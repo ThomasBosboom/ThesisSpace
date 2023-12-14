@@ -50,13 +50,6 @@ def read_coeffs(scaled=True):
     return cos_coeffs, sin_coeffs
 
 
-
-print(validation_LUMIO.get_reference_state_history(60390, 1, satellite="LPF"))
-
-print(validation_LUMIO.get_reference_state_history(60390, 1, satellite="LUMIO"))
-
-
-
 class HighFidelityDynamicModel(DynamicModelBase):
 
     def __init__(self, simulation_start_epoch_MJD, propagation_time):
