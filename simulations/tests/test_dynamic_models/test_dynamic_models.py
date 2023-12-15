@@ -131,7 +131,7 @@ class TestOutputsDynamicalModels:
 
 test = TestOutputsDynamicalModels()
 # # dynamic_model_objects = test.get_dynamic_model_objects(60390, 10)
-test_initial_state = test.test_initial_state(60390, 10)
+# test_initial_state = test.test_initial_state(60390, 10)
 test.test_example()
 
 # low_fidelity_dynamic_model_objects = dynamic_model_objects["low_fidelity"]
