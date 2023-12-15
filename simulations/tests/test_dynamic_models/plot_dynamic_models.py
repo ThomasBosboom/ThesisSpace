@@ -25,6 +25,7 @@ from src.dynamic_models.high_fidelity.spherical_harmonics import *
 from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import EstimationModel
 
+from src.dynamic_models import Interpolator
 
 class PlotOutputsDynamicalModels:
 
@@ -77,39 +78,41 @@ class PlotOutputsDynamicalModels:
             return estimation_model_objects
 
 
-    def get_interpolated_propagation_results(self, dynamic_model_object, step_size=60, kind='linear', epoch_in_MJD=True):
+    def get_interpolated_propagation_results(self, dynamic_model_object):
 
-        dynamics_simulator, variational_equations_solver = dynamic_model_object.get_propagated_orbit()
+        interp_epochs, interp_state_history, interp_dependent_variables_history, interp_state_transition_matrix_history = Interpolator(dynamic_model_object)
 
-        # Extract the time vector
-        epochs                          = np.stack(list(variational_equations_solver.state_history.keys()))
-        state_history                   = np.stack(list(variational_equations_solver.state_history.values()))
-        state_transition_matrix_history = np.stack(list(variational_equations_solver.state_transition_matrix_history.values()))
+        # dynamics_simulator, variational_equations_solver = dynamic_model_object.get_propagated_orbit()
 
-        # Define updated time vector
-        interp_epochs = np.arange(np.min(epochs), np.max(epochs), step_size)
+        # # Extract the time vector
+        # epochs                          = np.stack(list(variational_equations_solver.state_history.keys()))
+        # state_history                   = np.stack(list(variational_equations_solver.state_history.values()))
+        # state_transition_matrix_history = np.stack(list(variational_equations_solver.state_transition_matrix_history.values()))
 
-        # Perform interpolation using on the results from variational_equations_solver
-        interp_func = interp1d(epochs, state_history, axis=0, kind=kind, fill_value='extrapolate')
-        interp_state_history = interp_func(interp_epochs)
+        # # Define updated time vector
+        # interp_epochs = np.arange(np.min(epochs), np.max(epochs), step_size)
 
-        interp_state_transition_matrix_history = np.zeros((len(interp_epochs), *state_transition_matrix_history.shape[1:]))
-        for i in range(state_transition_matrix_history.shape[1]):
-            interp_func = interp1d(epochs, state_transition_matrix_history[:, i, :], axis=0, kind=kind, fill_value='extrapolate')
-            interp_state_transition_matrix_history[:, i, :] = interp_func(interp_epochs)
+        # # Perform interpolation using on the results from variational_equations_solver
+        # interp_func = interp1d(epochs, state_history, axis=0, kind=kind, fill_value='extrapolate')
+        # interp_state_history = interp_func(interp_epochs)
 
-        # Perform interpolation using on the results from dynamics_simulator
-        epochs                          = np.stack(list(dynamics_simulator.dependent_variable_history.keys()))
-        dependent_variables_history     = np.stack(list(dynamics_simulator.dependent_variable_history.values()))
-        interp_func = interp1d(epochs, dependent_variables_history, axis=0, kind=kind, fill_value='extrapolate')
-        interp_dependent_variables_history = interp_func(interp_epochs)
+        # interp_state_transition_matrix_history = np.zeros((len(interp_epochs), *state_transition_matrix_history.shape[1:]))
+        # for i in range(state_transition_matrix_history.shape[1]):
+        #     interp_func = interp1d(epochs, state_transition_matrix_history[:, i, :], axis=0, kind=kind, fill_value='extrapolate')
+        #     interp_state_transition_matrix_history[:, i, :] = interp_func(interp_epochs)
 
-        if epoch_in_MJD:
+        # # Perform interpolation using on the results from dynamics_simulator
+        # epochs                          = np.stack(list(dynamics_simulator.dependent_variable_history.keys()))
+        # dependent_variables_history     = np.stack(list(dynamics_simulator.dependent_variable_history.values()))
+        # interp_func = interp1d(epochs, dependent_variables_history, axis=0, kind=kind, fill_value='extrapolate')
+        # interp_dependent_variables_history = interp_func(interp_epochs)
 
-            interp_epochs = np.array([time_conversion.julian_day_to_modified_julian_day(\
-                time_conversion.seconds_since_epoch_to_julian_day(interp_epoch)) for interp_epoch in interp_epochs])
+        # if epoch_in_MJD:
 
-        return interp_epochs, interp_state_history, interp_dependent_variables_history, interp_state_transition_matrix_history
+        #     interp_epochs = np.array([time_conversion.julian_day_to_modified_julian_day(\
+        #         time_conversion.seconds_since_epoch_to_julian_day(interp_epoch)) for interp_epoch in interp_epochs])
+
+        # return interp_epochs, interp_state_history, interp_dependent_variables_history, interp_state_transition_matrix_history
 
 
     def plot_3D_state_history(self, dynamic_model_objects):
@@ -298,6 +301,6 @@ test = PlotOutputsDynamicalModels(60390, 10)
 dynamic_model_objects = test.get_dynamic_model_objects()
 # print(test.get_interpolated_propagation_results(dynamic_model_objects[0]))
 # print(test.plot_2D_state_history(dynamic_model_objects))
-get_estimation_model_objects = test.get_estimation_model_objects()
-reference_convergence_history = test.plot_observability_effectiveness()
-print(reference_convergence_history)
+# get_estimation_model_objects = test.get_estimation_model_objects()
+# reference_convergence_history = test.plot_observability_effectiveness()
+print(dynamic_model_objects)
