@@ -35,6 +35,7 @@ class DynamicModelBase:
         self.bodies_radiation_pressure_coefficient = [1.8, 1.08]
         self.gravitational_parameter_primary = spice.get_body_gravitational_parameter(self.name_primary)
         self.gravitational_parameter_secondary = spice.get_body_gravitational_parameter(self.name_secondary)
+        self.mu = self.gravitational_parameter_secondary/(self.gravitational_parameter_primary+self.gravitational_parameter_secondary)
 
     def set_environment_settings(self):
         pass
