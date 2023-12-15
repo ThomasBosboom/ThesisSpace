@@ -38,7 +38,7 @@ class TestOutputsDynamicalModels:
     def test_parametrize(self, first_value, second_value):
         assert first_value - 2 == second_value
 
-    def get_dynamic_model_objects(self, simulation_start_epoch_MJD, propagation_time, package_dict={"low_fidelity": ["integration_settings"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics"]}):
+    def get_dynamic_model_objects(self, simulation_start_epoch_MJD, propagation_time, package_dict={"low_fidelity": ["integration_settings"], "high_fidelity": ["point_mass", "point_mass_srp"]}):
 
         # Get a list of all relevant packages within 'high_fidelity'
         dynamic_model_objects = {}
@@ -82,7 +82,7 @@ class TestOutputsDynamicalModels:
 
     def test_low_fidelity(self, simulation_start_epoch_MJD, propagation_time, extras):
 
-        dynamic_model_objects = self.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict={"high_fidelity": ["point_mass", "point_mass_srp"]})
+        dynamic_model_objects = self.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
 
         # Loop through each key in the outer dictionary
         for package_type, package_names in dynamic_model_objects.items():
@@ -98,12 +98,12 @@ class TestOutputsDynamicalModels:
                     # print(dependent_variables_history[0,:])
                     # print(state_transition_matrix_history[0,:])
 
-                    mass_primary = dependent_variables_history[0,-2]
-                    mass_secondary = dependent_variables_history[0,-1]
-                    state_history_barycentric = dependent_variables_history[:,:6]*(1-1/(1+mass_primary/mass_secondary))
+                    state_history_barycentric_primary = dependent_variables_history[:,:6]*(-dynamic_model.mu)
+                    state_history_barycentric_secondary = dependent_variables_history[:,:6]*(1-dynamic_model.mu)
 
                     print(state_history)
-                    print(state_history_barycentric)
+                    # print(state_history_barycentric)
+                    print("difference: ", np.linalg.norm(state_history_barycentric_primary-state_history_barycentric_secondary, axis=1))
 
             # Test initial state
 
