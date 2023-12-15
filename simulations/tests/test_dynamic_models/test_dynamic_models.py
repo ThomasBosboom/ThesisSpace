@@ -1,6 +1,7 @@
 # Standard
 import os
 import sys
+import numpy as np
 import matplotlib.pyplot as plt
 
 # Define path to import src files
@@ -10,7 +11,8 @@ sys.path.append(parent_dir)
 
 # Third party
 import pytest
-import mpld3
+import pytest_html
+# import mpld3
 
 # Own
 from src.dynamic_models import validation_LUMIO
@@ -21,18 +23,7 @@ from src.dynamic_models.high_fidelity.spherical_harmonics import *
 from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 # from src.estimation_models import EstimationModel
 
-
-
-# Get a list of all relevant packages within 'high_fidelity'
-# packages_dir = os.path.join(parent_dir, 'src', 'dynamic_models', 'high_fidelity')
-# package_list = [d for d in os.listdir(packages_dir) if d != "__pycache__" if os.path.isdir(os.path.join(packages_dir, d))]
-# package_list.remove("spherical_harmonics")
-# package_list.remove("spherical_harmonics_srp")
-
-
-# def custom_figure_test(func):
-#     func.custom_figure_data = "your_custom_figure_data"
-#     return func
+from src.dynamic_models import Interpolator
 
 
 class TestOutputsDynamicalModels:
@@ -85,25 +76,43 @@ class TestOutputsDynamicalModels:
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        (60390, 10),
-        (60395, 10),
+        (60390, 1),
+        # (60395, 1),
     ])
 
-    def test_initial_state(self, simulation_start_epoch_MJD, propagation_time, all_specified_models=True):
+    def test_low_fidelity(self, simulation_start_epoch_MJD, propagation_time, extras):
 
-        dynamic_model_objects = self.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
-        # Run the low_fidelity models
-        for dynamic_model in dynamic_model_objects["high_fidelity"]["point_mass"]:
+        dynamic_model_objects = self.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict={"high_fidelity": ["point_mass", "point_mass_srp"]})
 
-            print(dynamic_model)
+        # Loop through each key in the outer dictionary
+        for package_type, package_names in dynamic_model_objects.items():
+            for package_name, dynamic_models in package_names.items():
+                for dynamic_model in dynamic_models:
+
+                    print(f"dynamic_model: {dynamic_model}")
+
+                    # Extract simulation histories
+                    epochs, state_history, dependent_variables_history, state_transition_matrix_history = Interpolator.Interpolator(dynamic_model).get_results()
+                    # print(epochs)
+                    # print(state_history[0,:])
+                    # print(dependent_variables_history[0,:])
+                    # print(state_transition_matrix_history[0,:])
+
+                    mass_primary = dependent_variables_history[0,-2]
+                    mass_secondary = dependent_variables_history[0,-1]
+                    state_history_barycentric = dependent_variables_history[:,:6]*(1-1/(1+mass_primary/mass_secondary))
+
+                    print(state_history)
+                    print(state_history_barycentric)
+
+            # Test initial state
+
 
             assert dynamic_model.name_ELO == "LPF"
             assert dynamic_model.simulation_start_epoch_MJD == simulation_start_epoch_MJD
 
 
-    # @custom_figure_test
-    def test_example(self):
-        # Your test code here
+    def test_example(self, extras):
 
         # Assume some test logic that generates a plot
         for i in range(5):
@@ -118,24 +127,34 @@ class TestOutputsDynamicalModels:
             figure_path = f"C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/tests/test_dynamic_models/figure{i}.png"
             fig.savefig(figure_path)
 
-            # html_code = mpld3.fig_to_html(fig)
+            extras.append(pytest_html.extras.png(figure_path))
 
-        # print(html_code)
-
-
-        # Your test assertions go here
-        assert True  # Replace with your actual test assertions
+        assert True
 
 
 
 
-test = TestOutputsDynamicalModels()
-# # dynamic_model_objects = test.get_dynamic_model_objects(60390, 10)
-# test_initial_state = test.test_initial_state(60390, 10)
-test.test_example()
+# test = TestOutputsDynamicalModels()
+# dynamic_model_objects = test.get_dynamic_model_objects(60390, 10)
+# model = dynamic_model_objects["high_fidelity"]["point_mass"][0]
 
-# low_fidelity_dynamic_model_objects = dynamic_model_objects["low_fidelity"]
-# high_fidelity_dynamic_model_objects = dynamic_model_objects["high_fidelity"]["point_mass_srp"]
-# print(high_fidelity_dynamic_model_objects)
+# dynamics_simulator, variational_equations_solver = model.get_propagated_orbit()
+# print(model)
 
+# print(Interpolator.Interpolator(model).get_results()[0], np.shape(Interpolator.Interpolator(model).get_results()[0]))
+# # print(Interpolator.Interpolator(model).get_results()[1], np.shape(Interpolator.Interpolator(model).get_results()[1]))
+# # print(Interpolator.Interpolator(model).get_results()[2], np.shape(Interpolator.Interpolator(model).get_results()[2]))
+# # print(Interpolator.Interpolator(model).get_results()[3], np.shape(Interpolator.Interpolator(model).get_results()[3]))
 
+# state_history = Interpolator.Interpolator(model).get_results()[1]
+# ax = plt.figure().add_subplot(projection='3d')
+# ax.plot(state_history[:,0], state_history[:,1], state_history[:,2], color="red", label="LPF")
+# ax.plot(state_history[:,6], state_history[:,7], state_history[:,8], color="blue", label="LUMIO")
+# ax.set_xlabel("X [m]")
+# ax.set_ylabel("Y [m]")
+# ax.set_zlabel("Z [m]")
+# plt.axis('equal')
+# plt.legend()
+# plt.grid(alpha=0.2)
+# plt.tight_layout()
+# plt.show()
