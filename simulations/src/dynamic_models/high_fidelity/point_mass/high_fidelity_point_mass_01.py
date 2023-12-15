@@ -162,11 +162,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 # test2 = HighFidelityDynamicModel(60390, 10)
 # dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
 
-
 # print(np.shape(dep_var))
 # ax = plt.figure()
-# # plt.plot(states[:,0], states[:,1], states[:,2])
-# # plt.plot(states[:,6], states[:,7], states[:,8])
 # plt.plot(dep_var[:,-2:])
 # # plt.plot(dep_var[:,-8:-6])
 # plt.legend()

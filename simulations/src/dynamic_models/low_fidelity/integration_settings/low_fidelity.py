@@ -30,7 +30,6 @@ class LowFidelityDynamicModel(DynamicModelBase):
         self.bodies_mass = [0,0]
         self.lu_cr3bp = self.distance_between_primaries
         self.tu_cr3bp = 1/np.sqrt((self.gravitational_parameter_primary + self.gravitational_parameter_secondary)/self.distance_between_primaries**3)
-        self.mu = self.gravitational_parameter_secondary/(self.gravitational_parameter_primary+self.gravitational_parameter_secondary)
         self.rotation_rate = 1/self.tu_cr3bp
 
 
