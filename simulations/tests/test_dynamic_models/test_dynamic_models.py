@@ -30,9 +30,9 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 # package_list.remove("spherical_harmonics_srp")
 
 
-def custom_figure_test(func):
-    func.custom_figure_data = "your_custom_figure_data"
-    return func
+# def custom_figure_test(func):
+#     func.custom_figure_data = "your_custom_figure_data"
+#     return func
 
 
 class TestOutputsDynamicalModels:
