@@ -2023,3 +2023,15 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url      = {https://ui.adsabs.harvard.edu/abs/2011amos.confE..34F},
   urldate  = {2023-11-26},
 }
+
+ 
+@Article{Stiller2023,
+  author   = {Stiller, Dominik},
+  title    = {Short-term orbital effects of radiation pressure on the {Lunar} {Reconnaissance} {Orbiter}},
+  year     = {2023},
+  abstract = {Precision orbit determination for geodetic applications requires force models even for small perturbations. Radiation from the Sun and Moon is a significant source of perturbation in lunar orbits and inadequate modeling of radiation pressure (RP) can lead to large position errors. This paper describes the short-term effect of RP on the Lunar Reconnaissance Orbiter (LRO), which has a position knowledge requirement of 50 m to 100 m in total and below 1 m radially. We compared models of varying complexity to determine the benefits and computational cost of high-accuracy RP modeling. We found that (1) the accelerations differ greatly depending on the Sun position, (2) only a paneled spacecraft model can account properly for changing orientation and geometry of LRO, and (3) a constant-albedo model is sufficient for lunar radiation, which is dominated by the thermal component. A spherical harmonics model for lunar albedo increases computational cost with little gain in the attained accuracy. If RP is neglected, the along-track position errors can be as large as 1100 m and the radial error varies periodically with an amplitude of up to 24 m, highlighting the importance of adequate force modeling to meet LRO's orbit determination requirements.},
+  file     = {:Stiller2023 - Short Term Orbital Effects of Radiation Pressure on the Lunar Reconnaissance Orbiter.pdf:PDF},
+  language = {en},
+  url      = {https://repository.tudelft.nl/islandora/object/uuid%3A8a82400a-2233-4a84-98be-ed37f7eeb620},
+  urldate  = {2023-11-30},
+}
