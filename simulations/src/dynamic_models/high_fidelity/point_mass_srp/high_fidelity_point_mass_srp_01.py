@@ -45,21 +45,14 @@ class HighFidelityDynamicModel(DynamicModelBase):
             self.bodies.get_body(body).mass = self.bodies_mass[index]
 
         # Create radiation pressure settings, and add to vehicle
-        reference_area_radiation = 3.0
-        radiation_pressure_coefficient = 1.8
         occulting_bodies_dict = dict()
         occulting_bodies_dict[ "Sun" ] = [self.name_primary, self.name_secondary]
-        vehicle_target_settings = environment_setup.radiation_pressure.cannonball_radiation_target(
-            reference_area_radiation, radiation_pressure_coefficient, occulting_bodies_dict )
-        environment_setup.add_radiation_pressure_target_model(self.bodies, self.name_ELO, vehicle_target_settings)
-
-        reference_area_radiation = 0.41064
-        radiation_pressure_coefficient = 1.08
-        occulting_bodies_dict = dict()
-        occulting_bodies_dict[ "Sun" ] = [self.name_primary, self.name_secondary]
-        vehicle_target_settings = environment_setup.radiation_pressure.cannonball_radiation_target(
-            reference_area_radiation, radiation_pressure_coefficient, occulting_bodies_dict )
-        environment_setup.add_radiation_pressure_target_model(self.bodies, self.name_LPO, vehicle_target_settings)
+        for index, body in enumerate(self.bodies_to_propagate):
+            self.bodies.create_empty_body(body)
+            self.bodies.get_body(body).mass = self.bodies_mass[index]
+            vehicle_target_settings = environment_setup.radiation_pressure.cannonball_radiation_target(
+                self.bodies_reference_area_radiation[index], self.bodies_radiation_pressure_coefficient[index], occulting_bodies_dict)
+            environment_setup.add_radiation_pressure_target_model(self.bodies, body, vehicle_target_settings)
 
 
     def set_acceleration_settings(self):
@@ -118,8 +111,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         # Define required outputs
         self.dependent_variables_to_save = [
-            propagation_setup.dependent_variable.relative_position(self.name_primary, self.name_secondary),
-            propagation_setup.dependent_variable.relative_velocity(self.name_primary, self.name_secondary),
+            propagation_setup.dependent_variable.relative_position(self.name_secondary, self.name_primary),
+            propagation_setup.dependent_variable.relative_velocity(self.name_secondary, self.name_primary),
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.total_acceleration(self.name_ELO),
@@ -134,6 +127,9 @@ class HighFidelityDynamicModel(DynamicModelBase):
             propagation_setup.dependent_variable.single_acceleration_norm(
                     propagation_setup.acceleration.radiation_pressure_type, body_to_propagate, "Sun") \
                         for body_to_propagate in self.bodies_to_propagate])
+
+        self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.body_mass(self.name_primary),
+                                                 propagation_setup.dependent_variable.body_mass(self.name_secondary)])
 
 
 

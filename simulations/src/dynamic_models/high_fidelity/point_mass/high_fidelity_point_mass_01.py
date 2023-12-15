@@ -97,8 +97,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         # Define required outputs
         self.dependent_variables_to_save = [
-            propagation_setup.dependent_variable.relative_position(self.name_primary, self.name_secondary),
-            propagation_setup.dependent_variable.relative_velocity(self.name_primary, self.name_secondary),
+            propagation_setup.dependent_variable.relative_position(self.name_secondary, self.name_primary),
+            propagation_setup.dependent_variable.relative_velocity(self.name_secondary, self.name_primary),
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.total_acceleration(self.name_ELO),
@@ -109,9 +109,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
                     propagation_setup.acceleration.point_mass_gravity_type, body_to_propagate, body_to_create) \
                         for body_to_create in self.bodies_to_create for body_to_propagate in self.bodies_to_propagate])
 
-        # self.dependent_variables_to_save.extend([
-        #     propagation_setup.dependent_variable.single_acceleration_norm(
-        #             propagation_setup.acceleration.point_mass_gravity_type, self.name_LPO, body) for body in self.bodies_to_create])
+        self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.body_mass(self.name_primary),
+                                                 propagation_setup.dependent_variable.body_mass(self.name_secondary)])
 
 
     def set_termination_settings(self):
@@ -160,15 +159,15 @@ class HighFidelityDynamicModel(DynamicModelBase):
         return dynamics_simulator, variational_equations_solver
 
 
-test2 = HighFidelityDynamicModel(60390, 10)
-dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
+# test2 = HighFidelityDynamicModel(60390, 10)
+# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
 
 
 # print(np.shape(dep_var))
 # ax = plt.figure()
 # # plt.plot(states[:,0], states[:,1], states[:,2])
 # # plt.plot(states[:,6], states[:,7], states[:,8])
-# plt.plot(dep_var[:,-6:-3])
+# plt.plot(dep_var[:,-2:])
 # # plt.plot(dep_var[:,-8:-6])
 # plt.legend()
 # plt.yscale("log")
