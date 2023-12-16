@@ -120,7 +120,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
                     propagation_setup.acceleration.point_mass_gravity_type, body_to_propagate, body_to_create) \
-                        for body_to_create in self.bodies_to_create for body_to_propagate in self.bodies_to_propagate])
+                        for body_to_propagate in self.bodies_to_propagate for body_to_create in self.bodies_to_create])
 
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(

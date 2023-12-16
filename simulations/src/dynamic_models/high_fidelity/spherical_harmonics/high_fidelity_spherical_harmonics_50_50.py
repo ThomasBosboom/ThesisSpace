@@ -106,11 +106,11 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
                     propagation_setup.acceleration.point_mass_gravity_type, body_to_propagate, new_body_to_create) \
-                        for new_body_to_create in self.new_bodies_to_create for body_to_propagate in self.bodies_to_propagate])
+                        for body_to_propagate in self.bodies_to_propagate for new_body_to_create in self.new_bodies_to_create])
 
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.spherical_harmonic_terms_acceleration_norm(body_to_propagate, body_to_create, [(2,0), (2,1), (2,2)]) \
-                        for body_to_create in [self.name_primary, self.name_secondary] for body_to_propagate in self.bodies_to_propagate])
+                        for body_to_propagate in self.bodies_to_propagate for body_to_create in [self.name_primary, self.name_secondary]])
 
         self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.body_mass(self.name_primary),
                                                  propagation_setup.dependent_variable.body_mass(self.name_secondary)])
