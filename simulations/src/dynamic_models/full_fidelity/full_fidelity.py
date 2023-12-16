@@ -81,14 +81,14 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
             else:
 
-                # cos_coeffs, sin_coeffs = read_coeffs()
+                cos_coeffs, sin_coeffs = read_coeffs()
 
                 surface_radiosity_models = [
                     environment_setup.radiation_pressure.variable_albedo_surface_radiosity(
-                        # albedo_distribution_settings = environment_setup.radiation_pressure.spherical_harmonic_surface_property_distribution(cos_coeffs, sin_coeffs),
-                        # original_source_name = "Sun"),
-                        albedo_distribution_settings = environment_setup.radiation_pressure.constant_surface_property_distribution(0.150),
+                        albedo_distribution_settings = environment_setup.radiation_pressure.spherical_harmonic_surface_property_distribution(cos_coeffs, sin_coeffs),
                         original_source_name = "Sun"),
+                        # albedo_distribution_settings = environment_setup.radiation_pressure.constant_surface_property_distribution(0.150),
+                        # original_source_name = "Sun"),
                     environment_setup.radiation_pressure.thermal_emission_blackbody_variable_emissivity(
                         emissivity_distribution_model = environment_setup.radiation_pressure.constant_surface_property_distribution(0.95),
                         original_source_name = "Sun")]
@@ -132,7 +132,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
                     self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(50,50),
                                         propagation_setup.acceleration.relativistic_correction(),
                                         propagation_setup.acceleration.radiation_pressure()],
-                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(100,100),
+                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(50,50),
                                           propagation_setup.acceleration.relativistic_correction(),
                                           propagation_setup.acceleration.radiation_pressure()]}
             for body in self.new_bodies_to_create:
@@ -256,13 +256,6 @@ class HighFidelityDynamicModel(DynamicModelBase):
                 self.propagator_settings,
                 self.parameters_to_estimate,
                 simulate_dynamics_on_creation=True)
-
-        # Extract the simulation results
-        self.state_history                   = np.vstack(list(variational_equations_solver.state_history.values()))
-        self.dependent_variables_history     = np.vstack(list(dynamics_simulator.dependent_variable_history.values()))
-        self.state_transition_matrix_history = np.vstack(list(variational_equations_solver.state_transition_matrix_history.values())).reshape((np.shape(self.state_history)[0], np.shape(self.state_history)[1], np.shape(self.state_history)[1]))
-
-        # return self.state_history, self.dependent_variables_history, self.state_transition_matrix_history
 
         return dynamics_simulator, variational_equations_solver
 
