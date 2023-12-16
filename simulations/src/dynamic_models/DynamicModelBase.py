@@ -37,26 +37,34 @@ class DynamicModelBase:
         self.gravitational_parameter_secondary = spice.get_body_gravitational_parameter(self.name_secondary)
         self.mu = self.gravitational_parameter_secondary/(self.gravitational_parameter_primary+self.gravitational_parameter_secondary)
 
+
     def set_environment_settings(self):
         pass
+
 
     def set_acceleration_settings(self):
         pass
 
+
     def set_initial_state(self):
         pass
+
 
     def set_integration_settings(self):
         pass
 
+
     def set_dependent_variables_to_save(self):
         pass
+
 
     def set_termination_settings(self):
         pass
 
+
     def set_propagator_settings(self):
         pass
+
 
     def get_propagated_orbit(self):
         pass
