@@ -260,15 +260,15 @@ class HighFidelityDynamicModel(DynamicModelBase):
         return dynamics_simulator, variational_equations_solver
 
 
-test = HighFidelityDynamicModel(60390, 365)
-dynamics_simulator, variational_equations_solver = test.get_propagated_orbit()
+# test = HighFidelityDynamicModel(60390, 365)
+# dynamics_simulator, variational_equations_solver = test.get_propagated_orbit()
 
-state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.state_history.items()], dtype=object)
-moon_state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.dependent_variable_history.items()], dtype=object)
+# state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.state_history.items()], dtype=object)
+# moon_state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.dependent_variable_history.items()], dtype=object)
 
-header = "epoch (MJD), epoch (seconds TDB), x [km], y [km], z [km], vx [km/s], vy [km/s], vz [km/s]"
-np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/LPF_states_J2000_Earth_centered.txt", state_history[:,:8], delimiter=',', fmt='%f', header=header)
-np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/Moon_states_J2000_Earth_centered.txt", moon_state_history[:,:8], delimiter=',', fmt='%f', header=header)
+# header = "epoch (MJD), epoch (seconds TDB), x [km], y [km], z [km], vx [km/s], vy [km/s], vz [km/s]"
+# np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/LPF_states_J2000_Earth_centered.txt", state_history[:,:8], delimiter=',', fmt='%f', header=header)
+# np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/Moon_states_J2000_Earth_centered.txt", moon_state_history[:,:8], delimiter=',', fmt='%f', header=header)
 
 # ax = plt.figure().add_subplot(projection='3d')
 # plt.plot(moon_state_history[:,2], moon_state_history[:,3], moon_state_history[:,4])
@@ -276,8 +276,8 @@ np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/re
 # plt.legend()
 # plt.show()
 
-dependent_variables_history = np.vstack(list(dynamics_simulator.dependent_variable_history.values()))
-print(np.shape(dependent_variables_history))
+# dependent_variables_history = np.vstack(list(dynamics_simulator.dependent_variable_history.values()))
+# print(np.shape(dependent_variables_history))
 # ax = plt.figure()
 # plt.plot(dependent_variables_history[:,-6:-3], label="ELO")
 # plt.plot(dependent_variables_history[:,-3:], label="LPO")
