@@ -162,15 +162,15 @@ class HighFidelityDynamicModel(DynamicModelBase):
         return dynamics_simulator, variational_equations_solver
 
 
-test2 = HighFidelityDynamicModel(60390, 28)
-dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
+# test2 = HighFidelityDynamicModel(60390, 28)
+# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
 
-print(np.shape(dep_var))
-ax = plt.figure()
-# plt.plot(states[:,0], states[:,1], states[:,2])
-# plt.plot(states[:,6], states[:,7], states[:,8])
-plt.plot(dep_var[:,-12:-9])
-plt.plot(dep_var[:,-9:-6])
-plt.legend()
-plt.yscale("log")
-plt.show()
+# print(np.shape(dep_var))
+# ax = plt.figure()
+# # plt.plot(states[:,0], states[:,1], states[:,2])
+# # plt.plot(states[:,6], states[:,7], states[:,8])
+# plt.plot(dep_var[:,-12:-9])
+# plt.plot(dep_var[:,-9:-6])
+# plt.legend()
+# plt.yscale("log")
+# plt.show()
