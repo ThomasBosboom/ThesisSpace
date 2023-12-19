@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 root_dir = Path(__file__).resolve().parent.parent.parent
-reference_folder_path = root_dir / "Reference"
+reference_folder_path = root_dir / "reference"
 
 
 def read_textfiles(data_type, satellite="LUMIO"):
@@ -142,7 +142,7 @@ def get_state_history_erdem():
 
     # Specify the file path
     root_dir = Path(__file__).resolve().parent.parent.parent
-    file_path = root_dir / "Reference" / "Halo_orbit_files" / "Erdem.txt"
+    file_path = root_dir / "reference" / "Halo_orbit_files" / "Erdem.txt"
 
     # Open the file for reading
     states_erdem = np.empty((1, 13))
