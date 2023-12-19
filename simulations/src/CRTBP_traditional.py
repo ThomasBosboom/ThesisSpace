@@ -43,10 +43,11 @@ class CRTBP:
 
 
     def get_state_history(self, state_rotating_bary_0, start, stop, step):
-        
+
         self.t = np.arange(start, stop/(self.tstar)+step/(self.tstar), step/(self.tstar))
-        
-        return self.t, odeint(self.get_equations_of_motion, state_rotating_bary_0, self.t)
+
+        return self.t*self.tstar, odeint(self.get_equations_of_motion, state_rotating_bary_0, self.t)
+        # return self.t*self.tstar, odeint(self.get_equations_of_motion, state_rotating_bary_0, self.t)
 
 
     def get_jacobi_constant_history(self, state_rotating_barycenter):
@@ -75,12 +76,12 @@ class CRTBP:
         #     return np.array([self.lstar, self.lstar, self.lstar, self.lstar/self.tstar, self.lstar/self.tstar, self.lstar/self.tstar])*state_nondim*1000
 
     def convert_state_dim_to_nondim(self, state_dim):
-        
+
         return np.array([1/self.lstar, 1/self.lstar, 1/self.lstar, 1/(self.lstar/self.tstar), 1/(self.lstar/self.tstar), 1/(self.lstar/self.tstar)])*state_dim/1000
 
 
     def convert_state_barycentric_to_body(self, state_barycentric, body, state_type="inertial"):
-        
+
         if state_type == "inertial":
             if body == "primary":
                 return state_barycentric - self.state_m1*state_barycentric
@@ -100,7 +101,7 @@ class CRTBP:
 
 
     def convert_state_body_to_barycentric(self, state_body, body, state_type="inertial"):
-        
+
         if state_type == "inertial":
             if body == "primary":
                 return state_body + self.state_m1*state_body
@@ -116,7 +117,7 @@ class CRTBP:
                 for epoch, state in enumerate(state_barycentric):
                     state_barycentric[epoch, 0] = state_barycentric[epoch, 0] + (1-self.mu)
                 return state_barycentric
-                
+
 
     def convert_state_rotating_to_inertial(self, state_rotating):
 
@@ -242,7 +243,7 @@ class CRTBP:
 # plt.show()
 
 
-# ##### Body-fixed Frame Plots ###################################################
+# # ##### Body-fixed Frame Plots ###################################################
 
 # ## Barycentric frame
 # state_inertial_bary_LUMIO     = system.convert_state_rotating_to_inertial(state_rotating_bary_LUMIO)
@@ -262,7 +263,7 @@ class CRTBP:
 # ax.plot3D(state_inertial_secondary[:,0], state_inertial_secondary[:,1], state_inertial_secondary[:,2], c='gray', marker='o', label="Moon")
 # plt.legend()
 # plt.axis('equal')
-# # plt.show()
+# plt.show()
 
 # ## Earth-fixed frame
 # state_inertial_primary_LUMIO = system.convert_state_barycentric_to_body(state_inertial_bary_LUMIO, "primary")
