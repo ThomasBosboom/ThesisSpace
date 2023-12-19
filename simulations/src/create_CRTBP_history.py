@@ -48,9 +48,9 @@ time_from_start = 0
 simulation_start_epoch = 60390+time_from_start
 propagation_time = 28
 
-G  = 6.67408E-11
-m1 = 5.97219E+24
-m2 = 7.34767E+22
+# G  = 6.67408E-11
+# m1 = 5.97219E+24
+# m2 = 7.34767E+22
 a  = 3.84747963e8
 
 name_primary = "Earth"
@@ -90,7 +90,7 @@ moon_initial_state = spice.get_body_cartesian_state_at_epoch(
     )
 
 # Define the computation of the Kepler orbit ephemeris
-central_body_gravitational_parameter = spice.get_body_gravitational_parameter(name_primary) + spice.get_body_gravitational_parameter(name_secondary) 
+central_body_gravitational_parameter = spice.get_body_gravitational_parameter(name_primary) + spice.get_body_gravitational_parameter(name_secondary)
 initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(moon_initial_state, central_body_gravitational_parameter)
 initial_keplerian_moon_state[0], initial_keplerian_moon_state[1] = distance_between_primaries, 0      # Make orbit circular at the right radius
 
@@ -171,12 +171,12 @@ acceleration_models = propagation_setup.create_acceleration_models(
 # # Maximum step size: inf; minimum step size: eps
 # integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(initial_time_step,
 #                                                                                   current_coefficient_set,
-#                                                                                   np.finfo(float).eps, 
+#                                                                                   np.finfo(float).eps,
 #                                                                                   np.inf,
-#                                                                                   current_tolerance, 
+#                                                                                   current_tolerance,
 #                                                                                   current_tolerance)
 
-integrator_settings = propagation_setup.integrator.runge_kutta_4(simulation_start_epoch, 0.005*86400)
+integrator_settings = propagation_setup.integrator.runge_kutta_4(simulation_start_epoch, 0.005*constants.JULIAN_DAY)
 
 # Select dependent variables
 dependent_variables_to_save = [propagation_setup.dependent_variable.relative_position(name_secondary, name_primary),
@@ -186,11 +186,11 @@ dependent_variables_to_save = [propagation_setup.dependent_variable.relative_pos
                                propagation_setup.dependent_variable.relative_distance(name_secondary, name_primary),
                                propagation_setup.dependent_variable.relative_distance(name_spacecraft, name_secondary),
                                propagation_setup.dependent_variable.relative_speed(name_spacecraft, name_secondary),
-                               propagation_setup.dependent_variable.keplerian_state(name_secondary, name_primary), 
+                               propagation_setup.dependent_variable.keplerian_state(name_secondary, name_primary),
                                propagation_setup.dependent_variable.total_acceleration(name_spacecraft)]
 
 # Create propagator settings
-termination_settings = propagation_setup.propagator.time_termination(simulation_start_epoch+propagation_time*86400)
+termination_settings = propagation_setup.propagator.time_termination(simulation_start_epoch+propagation_time*constants.JULIAN_DAY)
 propagator_settings = propagation_setup.propagator.translational(
             central_bodies,
             acceleration_models,
@@ -202,14 +202,14 @@ propagator_settings = propagation_setup.propagator.translational(
             output_variables= dependent_variables_to_save
         )
 
-print("PROPAGATOR SETTINGS: ", propagator_settings)
-print(central_bodies)
-print(acceleration_models)
-print(bodies_to_propagate)
-print(initial_state_history_lumio)
-print(simulation_start_epoch)
-print(integrator_settings)
-print(termination_settings)
+# print("PROPAGATOR SETTINGS: ", propagator_settings)
+# print(central_bodies)
+# print(acceleration_models)
+# print(bodies_to_propagate)
+# print(initial_state_history_lumio)
+# print(simulation_start_epoch)
+# print(integrator_settings)
+# print(termination_settings)
 
 # Propagate variational equations, propagating just the STM
 parameter_settings = estimation_setup.parameter.initial_states(propagator_settings, bodies)
@@ -228,12 +228,13 @@ stm_history_lumio_inertial = variational_equations_solver.state_transition_matri
 dynamics_simulator = numerical_simulation.create_dynamics_simulator(bodies, propagator_settings)
 dependent_variable_history_lumio_inertial = dynamics_simulator.dependent_variable_history
 
+epochs = np.vstack(list(state_history_lumio.keys()))
 state_history_lumio = np.vstack(list(state_history_lumio.values()))
 dependent_variables_to_save = np.vstack(list(dependent_variable_history_lumio_inertial.values()))
 
 
-print("Moon states: ", dependent_variables_to_save[0,:6], initial_cartesian_moon_state)
-print("Initial state lumio", initial_state_history_lumio)
+# print("Moon states: ", dependent_variables_to_save[0,:6], initial_cartesian_moon_state)
+# print("Initial state lumio", initial_state_history_lumio)
 
 
 # [-2.66109637e+08  2.41012575e+08  1.38309778e+08 -7.39210793e+02
@@ -263,13 +264,15 @@ print("Initial state lumio", initial_state_history_lumio)
 
 import CRTBP_traditional
 
-G  = 6.67408E-11
-m1 = 5.97219E+24
-m2 = 7.34767E+22
-a  = 3.8474796e8
-print(bodies.get("Earth").mass)
+G  = constants.GRAVITATIONAL_CONSTANT
+m1 = bodies.get("Earth").mass
+m2 = bodies.get("Moon").mass
+a  = 3.84747963e8
+
+print(G, m1, m2, a)
 
 state_rotating_bary_lumio_0 = [1.1473302, 0, -0.15142308, 0, -0.21994554, 0]
+# state_rotating_bary_lumio_0 = [ 1.14417651,  0.03953938, -0.14700223,  0.03417904, -0.21083117, -0.04839979]
 # state_rotating_bary_LPF_0   = [0.98512134, 0.00147649, 0.00492546, -0.87329730, -1.61190048, 0]
 start = 0
 stop = propagation_time
@@ -278,9 +281,12 @@ step = 0.005
 system   = CRTBP_traditional.CRTBP(G, m1, m2, a)
 t, state_rotating_bary_lumio = system.get_state_history(state_rotating_bary_lumio_0, start, stop, step)
 state_rotating_secondary_lumio = system.convert_state_barycentric_to_body(state_rotating_bary_lumio, "secondary", state_type="rotating")
-# state_rotating_bary_lumio[:, 0] = state_rotating_bary_lumio[:,0] - (1-mu)
-# state_rotating_secondary_lumio = state_rotating_bary_lumio
-# t, state_rotating_bary_LPF   = system.get_state_history(state_rotating_bary_LPF_0, start, stop, step)[1]
+
+print("t", t, np.shape(t))
+print("epochs crtbp", simulation_start_epoch + t*constants.JULIAN_DAY, np.shape(t))
+print("epochs tudat", epochs, np.shape(epochs))
+print("state_rotating_bary_lumio", state_rotating_bary_lumio, np.shape(state_rotating_bary_lumio))
+
 
 # Looping through all epochs to convert each synodic frame element to J2000 Earth-centered
 state_history_lumio_CRTBP = np.empty(np.shape(state_rotating_secondary_lumio))
@@ -303,7 +309,7 @@ for epoch, state in enumerate(state_rotating_secondary_lumio):
     initial_state_lumio_moon_fixed = np.concatenate((state_rotating_secondary_lumio[epoch, :3]*lu_cr3bp, state_rotating_secondary_lumio[epoch, 3:]*lu_cr3bp/tu_cr3bp))
     state_history_lumio_CRTBP[epoch] = dependent_variables_to_save[epoch, :6] + np.dot(total_rsw_to_inertial_rotation_matrix,initial_state_lumio_moon_fixed)
 
-    
+
 array_dict = {float(f'{simulation_start_epoch+i*0.005*86400}'): row.tolist() for i, row in enumerate(state_history_lumio_CRTBP)}
 file_name = 'lumio_crtbp_j2000.txt'
 with open(file_name, 'w') as file:
