@@ -17,6 +17,7 @@ from tudatpy.kernel.astro import time_conversion
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 # Own
+from src.dynamic_models import Interpolator
 from src.dynamic_models import validation_LUMIO
 from src.dynamic_models.low_fidelity import *
 from src.dynamic_models.high_fidelity.point_mass import *
@@ -25,7 +26,7 @@ from src.dynamic_models.high_fidelity.spherical_harmonics import *
 from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import EstimationModel
 
-from src.dynamic_models import Interpolator
+
 
 class PlotOutputsDynamicalModels:
 
