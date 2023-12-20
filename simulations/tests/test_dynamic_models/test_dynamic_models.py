@@ -78,7 +78,7 @@ class TestOutputsDynamicalModels:
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        (60400, 10),
+        (60390, 30),
         # (60395, 1),
     ])
 
@@ -129,7 +129,7 @@ class TestOutputsDynamicalModels:
 
     def test_low_fidelity_dynamic_models(self, simulation_start_epoch_MJD, propagation_time, extras):
 
-        custom_initial_state = np.array([0.98512134, 0.00147649, 0.00492546, -0.87329730, -1.61190048, 0, \
+        custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0, \
                                          1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
 
         # Generate LowFidelityDynamicModel object only
@@ -143,7 +143,11 @@ class TestOutputsDynamicalModels:
             Interpolator.Interpolator(dynamic_model, step_size=step_size).get_results()
 
         # Extract simulation histories classical solution
-        epochs_classic, state_history_classic = \
+
+        custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861,  0, \
+                                         1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
+
+        epochs_classic, state_history_classic, state_history_primaries = \
             FrameConverter.SynodicToInertialHistoryConverter(dynamic_model, step_size=step_size).get_results(custom_initial_state=custom_initial_state)
 
 
@@ -152,22 +156,44 @@ class TestOutputsDynamicalModels:
         print("tudatpy: ", state_history[0], "classic: ", state_history_classic[0])
 
         ax = plt.figure()
+        plt.plot(epochs, np.abs(state_history[:,0]-state_history_classic[:,0]), label="LPF x")
+        plt.plot(epochs, np.abs(state_history[:,1]-state_history_classic[:,1]), label="LPF y")
+        plt.plot(epochs, np.abs(state_history[:,2]-state_history_classic[:,2]),  label="LPF z")
+
         plt.plot(epochs, np.linalg.norm(state_history[:,:3]-state_history_classic[:,:3], axis=1), label="LPF")
         plt.plot(epochs, np.linalg.norm(state_history[:,6:9]-state_history_classic[:,6:9], axis=1), label="LUMIO")
+        # plt.plot(epochs, np.linalg.norm(dependent_variables_history[:,:3]-state_history_primaries[:,:3], axis=1), label="Earth")
+        plt.plot(epochs, np.linalg.norm(dependent_variables_history[:,:3]-state_history_primaries[:,6:9], axis=1), label="Moon")
         plt.xlabel("Epoch")
         plt.ylabel("Difference [m]")
-        plt.title("Absolute difference tudatpy versus classical CRTBP")
+        plt.title("Absolute position difference tudatpy versus classical CRTBP")
+        ax.legend()
+        plt.grid(alpha=0.5)
+        plt.yscale("log")
+        plt.show()
+
+        ax = plt.figure()
+        plt.plot(epochs, np.linalg.norm(state_history[:,3:6]-state_history_classic[:,3:6], axis=1), label="LPF")
+        plt.plot(epochs, np.linalg.norm(state_history[:,9:12]-state_history_classic[:,9:12], axis=1), label="LUMIO")
+        # plt.plot(epochs, np.linalg.norm(dependent_variables_history[:,3:6]-state_history_primaries[:,3:6], axis=1), label="Earth")
+        plt.plot(epochs, np.linalg.norm(dependent_variables_history[:,3:6]-state_history_primaries[:,9:12], axis=1), label="Moon")
+        plt.xlabel("Epoch")
+        plt.ylabel("Difference [m/s]")
+        plt.title("Absolute velocity difference tudatpy versus classical CRTBP")
         ax.legend()
         plt.grid(alpha=0.5)
         plt.yscale("log")
         plt.show()
 
         ax = plt.figure().add_subplot(projection='3d')
-        plt.plot(dependent_variables_history[:,0], dependent_variables_history[:,1], dependent_variables_history[:,2], label="moon w.r.t earth")
-        plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8], label="lumio w.r.t earth method 1")
-        plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="lumio w.r.t earth method 2")
-        plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2], label="lpf w.r.t earth method 1")
-        plt.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="lpf w.r.t earth method 2")
+        # plt.plot(dependent_variables_history[:,0], dependent_variables_history[:,1], dependent_variables_history[:,2], label="moon w.r.t earth")
+        plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2], label="lpf classic")
+        plt.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="lpf tudatpy")
+        plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8], label="lumio classic")
+        plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="lumio tudatpy")
+        plt.plot(state_history_primaries[:,0], state_history_primaries[:,1], state_history_primaries[:,2], label="earth classic")
+        plt.plot(state_history_primaries[:,6], state_history_primaries[:,7], state_history_primaries[:,8], label="moon classic")
+        plt.plot(dependent_variables_history[:,0], dependent_variables_history[:,1], dependent_variables_history[:,2], label="moon tudatpy")
         ax.set_xlabel("X [km]")
         ax.set_ylabel("Y [km]")
         ax.set_zlabel("Z [km]")
