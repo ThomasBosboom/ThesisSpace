@@ -68,25 +68,37 @@ class SynodicToInertialHistoryConverter:
             state_rotating_bary_lumio_0 = self.dynamic_model_object.custom_initial_state[6:]
 
         state_rotating_bary_lumio_0 = [1.1473302, 0, -0.15142308, 0, -0.21994554, 0]
-        state_rotating_bary_lpf_0   = [0.98512134, 0.00147649, 0.00492546, -0.87329730, -1.61190048, 0]
+        state_rotating_bary_lpf_0   = [0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0]
 
 
 
 
-
+        # Generate history of classical CRTBP
         system   = CRTBP_traditional.CRTBP(self.G, self.m1, self.m2, self.a)
         t, state_rotating_bary_lumio = system.get_state_history(state_rotating_bary_lumio_0, 0, self.propagation_time, self.step_size)
         t, state_rotating_bary_lpf = system.get_state_history(state_rotating_bary_lpf_0, 0, self.propagation_time, self.step_size)
-        state_rotating_secondary_lumio = system.convert_state_barycentric_to_body(state_rotating_bary_lumio, "secondary", state_type="rotating")
-        state_rotating_secondary_lpf = system.convert_state_barycentric_to_body(state_rotating_bary_lpf, "secondary", state_type="rotating")
-        state_rotating_secondary = np.concatenate((state_rotating_secondary_lpf, state_rotating_secondary_lumio), axis=1)
+
+        # Convert satellite states to moon centric frame
+        state_history_moon_fixed_lumio = system.convert_state_barycentric_to_body(state_rotating_bary_lumio, "secondary", state_type="rotating")
+        state_history_moon_fixed_lpf = system.convert_state_barycentric_to_body(state_rotating_bary_lpf, "secondary", state_type="rotating")
+        state_history_moon_fixed_satellites = np.concatenate((state_history_moon_fixed_lpf, state_history_moon_fixed_lumio), axis=1)
+
+        # Convert primaries states to moon centric frame
+        state_rotating_bary_primary = np.multiply(np.ones((np.shape(t)[0],6)), system.state_m1)
+        state_rotating_bary_secondary = np.multiply(np.ones((np.shape(t)[0],6)), system.state_m2)
+        state_history_moon_fixed_primary = system.convert_state_barycentric_to_body(state_rotating_bary_primary, "secondary", state_type="rotating")
+        state_history_moon_fixed_secondary = system.convert_state_barycentric_to_body(state_rotating_bary_secondary, "secondary", state_type="rotating")
+        state_history_moon_fixed_primaries = np.concatenate((state_history_moon_fixed_primary, state_history_moon_fixed_secondary), axis=1)
 
         # Looping through all epochs to convert each synodic frame element to J2000 Earth-centered
-        state_history_CRTBP = np.empty(np.shape(state_rotating_secondary))
-        for epoch, state in enumerate(state_rotating_secondary):
-            state_history_CRTBP[epoch] = self.convert_synodic_to_inertial_state(state_rotating_secondary[epoch], dependent_variables_history[epoch, :6])
-
-        return t, state_history_CRTBP
+        state_history_inertial_satellites = np.empty(np.shape(state_history_moon_fixed_satellites))
+        state_history_inertial_primaries = np.empty(np.shape(state_history_moon_fixed_primaries))
+        for epoch, state in enumerate(state_history_moon_fixed_satellites):
+            state_history_inertial_satellites[epoch] = self.convert_synodic_to_inertial_state(state_history_moon_fixed_satellites[epoch], dependent_variables_history[epoch, :6])
+            state_history_inertial_primaries[epoch] = self.convert_synodic_to_inertial_state(state_history_moon_fixed_primaries[epoch], dependent_variables_history[epoch, :6])
+        print(state_history_moon_fixed_primaries)
+        print(state_history_inertial_primaries)
+        return t, state_history_inertial_satellites, state_history_inertial_primaries
 
 
 
@@ -105,11 +117,11 @@ class SynodicToInertialHistoryConverter:
     #     system   = CRTBP_traditional.CRTBP(self.G, self.m1, self.m2, self.a)
     #     t, state_rotating_bary_lumio = system.get_state_history(state_rotating_bary_lumio_0, 0, self.propagation_time, self.step_size)
     #     # t, state_rotating_bary_lpf = system.get_state_history(state_rotating_bary_lpf_0, 0, self.propagation_time, self.step_size)
-    #     state_rotating_secondary_lumio = system.convert_state_barycentric_to_body(state_rotating_bary_lumio, "secondary", state_type="rotating")
+    #     state_history_moon_fixed_lumio = system.convert_state_barycentric_to_body(state_rotating_bary_lumio, "secondary", state_type="rotating")
 
     #     # Looping through all epochs to convert each synodic frame element to J2000 Earth-centered
-    #     state_history_lumio_CRTBP = np.empty(np.shape(state_rotating_secondary_lumio))
-    #     for epoch, state in enumerate(state_rotating_secondary_lumio):
+    #     state_history_lumio_CRTBP = np.empty(np.shape(state_history_moon_fixed_lumio))
+    #     for epoch, state in enumerate(state_history_moon_fixed_lumio):
 
     #         rsw_to_inertial_rotation_matrix = frame_conversion.rsw_to_inertial_rotation_matrix(dependent_variables_history[epoch, :6])
 
@@ -121,7 +133,7 @@ class SynodicToInertialHistoryConverter:
     #         total_rsw_to_inertial_rotation_matrix = np.block([[rsw_to_inertial_rotation_matrix, np.zeros((3,3))],
     #                         [time_derivative_rsw_to_inertial_rotation_matrix, rsw_to_inertial_rotation_matrix]])
 
-    #         initial_state_lumio_moon_fixed = np.concatenate((state_rotating_secondary_lumio[epoch, :3]*self.lu_cr3bp, state_rotating_secondary_lumio[epoch, 3:]*self.lu_cr3bp/self.tu_cr3bp))
+    #         initial_state_lumio_moon_fixed = np.concatenate((state_history_moon_fixed_lumio[epoch, :3]*self.lu_cr3bp, state_history_moon_fixed_lumio[epoch, 3:]*self.lu_cr3bp/self.tu_cr3bp))
     #         state_history_lumio_CRTBP[epoch] = dependent_variables_history[epoch, :6] + np.dot(total_rsw_to_inertial_rotation_matrix,initial_state_lumio_moon_fixed)
 
     #     return t, state_history_lumio_CRTBP
