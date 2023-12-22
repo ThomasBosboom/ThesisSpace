@@ -17,7 +17,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 # Own
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from dynamic_models import validation_LUMIO
-from dynamic_models.low_fidelity import low_fidelity
+from dynamic_models.low_fidelity.integration_settings import *
 from dynamic_models.high_fidelity.point_mass import *
 from dynamic_models.high_fidelity.point_mass_srp import *
 from dynamic_models.high_fidelity.spherical_harmonics import *
@@ -179,7 +179,7 @@ class EstimationModel:
         estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
         # Run the estimation
-        with util.redirect_std(redirect_out=False):
+        with util.redirect_std(redirect_out=True):
             estimation_output = estimator.perform_estimation(estimation_input)
         initial_states_updated = self.parameters_to_estimate.parameter_vector
 
