@@ -1,6 +1,9 @@
 # Tudatpy imports
+from tudatpy.kernel.numerical_simulation import propagation_setup
 from tudatpy.kernel.astro import time_conversion
 from tudatpy.kernel.interface import spice
+from tudatpy.kernel import constants
+
 
 # Load spice kernels.
 spice.load_standard_kernels()
@@ -36,6 +39,12 @@ class DynamicModelBase:
         self.gravitational_parameter_primary = spice.get_body_gravitational_parameter(self.name_primary)
         self.gravitational_parameter_secondary = spice.get_body_gravitational_parameter(self.name_secondary)
         self.mu = self.gravitational_parameter_secondary/(self.gravitational_parameter_primary+self.gravitational_parameter_secondary)
+
+        # Define integrator settings
+        self.use_variable_step_size_integrator = True
+        self.current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkdp_87
+        self.current_tolerance = 1e-10*constants.JULIAN_DAY
+        self.initial_time_step = 1e-3*constants.JULIAN_DAY
 
 
     def set_environment_settings(self):
