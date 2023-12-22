@@ -80,15 +80,16 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_initial_state()
 
-        current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkdp_87
-        current_tolerance = 1e-10*constants.JULIAN_DAY
-        initial_time_step = 1e-3*constants.JULIAN_DAY
-        self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(initial_time_step,
-                                                                                        current_coefficient_set,
-                                                                                        np.finfo(float).eps,
-                                                                                        np.inf,
-                                                                                        current_tolerance,
-                                                                                        current_tolerance)
+        if self.use_variable_step_size_integrator:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(self.initial_time_step,
+                                                                                            self.current_coefficient_set,
+                                                                                            np.finfo(float).eps,
+                                                                                            np.inf,
+                                                                                            self.current_tolerance,
+                                                                                            self.current_tolerance)
+        else:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
+                                                                                           self.current_coefficient_set)
 
 
     def set_dependent_variables_to_save(self):

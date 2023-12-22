@@ -37,7 +37,7 @@ class LowFidelityDynamicModel(DynamicModelBase):
     def set_initial_cartesian_moon_state(self):
 
         # Adjust the orbit of the moon to perfectly circular
-        self.moon_initial_state = spice.get_body_cartesian_state_at_epoch(
+        moon_initial_state = spice.get_body_cartesian_state_at_epoch(
             target_body_name = self.name_secondary,
             observer_body_name = self.name_primary,
             reference_frame_name = self.global_frame_orientation,
@@ -45,7 +45,7 @@ class LowFidelityDynamicModel(DynamicModelBase):
             ephemeris_time = self.simulation_start_epoch)
 
         central_body_gravitational_parameter = self.gravitational_parameter_primary + self.gravitational_parameter_secondary
-        initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(self.moon_initial_state,
+        initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(moon_initial_state,
                                                                                  central_body_gravitational_parameter)
         initial_keplerian_moon_state[0] = self.distance_between_primaries
         initial_keplerian_moon_state[1] = self.eccentricity
@@ -58,9 +58,9 @@ class LowFidelityDynamicModel(DynamicModelBase):
         self.set_initial_cartesian_moon_state()
 
         # Convert barycentric CRTBP non-dimensionalized state into moon fixed frame.
-        initial_state_barycenter_fixed[0] = initial_state_barycenter_fixed[0] - (1-self.mu)
-        initial_state_barycenter_fixed[6] = initial_state_barycenter_fixed[6] - (1-self.mu)
         initial_state_moon_fixed = initial_state_barycenter_fixed
+        initial_state_moon_fixed[0] = initial_state_moon_fixed[0] - (1-self.mu)
+        initial_state_moon_fixed[6] = initial_state_moon_fixed[6] - (1-self.mu)
 
         # Compute the transformation matrix from CRTBP synodic frame to Earth-centered J2000 frame
         rsw_to_inertial_rotation_matrix = frame_conversion.rsw_to_inertial_rotation_matrix(self.initial_cartesian_moon_state)
@@ -78,9 +78,9 @@ class LowFidelityDynamicModel(DynamicModelBase):
         initial_state_moon_fixed_lumio = np.concatenate((initial_state_moon_fixed[6:9]*self.lu_cr3bp, initial_state_moon_fixed[9:12]*self.lu_cr3bp/self.tu_cr3bp))
         initial_state_lpf = self.initial_cartesian_moon_state + np.dot(total_rsw_to_inertial_rotation_matrix,initial_state_moon_fixed_lpf)
         initial_state_lumio = self.initial_cartesian_moon_state + np.dot(total_rsw_to_inertial_rotation_matrix,initial_state_moon_fixed_lumio)
-        self.initial_state = np.concatenate((initial_state_lpf, initial_state_lumio))
+        initial_state = np.concatenate((initial_state_lpf, initial_state_lumio))
 
-        return self.initial_state
+        return initial_state
 
 
     def get_closest_initial_state(self):
@@ -136,7 +136,7 @@ class LowFidelityDynamicModel(DynamicModelBase):
             self.body_settings.get(body).constant_mass = self.bodies_mass[index]
 
         # Adjust the orbit of the moon to perfectly circular
-        self.moon_initial_state = spice.get_body_cartesian_state_at_epoch(
+        moon_initial_state = spice.get_body_cartesian_state_at_epoch(
             target_body_name = self.name_secondary,
             observer_body_name = self.name_primary,
             reference_frame_name = self.global_frame_orientation,
@@ -144,7 +144,7 @@ class LowFidelityDynamicModel(DynamicModelBase):
             ephemeris_time = self.simulation_start_epoch)
 
         central_body_gravitational_parameter = self.gravitational_parameter_primary + self.gravitational_parameter_secondary
-        initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(self.moon_initial_state, central_body_gravitational_parameter)
+        initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(moon_initial_state, central_body_gravitational_parameter)
         initial_keplerian_moon_state[0], initial_keplerian_moon_state[1] = self.distance_between_primaries, self.eccentricity
         self.initial_cartesian_moon_state = element_conversion.keplerian_to_cartesian(initial_keplerian_moon_state, central_body_gravitational_parameter)
 
@@ -154,6 +154,10 @@ class LowFidelityDynamicModel(DynamicModelBase):
             self.simulation_start_epoch,
             central_body_gravitational_parameter,
             self.global_frame_origin, self.global_frame_orientation)
+
+        # define parameters describing the synchronous rotation model for Moon fixed frame w.r.t. central body Earth
+        self.body_settings.get(self.name_secondary).rotation_model_settings = environment_setup.rotation_model.synchronous(
+            self.name_primary, self.global_frame_orientation, "Moon_fixed")
 
         # Update the body settings
         self.bodies = environment_setup.create_system_of_bodies(self.body_settings)
@@ -187,9 +191,9 @@ class LowFidelityDynamicModel(DynamicModelBase):
         if self.custom_initial_state is None:
             self.initial_state = self.get_closest_initial_state()
         else:
-
             self.initial_state = self.convert_synodic_to_inertial_state(self.custom_initial_state)
-            print("self.initial_state: ", self.initial_state)
+            self.custom_initial_state[0] = self.custom_initial_state[0] + (1-self.mu)
+            self.custom_initial_state[6] = self.custom_initial_state[6] + (1-self.mu)
 
 
 
@@ -198,17 +202,16 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
         self.set_initial_state()
 
-        current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkf_45
-        current_tolerance = 1e-10*constants.JULIAN_DAY
-        initial_time_step = 1e-6*constants.JULIAN_DAY
-        self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(initial_time_step,
-                                                                                        current_coefficient_set,
-                                                                                        np.finfo(float).eps,
-                                                                                        np.inf,
-                                                                                        current_tolerance,
-                                                                                        current_tolerance)
-
-        # self.integrator_settings = propagation_setup.integrator.runge_kutta_4(self.simulation_start_epoch, 0.005*constants.JULIAN_DAY)
+        if self.use_variable_step_size_integrator:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(self.initial_time_step,
+                                                                                            self.current_coefficient_set,
+                                                                                            np.finfo(float).eps,
+                                                                                            np.inf,
+                                                                                            self.current_tolerance,
+                                                                                            self.current_tolerance)
+        else:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
+                                                                                           self.current_coefficient_set)
 
 
     def set_dependent_variables_to_save(self):
@@ -280,25 +283,41 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
 
 
-# custom_initial_state = None
-# custom_initial_state = np.array([0.98512134, 0.00147649, 0.00492546, -0.87329730, -1.61190048, 0, \
-#                                  1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
-# test2 = LowFidelityDynamicModel(60390, 28, custom_initial_state=custom_initial_state)
-# states2 = np.stack(list(test2.get_propagated_orbit()[0].state_history.values()))
-# # print(test2.convert_cartesian_state_to_synodic())
+
+# from dynamic_models import Interpolator, FrameConverter
+
+# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0, \
+#                                     1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
+
+# # Generate LowFidelityDynamicModel object only
+# dynamic_model = LowFidelityDynamicModel(60390, 28, custom_initial_state=custom_initial_state)
+
+# # Define step size that both tudatpy and classic model work run (variable step size epochs are adjusted in Interpolator)
+# step_size = 0.001
+
+# # Extract simulation histories tudatpy solution
+# epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
+#     Interpolator.Interpolator(dynamic_model, step_size=step_size).get_results()
+
+# # Extract simulation histories classical solution
+# epochs_classic, state_history_classic, state_history_primaries = \
+#     FrameConverter.SynodicToInertialHistoryConverter(dynamic_model, step_size=step_size).get_results()
+
+# print(dependent_variables_history[:,:3])
+# print(state_history_primaries[:,6:9])
+
+# # states2 = np.stack(list(test2.get_propagated_orbit()[0].state_history.values()))
 
 # ax = plt.figure().add_subplot(projection='3d')
-# # plt.plot(states[:,0], states[:,1], states[:,2])
-# # plt.plot(states[:,6], states[:,7], states[:,8])
-# plt.plot(states2[:,0], states2[:,1], states2[:,2])
-# plt.plot(states2[:,6], states2[:,7], states2[:,8])
+# plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
+# plt.plot(state_history[:,6], state_history[:,7], state_history[:,8])
 # plt.legend()
 # plt.axis('equal')
 # plt.show()
 
-# states2 = test2.get_propagated_orbit()[1]
+# # states2 = test2.get_propagated_orbit()[1]
 
-# ax = plt.figure()
-# plt.plot(states2[:,:6])
-# plt.legend()
-# plt.show()
+# # ax = plt.figure()
+# # plt.plot(states2[:,:6])
+# # plt.legend()
+# # plt.show()
