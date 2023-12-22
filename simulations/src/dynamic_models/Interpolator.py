@@ -9,8 +9,6 @@ class Interpolator:
     def __init__(self, dynamic_model_object, step_size=0.005, kind='cubic', epoch_in_MJD=True):
 
         self.dynamic_model_object = dynamic_model_object
-        self.custom_initial_state = self.dynamic_model_object.custom_initial_state
-        print("Interpolator first: ", self.dynamic_model_object.custom_initial_state)
         self.step_size = step_size*constants.JULIAN_DAY
         self.kind = kind
         self.epoch_in_MJD = epoch_in_MJD
@@ -31,12 +29,9 @@ class Interpolator:
     def get_results(self):
 
         # Get simulation results from each dynamic model
-        print("Interpolator second before: ", self.dynamic_model_object.custom_initial_state)
-        print("dynamic_model_object: ", self.dynamic_model_object)
         self.dynamics_simulator, self.variational_equations_solver = self.dynamic_model_object.get_propagated_orbit()
         self.simulation_start_epoch = self.dynamic_model_object.simulation_start_epoch
         self.simulation_end_epoch = self.dynamic_model_object.simulation_end_epoch
-        print("Interpolator second after: ", self.custom_initial_state)
 
         # Extract the variational_equations_solver results
         epochs                          = np.stack(list(self.variational_equations_solver.state_history.keys()))
