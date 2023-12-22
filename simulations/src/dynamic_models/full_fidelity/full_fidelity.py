@@ -27,7 +27,7 @@ def read_coeffs(scaled=True):
 
     # Specify the file path
     root_dir = Path(__file__).resolve().parent.parent.parent.parent
-    file_path = root_dir / "Reference" / "lunar_albedo" / "DLAM-1.txt"
+    file_path = root_dir / "reference" / "lunar_albedo" / "DLAM-1.txt"
 
     with open(file_path) as f:
         lines = f.readlines()
