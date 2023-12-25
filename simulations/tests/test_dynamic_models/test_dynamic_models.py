@@ -43,11 +43,9 @@ class TestOutputsDynamicalModels:
         dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
         estimation_model_objects = utils.get_estimation_model_objects(EstimationModel, dynamic_model_objects)
 
-        for package_type, package_names in estimation_model_objects.items():
-            for package_name, estimation_model_objects in package_names.items():
-                for estimation_model_object in estimation_model_objects:
+        for estimation_model in utils.loop_through_model_objects(estimation_model_objects):
 
-                    print(estimation_model_object.get_estimation_results()[0])
+            print(estimation_model)
 
 
     @pytest.mark.parametrize(
@@ -64,35 +62,33 @@ class TestOutputsDynamicalModels:
 
         # Create a figure and three subplots side by side
         fig, axs = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
-        for package_type, package_names in dynamic_model_objects.items():
-            for package_name, dynamic_models in package_names.items():
-                for dynamic_model in dynamic_models:
+        for dynamic_model in utils.loop_through_model_objects(dynamic_model_objects):
 
-                    # Create a folder named after the function
-                    folder_name = "test_compare_dynamic_models"
-                    os.makedirs(folder_name, exist_ok=True)
+            # Create a folder named after the function
+            folder_name = "test_compare_dynamic_models"
+            os.makedirs(folder_name, exist_ok=True)
 
-                    setattr(dynamic_model, "current_coefficient_set", propagation_setup.integrator.CoefficientSets.rkf_89)
+            setattr(dynamic_model, "current_coefficient_set", propagation_setup.integrator.CoefficientSets.rkf_89)
 
-                    # Extract simulation histories numerical solution
-                    epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                        Interpolator.Interpolator(dynamic_model, step_size=0.005, epoch_in_MJD=False).get_results()
+            # Extract simulation histories numerical solution
+            epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
+                Interpolator.Interpolator(dynamic_model, step_size=0.005, epoch_in_MJD=False).get_results()
 
-                    # Define the titles for the subplots
-                    subplot_titles = ['Plot 1', 'Plot 2', 'Plot 3']
+            # Define the titles for the subplots
+            subplot_titles = ['Plot 1', 'Plot 2', 'Plot 3']
 
-                    # Data to plot
-                    data_to_plot = [dependent_variables_history[:, 6:9]]
+            # Data to plot
+            data_to_plot = [dependent_variables_history[:, 6:9]]
 
-                    # Iterate through subplots and data
-                    for i, ax in enumerate(axs):
-                        for data in data_to_plot:
-                            ax.plot(data[:, i % 3], data[:, (i + 1) % 3], label=f"{dynamic_model}")
+            # Iterate through subplots and data
+            for i, ax in enumerate(axs):
+                for data in data_to_plot:
+                    ax.plot(data[:, i % 3], data[:, (i + 1) % 3], label=f"{dynamic_model}")
 
-                        ax.grid(alpha=0.5, linestyle='--')
-                        ax.set_title(subplot_titles[i])
+                ax.grid(alpha=0.5, linestyle='--')
+                ax.set_title(subplot_titles[i])
 
-                    assert dynamic_model.name_ELO == "LPF"
+            assert dynamic_model.name_ELO == "LPF"
 
         plt.legend()
         figure_path = os.path.join(folder_name, f"test_low_fidelity_dynamic_models_{simulation_start_epoch_MJD}_{propagation_time}.png")

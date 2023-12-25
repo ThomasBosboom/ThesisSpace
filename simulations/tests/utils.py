@@ -4,7 +4,7 @@ import sys
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
-# package_dict={"low_fidelity": ["integration_settings"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+
 def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict={"low_fidelity": ["integration_settings"], "high_fidelity": ["point_mass"]}):
 
     dynamic_model_objects = {}
@@ -38,13 +38,23 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, pack
 
 def get_estimation_model_objects(estimation_model, dynamic_model_objects):
 
-    estimation_models_objects = {}
-    # dynamic_model_objects = get_dynamic_model_objects(package_dict=package_dict)
+    estimation_model_objects = {}
     for package_type, package_names in dynamic_model_objects.items():
         submodels_dict = {}
         for package_name, dynamic_models in package_names.items():
             submodels = [estimation_model.EstimationModel(dynamic_model) for dynamic_model in dynamic_models]
             submodels_dict[package_name] = submodels
-        estimation_models_objects[package_type] = submodels_dict
+        estimation_model_objects[package_type] = submodels_dict
 
-    return estimation_models_objects
+    return estimation_model_objects
+
+
+def loop_through_model_objects(model_objects):
+
+    model_objects_list = []
+    for package_type, package_names in model_objects.items():
+        for package_name, models in package_names.items():
+            for model in models:
+                model_objects_list.append(model)
+
+    return model_objects_list
