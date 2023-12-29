@@ -4,8 +4,6 @@ This repository reflects the work for the Master Thesis of Thomas Bosboom with S
 The "Report" folder contains the contents related to the report of thesis work.
 The "Simulations" folder contains the underlying code that is used in the report.
 
-===========================================================
-
 For proper installation follow this guide. The installation of tudatpy is supported exclusively through the use of a conda package manager,
 such as Miniconda or Anaconda. For new users, and Windows users in particular, the use of Anaconda is recommended.
 
