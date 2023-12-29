@@ -21,8 +21,10 @@ from DynamicModelBase import DynamicModelBase
 
 class HighFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
+
+        self.custom_initial_state = custom_initial_state
 
         self.new_bodies_to_create = ["Sun", "Mercury", "Venus"]
         for new_body in self.new_bodies_to_create:
@@ -73,22 +75,26 @@ class HighFidelityDynamicModel(DynamicModelBase):
         initial_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
         initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
-        self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
+        if self.custom_initial_state is not None:
+            self.initial_state = self.custom_initial_state
+        else:
+            self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
 
 
     def set_integration_settings(self):
 
         self.set_initial_state()
 
-        current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkdp_87
-        current_tolerance = 1e-10*constants.JULIAN_DAY
-        initial_time_step = 1e-3*constants.JULIAN_DAY
-        self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(initial_time_step,
-                                                                                        current_coefficient_set,
-                                                                                        np.finfo(float).eps,
-                                                                                        np.inf,
-                                                                                        current_tolerance,
-                                                                                        current_tolerance)
+        if self.use_variable_step_size_integrator:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(self.initial_time_step,
+                                                                                            self.current_coefficient_set,
+                                                                                            np.finfo(float).eps,
+                                                                                            np.inf,
+                                                                                            self.current_tolerance,
+                                                                                            self.current_tolerance)
+        else:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
+                                                                                           self.current_coefficient_set)
 
 
     def set_dependent_variables_to_save(self):
@@ -102,7 +108,9 @@ class HighFidelityDynamicModel(DynamicModelBase):
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.total_acceleration(self.name_ELO),
-            propagation_setup.dependent_variable.total_acceleration(self.name_LPO)]
+            propagation_setup.dependent_variable.total_acceleration(self.name_LPO),
+            propagation_setup.dependent_variable.keplerian_state(self.name_secondary, self.name_primary),
+            propagation_setup.dependent_variable.keplerian_state(self.name_ELO, self.name_secondary)]
 
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(

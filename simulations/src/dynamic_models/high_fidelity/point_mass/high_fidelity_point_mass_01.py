@@ -21,8 +21,10 @@ from DynamicModelBase import DynamicModelBase
 
 class HighFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
+
+        self.custom_initial_state = custom_initial_state
 
         self.new_bodies_to_create = ["Sun"]
         for new_body in self.new_bodies_to_create:
@@ -73,7 +75,10 @@ class HighFidelityDynamicModel(DynamicModelBase):
         initial_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
         initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
-        self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
+        if self.custom_initial_state is not None:
+            self.initial_state = self.custom_initial_state
+        else:
+            self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
 
 
     def set_integration_settings(self):
@@ -103,7 +108,9 @@ class HighFidelityDynamicModel(DynamicModelBase):
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.total_acceleration(self.name_ELO),
-            propagation_setup.dependent_variable.total_acceleration(self.name_LPO)]
+            propagation_setup.dependent_variable.total_acceleration(self.name_LPO),
+            propagation_setup.dependent_variable.keplerian_state(self.name_secondary, self.name_primary),
+            propagation_setup.dependent_variable.keplerian_state(self.name_ELO, self.name_secondary)]
 
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
@@ -160,13 +167,21 @@ class HighFidelityDynamicModel(DynamicModelBase):
         return dynamics_simulator, variational_equations_solver
 
 
-# test2 = HighFidelityDynamicModel(60390, 10)
+# custom_initial_state = np.array([-2.81273933e+08, 2.51467647e+08, 1.46454096e+08, -1.16911938e+03,
+#  -2.16728817e+03, -7.88098467e+02, -3.10537998e+08 , 2.49423157e+08,
+#   1.74937757e+08, -9.93171842e+02, -7.66408514e+02, -5.25173280e+02])
+# test2 = HighFidelityDynamicModel(60390, 28, custom_initial_state=custom_initial_state)
 # dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
+# states = np.stack(list(test2.get_propagated_orbit()[0].state_history.values()))
 
 # print(np.shape(dep_var))
 # ax = plt.figure()
-# plt.plot(dep_var[:,-2:])
-# # plt.plot(dep_var[:,-8:-6])
+# plt.plot(np.linalg.norm(states[:,:3], axis=1))
 # plt.legend()
-# plt.yscale("log")
+# # plt.yscale("log")
+# plt.show()
+
+# ax = plt.figure()
+# plt.plot(dep_var[:,18:24])
+# plt.legend()
 # plt.show()

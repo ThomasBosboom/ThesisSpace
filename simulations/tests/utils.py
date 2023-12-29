@@ -1,6 +1,7 @@
 # Standard
 import os
 import sys
+import pytest_html
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -49,7 +50,7 @@ def get_estimation_model_objects(estimation_model, dynamic_model_objects):
     return estimation_model_objects
 
 
-def loop_through_model_objects(model_objects):
+def convert_model_objects_to_list(model_objects):
 
     model_objects_list = []
     for package_type, package_names in model_objects.items():
@@ -58,3 +59,57 @@ def loop_through_model_objects(model_objects):
                 model_objects_list.append(model)
 
     return model_objects_list
+
+
+def convert_dictionary_to_array(dictionary):
+
+    keys = np.stack(list(dictionary.keys()), axis=0)
+    values = np.stack(list(dictionary.values()), axis=0)
+
+    return keys, values
+
+
+def save_figures_to_folder(folder_name, extras, figs=[], labels=[], save_to_report=True):
+
+    # Save the figure to designated folder belong to the respective test method
+    os.makedirs(folder_name, exist_ok=True)
+    for i, fig in enumerate(figs):
+        base_string = "_".join([str(label) for label in labels])
+        figure_path = os.path.join(folder_name, f"{i+1}_{base_string}.png")
+        fig.savefig(figure_path)
+        if save_to_report:
+            extras.append(pytest_html.extras.png(figure_path))
+
+
+# Define a dictionary with configurations for LPF and LUMIO
+plot_config_LPF = {
+    'label': 'Example Label',
+    'color': 'blue',
+    'linestyle': '--',
+    'linewidth': 2,
+    'marker': 'o'
+}
+
+plot_config_LUMIO = {
+    'label': 'Example Label',
+    'color': 'blue',
+    'linestyle': '--',
+    'linewidth': 2,
+    'marker': 'o'
+}
+
+plot_config_primary = {
+    'label': 'Example Label',
+    'color': 'blue',
+    'linestyle': '--',
+    'linewidth': 2,
+    'marker': 'o'
+}
+
+plot_config_secondary = {
+    'label': 'Example Label',
+    'color': 'blue',
+    'linestyle': '--',
+    'linewidth': 2,
+    'marker': 'o'
+}

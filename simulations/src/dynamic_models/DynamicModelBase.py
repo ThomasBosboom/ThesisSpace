@@ -42,8 +42,8 @@ class DynamicModelBase:
 
         # Define integrator settings
         self.use_variable_step_size_integrator = True
-        self.current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkdp_87
-        self.current_tolerance = 1e-10*constants.JULIAN_DAY
+        self.current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkf_1412
+        self.current_tolerance = 1e-15*constants.JULIAN_DAY
         self.initial_time_step = 1e-3*constants.JULIAN_DAY
 
 

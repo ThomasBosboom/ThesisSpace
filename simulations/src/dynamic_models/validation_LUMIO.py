@@ -5,6 +5,7 @@ from tudatpy.kernel import constants
 from scipy.interpolate import CubicSpline, interp1d
 from tudatpy.kernel.astro import time_conversion
 from pathlib import Path
+import TraditionalLowFidelity
 
 
 root_dir = Path(__file__).resolve().parent.parent.parent
@@ -138,7 +139,7 @@ def get_state_history_richardson(dc_corrected=False):
 
 #     return np.delete(states_erdem[:,:],0,0)
 
-def get_state_history_erdem():
+def get_synodic_state_history_erdem():
 
     # Specify the file path
     root_dir = Path(__file__).resolve().parent.parent.parent
@@ -151,6 +152,21 @@ def get_state_history_erdem():
             states_erdem = np.vstack((states_erdem, np.array([float(state) for state in line.split()])))
 
     return np.delete(states_erdem[:,:],0,0)
+
+
+def get_synodic_state_history(dynamic_model, propagation_time, step_size, custom_initial_state):
+
+    G = constants.GRAVITATIONAL_CONSTANT
+    m1 = dynamic_model.gravitational_parameter_primary/G
+    m2 = dynamic_model.gravitational_parameter_secondary/G
+    a = dynamic_model.distance_between_primaries
+
+    dynamic_model_classic = TraditionalLowFidelity.TraditionalLowFidelity(G, m1, m2, a)
+    epoch_history, state_rotating_bary_lpf = dynamic_model_classic.get_state_history(custom_initial_state[:6], 0, propagation_time, step_size)
+    epoch_history, state_rotating_bary_lumio = dynamic_model_classic.get_state_history(custom_initial_state[6:], 0, propagation_time, step_size)
+    synodic_state_history = np.concatenate((state_rotating_bary_lpf, state_rotating_bary_lumio), axis=1)
+
+    return epoch_history, synodic_state_history
 
 
 # import matplotlib.pyplot as plt

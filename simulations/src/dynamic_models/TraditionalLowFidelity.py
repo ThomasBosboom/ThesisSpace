@@ -4,6 +4,7 @@ from scipy.integrate import odeint
 from tudatpy.kernel import constants
 from tudatpy.kernel.astro import time_conversion
 
+
 class TraditionalLowFidelity:
     def __init__(self, G, m1, m2, a):
 
@@ -15,6 +16,8 @@ class TraditionalLowFidelity:
         self.mu    = self.m2/(self.m1+self.m2)
         self.lstar = self.a
         self.tstar = np.sqrt(self.lstar**3/(self.G*(self.m1+self.m2)))/constants.JULIAN_DAY
+        self.tstar = 4.348377505921948
+        self.rotation_rate = 1/self.tstar
 
         self.state_m1 = np.array([-self.mu, 0, 0, 0, 0, 0])
         self.state_m2 = np.array([(1-self.mu), 0, 0, 0, 0, 0])
@@ -44,7 +47,6 @@ class TraditionalLowFidelity:
         self.t = np.arange(start, stop/(self.tstar)+step/(self.tstar), step/(self.tstar))
 
         return self.t*self.tstar, odeint(self.get_equations_of_motion, state_rotating_bary_0, self.t)
-        # return self.t*self.tstar, odeint(self.get_equations_of_motion, state_rotating_bary_0, self.t)
 
 
     def get_jacobi_constant_history(self, state_rotating_barycenter):
@@ -62,15 +64,13 @@ class TraditionalLowFidelity:
     def convert_state_nondim_to_dim(self, state_nondim, state_primary_to_secondary):
 
         state_history_dim = np.empty((np.shape(state_nondim)[0],6))
-        # print(np.shape(state_nondim), np.shape(state_primary_to_secondary))
         for epoch, state in enumerate(state_nondim):
             lstar = np.linalg.norm(state_primary_to_secondary[epoch,:3])
             tstar = np.sqrt(lstar**3/(self.G*(self.m1+self.m2)))
             state_history_dim[epoch] = np.array([lstar, lstar, lstar, lstar/tstar, lstar/tstar, lstar/tstar])*state
 
         return state_history_dim
-        # else:
-        #     return np.array([self.lstar, self.lstar, self.lstar, self.lstar/self.tstar, self.lstar/self.tstar, self.lstar/self.tstar])*state_nondim*1000
+
 
     def convert_state_dim_to_nondim(self, state_dim):
 
@@ -87,7 +87,6 @@ class TraditionalLowFidelity:
 
         elif state_type == "rotating":
             state_body = state_barycentric
-            print("I have been here")
             if body == "primary":
                 for epoch, state in enumerate(state_body):
                     state_body[epoch, 0] = state_body[epoch, 0] - (self.mu)
@@ -96,7 +95,6 @@ class TraditionalLowFidelity:
                 for epoch, state in enumerate(state_body):
                     state_body[epoch, 0] = state_body[epoch, 0] - (1-self.mu)
                 return state_body
-
 
 
     def convert_state_body_to_barycentric(self, state_body, body, state_type="inertial"):
@@ -108,6 +106,7 @@ class TraditionalLowFidelity:
                 return state_body + self.state_m2*state_body
 
         elif state_type == "rotating":
+            state_barycentric = state_body
             if body == "primary":
                 for epoch, state in enumerate(state_barycentric):
                     state_barycentric[epoch, 0] = state_barycentric[epoch, 0] + (self.mu)
@@ -160,43 +159,6 @@ class TraditionalLowFidelity:
             state_rotating[i] = np.dot(transformation_matrix_inverse,state_inertial[i,:])
 
         return state_rotating
-
-
-    def convert_state_synodic_to_ICRF(self, state_primary_to_secondary, state_synodic):
-
-        state_ICRF  = np.empty((np.shape(state_synodic)[0], 6))
-        angle_history = np.empty((np.shape(state_synodic)[0], 3))
-        for index, state in enumerate(state_primary_to_secondary):
-
-            beta = np.arctan(state[5]/(np.sqrt(state[3]**2+state[4]**2)))
-            phi = np.arctan(state[2]/(np.sqrt(state[0]**2+state[1]**2)))
-            theta = np.arctan(state[1]/state[0])
-
-            rot_theta = np.array([[np.cos(theta), -np.sin(theta), 0],
-                                  [np.sin(theta),  np.cos(theta), 0],
-                                  [0,              0,             1]])
-
-            rot_phi = np.array([[np.cos(phi),  0, -np.sin(phi)],
-                                [0,            1,            0],
-                                [np.sin(phi),  0,  np.cos(phi)]])
-
-            rot_beta = np.array([[1,  0,                        0],
-                                 [0,  np.cos(beta), -np.sin(beta)],
-                                 [0,  np.sin(beta),  np.cos(beta)]])
-
-            rot_gamma = np.dot(np.dot(rot_theta, rot_phi), rot_beta)
-
-            transformation_matrix = np.block([[rot_gamma, np.zeros((3,3))],
-                                              [np.zeros((3,3)), rot_gamma]])
-
-            angle_history[index] = np.array([beta, phi, theta])
-            state_ICRF[index] = np.dot(transformation_matrix,state_synodic[index])
-
-        return state_ICRF
-
-
-
-
 
 
 # G  = 6.67408E-11

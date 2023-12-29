@@ -44,13 +44,16 @@ class LowFidelityDynamicModel(DynamicModelBase):
             aberration_corrections = 'NONE',
             ephemeris_time = self.simulation_start_epoch)
 
-        central_body_gravitational_parameter = self.gravitational_parameter_primary + self.gravitational_parameter_secondary
-        initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(moon_initial_state,
-                                                                                 central_body_gravitational_parameter)
-        initial_keplerian_moon_state[0] = self.distance_between_primaries
-        initial_keplerian_moon_state[1] = self.eccentricity
-        self.initial_cartesian_moon_state = element_conversion.keplerian_to_cartesian(initial_keplerian_moon_state,
-                                                                                      central_body_gravitational_parameter)
+        self.central_body_gravitational_parameter = self.gravitational_parameter_primary + self.gravitational_parameter_secondary
+        self.initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(moon_initial_state,
+                                                                                      self.central_body_gravitational_parameter)
+        self.initial_keplerian_moon_state[0] = self.distance_between_primaries
+        self.initial_keplerian_moon_state[1] = self.eccentricity
+        # print("initial_keplerian_moon_state: ", initial_keplerian_moon_state)
+        self.initial_cartesian_moon_state = element_conversion.keplerian_to_cartesian(self.initial_keplerian_moon_state,
+                                                                                      self.central_body_gravitational_parameter)
+        # print("initial_cartesian_moon_state: ", self.initial_cartesian_moon_state)
+
 
 
     def convert_synodic_to_inertial_state(self, initial_state_barycenter_fixed):
@@ -66,7 +69,13 @@ class LowFidelityDynamicModel(DynamicModelBase):
         rsw_to_inertial_rotation_matrix = frame_conversion.rsw_to_inertial_rotation_matrix(self.initial_cartesian_moon_state)
 
         # Compute time derivative element for the conversion of the velocity state elements and combine into final matrix
-        omega_w_norm = np.linalg.norm(np.dot(rsw_to_inertial_rotation_matrix[:, 2], self.rotation_rate))
+        omega_w_norm = self.rotation_rate
+        m = self.gravitational_parameter_secondary/constants.GRAVITATIONAL_CONSTANT
+        r_norm = np.linalg.norm(self.initial_cartesian_moon_state[:3])
+        v_norm = np.linalg.norm(self.initial_cartesian_moon_state[3:])
+        h = m*r_norm*v_norm
+        rotation_rate = h/(m*r_norm**2)
+        omega_w_norm = rotation_rate
         Omega = np.array([[0, omega_w_norm, 0],[-omega_w_norm, 0, 0],[0, 0, 0]])
 
         time_derivative_rsw_to_inertial_rotation_matrix = -np.dot(rsw_to_inertial_rotation_matrix, Omega)
@@ -136,24 +145,15 @@ class LowFidelityDynamicModel(DynamicModelBase):
             self.body_settings.get(body).constant_mass = self.bodies_mass[index]
 
         # Adjust the orbit of the moon to perfectly circular
-        moon_initial_state = spice.get_body_cartesian_state_at_epoch(
-            target_body_name = self.name_secondary,
-            observer_body_name = self.name_primary,
-            reference_frame_name = self.global_frame_orientation,
-            aberration_corrections = 'NONE',
-            ephemeris_time = self.simulation_start_epoch)
-
-        central_body_gravitational_parameter = self.gravitational_parameter_primary + self.gravitational_parameter_secondary
-        initial_keplerian_moon_state = element_conversion.cartesian_to_keplerian(moon_initial_state, central_body_gravitational_parameter)
-        initial_keplerian_moon_state[0], initial_keplerian_moon_state[1] = self.distance_between_primaries, self.eccentricity
-        self.initial_cartesian_moon_state = element_conversion.keplerian_to_cartesian(initial_keplerian_moon_state, central_body_gravitational_parameter)
+        self.set_initial_cartesian_moon_state()
 
         # Add ephemeris settings to body settings of the Moon
         self.body_settings.get(self.name_secondary).ephemeris_settings = environment_setup.ephemeris.keplerian(
-            initial_keplerian_moon_state,
+            self.initial_keplerian_moon_state,
             self.simulation_start_epoch,
-            central_body_gravitational_parameter,
-            self.global_frame_origin, self.global_frame_orientation)
+            self.central_body_gravitational_parameter,
+            self.global_frame_origin,
+            self.global_frame_orientation)
 
         # define parameters describing the synchronous rotation model for Moon fixed frame w.r.t. central body Earth
         self.body_settings.get(self.name_secondary).rotation_model_settings = environment_setup.rotation_model.synchronous(
@@ -196,8 +196,6 @@ class LowFidelityDynamicModel(DynamicModelBase):
             self.custom_initial_state[6] = self.custom_initial_state[6] + (1-self.mu)
 
 
-
-
     def set_integration_settings(self):
 
         self.set_initial_state()
@@ -225,7 +223,9 @@ class LowFidelityDynamicModel(DynamicModelBase):
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.total_acceleration(self.name_ELO),
-            propagation_setup.dependent_variable.total_acceleration(self.name_LPO)]
+            propagation_setup.dependent_variable.total_acceleration(self.name_LPO),
+            propagation_setup.dependent_variable.keplerian_state(self.name_secondary, self.name_primary),
+            propagation_setup.dependent_variable.keplerian_state(self.name_ELO, self.name_secondary)]
 
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
@@ -283,41 +283,23 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
 
 
+# custom_initial_state = np.array([0.985141349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0, \
+#                                          1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
+# test2 = LowFidelityDynamicModel(60390, 10, custom_initial_state=custom_initial_state)
+# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
 
-# from dynamic_models import Interpolator, FrameConverter
-
-# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0, \
-#                                     1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
-
-# # Generate LowFidelityDynamicModel object only
-# dynamic_model = LowFidelityDynamicModel(60390, 28, custom_initial_state=custom_initial_state)
-
-# # Define step size that both tudatpy and classic model work run (variable step size epochs are adjusted in Interpolator)
-# step_size = 0.001
-
-# # Extract simulation histories tudatpy solution
-# epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-#     Interpolator.Interpolator(dynamic_model, step_size=step_size).get_results()
-
-# # Extract simulation histories classical solution
-# epochs_classic, state_history_classic, state_history_primaries = \
-#     FrameConverter.SynodicToInertialHistoryConverter(dynamic_model, step_size=step_size).get_results()
-
-# print(dependent_variables_history[:,:3])
-# print(state_history_primaries[:,6:9])
-
-# # states2 = np.stack(list(test2.get_propagated_orbit()[0].state_history.values()))
-
-# ax = plt.figure().add_subplot(projection='3d')
-# plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
-# plt.plot(state_history[:,6], state_history[:,7], state_history[:,8])
+# print(np.shape(dep_var))
+# ax = plt.figure()
+# plt.plot(dep_var[:,18:24])
 # plt.legend()
-# plt.axis('equal')
-# plt.show()
-
-# # states2 = test2.get_propagated_orbit()[1]
-
-# # ax = plt.figure()
-# # plt.plot(states2[:,:6])
-# # plt.legend()
+# # plt.yscale("log")
 # # plt.show()
+
+# ax = plt.figure()
+# plt.plot(dep_var[:,24:30])
+# plt.legend()
+# # plt.yscale("log")
+# # plt.show()
+
+# print(dep_var[0,18:24])
+# print(dep_var[0,24:30])
