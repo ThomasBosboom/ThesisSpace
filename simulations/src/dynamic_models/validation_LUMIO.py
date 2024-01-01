@@ -112,12 +112,12 @@ def get_state_history_richardson(dc_corrected=False):
     orbit_files = reference_folder_path / "Halo_orbit_files"
 
     if dc_corrected == False:
-        file_path = orbit_files / "Richardson.txt"
+        file_path = orbit_files / "Richardson1.txt"
     if dc_corrected == True:
         file_path = orbit_files / "Richardson_dc.txt"
 
     # Open the file for reading
-    states_richardson = np.empty((1, 6))
+    states_richardson = np.empty((1, 7))
     with open(file_path, 'r') as file:
         for line in file:
             states_richardson = np.vstack((states_richardson, np.array([float(state) for state in line.strip().split('\t')])))
@@ -154,12 +154,9 @@ def get_synodic_state_history_erdem():
     return np.delete(states_erdem[:,:],0,0)
 
 
-def get_synodic_state_history(dynamic_model, propagation_time, step_size, custom_initial_state):
-
-    G = constants.GRAVITATIONAL_CONSTANT
-    m1 = dynamic_model.gravitational_parameter_primary/G
-    m2 = dynamic_model.gravitational_parameter_secondary/G
-    a = dynamic_model.distance_between_primaries
+custom_initial_state = np.array([0.98512,     0.0014765,	    0.0049255,	 -0.8733,	      -1.6119,	     0,	\
+                                 1.147342501,-0.0002324517381, -0.151368318, -0.000202046355, -0.2199137166, 0.0002817105509])
+def get_synodic_state_history(G, m1, m2, a, propagation_time, step_size, custom_initial_state=custom_initial_state):
 
     dynamic_model_classic = TraditionalLowFidelity.TraditionalLowFidelity(G, m1, m2, a)
     epoch_history, state_rotating_bary_lpf = dynamic_model_classic.get_state_history(custom_initial_state[:6], 0, propagation_time, step_size)
@@ -171,9 +168,8 @@ def get_synodic_state_history(dynamic_model, propagation_time, step_size, custom
 
 # import matplotlib.pyplot as plt
 # ax = plt.figure().add_subplot(projection='3d')
-# plt.plot(get_state_history_erdem()[:100,1], get_state_history_erdem()[:100,2], get_state_history_erdem()[:100,3])
-# plt.plot(get_state_history_erdem()[:,7], get_state_history_erdem()[:,8], get_state_history_erdem()[:,9])
-# plt.plot(get_state_history_richardson()[:100,0], get_state_history_richardson()[:100,1], get_state_history_richardson()[:100,2])
-# # plt.plot(get_state_history_richardson(dc_corrected=True)[:,0], get_state_history_richardson(dc_corrected=True)[:,1], get_state_history_richardson(dc_corrected=True)[:,2])
+# plt.plot(get_synodic_state_history_erdem()[:,1], get_synodic_state_history_erdem()[:,2], get_synodic_state_history_erdem()[:,3])
+# plt.plot(get_synodic_state_history_erdem()[:,7], get_synodic_state_history_erdem()[:,8], get_synodic_state_history_erdem()[:,9])
+# plt.plot(get_state_history_richardson()[:,1], get_state_history_richardson()[:,2], get_state_history_richardson()[:,3])
 # plt.legend()
 # plt.show()
