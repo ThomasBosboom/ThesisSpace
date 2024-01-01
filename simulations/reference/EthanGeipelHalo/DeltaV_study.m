@@ -31,7 +31,7 @@ numOrbs = 14; % Number of Periods to Integrate over
 % dx0 = 0; dy0 = -2.91755907*10^2/1000; dz0 = 0;
 
 fprintf('Starting 3rd Order Approximation...\n')
-Ax = 1500; Az = 28148.28;
+Ax = 18148.28; Az = 44148.28;
 InitialConditions = HALO_3OA(mu, Ax, Az, ne);
 x0 = InitialConditions(1);
 z0 = InitialConditions(3);
@@ -44,7 +44,7 @@ dy0 = -InitialConditions(5);
 % z0 = InitialConditions(3);
 % dy0 = -InitialConditions(5);
 
-% Y_3OA = [L2*au+x0; 0; z0; 0; L2*au-(L2*au*ne+dy0)/ne; 0]/au
+Y_3OA = [L2*au+x0; 0; z0; 0; L2*au-(L2*au*ne+dy0)/ne; 0]/au
 Y_3OA = [1.147342612325716;0;-0.151423081776634;0;-0.219954169502041;0];
 i = 1; Y_final = zeros(1,42); t_0 = 0; h = 0.0001;
 [T2, ~, ~] = findT2(Y_3OA, 0, 10, h, Io, mu, 1);
@@ -392,5 +392,5 @@ time = file_data(:,1);
 lpf_state = file_data(:,2:7);
 lpf_state_interp = interp1(time, lpf_state, t_list', 'spline', 'extrap');
 
-dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/Simulations/Reference/Halo_orbit_files/Erdem.txt', [t_list', lpf_state_interp, Y_delta(i, 1:6)], 'delimiter', '\t')
+dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/Simulations/Reference/Halo_orbit_files/Erdem.txt', [t_list', lpf_state_interp, Y_delta(i, 1:6)], 'delimiter', '\t', 'precision', 10)
 

@@ -28,13 +28,13 @@ fprintf('\ndemo_halo_dc - halo orbit design using differential correction\n\n');
 
 while(1)
 
-    fprintf('\nplease input the z-amplitude in kilometers\n');
+    
 
-%     ampl_z = input('? ');
+    ampl_z = 28418.28;
 
-%     ampl_z = 28418.28;
+%     ampl_z = 44143;
 
-    ampl_z = 44143;
+    fprintf('\nThe z-amplitude in kilometers\n:', ampl_z);
 
     if (ampl_z > 0.0)
 
@@ -56,15 +56,15 @@ hclass = 1;
 % earth-moon system
 % -----------------
 
-G  = 6.67408e-11;
+G  = 6.67259e-11;
 
 % gravitational constant of earth (kilometers^3/seconds^2)
 
-mu1 = G*5.97219e+24/1e9;
+mu1 = G*5.973698990946545e+24/1e9;
 
 % gravitational constant of the moon (kilometers^3/seconds^2)
 
-mu2 = G*7.34767e+22/1e9;
+mu2 = G*7.347671776396872e+22/1e9;
 
 % normalized gravitational constant
 
@@ -72,7 +72,7 @@ mu = mu2 / (mu1 + mu2);
 
 % distance between primary and secondary bodies (kilometers)
 
-dist = 3.8474796e5;
+dist = 3.84747963e5;
 
 % length unit (kilometers)
 
@@ -113,14 +113,20 @@ start = 0;
 stop = 28;
 step = 0.005;
 tu_days = tu/86400;
-t_array =  start:step:stop;
 for t = start:step:stop
 
+     
+    time_crtbp_days = k*step;
+    time_crtbp = t/tu_days;
+    [r_crtbp, v_crtbp, period] = halo_sv(ampl_z, time_crtbp);
+    
     k = k + 1;
-    [r_crtbp, v_crtbp, period] = halo_sv(ampl_z, t/tu_days);
-    x_crtbp(k,:) = [r_crtbp', v_crtbp'];
+
+    x_crtbp(k,:) = [time_crtbp_days, r_crtbp', v_crtbp'];
 
 end
+
+dlmwrite('C:\Users\thoma\OneDrive\Documenten\GitHub\ThesisSpace\simulations\reference\Halo_orbit_files\Richardson1.txt', x_crtbp, 'delimiter', '\t', 'precision', 10)
 
 
 
@@ -394,7 +400,7 @@ svprint(y(1:3), y(4:6));
 % view(-15.0, 50.0);
 
 % create tiff graphics disk file
-
-print('halo_dc_3d.tif', '-dtiff');
-
-fprintf('\n\n');
+% 
+% print('halo_dc_3d.tif', '-dtiff');
+% 
+% fprintf('\n\n');
