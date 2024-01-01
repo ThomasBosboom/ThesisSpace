@@ -112,7 +112,7 @@ def get_state_history_richardson(dc_corrected=False):
     orbit_files = reference_folder_path / "Halo_orbit_files"
 
     if dc_corrected == False:
-        file_path = orbit_files / "Richardson1.txt"
+        file_path = orbit_files / "Richardson.txt"
     if dc_corrected == True:
         file_path = orbit_files / "Richardson_dc.txt"
 
