@@ -35,7 +35,7 @@ from src.estimation_models import EstimationModel
 class TestFrameConversions:
 
     simulation_start_epoch_MJD = [60390]
-    propagation_time = [14]
+    propagation_time = [28]
     tolerance = [1e-3]
 
     all_combinations = itertools.product(simulation_start_epoch_MJD, propagation_time, tolerance)
@@ -43,8 +43,8 @@ class TestFrameConversions:
     def test_validation_crtbp(self, simulation_start_epoch_MJD, propagation_time, tolerance, extras, step_size = 0.001):
 
         # Define initial state for both tudatpy and classic simulations
-        custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0, \
-                                        1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
+        custom_initial_state = np.array([0.98512,0.0014765,	0.0049255,	-0.8733,	-1.6119,	0,	\
+            1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 
         # Generate LowFidelityDynamicModel object only
         dynamic_model = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
@@ -54,11 +54,119 @@ class TestFrameConversions:
             Interpolator.Interpolator(dynamic_model, step_size=step_size).get_results()
 
         # Extract synodic simulation histories classical solution
-        epochs_synodic, synodic_state_history = validation_LUMIO.get_synodic_state_history(dynamic_model, propagation_time, step_size, custom_initial_state)
+        epochs_synodic, synodic_state_history = validation_LUMIO.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
+                                                                                           dynamic_model.bodies.get("Earth").mass,
+                                                                                           dynamic_model.bodies.get("Moon").mass,
+                                                                                           dynamic_model.distance_between_primaries,
+                                                                                           propagation_time,
+                                                                                           step_size,
+                                                                                           custom_initial_state=custom_initial_state)
 
         # Extract converted inertial states (works only with low-fidelity dynamic model)
         epochs_classic, state_history_classic, dependent_variables_history_classic = \
             FrameConverter.SynodicToInertialHistoryConverter(dynamic_model, step_size=step_size).get_results(synodic_state_history)
+
+        # Convert back to synodic
+        epochs_synodic, state_history_synodic = \
+            FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
+
+        print("actual initial state: ", custom_initial_state)
+        print("converted back: ", state_history_synodic)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        plt.title("test figure")
+        plt.plot(state_history_synodic[:,0], state_history_synodic[:,1], state_history_synodic[:,2])
+        plt.plot(state_history_synodic[:,6], state_history_synodic[:,7], state_history_synodic[:,8])
+        # plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2])
+        # plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8])
+        # plt.show()
+
+
+
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        plt.title("Comparison tudat versus classical CRTBP")
+        plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
+        plt.plot(state_history[:,6], state_history[:,7], state_history[:,8])
+        plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2])
+        plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8])
+        # plt.show()
+
+        synodic_state_history_erdem = validation_LUMIO.get_synodic_state_history_erdem()[:,1:]
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        plt.title("Comparison Erdem versus own-built CRTBP")
+        plt.plot(synodic_state_history[:,0], synodic_state_history[:,1], synodic_state_history[:,2])
+        plt.plot(synodic_state_history[:,6], synodic_state_history[:,7], synodic_state_history[:,8])
+        plt.plot(synodic_state_history_erdem[:,0], synodic_state_history_erdem[:,1], synodic_state_history_erdem[:,2])
+        plt.plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,7], synodic_state_history_erdem[:,8])
+        # plt.show()
+
+
+        # Create a figure and three subplots side by side
+        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
+
+        # axs[0].plot(state_history_synodic[:,0], state_history_synodic[:,1], label="LPF", color="red", ls="--")
+        # axs[0].plot(synodic_state_history[:,0], synodic_state_history[:,1], label="LPF classic", color="black")
+        axs[0].plot(state_history_synodic[:,6], state_history_synodic[:,7], label="LUMIO tudat", color="blue", ls="--")
+        axs[0].plot(synodic_state_history[:,6], synodic_state_history[:,7], label="LUMIO classic", color="grey")
+        axs[0].plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,7], label="LUMIO halo", color="black")
+        axs[0].grid(alpha=0.5, linestyle='--')
+        axs[0].set_title('Plot 1')
+
+        axs[1].plot(state_history_synodic[:,7], state_history_synodic[:,8], label="LUMIO tudat", color="blue", ls="--")
+        axs[1].plot(synodic_state_history[:,7], synodic_state_history[:,8], label="LUMIO classic", color="grey")
+        axs[1].plot(synodic_state_history_erdem[:,7], synodic_state_history_erdem[:,8], label="LUMIO halo", color="black")
+        axs[1].grid(alpha=0.5, linestyle='--')
+        axs[1].set_title('Plot 2')
+
+        axs[2].plot(state_history_synodic[:,8], state_history_synodic[:,6], label="LUMIO tudat", color="blue", ls="--")
+        axs[2].plot(synodic_state_history[:,8], synodic_state_history[:,6], label="LUMIO classic", color="grey")
+        axs[2].plot(synodic_state_history_erdem[:,8], synodic_state_history_erdem[:,6], label="LUMIO halo", color="black")
+        axs[2].grid(alpha=0.5, linestyle='--')
+        axs[2].set_title('Plot 3')
+
+        plt.suptitle("Comparison tudat and classical CRTBP synodic non-dim rotating frame")
+        plt.tight_layout()
+        plt.legend()
+        plt.show()
+
+
+
+
+
+        # Calculate the percentage difference for each entry
+        percentage_difference = np.abs((dependent_variables_history[0,0:6] - dependent_variables_history_classic[0,6:12])/dependent_variables_history_classic[0,6:12]) * 100
+        print(percentage_difference)
+        percentage_difference = np.abs((state_history[0,0:6] - state_history_classic[0,0:6])/state_history_classic[0,0:6]) * 100
+        print(percentage_difference)
+        percentage_difference = np.abs((state_history[0,6:12] - state_history_classic[0,6:12])/state_history_classic[0,6:12]) * 100
+        print(percentage_difference)
+        percentage_difference = np.abs((state_history[0,0:6]-dependent_variables_history[0,6:12] - (state_history_classic[0,0:6]-dependent_variables_history[0,6:12]))/(state_history_classic[0,0:6]-dependent_variables_history[0,6:12])) * 100
+        print(percentage_difference)
+
+
+
+        Keplerian_state_Moon_Earth_tudat = element_conversion.cartesian_to_keplerian(dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
+        Keplerian_state_Moon_Earth_classic = element_conversion.cartesian_to_keplerian(dependent_variables_history_classic[0,6:12], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
+
+        Keplerian_state_LPF_Moon_tudat = element_conversion.cartesian_to_keplerian(state_history[0,0:6]-dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_secondary)
+        Keplerian_state_LPF_Moon_classic = element_conversion.cartesian_to_keplerian(state_history_classic[0,0:6]-dependent_variables_history_classic[0,6:12], dynamic_model.gravitational_parameter_secondary)
+
+        percentage_difference = np.abs((Keplerian_state_Moon_Earth_tudat-Keplerian_state_Moon_Earth_classic)/Keplerian_state_Moon_Earth_classic) * 100
+        print(percentage_difference)
+        percentage_difference = np.abs((Keplerian_state_LPF_Moon_tudat-Keplerian_state_LPF_Moon_classic)/Keplerian_state_LPF_Moon_classic) * 100
+        print(percentage_difference)
+
+        Keplerian_state_LPF_Moon_frontiers = np.array([5737.4e3, 6.1e-1, 57.83*np.pi/180, 90*np.pi/180, 61.55*np.pi/180, 0])
+        print(Keplerian_state_LPF_Moon_frontiers)
+
+        percentage_difference = np.abs((Keplerian_state_LPF_Moon_frontiers-Keplerian_state_LPF_Moon_tudat)/Keplerian_state_LPF_Moon_tudat) * 100
+        print(percentage_difference)
+        percentage_difference = np.abs((Keplerian_state_LPF_Moon_frontiers-Keplerian_state_LPF_Moon_classic)/Keplerian_state_LPF_Moon_classic) * 100
+        print(percentage_difference)
+
 
         print("==== Cartesian states tudat ====")
         print("Moon w.r.t. Earth: ", dependent_variables_history[0,0:6])
@@ -170,14 +278,16 @@ class TestFrameConversions:
         plt.suptitle("Keplerian states")
         fig2.legend(loc='lower center', bbox_to_anchor=(0.0, -1))
         plt.legend()
-        plt.show()
+        # plt.show()
 
 
         # Create a figure and three subplots side by side
         fig3, axs = plt.subplots(1, 3, figsize=(15, 5))
 
-        axs[0].plot(state_history[:,0], state_history[:,1])
-        axs[0].plot(state_history_classic[:,0], state_history_classic[:,1])
+        axs[0].plot(state_history[:,0], state_history[:,1], label="LPF", color="red", ls="--")
+        axs[0].plot(state_history_classic[:,0], state_history_classic[:,1], label="LPF classic", color="black")
+        axs[0].plot(state_history[:,6], state_history[:,7], label="LUMIO", color="blue", ls="--")
+        axs[0].plot(state_history_classic[:,6], state_history_classic[:,7], label="LUMIO classic", color="grey")
         axs[0].grid(alpha=0.5, linestyle='--')
         axs[0].set_title('Plot 1')
 
@@ -192,7 +302,8 @@ class TestFrameConversions:
         axs[2].set_title('Plot 3')
 
         plt.tight_layout()
-        # plt.show()
+        plt.legend()
+        plt.show()
 
         utils.save_figures_to_folder("test_initial_state_conversion", extras, [fig1, fig2, fig3], [simulation_start_epoch_MJD, propagation_time, tolerance])
 
@@ -319,3 +430,29 @@ class TestOutputsDynamicalModels:
         plt.suptitle("Observability effectiveness comparison of high and low fidelity models. Time step: "+str(propagation_time)+" days")
         plt.tight_layout()
         plt.show()
+
+
+
+import numpy as np
+import pandas as pd
+
+# Example data (replace these with your actual arrays)
+array1 = np.array([1, 2, 3, 4])
+array2 = np.array([1.2, 1.8, 3.1, 4.5])
+
+# Calculate the percentage difference for each entry
+percentage_difference = np.abs((array2 - array1) / array1) * 100
+
+# Create a DataFrame
+data = {'Array 1': array1, 'Array 2': array2, 'Percentage Difference': percentage_difference}
+df = pd.DataFrame(data)
+
+# Transpose the DataFrame
+df_transposed = df.transpose()
+
+# Export the transposed DataFrame to a LaTeX table
+latex_table_transposed = df_transposed.to_latex()
+
+# Display the LaTeX table
+print(latex_table_transposed)
+
