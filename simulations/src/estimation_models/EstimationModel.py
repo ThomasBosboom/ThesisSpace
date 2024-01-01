@@ -37,9 +37,45 @@ class EstimationModel:
         self.noise_doppler = 0.00097
         self.observation_step_size_range = 600
         self.observation_step_size_doppler = 600
+        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_range)
+        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_doppler)
+
+
+    def update_environment_settings(self):
+
+        self.dynamic_model.set_environment_settings()
+
+        # Create default body settings
+        self.dynamic_model.body_settings = environment_setup.get_default_body_settings(
+                                                self.dynamic_model.bodies_to_create,
+                                                self.dynamic_model.global_frame_origin,
+                                                self.dynamic_model.global_frame_orientation)
+
+        self.dynamic_model.body_settings.add_empty_settings(self.dynamic_model.name_ELO)
+        self.dynamic_model.body_settings.add_empty_settings(self.dynamic_model.name_LPO)
+
+        # Create spacecraft bodies
+        for index, body in enumerate(self.dynamic_model.bodies_to_propagate):
+            self.dynamic_model.bodies.create_empty_body(body)
+            self.dynamic_model.bodies.get_body(body).mass = self.dynamic_model.bodies_mass[index]
+            self.dynamic_model.body_settings.get(body).ephemeris_settings = environment_setup.ephemeris.tabulated(
+                validation_LUMIO.get_reference_state_history(self.dynamic_model.simulation_start_epoch_MJD,
+                                                             self.dynamic_model.propagation_time,
+                                                             satellite=body,
+                                                             get_dict=True,
+                                                             get_full_history=True),
+                self.dynamic_model.global_frame_origin,
+                self.dynamic_model.global_frame_orientation)
+
+        # Update environment with reference states as ephermeris settings
+        self.dynamic_model.bodies = environment_setup.create_system_of_bodies(self.dynamic_model.body_settings)
+
+
 
 
     def set_observation_settings(self):
+
+        self.update_environment_settings()
 
         # Define the uplink link ends for one-way observable
         link_ends = {observation.transmitter: observation.body_origin_link_end_id(self.dynamic_model.name_ELO),
@@ -62,9 +98,6 @@ class EstimationModel:
                                                                     bias_settings = doppler_bias_settings)]
 
         # Define observation simulation times for each link
-        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_range)
-        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_doppler)
-
         self.observation_simulation_settings = [observation.tabulated_simulation_settings(observation.one_way_range_type,
                                                                                           self.link_definition,
                                                                                           self.observation_times_range),
@@ -136,19 +169,8 @@ class EstimationModel:
         self.single_observation_set_lists = [self.simulated_observations.get_single_link_and_type_observations(observation.one_way_range_type, self.link_definition),
                                              self.simulated_observations.get_single_link_and_type_observations(observation.one_way_instantaneous_doppler_type, self.link_definition)]
 
-        self.observations = dict()
-        for single_observation_set_list in self.single_observation_set_lists:
-            for single_observation_set in single_observation_set_list:
-                self.observations[single_observation_set.observable_type] = dict(zip(single_observation_set.observation_times, single_observation_set.concatenated_observations))
 
-        ax = plt.figure()
-        plt.plot(self.observations[observation.one_way_instantaneous_doppler_type].keys(), self.observations[observation.one_way_instantaneous_doppler_type].values(), color="red", marker="o")
-        plt.show()
-
-        return self.observations
-
-
-    def get_estimation_results(self, apriori_covariance=np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2, maximum_iterations=4):
+    def get_estimation_results(self, apriori_covariance=np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2, maximum_iterations=2):
 
         self.set_simulated_observations()
 
@@ -169,7 +191,7 @@ class EstimationModel:
         # Run the estimation
         with util.redirect_std(redirect_out=True):
             estimation_output = self.estimator.perform_estimation(estimation_input)
-        initial_states_updated = self.parameters_to_estimate.parameter_vector
+        # initial_states_updated = self.parameters_to_estimate.parameter_vector
 
         # Propagate formal errors and covariance over the course of estimation window
         output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 60)
@@ -209,11 +231,21 @@ class EstimationModel:
         covariance_history[observation.one_way_instantaneous_doppler_type] = dict(zip(self.observation_times_doppler, covariance))
         information_matrix_history[observation.one_way_instantaneous_doppler_type] = dict(zip(self.observation_times_doppler, information_matrix))
 
+        self.observations = dict()
+        for single_observation_set_list in self.single_observation_set_lists:
+            for single_observation_set in single_observation_set_list:
+                self.observations[single_observation_set.observable_type] = dict(zip(single_observation_set.observation_times, single_observation_set.concatenated_observations))
+
+        # ax = plt.figure()
+        # plt.plot(self.observations[observation.one_way_instantaneous_doppler_type].keys(), self.observations[observation.one_way_instantaneous_doppler_type].values(), color="red", marker="o")
+        # plt.show()
+
         return estimation_output, \
                propagated_formal_errors, \
                propagated_covariance, \
                covariance_history, \
-               information_matrix_history
+               information_matrix_history, \
+               self.observations
 
 
     def get_propagated_orbit(self):
@@ -221,3 +253,30 @@ class EstimationModel:
         self.set_simulated_observations()
 
         return self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
+
+
+# model = high_fidelity_point_mass_srp_01.HighFidelityDynamicModel(60390, 28)
+# # model = LowFidelityDynamicModel.LowFidelityDynamicModel(60390, 14)
+# estimation_model = EstimationModel(model)
+
+# estimation_output = estimation_model.get_estimation_results()[0]
+
+# parameter_history = estimation_output.parameter_history
+# residual_history = estimation_output.residual_history
+# covariance = estimation_output.covariance
+# formal_errors = estimation_output.formal_errors
+# print(parameter_history)
+# print(residual_history, np.shape(residual_history))
+# print(covariance)
+# print(formal_errors)
+
+# propagated_formal_errors = estimation_model.get_estimation_results()[1]
+# observations = estimation_model.get_estimation_results()[-1]
+# observations_range = observations[observation.one_way_range_type]
+# observations_doppler = observations[observation.one_way_instantaneous_doppler_type]
+
+# ax = plt.figure(figsize=(6.5,6))
+# plt.plot(propagated_formal_errors[0], np.vstack(propagated_formal_errors[1])[:,:6])
+# plt.plot(observations_range.keys(), observations_range.values())
+# plt.plot(observations_doppler.keys(), observations_doppler.values())
+# plt.show()
