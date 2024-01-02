@@ -73,7 +73,7 @@ view(10,15);
 % Save txt file
 time = [0:2.6667e-06*step:simdur/4.343]';
 state_history = [time, Y]
-dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/Simulations/Reference/Halo_orbit_files/Erdem.txt', state_history, 'delimiter', '\t')
+dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/Halo_orbit_files/Erdem1.txt', state_history, 'delimiter', '\t')
 
 
 

@@ -35,7 +35,7 @@ from src.estimation_models import EstimationModel
 class TestFrameConversions:
 
     simulation_start_epoch_MJD = [60390]
-    propagation_time = [28]
+    propagation_time = [50]
     tolerance = [1e-3]
 
     all_combinations = itertools.product(simulation_start_epoch_MJD, propagation_time, tolerance)
@@ -107,33 +107,38 @@ class TestFrameConversions:
         # Create a figure and three subplots side by side
         fig, axs = plt.subplots(1, 3, figsize=(15, 5))
 
-        # axs[0].plot(state_history_synodic[:,0], state_history_synodic[:,1], label="LPF", color="red", ls="--")
-        # axs[0].plot(synodic_state_history[:,0], synodic_state_history[:,1], label="LPF classic", color="black")
-        axs[0].plot(state_history_synodic[:,6], state_history_synodic[:,7], label="LUMIO tudat", color="blue", ls="--")
-        axs[0].plot(synodic_state_history[:,6], synodic_state_history[:,7], label="LUMIO classic", color="grey")
-        axs[0].plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,7], label="LUMIO halo", color="black")
-        axs[0].grid(alpha=0.5, linestyle='--')
-        axs[0].set_title('Plot 1')
+        axs[0].plot(state_history_synodic[:,0], state_history_synodic[:,1], label="LPF tudat", color="red")
+        axs[0].plot(synodic_state_history[:,0], synodic_state_history[:,1], label="LPF classic", color="lightsalmon")
+        axs[0].plot(synodic_state_history_erdem[:,0], synodic_state_history_erdem[:,1], label="LPF halo", color="darkred")
+        axs[0].plot(state_history_synodic[:,6], state_history_synodic[:,7], label="LUMIO tudat", color="blue")
+        axs[0].plot(synodic_state_history[:,6], synodic_state_history[:,7], label="LUMIO classic", color="lightskyblue")
+        axs[0].plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,7], label="LUMIO halo", color="darkblue")
+        axs[0].set_xlabel('X')
+        axs[0].set_ylabel('Y')
 
-        axs[1].plot(state_history_synodic[:,7], state_history_synodic[:,8], label="LUMIO tudat", color="blue", ls="--")
-        axs[1].plot(synodic_state_history[:,7], synodic_state_history[:,8], label="LUMIO classic", color="grey")
-        axs[1].plot(synodic_state_history_erdem[:,7], synodic_state_history_erdem[:,8], label="LUMIO halo", color="black")
-        axs[1].grid(alpha=0.5, linestyle='--')
-        axs[1].set_title('Plot 2')
+        axs[1].plot(state_history_synodic[:,1], state_history_synodic[:,2], label="LPF tudat", color="red")
+        axs[1].plot(synodic_state_history[:,1], synodic_state_history[:,2], label="LPF classic", color="lightsalmon")
+        axs[1].plot(synodic_state_history_erdem[:,1], synodic_state_history_erdem[:,2], label="LPF halo", color="darkred")
+        axs[1].plot(state_history_synodic[:,7], state_history_synodic[:,8], label="LUMIO tudat", color="blue")
+        axs[1].plot(synodic_state_history[:,7], synodic_state_history[:,8], label="LUMIO classic", color="lightskyblue")
+        axs[1].plot(synodic_state_history_erdem[:,7], synodic_state_history_erdem[:,8], label="LUMIO halo", color="darkblue")
+        axs[1].set_xlabel('Y')
+        axs[1].set_ylabel('Z')
 
-        axs[2].plot(state_history_synodic[:,8], state_history_synodic[:,6], label="LUMIO tudat", color="blue", ls="--")
-        axs[2].plot(synodic_state_history[:,8], synodic_state_history[:,6], label="LUMIO classic", color="grey")
-        axs[2].plot(synodic_state_history_erdem[:,8], synodic_state_history_erdem[:,6], label="LUMIO halo", color="black")
-        axs[2].grid(alpha=0.5, linestyle='--')
-        axs[2].set_title('Plot 3')
+        axs[2].plot(state_history_synodic[:,0], state_history_synodic[:,2], label="LPF tudat", color="red")
+        axs[2].plot(synodic_state_history[:,0], synodic_state_history[:,2], label="LPF classic", color="lightsalmon")
+        axs[2].plot(synodic_state_history_erdem[:,0], synodic_state_history_erdem[:,2], label="LPF halo", color="darkred")
+        axs[2].plot(state_history_synodic[:,6], state_history_synodic[:,8], label="LUMIO tudat", color="blue")
+        axs[2].plot(synodic_state_history[:,6], synodic_state_history[:,8], label="LUMIO classic", color="lightskyblue")
+        axs[2].plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,8], label="LUMIO halo", color="darkblue")
+        axs[2].set_xlabel('X')
+        axs[2].set_ylabel('Z')
 
+        [ax.grid(alpha=0.5, linestyle='--') for ax in axs]
         plt.suptitle("Comparison tudat and classical CRTBP synodic non-dim rotating frame")
         plt.tight_layout()
         plt.legend()
         plt.show()
-
-
-
 
 
         # Calculate the percentage difference for each entry
