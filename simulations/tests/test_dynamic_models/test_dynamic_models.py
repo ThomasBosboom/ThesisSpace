@@ -542,7 +542,7 @@ class TestOutputsDynamicalModels:
 
             # Extract simulation histories numerical solution
             epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagator_results(dynamic_model)
+                Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
 
             reference_state_history = np.concatenate((validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
                                                       validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
@@ -568,22 +568,23 @@ class TestOutputsDynamicalModels:
 
             # Define the titles and data for the subplots
             figure_titles = ["Position difference w.r.t reference state", "Velocity difference w.r.t reference state"]
-            subplot_labels = ['', 'Plot 2', 'Plot 3']
+            subplot_ylabels = ['X [m]', 'Y [m]', 'Z [m]', 'VX [m/s]', 'VY [m/s]', 'VZ [m/s]']
             data_to_plot = [state_history-reference_state_history]
             print(data_to_plot[0][:,0])
 
             # Plot the state histories for each entry across all models
             for state_index in range(6):
-                axs1[state_index].plot(data_to_plot[0][:,state_index])
-                axs1[state_index].plot(data_to_plot[0][:,6+state_index])
-                axs1[state_index].grid(alpha=0.5, linestyle='--')
+                axs1[state_index].plot(epoch, data_to_plot[0][:,state_index])
+                axs1[state_index].plot(epoch, data_to_plot[0][:,6+state_index])
 
-        # for state_index in range(6):
-        #     axs1[state_index].set_title(subplot_labels[state_index])
 
-        #     assert dynamic_model.name_ELO == "LPF"
+        for state_index in range(6):
+            axs1[state_index].set_ylabel(subplot_ylabels[state_index])
+            axs1[state_index].grid(alpha=0.5, linestyle='--')
 
-        plt.legend()
+        fig.suptitle("State difference w.r.t. reference states")
+
+        # plt.legend()
         plt.show()
 
         # Create a folder named after the function
