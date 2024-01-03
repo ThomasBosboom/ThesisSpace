@@ -9,7 +9,7 @@ import TraditionalLowFidelity
 
 class SynodicToInertialHistoryConverter:
 
-    def __init__(self, dynamic_model_object, step_size=0.005):
+    def __init__(self, dynamic_model_object, step_size=0.001):
 
         self.dynamic_model_object = dynamic_model_object
         self.propagation_time = dynamic_model_object.propagation_time
@@ -92,7 +92,7 @@ class SynodicToInertialHistoryConverter:
     def get_results(self, synodic_state_history):
 
         epochs, _, dependent_variables_history, _ = \
-            Interpolator.Interpolator(self.dynamic_model_object, step_size=self.step_size).get_results()
+            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model_object)
 
         # Generate history of classical CRTBP
         state_rotating_bary_lpf, state_rotating_bary_lumio = synodic_state_history[:,:6], synodic_state_history[:,6:]
@@ -123,7 +123,7 @@ class SynodicToInertialHistoryConverter:
 
 class InertialToSynodicHistoryConverter:
 
-    def __init__(self, dynamic_model_object, step_size=0.005):
+    def __init__(self, dynamic_model_object, step_size=0.001):
 
         self.dynamic_model_object = dynamic_model_object
         self.propagation_time = dynamic_model_object.propagation_time
@@ -206,7 +206,7 @@ class InertialToSynodicHistoryConverter:
     def get_results(self, inertial_state_history):
 
         epochs, _, dependent_variables_history, _ = \
-            Interpolator.Interpolator(self.dynamic_model_object, step_size=self.step_size).get_results()
+            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model_object)
 
         # Split states into spacecraft states
         state_inertial_lpf, state_inertial_lumio = inertial_state_history[:,:6], inertial_state_history[:,6:]
