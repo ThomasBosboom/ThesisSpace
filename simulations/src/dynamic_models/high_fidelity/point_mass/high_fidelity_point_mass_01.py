@@ -170,18 +170,20 @@ class HighFidelityDynamicModel(DynamicModelBase):
 # custom_initial_state = np.array([-2.81273933e+08, 2.51467647e+08, 1.46454096e+08, -1.16911938e+03,
 #  -2.16728817e+03, -7.88098467e+02, -3.10537998e+08 , 2.49423157e+08,
 #   1.74937757e+08, -9.93171842e+02, -7.66408514e+02, -5.25173280e+02])
-# test2 = HighFidelityDynamicModel(60390, 28, custom_initial_state=custom_initial_state)
-# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
-# states = np.stack(list(test2.get_propagated_orbit()[0].state_history.values()))
+# dynamic_model = HighFidelityDynamicModel(60390, 10)
+# dep_var = np.stack(list(dynamic_model.get_propagated_orbit()[0].dependent_variable_history.values()))
+# states = np.stack(list(dynamic_model.get_propagated_orbit()[0].state_history.values()))
 
-# print(np.shape(dep_var))
-# ax = plt.figure()
-# plt.plot(np.linalg.norm(states[:,:3], axis=1))
+# import Interpolator
+# epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
+#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.001).get_propagator_results(dynamic_model)
+
+# ax = plt.figure().add_subplot(projection='3d')
+# plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
+# plt.plot(dependent_variables_history[:,0], dependent_variables_history[:,1], dependent_variables_history[:,2])
 # plt.legend()
-# # plt.yscale("log")
 # plt.show()
-
-# ax = plt.figure()
+# # ax = plt.figure()
 # plt.plot(dep_var[:,18:24])
 # plt.legend()
 # plt.show()
