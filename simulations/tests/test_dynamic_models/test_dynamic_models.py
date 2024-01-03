@@ -34,6 +34,21 @@ from src.estimation_models import EstimationModel
 
 class TestFrameConversions:
 
+    # simulation_start_epoch_MJD = [60390]
+    # propagation_time = [1]
+    # tolerance = [1e-3]
+
+    # all_combinations = itertools.product(simulation_start_epoch_MJD, propagation_time, tolerance)
+    # @pytest.mark.parametrize("simulation_start_epoch_MJD, propagation_time, tolerance", all_combinations)
+    # def test_initial_states_dynamic_models(self, simulation_start_epoch_MJD, propagation_time, tolerance, extras, step_size = 0.001):
+
+    #     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
+    #     for dynamic_model in utils.convert_model_objects_to_list(dynamic_model_objects):
+
+    #         state_history_dict = dynamic_model.get_propagated_orbit()[0].state_history
+    #         print(utils.convert_dictionary_to_array(state_history_dict)[1][0,:])
+
+
     simulation_start_epoch_MJD = [60390]
     propagation_time = [50]
     tolerance = [1e-3]
@@ -43,15 +58,19 @@ class TestFrameConversions:
     def test_validation_crtbp(self, simulation_start_epoch_MJD, propagation_time, tolerance, extras, step_size = 0.001):
 
         # Define initial state for both tudatpy and classic simulations
-        custom_initial_state = np.array([0.98512,0.0014765,	0.0049255,	-0.8733,	-1.6119,	0,	\
-            1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+        custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+                                        1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 
         # Generate LowFidelityDynamicModel object only
         dynamic_model = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
 
         # Extract simulation histories tudatpy solution
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-            Interpolator.Interpolator(dynamic_model, step_size=step_size).get_results()
+            Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model)
+
+        # Convert back to synodic
+        epochs_synodic, state_history_synodic = \
+            FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
 
         # Extract synodic simulation histories classical solution
         epochs_synodic, synodic_state_history = validation_LUMIO.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
@@ -62,83 +81,295 @@ class TestFrameConversions:
                                                                                            step_size,
                                                                                            custom_initial_state=custom_initial_state)
 
+        # Extract synodic simulation histories classical solution Erdem's continuation model (breaks of other than 0.001)
+        synodic_state_history_erdem = validation_LUMIO.get_synodic_state_history_erdem()[:int(propagation_time/0.001),1:]
+
         # Extract converted inertial states (works only with low-fidelity dynamic model)
         epochs_classic, state_history_classic, dependent_variables_history_classic = \
             FrameConverter.SynodicToInertialHistoryConverter(dynamic_model, step_size=step_size).get_results(synodic_state_history)
 
-        # Convert back to synodic
-        epochs_synodic, state_history_synodic = \
-            FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
+        # Extract converted inertial states Erdem's continuation model
+        epochs_classic_erdem, state_history_classic_erdem, dependent_variables_history_classic_erdem = \
+            FrameConverter.SynodicToInertialHistoryConverter(dynamic_model, step_size=step_size).get_results(synodic_state_history_erdem)
 
-        print("actual initial state: ", custom_initial_state)
-        print("converted back: ", state_history_synodic)
 
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        plt.title("test figure")
-        plt.plot(state_history_synodic[:,0], state_history_synodic[:,1], state_history_synodic[:,2])
-        plt.plot(state_history_synodic[:,6], state_history_synodic[:,7], state_history_synodic[:,8])
-        # plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2])
-        # plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8])
-        # plt.show()
+
+        # fig = plt.figure()
+        # ax = fig.add_subplot(111, projection='3d')
+        # plt.title("test figure")
+        # plt.plot(state_history_synodic[:,0], state_history_synodic[:,1], state_history_synodic[:,2])
+        # plt.plot(state_history_synodic[:,6], state_history_synodic[:,7], state_history_synodic[:,8])
+        # # plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2])
+        # # plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8])
+        # # plt.show()
 
 
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         plt.title("Comparison tudat versus classical CRTBP")
-        plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
-        plt.plot(state_history[:,6], state_history[:,7], state_history[:,8])
-        plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2])
-        plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8])
-        # plt.show()
-
-        synodic_state_history_erdem = validation_LUMIO.get_synodic_state_history_erdem()[:,1:]
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        plt.title("Comparison Erdem versus own-built CRTBP")
-        plt.plot(synodic_state_history[:,0], synodic_state_history[:,1], synodic_state_history[:,2])
-        plt.plot(synodic_state_history[:,6], synodic_state_history[:,7], synodic_state_history[:,8])
-        plt.plot(synodic_state_history_erdem[:,0], synodic_state_history_erdem[:,1], synodic_state_history_erdem[:,2])
-        plt.plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,7], synodic_state_history_erdem[:,8])
-        # plt.show()
-
-
-        # Create a figure and three subplots side by side
-        fig, axs = plt.subplots(1, 3, figsize=(15, 5))
-
-        axs[0].plot(state_history_synodic[:,0], state_history_synodic[:,1], label="LPF tudat", color="red")
-        axs[0].plot(synodic_state_history[:,0], synodic_state_history[:,1], label="LPF classic", color="lightsalmon")
-        axs[0].plot(synodic_state_history_erdem[:,0], synodic_state_history_erdem[:,1], label="LPF halo", color="darkred")
-        axs[0].plot(state_history_synodic[:,6], state_history_synodic[:,7], label="LUMIO tudat", color="blue")
-        axs[0].plot(synodic_state_history[:,6], synodic_state_history[:,7], label="LUMIO classic", color="lightskyblue")
-        axs[0].plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,7], label="LUMIO halo", color="darkblue")
-        axs[0].set_xlabel('X')
-        axs[0].set_ylabel('Y')
-
-        axs[1].plot(state_history_synodic[:,1], state_history_synodic[:,2], label="LPF tudat", color="red")
-        axs[1].plot(synodic_state_history[:,1], synodic_state_history[:,2], label="LPF classic", color="lightsalmon")
-        axs[1].plot(synodic_state_history_erdem[:,1], synodic_state_history_erdem[:,2], label="LPF halo", color="darkred")
-        axs[1].plot(state_history_synodic[:,7], state_history_synodic[:,8], label="LUMIO tudat", color="blue")
-        axs[1].plot(synodic_state_history[:,7], synodic_state_history[:,8], label="LUMIO classic", color="lightskyblue")
-        axs[1].plot(synodic_state_history_erdem[:,7], synodic_state_history_erdem[:,8], label="LUMIO halo", color="darkblue")
-        axs[1].set_xlabel('Y')
-        axs[1].set_ylabel('Z')
-
-        axs[2].plot(state_history_synodic[:,0], state_history_synodic[:,2], label="LPF tudat", color="red")
-        axs[2].plot(synodic_state_history[:,0], synodic_state_history[:,2], label="LPF classic", color="lightsalmon")
-        axs[2].plot(synodic_state_history_erdem[:,0], synodic_state_history_erdem[:,2], label="LPF halo", color="darkred")
-        axs[2].plot(state_history_synodic[:,6], state_history_synodic[:,8], label="LUMIO tudat", color="blue")
-        axs[2].plot(synodic_state_history[:,6], synodic_state_history[:,8], label="LUMIO classic", color="lightskyblue")
-        axs[2].plot(synodic_state_history_erdem[:,6], synodic_state_history_erdem[:,8], label="LUMIO halo", color="darkblue")
-        axs[2].set_xlabel('X')
-        axs[2].set_ylabel('Z')
-
-        [ax.grid(alpha=0.5, linestyle='--') for ax in axs]
-        plt.suptitle("Comparison tudat and classical CRTBP synodic non-dim rotating frame")
-        plt.tight_layout()
+        plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2], label="LPF classic", color="gray")
+        plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8], label="LUMIO classic", color="gray")
+        plt.plot(state_history_classic_erdem[:,0], state_history_classic_erdem[:,1], state_history_classic_erdem[:,2], label="LPF halo", color="black")
+        plt.plot(state_history_classic_erdem[:,6], state_history_classic_erdem[:,7], state_history_classic_erdem[:,8], label="LUMIO halo", color="black")
+        plt.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF tudat", color="red")
+        plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO tudat", color="blue")
         plt.legend()
-        plt.show()
+        # plt.show()
+
+
+
+        ### Printing histories in inertial frame ###
+        fontsize = 16
+        durations = [7, 14, 28, 42, 49]
+        fig1, axs1 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+        fig2, axs2 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+
+        figs = [fig1, fig2]
+        axs = [axs1, axs2]
+
+        for k, fig in enumerate(figs):
+            for i, ax in enumerate(axs[k]):
+
+                ax[0].title.set_text(str(durations[i])+ " days")
+                [axis.grid(alpha=0.5, linestyle='--') for axis in ax]
+
+                j = int(durations[i]/(step_size))
+
+                if k==0:
+
+                    ax[0].plot(synodic_state_history_erdem[:j,0], synodic_state_history_erdem[:j,1], label="LPF halo", color="black")
+                    ax[0].plot(synodic_state_history[:j,0], synodic_state_history[:j,1], label="LPF classic", color="gray")
+                    ax[0].plot(state_history_synodic[:j,0], state_history_synodic[:j,1], label="LPF tudat", color="red")
+                    ax[0].plot(synodic_state_history[:j,6], synodic_state_history[:j,7], label="LUMIO classic", color="gray")
+                    ax[0].plot(state_history_synodic[:j,6], state_history_synodic[:j,7], label="LUMIO tudat", color="blue")
+                    ax[0].plot(synodic_state_history_erdem[:j,6], synodic_state_history_erdem[:j,7], label="LUMIO halo", color="black")
+                    ax[0].set_xlabel('X [-]')
+                    ax[0].set_ylabel('Y [-]')
+
+                    ax[1].plot(synodic_state_history_erdem[:j,1], synodic_state_history_erdem[:j,2], label="LPF halo", color="black")
+                    ax[1].plot(synodic_state_history[:j,1], synodic_state_history[:j,2], label="LPF classic", color="gray")
+                    ax[1].plot(state_history_synodic[:j,1], state_history_synodic[:j,2], label="LPF tudat", color="red")
+                    ax[1].plot(synodic_state_history[:j,7], synodic_state_history[:j,8], label="LUMIO classic", color="gray")
+                    ax[1].plot(state_history_synodic[:j,7], state_history_synodic[:j,8], label="LUMIO tudat", color="blue")
+                    ax[1].plot(synodic_state_history_erdem[:j,7], synodic_state_history_erdem[:j,8], label="LUMIO halo", color="black")
+                    ax[1].set_xlabel('Y [-]')
+                    ax[1].set_ylabel('Z [-]')
+
+                    ax[2].plot(synodic_state_history_erdem[:j,0], synodic_state_history_erdem[:j,2], label="LPF halo", color="black")
+                    ax[2].plot(synodic_state_history[:j,0], synodic_state_history[:j,2], label="LPF classic", color="gray")
+                    ax[2].plot(state_history_synodic[:j,0], state_history_synodic[:j,2], label="LPF tudat", color="red")
+                    ax[2].plot(synodic_state_history[:j,6], synodic_state_history[:j,8], label="LUMIO classic", color="gray")
+                    ax[2].plot(state_history_synodic[:j,6], state_history_synodic[:j,8], label="LUMIO tudat", color="blue")
+                    ax[2].plot(synodic_state_history_erdem[:j,6], synodic_state_history_erdem[:j,8], label="LUMIO halo", color="black")
+                    ax[2].set_xlabel('X [-]')
+                    ax[2].set_ylabel('Z [-]')
+
+                    fig.legend(["LPF classic", "LPF tudat", "LPF halo", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+
+                if k==1:
+
+                    ax[0].plot(synodic_state_history_erdem[:j,0], synodic_state_history_erdem[:j,1], label="LPF halo", color="black")
+                    ax[0].plot(synodic_state_history[:j,0], synodic_state_history[:j,1], label="LPF classic", color="gray")
+                    ax[0].plot(state_history_synodic[:j,0], state_history_synodic[:j,1], label="LPF tudat", color="red")
+                    ax[0].set_xlabel('X [-]')
+                    ax[0].set_ylabel('Y [-]')
+
+                    ax[1].plot(synodic_state_history_erdem[:j,1], synodic_state_history_erdem[:j,2], label="LPF halo", color="black")
+                    ax[1].plot(synodic_state_history[:j,1], synodic_state_history[:j,2], label="LPF classic", color="gray")
+                    ax[1].plot(state_history_synodic[:j,1], state_history_synodic[:j,2], label="LPF tudat", color="red")
+                    ax[1].set_xlabel('Y [-]')
+                    ax[1].set_ylabel('Z [-]')
+
+                    ax[2].plot(synodic_state_history_erdem[:j,0], synodic_state_history_erdem[:j,2], label="LPF halo", color="black")
+                    ax[2].plot(synodic_state_history[:j,0], synodic_state_history[:j,2], label="LPF classic", color="gray")
+                    ax[2].plot(state_history_synodic[:j,0], state_history_synodic[:j,2], label="LPF tudat", color="red")
+                    ax[2].set_xlabel('X [-]')
+                    ax[2].set_ylabel('Z [-]')
+
+                    fig.legend(["LPF classic", "LPF tudat", "LPF halo"])
+
+                fig.suptitle("Comparison position CRTBP models, synodic non-dim barycentric rotating frame", fontsize=fontsize)
+
+        plt.tight_layout()
+        # plt.show()
+
+
+        fig3, axs3 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+        fig4, axs4 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+
+        figs = [fig3, fig4]
+        axs = [axs3, axs4]
+
+        for k, fig in enumerate(figs):
+            for i, ax in enumerate(axs[k]):
+
+                ax[0].title.set_text(str(durations[i])+ " days")
+                [axis.grid(alpha=0.5, linestyle='--') for axis in ax]
+
+                j = int(durations[i]/(step_size))
+
+                if k==0:
+
+                    ax[0].plot(synodic_state_history_erdem[:j,3], synodic_state_history_erdem[:j,4], label="LPF halo", color="black")
+                    ax[0].plot(synodic_state_history[:j,3], synodic_state_history[:j,4], label="LPF classic", color="gray")
+                    ax[0].plot(state_history_synodic[:j,3], state_history_synodic[:j,4], label="LPF tudat", color="red")
+                    ax[0].plot(synodic_state_history[:j,9], synodic_state_history[:j,10], label="LUMIO classic", color="gray")
+                    ax[0].plot(state_history_synodic[:j,9], state_history_synodic[:j,10], label="LUMIO tudat", color="blue")
+                    ax[0].plot(synodic_state_history_erdem[:j,9], synodic_state_history_erdem[:j,10], label="LUMIO halo", color="black")
+                    ax[0].set_xlabel('VX [-]')
+                    ax[0].set_ylabel('VY [-]')
+
+                    ax[1].plot(synodic_state_history_erdem[:j,4], synodic_state_history_erdem[:j,5], label="LPF halo", color="black")
+                    ax[1].plot(synodic_state_history[:j,4], synodic_state_history[:j,5], label="LPF classic", color="gray")
+                    ax[1].plot(state_history_synodic[:j,4], state_history_synodic[:j,5], label="LPF tudat", color="red")
+                    ax[1].plot(synodic_state_history[:j,10], synodic_state_history[:j,11], label="LUMIO classic", color="gray")
+                    ax[1].plot(state_history_synodic[:j,10], state_history_synodic[:j,11], label="LUMIO tudat", color="blue")
+                    ax[1].plot(synodic_state_history_erdem[:j,10], synodic_state_history_erdem[:j,11], label="LUMIO halo", color="black")
+                    ax[1].set_xlabel('VY [-]')
+                    ax[1].set_ylabel('VZ [-]')
+
+                    ax[2].plot(synodic_state_history_erdem[:j,3], synodic_state_history_erdem[:j,5], label="LPF halo", color="black")
+                    ax[2].plot(synodic_state_history[:j,3], synodic_state_history[:j,5], label="LPF classic", color="gray")
+                    ax[2].plot(state_history_synodic[:j,3], state_history_synodic[:j,5], label="LPF tudat", color="red")
+                    ax[2].plot(synodic_state_history[:j,9], synodic_state_history[:j,11], label="LUMIO classic", color="gray")
+                    ax[2].plot(state_history_synodic[:j,9], state_history_synodic[:j,11], label="LUMIO tudat", color="blue")
+                    ax[2].plot(synodic_state_history_erdem[:j,9], synodic_state_history_erdem[:j,11], label="LUMIO halo", color="black")
+                    ax[2].set_xlabel('VX [-]')
+                    ax[2].set_ylabel('VZ [-]')
+
+                    fig.legend(["LPF halo", "LPF classic", "LPF tudat", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+
+                if k==1:
+
+                    ax[0].plot(synodic_state_history[:j,9], synodic_state_history[:j,10], label="LUMIO classic", color="gray")
+                    ax[0].plot(state_history_synodic[:j,9], state_history_synodic[:j,10], label="LUMIO tudat", color="blue")
+                    ax[0].plot(synodic_state_history_erdem[:j,9], synodic_state_history_erdem[:j,10], label="LUMIO halo", color="black")
+                    ax[0].set_xlabel('VX [-]')
+                    ax[0].set_ylabel('VY [-]')
+
+                    ax[1].plot(synodic_state_history[:j,10], synodic_state_history[:j,11], label="LUMIO classic", color="gray")
+                    ax[1].plot(state_history_synodic[:j,10], state_history_synodic[:j,11], label="LUMIO tudat", color="blue")
+                    ax[1].plot(synodic_state_history_erdem[:j,10], synodic_state_history_erdem[:j,11], label="LUMIO halo", color="black")
+                    ax[1].set_xlabel('VY [-]')
+                    ax[1].set_ylabel('VZ [-]')
+
+                    ax[2].plot(synodic_state_history[:j,9], synodic_state_history[:j,11], label="LUMIO classic", color="gray")
+                    ax[2].plot(state_history_synodic[:j,9], state_history_synodic[:j,11], label="LUMIO tudat", color="blue")
+                    ax[2].plot(synodic_state_history_erdem[:j,9], synodic_state_history_erdem[:j,11], label="LUMIO halo", color="black")
+                    ax[2].set_xlabel('VX [-]')
+                    ax[2].set_ylabel('VZ [-]')
+
+                    fig.legend(["LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+
+                fig.suptitle("Comparison velocities CRTBP models, synodic non-dim barycentric rotating frame", fontsize=fontsize)
+
+        plt.tight_layout()
+        # plt.show()
+
+
+
+        ### Printing histories in inertial frame ###
+
+        fig5, axs5 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained", sharex=True, sharey=True)
+
+        figs = [fig5]
+        axs = [axs5]
+
+        for k, fig in enumerate(figs):
+            for i, ax in enumerate(axs[k]):
+
+                ax[0].title.set_text(str(durations[i])+ " days")
+                [axis.grid(alpha=0.5, linestyle='--') for axis in ax]
+
+                j = int(durations[i]/(step_size))
+
+                if k==0:
+
+                    ax[0].plot(state_history_classic_erdem[:j,0], state_history_classic_erdem[:j,1], label="LPF halo", color="black")
+                    ax[0].plot(state_history_classic[:j,0], state_history_classic[:j,1], label="LPF classic", color="gray")
+                    ax[0].plot(state_history[:j,0], state_history[:j,1], label="LPF tudat", color="red")
+                    ax[0].plot(state_history_classic_erdem[:j,6], state_history_classic_erdem[:j,7], label="LUMIO halo", color="black")
+                    ax[0].plot(state_history_classic[:j,6], state_history_classic[:j,7], label="LUMIO classic", color="gray")
+                    ax[0].plot(state_history[:j,6], state_history[:j,7], label="LUMIO tudat", color="blue")
+                    ax[0].set_xlabel('X [m]')
+                    ax[0].set_ylabel('Y [m]')
+
+                    ax[1].plot(state_history_classic_erdem[:j,1], state_history_classic_erdem[:j,2], label="LPF halo", color="black")
+                    ax[1].plot(state_history_classic[:j,1], state_history_classic[:j,2], label="LPF classic", color="gray")
+                    ax[1].plot(state_history[:j,1], state_history[:j,2], label="LPF tudat", color="red")
+                    ax[1].plot(state_history_classic_erdem[:j,7], state_history_classic_erdem[:j,8], label="LUMIO halo", color="black")
+                    ax[1].plot(state_history_classic[:j,7], state_history_classic[:j,8], label="LUMIO classic", color="gray")
+                    ax[1].plot(state_history[:j,7], state_history[:j,8], label="LUMIO tudat", color="blue")
+                    ax[1].set_xlabel('Y [m]')
+                    ax[1].set_ylabel('Z [m]')
+
+                    ax[2].plot(state_history_classic_erdem[:j,0], state_history_classic_erdem[:j,2], label="LPF halo", color="black")
+                    ax[2].plot(state_history_classic[:j,0], state_history_classic[:j,2], label="LPF classic", color="gray")
+                    ax[2].plot(state_history[:j,0], state_history[:j,2], label="LPF tudat", color="red")
+                    ax[2].plot(state_history_classic_erdem[:j,6], state_history_classic_erdem[:j,8], label="LUMIO halo", color="black")
+                    ax[2].plot(state_history_classic[:j,6], state_history_classic[:j,8], label="LUMIO classic", color="gray")
+                    ax[2].plot(state_history[:j,6], state_history[:j,8], label="LUMIO tudat", color="blue")
+                    ax[2].set_xlabel('X [m]')
+                    ax[2].set_ylabel('Z [m]')
+
+                    fig.legend(["LPF classic", "LPF tudat", "LPF halo", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+
+                fig.suptitle("Comparison position CRTBP models, inertial Earth-centered frame", fontsize=fontsize)
+
+        plt.tight_layout()
+        # plt.show()
+
+
+        fig6, axs6 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+
+        figs = [fig6]
+        axs = [axs6]
+
+        for k, fig in enumerate(figs):
+            for i, ax in enumerate(axs[k]):
+
+                ax[0].title.set_text(str(durations[i])+ " days")
+                [axis.grid(alpha=0.5, linestyle='--') for axis in ax]
+
+                j = int(durations[i]/(step_size))
+
+                if k==0:
+
+                    ax[0].plot(state_history_classic_erdem[:j,3], state_history_classic_erdem[:j,4], label="LPF halo", color="black")
+                    ax[0].plot(state_history_classic[:j,3], state_history_classic[:j,4], label="LPF classic", color="gray")
+                    ax[0].plot(state_history[:j,3], state_history[:j,4], label="LPF tudat", color="red")
+                    ax[0].plot(state_history_classic[:j,9], state_history_classic[:j,10], label="LUMIO classic", color="gray")
+                    ax[0].plot(state_history[:j,9], state_history[:j,10], label="LUMIO tudat", color="blue")
+                    ax[0].plot(state_history_classic_erdem[:j,9], state_history_classic_erdem[:j,10], label="LUMIO halo", color="black")
+                    ax[0].set_xlabel('VX [m/s]')
+                    ax[0].set_ylabel('VY [m/s]')
+
+                    ax[1].plot(state_history_classic_erdem[:j,4], state_history_classic_erdem[:j,5], label="LPF halo", color="black")
+                    ax[1].plot(state_history_classic[:j,4], state_history_classic[:j,5], label="LPF classic", color="gray")
+                    ax[1].plot(state_history[:j,4], state_history[:j,5], label="LPF tudat", color="red")
+                    ax[1].plot(state_history_classic[:j,10], state_history_classic[:j,11], label="LUMIO classic", color="gray")
+                    ax[1].plot(state_history[:j,10], state_history[:j,11], label="LUMIO tudat", color="blue")
+                    ax[1].plot(state_history_classic_erdem[:j,10], state_history_classic_erdem[:j,11], label="LUMIO halo", color="black")
+                    ax[1].set_xlabel('VY [m/s]')
+                    ax[1].set_ylabel('VZ [m/s]')
+
+                    ax[2].plot(state_history_classic_erdem[:j,3], state_history_classic_erdem[:j,5], label="LPF halo", color="black")
+                    ax[2].plot(state_history_classic[:j,3], state_history_classic[:j,5], label="LPF classic", color="gray")
+                    ax[2].plot(state_history[:j,3], state_history[:j,5], label="LPF tudat", color="red")
+                    ax[2].plot(state_history_classic[:j,9], state_history_classic[:j,11], label="LUMIO classic", color="gray")
+                    ax[2].plot(state_history[:j,9], state_history[:j,11], label="LUMIO tudat", color="blue")
+                    ax[2].plot(state_history_classic_erdem[:j,9], state_history_classic_erdem[:j,11], label="LUMIO halo", color="black")
+                    ax[2].set_xlabel('VX [m/s]')
+                    ax[2].set_ylabel('VZ [m/s]')
+
+                    fig.legend(["LPF halo", "LPF classic", "LPF tudat", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+
+                fig.suptitle("Comparison velocities CRTBP models, inertial Earth-centered frame", fontsize=fontsize)
+
+        plt.tight_layout()
+        # plt.show()
+
 
 
         # Calculate the percentage difference for each entry
@@ -172,23 +403,6 @@ class TestFrameConversions:
         percentage_difference = np.abs((Keplerian_state_LPF_Moon_frontiers-Keplerian_state_LPF_Moon_classic)/Keplerian_state_LPF_Moon_classic) * 100
         print(percentage_difference)
 
-
-        print("==== Cartesian states tudat ====")
-        print("Moon w.r.t. Earth: ", dependent_variables_history[0,0:6])
-        print("LPF w.r.t. Earth: ", state_history[0,0:6])
-        print("LUMIO w.r.t. Earth: ", state_history[0,6:12])
-        # print("Moon w.r.t. Earth: ", dependent_variables_history[0,0:6])
-        print("LPF w.r.t. Moon: ", state_history[0,0:6]-dependent_variables_history[0,6:12])
-        print("LUMIO w.r.t. Moon: ", state_history[0,6:12]-dependent_variables_history[0,6:12])
-
-        print("==== Cartesian states classic ====")
-        print("Moon w.r.t. Earth: ", dependent_variables_history_classic[0,6:12])
-        print("LPF w.r.t. Earth: ", state_history_classic[0,0:6])
-        print("LUMIO w.r.t. Earth: ", state_history_classic[0,6:12])
-        # print("Moon w.r.t. Earth, tudat: ", dependent_variables_history_classic[0,6:12])
-        print("LPF w.r.t. Moon: ", state_history_classic[0,0:6]-dependent_variables_history[0,6:12])
-        print("LUMIO w.r.t. Moon: ", state_history_classic[0,6:12]-dependent_variables_history[0,6:12])
-
         print("==== Keplerian states tudat ====")
         print("Moon w.r.t. Earth: ", element_conversion.cartesian_to_keplerian(dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary))
         print("LPF w.r.t. Moon: ", element_conversion.cartesian_to_keplerian(state_history[0,0:6]-dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_secondary))
@@ -199,7 +413,7 @@ class TestFrameConversions:
 
 
 
-        fig1, axs = plt.subplots(6, 1, figsize=(9,10), constrained_layout=True)
+        fig7, axs = plt.subplots(6, 1, figsize=(9,10), constrained_layout=True)
 
         axs[0].set_title("Position states tudat")
         axs[0].set_ylabel(r"$||\mathbf{r}||$ [m]")
@@ -255,62 +469,37 @@ class TestFrameConversions:
         [ax.grid(alpha=0.5, linestyle='--') for ax in axs]
         [ax.set_yscale("log") for ax in axs]
         lines, labels = axs[3].get_legend_handles_labels()
-        fig1.legend(lines, labels, loc='center right', bbox_to_anchor=(1.1, 0.5))
-        # plt.show()
-
-
-
-
-        keplerian_state_Moon_Earth = np.empty(np.shape(state_history_classic[:,:6]))
-        keplerian_state_LPF_Moon = keplerian_state_Moon_Earth.copy()
-        keplerian_state_Moon_Earth_classic = keplerian_state_Moon_Earth.copy()
-        keplerian_state_LPF_Moon_classic = keplerian_state_Moon_Earth.copy()
-        for epoch, state in enumerate(keplerian_state_Moon_Earth):
-            keplerian_state_Moon_Earth[epoch] = element_conversion.cartesian_to_keplerian(dependent_variables_history[epoch,0:6], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
-            keplerian_state_LPF_Moon[epoch] = element_conversion.cartesian_to_keplerian(state_history[epoch,0:6]-dependent_variables_history[epoch,0:6], dynamic_model.gravitational_parameter_secondary)
-            keplerian_state_Moon_Earth_classic[epoch] = element_conversion.cartesian_to_keplerian(dependent_variables_history_classic[epoch,6:12], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
-            keplerian_state_LPF_Moon_classic[epoch] = element_conversion.cartesian_to_keplerian(state_history_classic[epoch,0:6]-dependent_variables_history_classic[epoch,6:12], dynamic_model.gravitational_parameter_secondary)
-
-
-        fig2, axs = plt.subplots(2, 1, figsize=(11.69,8.27), constrained_layout=True)
-        axs[0].set_title("Moon w.r.t. Earth")
-        axs[0].plot(epochs, dependent_variables_history[:,18:24], label=[r"$a$", r"$e$", r"$i$", r"$\omega$", r"$\Omega$", r"$\theta$"])
-        axs[1].set_title("LPF w.r.t. Moon")
-        axs[1].plot(epochs, dependent_variables_history[:,24:30], label=[r"$a$", r"$e$", r"$i$", r"$\omega$", r"$\Omega$", r"$\theta$"])
-
-        plt.suptitle("State comparison of classic and tudat CRTBP model parameters. Time step: "+str(propagation_time)+" days")
-        [ax.grid(alpha=0.5, linestyle='--') for ax in axs]
-        plt.suptitle("Keplerian states")
-        fig2.legend(loc='lower center', bbox_to_anchor=(0.0, -1))
         plt.legend()
         # plt.show()
 
 
-        # Create a figure and three subplots side by side
-        fig3, axs = plt.subplots(1, 3, figsize=(15, 5))
 
-        axs[0].plot(state_history[:,0], state_history[:,1], label="LPF", color="red", ls="--")
-        axs[0].plot(state_history_classic[:,0], state_history_classic[:,1], label="LPF classic", color="black")
-        axs[0].plot(state_history[:,6], state_history[:,7], label="LUMIO", color="blue", ls="--")
-        axs[0].plot(state_history_classic[:,6], state_history_classic[:,7], label="LUMIO classic", color="grey")
-        axs[0].grid(alpha=0.5, linestyle='--')
-        axs[0].set_title('Plot 1')
 
-        axs[1].plot(state_history[:,1], state_history[:,2])
-        axs[1].plot(state_history_classic[:,1], state_history_classic[:,2])
-        axs[1].grid(alpha=0.5, linestyle='--')
-        axs[1].set_title('Plot 2')
+        # keplerian_state_Moon_Earth = np.empty(np.shape(state_history_classic[:,:6]))
+        # keplerian_state_LPF_Moon = keplerian_state_Moon_Earth.copy()
+        # keplerian_state_Moon_Earth_classic = keplerian_state_Moon_Earth.copy()
+        # keplerian_state_LPF_Moon_classic = keplerian_state_Moon_Earth.copy()
+        # for epoch, state in enumerate(keplerian_state_Moon_Earth):
+        #     keplerian_state_Moon_Earth[epoch] = element_conversion.cartesian_to_keplerian(dependent_variables_history[epoch,0:6], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
+        #     keplerian_state_LPF_Moon[epoch] = element_conversion.cartesian_to_keplerian(state_history[epoch,0:6]-dependent_variables_history[epoch,0:6], dynamic_model.gravitational_parameter_secondary)
+        #     keplerian_state_Moon_Earth_classic[epoch] = element_conversion.cartesian_to_keplerian(dependent_variables_history_classic[epoch,6:12], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
+        #     keplerian_state_LPF_Moon_classic[epoch] = element_conversion.cartesian_to_keplerian(state_history_classic[epoch,0:6]-dependent_variables_history_classic[epoch,6:12], dynamic_model.gravitational_parameter_secondary)
 
-        axs[2].plot(state_history[:,2], state_history[:,0])
-        axs[2].plot(state_history_classic[:,2], state_history_classic[:,0])
-        axs[2].grid(alpha=0.5, linestyle='--')
-        axs[2].set_title('Plot 3')
 
-        plt.tight_layout()
-        plt.legend()
-        plt.show()
+        # fig4, axs = plt.subplots(2, 1, figsize=(11.69,8.27), constrained_layout=True)
+        # axs[0].set_title("Moon w.r.t. Earth")
+        # axs[0].plot(epochs, dependent_variables_history[:,18:24], label=[r"$a$", r"$e$", r"$i$", r"$\omega$", r"$\Omega$", r"$\theta$"])
+        # axs[1].set_title("LPF w.r.t. Moon")
+        # axs[1].plot(epochs, dependent_variables_history[:,24:30], label=[r"$a$", r"$e$", r"$i$", r"$\omega$", r"$\Omega$", r"$\theta$"])
 
-        utils.save_figures_to_folder("test_initial_state_conversion", extras, [fig1, fig2, fig3], [simulation_start_epoch_MJD, propagation_time, tolerance])
+        # plt.suptitle("State comparison of classic and tudat CRTBP model parameters. Time step: "+str(propagation_time)+" days")
+        # [ax.grid(alpha=0.5, linestyle='--') for ax in axs]
+        # plt.suptitle("Keplerian states")
+        # fig2.legend(loc='lower center', bbox_to_anchor=(0.0, -1))
+        # plt.legend()
+        # plt.show()
+
+        utils.save_figures_to_folder("test_validation_crtbp", extras, [fig1, fig2, fig3, fig4, fig5, fig6, fig7], [simulation_start_epoch_MJD, propagation_time, tolerance])
 
 
 
@@ -338,51 +527,67 @@ class TestOutputsDynamicalModels:
     [
         # (60390, 10),
         # (60395, 10),
-        # (60400, 10),
+        (60390, 14),
     ])
 
-    def test_compare_dynamic_models(self, simulation_start_epoch_MJD, propagation_time, extras):
+    def test_difference_reference_model(self, simulation_start_epoch_MJD, propagation_time, extras, step_size=0.01):
 
         dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
 
         # Create a figure and three subplots side by side
-        fig, axs = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
+        fig1, axs1 = plt.subplots(6, 1, figsize=(15, 5))
         for dynamic_model in utils.convert_model_objects_to_list(dynamic_model_objects):
 
-            setattr(dynamic_model, "current_coefficient_set", propagation_setup.integrator.CoefficientSets.rkf_89)
+            setattr(dynamic_model, "current_coefficient_set", propagation_setup.integrator.CoefficientSets.rkdp_87)
 
             # Extract simulation histories numerical solution
             epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                Interpolator.Interpolator(dynamic_model, step_size=0.005, epoch_in_MJD=False).get_results()
+                Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagator_results(dynamic_model)
+
+            reference_state_history = np.concatenate((validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
+                                                      validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
+                                                      axis=1)
+
+            print(np.shape(state_history), np.shape(reference_state_history))
+            print(state_history[0,:])
+            print(reference_state_history[0,:])
+
+            fig = plt.figure()
+            ax = fig.add_subplot(111, projection='3d')
+            plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
+            plt.plot(state_history[:,6], state_history[:,7], state_history[:,8])
+            plt.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2])
+            plt.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8])
+            plt.show()
+
+            # plt.plot(np.linalg.norm(state_history[:,:3], axis=1))
+            # plt.plot(np.linalg.norm(reference_state_history[:,:3], axis=1))
+            # plt.plot(np.linalg.norm(state_history[:,6:9], axis=1))
+            # plt.plot(np.linalg.norm(reference_state_history[:,6:9], axis=1))
+            # plt.show()
 
             # Define the titles and data for the subplots
-            subplot_titles = ['Plot 1', 'Plot 2', 'Plot 3']
-            data_to_plot = [dependent_variables_history[:, 6:9]]
+            figure_titles = ["Position difference w.r.t reference state", "Velocity difference w.r.t reference state"]
+            subplot_labels = ['', 'Plot 2', 'Plot 3']
+            data_to_plot = [state_history-reference_state_history]
+            print(data_to_plot[0][:,0])
 
-            # Iterate through subplots and data
-            for i, ax in enumerate(axs):
-                for data in data_to_plot:
-                    ax.plot(data[:, i % 3], data[:, (i + 1) % 3], label=f"{dynamic_model}")
+            # Plot the state histories for each entry across all models
+            for state_index in range(6):
+                axs1[state_index].plot(data_to_plot[0][:,state_index])
+                axs1[state_index].plot(data_to_plot[0][:,6+state_index])
+                axs1[state_index].grid(alpha=0.5, linestyle='--')
 
-                ax.grid(alpha=0.5, linestyle='--')
-                ax.set_title(subplot_titles[i])
+        # for state_index in range(6):
+        #     axs1[state_index].set_title(subplot_labels[state_index])
 
-            assert dynamic_model.name_ELO == "LPF"
+        #     assert dynamic_model.name_ELO == "LPF"
 
         plt.legend()
+        plt.show()
 
         # Create a folder named after the function
-        folder_name = "test_compare_dynamic_models"
-        os.makedirs(folder_name, exist_ok=True)
-        figure_path = os.path.join(folder_name, f"{simulation_start_epoch_MJD}_{propagation_time}.png")
-        fig.savefig(figure_path)
-        extras.append(pytest_html.extras.png(figure_path))
-
-
-
-
-
-
+        utils.save_figures_to_folder("test_difference_reference_model", extras, [fig1], [simulation_start_epoch_MJD, propagation_time])
 
 
     @pytest.mark.parametrize(
@@ -393,7 +598,7 @@ class TestOutputsDynamicalModels:
         # (60400, 10),
     ])
 
-    def test_observability_effectiveness(self, simulation_start_epoch_MJD, propagation_time):
+    def test_observability_effectiveness(self, simulation_start_epoch_MJD, propagation_time, extras):
 
         # Plot the observability history and compare them to the different models
         fig, axs = plt.subplots(2, 1, figsize=(15, 5))
@@ -404,11 +609,12 @@ class TestOutputsDynamicalModels:
         for estimation_model in utils.convert_model_objects_to_list(estimation_model_objects):
 
             estimation_results = estimation_model.get_estimation_results()
-            observations_range = estimation_results[-1][observation.one_way_range_type]
-            observations_doppler = estimation_results[-1][observation.one_way_instantaneous_doppler_type]
+            observations_range = estimation_results[-2][observation.one_way_range_type]
+            observations_doppler = estimation_results[-2][observation.one_way_instantaneous_doppler_type]
 
             epoch_range, information_matrix_history_range = utils.convert_dictionary_to_array(observations_range)
             epoch_doppler, information_matrix_history_doppler = utils.convert_dictionary_to_array(observations_doppler)
+            epoch_range, epoch_doppler = utils.convert_epochs_to_MJD(epoch_range), utils.convert_epochs_to_MJD(epoch_doppler)
 
             # Define the titles for the subplots
             subplot_titles = ["Range measurements", "Range-rate measurements"]
@@ -416,6 +622,9 @@ class TestOutputsDynamicalModels:
 
             # Data to plot
             data_to_plot = [epoch_range, information_matrix_history_range, epoch_doppler, information_matrix_history_doppler]
+
+            print(information_matrix_history_range, np.shape(information_matrix_history_range))
+            print(information_matrix_history_doppler, np.shape(information_matrix_history_doppler))
 
             # Iterate through subplots and data
             for i, ax in enumerate(axs):
@@ -434,7 +643,10 @@ class TestOutputsDynamicalModels:
 
         plt.suptitle("Observability effectiveness comparison of high and low fidelity models. Time step: "+str(propagation_time)+" days")
         plt.tight_layout()
-        plt.show()
+        # plt.show()
+
+        # Create a folder named after the function
+        utils.save_figures_to_folder("test_observability_effectiveness", extras, [fig], [simulation_start_epoch_MJD, propagation_time])
 
 
 
