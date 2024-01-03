@@ -52,8 +52,10 @@ def read_coeffs(scaled=True):
 
 class HighFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
+
+        self.custom_initial_state = custom_initial_state
 
         self.new_bodies_to_create = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
         for new_body in self.new_bodies_to_create:
@@ -129,7 +131,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.acceleration_settings_on_spacecrafts = dict()
         for index, spacecraft in enumerate([self.name_ELO, self.name_LPO]):
             acceleration_settings_on_spacecraft = {
-                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(50,50),
+                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(10,10),
                                         propagation_setup.acceleration.relativistic_correction(),
                                         propagation_setup.acceleration.radiation_pressure()],
                     self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(50,50),
@@ -155,27 +157,32 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_acceleration_settings()
 
-        initial_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
-        initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+        # initial_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        # initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
-        self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
-
-        return self.initial_state
+        if self.custom_initial_state is not None:
+            self.initial_state = self.custom_initial_state
+        else:
+            # self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
+            self.initial_state = np.array([-2.81274203e+08,  2.51467494e+08,  1.46454277e+08, -1.16895572e+03,\
+                                            -2.16736162e+03, -7.88307987e+02, -3.10537998e+08,  2.49423157e+08,\
+                                            1.74937757e+08, -9.93171842e+02, -7.66408514e+02, -5.25173280e+02])
 
 
     def set_integration_settings(self):
 
         self.set_initial_state()
 
-        current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkdp_87
-        current_tolerance = 1e-15*constants.JULIAN_DAY
-        initial_time_step = 1e-3*constants.JULIAN_DAY
-        self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(initial_time_step,
-                                                                                        current_coefficient_set,
-                                                                                        np.finfo(float).eps,
-                                                                                        np.inf,
-                                                                                        current_tolerance,
-                                                                                        current_tolerance)
+        if self.use_variable_step_size_integrator:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_variable_step_size(self.initial_time_step,
+                                                                                            self.current_coefficient_set,
+                                                                                            np.finfo(float).eps,
+                                                                                            np.inf,
+                                                                                            self.current_tolerance,
+                                                                                            self.current_tolerance)
+        else:
+            self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
+                                                                                           self.current_coefficient_set)
 
 
     def set_dependent_variables_to_save(self):
@@ -189,29 +196,31 @@ class HighFidelityDynamicModel(DynamicModelBase):
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.total_acceleration(self.name_ELO),
-            propagation_setup.dependent_variable.total_acceleration(self.name_LPO)]
+            propagation_setup.dependent_variable.total_acceleration(self.name_LPO),
+            propagation_setup.dependent_variable.keplerian_state(self.name_secondary, self.name_primary),
+            propagation_setup.dependent_variable.keplerian_state(self.name_ELO, self.name_secondary)]
 
-        # self.dependent_variables_to_save.extend([
-        #     propagation_setup.dependent_variable.single_acceleration_norm(
-        #             propagation_setup.acceleration.point_mass_gravity_type, body_to_propagate, new_body_to_create) \
-        #                 for body_to_propagate in self.bodies_to_propagate for new_body_to_create in self.new_bodies_to_create])
+        self.dependent_variables_to_save.extend([
+            propagation_setup.dependent_variable.single_acceleration_norm(
+                    propagation_setup.acceleration.point_mass_gravity_type, body_to_propagate, new_body_to_create) \
+                        for body_to_propagate in self.bodies_to_propagate for new_body_to_create in self.new_bodies_to_create])
 
-        # self.dependent_variables_to_save.extend([
-        #     propagation_setup.dependent_variable.spherical_harmonic_terms_acceleration_norm(body_to_propagate, body_to_create, [(2,0), (2,1), (2,2)]) \
-        #                 for body_to_propagate in self.bodies_to_propagate for body_to_create in [self.name_primary, self.name_secondary] ])
+        self.dependent_variables_to_save.extend([
+            propagation_setup.dependent_variable.spherical_harmonic_terms_acceleration_norm(body_to_propagate, body_to_create, [(2,0), (2,1), (2,2)]) \
+                        for body_to_propagate in self.bodies_to_propagate for body_to_create in [self.name_primary, self.name_secondary] ])
 
-        # self.dependent_variables_to_save.extend([
-        #     propagation_setup.dependent_variable.single_acceleration_norm(
-        #             propagation_setup.acceleration.radiation_pressure_type, body_to_propagate, body) \
-        #                 for body_to_propagate in self.bodies_to_propagate for body in [self.name_primary, self.name_secondary, "Sun"]])
+        self.dependent_variables_to_save.extend([
+            propagation_setup.dependent_variable.single_acceleration_norm(
+                    propagation_setup.acceleration.radiation_pressure_type, body_to_propagate, body) \
+                        for body_to_propagate in self.bodies_to_propagate for body in [self.name_primary, self.name_secondary, "Sun"]])
 
-        # self.dependent_variables_to_save.extend([
-        #     propagation_setup.dependent_variable.single_acceleration_norm(
-        #             propagation_setup.acceleration.relativistic_correction_acceleration_type, body_to_propagate, body_to_create) \
-        #                 for body_to_propagate in self.bodies_to_propagate for body_to_create in self.bodies_to_create])
+        self.dependent_variables_to_save.extend([
+            propagation_setup.dependent_variable.single_acceleration_norm(
+                    propagation_setup.acceleration.relativistic_correction_acceleration_type, body_to_propagate, body_to_create) \
+                        for body_to_propagate in self.bodies_to_propagate for body_to_create in self.bodies_to_create])
 
-        # self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.body_mass(self.name_primary),
-        #                                          propagation_setup.dependent_variable.body_mass(self.name_secondary)])
+        self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.body_mass(self.name_primary),
+                                                 propagation_setup.dependent_variable.body_mass(self.name_secondary)])
 
 
     def set_termination_settings(self):
@@ -235,18 +244,20 @@ class HighFidelityDynamicModel(DynamicModelBase):
             self.simulation_start_epoch,
             self.integrator_settings,
             self.termination_settings,
-            output_variables= self.dependent_variables_to_save
-        )
+            output_variables= self.dependent_variables_to_save)
 
 
     def get_propagated_orbit(self):
 
         self.set_propagator_settings()
 
+        print("been here")
         # Create simulation object and propagate dynamics.
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
             self.bodies,
             self.propagator_settings)
+
+        print("been here too")
 
         # Setup parameters settings to propagate the state transition matrix
         self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
@@ -260,21 +271,26 @@ class HighFidelityDynamicModel(DynamicModelBase):
         return dynamics_simulator, variational_equations_solver
 
 
-# test = HighFidelityDynamicModel(60390, 365)
-# dynamics_simulator, variational_equations_solver = test.get_propagated_orbit()
+test = HighFidelityDynamicModel(60390, 365)
+dynamics_simulator, variational_equations_solver = test.get_propagated_orbit()
 
-# state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.state_history.items()], dtype=object)
-# moon_state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.dependent_variable_history.items()], dtype=object)
+state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.state_history.items()], dtype=object)
+moon_state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.dependent_variable_history.items()], dtype=object)
 
-# header = "epoch (MJD), epoch (seconds TDB), x [km], y [km], z [km], vx [km/s], vy [km/s], vz [km/s]"
-# np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/LPF_states_J2000_Earth_centered.txt", state_history[:,:8], delimiter=',', fmt='%f', header=header)
-# np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/Moon_states_J2000_Earth_centered.txt", moon_state_history[:,:8], delimiter=',', fmt='%f', header=header)
+header = "epoch (MJD), epoch (seconds TDB), x [km], y [km], z [km], vx [km/s], vy [km/s], vz [km/s]"
+np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/LPF_states_J2000_Earth_centered.txt", state_history[:,:8], delimiter=',', fmt='%f', header=header)
+np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/Moon_states_J2000_Earth_centered.txt", moon_state_history[:,:8], delimiter=',', fmt='%f', header=header)
 
-# ax = plt.figure().add_subplot(projection='3d')
-# plt.plot(moon_state_history[:,2], moon_state_history[:,3], moon_state_history[:,4])
-# plt.plot(state_history[:,2], state_history[:,3], state_history[:,4])
-# plt.legend()
-# plt.show()
+header = "epoch (MJD), epoch (seconds TDB), x [km], y [km], z [km], vx [km/s], vy [km/s], vz [km/s]"
+np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/LPF_states_J2000_Earth_centered_test.txt", state_history[:,:8], delimiter=',', fmt='%f', header=header)
+np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/Moon_states_J2000_Earth_centered_test.txt", moon_state_history[:,:8], delimiter=',', fmt='%f', header=header)
+
+
+ax = plt.figure().add_subplot(projection='3d')
+plt.plot(moon_state_history[:,2], moon_state_history[:,3], moon_state_history[:,4])
+plt.plot(state_history[:,2], state_history[:,3], state_history[:,4])
+plt.legend()
+plt.show()
 
 # dependent_variables_history = np.vstack(list(dynamics_simulator.dependent_variable_history.values()))
 # print(np.shape(dependent_variables_history))
