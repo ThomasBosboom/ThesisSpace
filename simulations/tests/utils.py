@@ -2,11 +2,15 @@
 import os
 import sys
 import pytest_html
+import numpy as np
+
+# tudatpy
+from tudatpy.kernel.astro import time_conversion
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict={"low_fidelity": ["integration_settings"], "high_fidelity": ["point_mass"]}):
+def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict={"high_fidelity": ["point_mass_srp"]}):
 
     dynamic_model_objects = {}
     for package_type, package_name_list in package_dict.items():
@@ -75,10 +79,20 @@ def save_figures_to_folder(folder_name, extras, figs=[], labels=[], save_to_repo
     os.makedirs(folder_name, exist_ok=True)
     for i, fig in enumerate(figs):
         base_string = "_".join([str(label) for label in labels])
-        figure_path = os.path.join(folder_name, f"{i+1}_{base_string}.png")
+        figure_path = os.path.join(folder_name, f"fig{i+1}_{base_string}.png")
         fig.savefig(figure_path)
         if save_to_report:
             extras.append(pytest_html.extras.png(figure_path))
+
+
+def convert_epochs_to_MJD(epochs):
+
+    epochs_MJD = np.array([time_conversion.julian_day_to_modified_julian_day(\
+        time_conversion.seconds_since_epoch_to_julian_day(epoch)) for epoch in epochs])
+
+    return epochs_MJD
+
+
 
 
 # Define a dictionary with configurations for LPF and LUMIO
