@@ -17,3 +17,8 @@ With the conda environment now installed, you can activate it to work in it usin
 ```
 conda activate tudat-space
 ```
+
+For more information, go to one of the documentation of tudatpy.
+
+[website](https://docs.tudat.space/en/latest/)
+[website](https://py.api.tudat.space/en/latest/index.html)
