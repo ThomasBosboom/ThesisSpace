@@ -51,7 +51,7 @@ def read_textfiles(data_type, satellite="LUMIO"):
 
 
 
-def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  fixed_step_size=0.01, satellite="LUMIO",body="satellite", interpolation_kind='linear', get_dict=False, get_epoch_in_array=False, get_full_history=False):
+def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  step_size=0.001, satellite="LUMIO",body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
 
     state_history = read_textfiles("state", satellite=satellite)
     if body == "satellite":
@@ -71,7 +71,7 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  f
     interpolated_state = interp_func(user_start_epoch)
 
     interpolated_states = np.zeros((1,6))
-    epochs = np.arange(user_start_epoch, user_end_epoch, fixed_step_size*constants.JULIAN_DAY)
+    epochs = np.arange(user_start_epoch, user_end_epoch+step_size*constants.JULIAN_DAY, step_size*constants.JULIAN_DAY)
     for epoch in epochs:
         interpolated_states = np.vstack((interpolated_states, interp_func(epoch)))
     interpolated_states = np.delete(interpolated_states, 0, 0)
@@ -154,8 +154,8 @@ def get_synodic_state_history_erdem():
     return np.delete(states_erdem[:,:],0,0)
 
 
-custom_initial_state = np.array([0.98512,     0.0014765,	    0.0049255,	 -0.8733,	      -1.6119,	     0,	\
-                                 1.147342501,-0.0002324517381, -0.151368318, -0.000202046355, -0.2199137166, 0.0002817105509])
+custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+                                 1.147342501,      -0.0002324517381,  -0.151368318,       -0.000202046355,    -0.2199137166,      0.0002817105509])
 def get_synodic_state_history(G, m1, m2, a, propagation_time, step_size, custom_initial_state=custom_initial_state):
 
     dynamic_model_classic = TraditionalLowFidelity.TraditionalLowFidelity(G, m1, m2, a)
@@ -169,7 +169,7 @@ def get_synodic_state_history(G, m1, m2, a, propagation_time, step_size, custom_
 # import matplotlib.pyplot as plt
 # ax = plt.figure().add_subplot(projection='3d')
 # plt.plot(get_synodic_state_history_erdem()[:,1], get_synodic_state_history_erdem()[:,2], get_synodic_state_history_erdem()[:,3])
-# plt.plot(get_synodic_state_history_erdem()[:,7], get_synodic_state_history_erdem()[:,8], get_synodic_state_history_erdem()[:,9])
+# plt.plot(get_synodic_state_history_erdem()[:1400,7], get_synodic_state_history_erdem()[:1400,8], get_synodic_state_history_erdem()[:1400,9])
 # plt.plot(get_state_history_richardson()[:,1], get_state_history_richardson()[:,2], get_state_history_richardson()[:,3])
 # plt.legend()
 # plt.show()
