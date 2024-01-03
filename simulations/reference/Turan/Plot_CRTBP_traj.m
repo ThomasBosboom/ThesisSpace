@@ -24,8 +24,8 @@
 % % Uncomment below and run
 SC1=9;           % e.g. Lunar Elliptic (pick value from above orbits)
 SC2=2;           % e.g. EML2south
-simdur =14;      % simulation duration in days
-step=60;        % simulation step in seconds (gives states in each step)
+simdur =50;      % simulation duration in days
+step=0.001*86400;        % simulation step in seconds (gives states in each step)
 Y=CRTBP_OD_traj(SC1, SC2, simdur, step);  % Run first trajectory file
 %% 
 % Orbital names, periods, etc.
@@ -45,36 +45,35 @@ xlabel('X [non-dim]','interpreter','latex','FontSize', 14);
 ylabel('Y [non-dim]','interpreter','latex','FontSize', 14);
 zlabel('Z [non-dim]','interpreter','latex','FontSize', 14);
 
-% Add Moon
-mu = 0.012155650403207;
-Rsy= 0.004515683426763;
-[xx, yy, zz] = sphere(1000);
-surf(1-mu+Rsy*xx, Rsy*yy, Rsy*zz)
-r = 0.8; g = r; b = r;
-map = [r g b
-       0 0 0
-       r g b];
-colormap(map)
-caxis([-Rsy/100 Rsy/100])
-shading interp
-hold on;
+% % Add Moon
+% mu = 0.012155650403207;
+% Rsy= 0.004515683426763;
+% [xx, yy, zz] = sphere(1000);
+% surf(1-mu+Rsy*xx, Rsy*yy, Rsy*zz)
+% r = 0.8; g = r; b = r;
+% map = [r g b
+%        0 0 0
+%        r g b];
+% colormap(map)
+% caxis([-Rsy/100 Rsy/100])
+% shading interp
+% hold on;
 
 % Plot Lagrangian points L1 and L2
-plot3(L2(1),L2(2),L2(3),'o', Color='black')
-text(L2(1)+0.005,L2(2),L2(3)+0.005,'L2','interpreter','latex','FontSize', 12)
-hold on;
-plot3(L1(1),L1(2),L1(3),'o', Color='black')
-text(L1(1)+0.005,L1(2),L1(3)+0.005,'L1','interpreter','latex','FontSize', 12)
-hold on;
+% plot3(L2(1),L2(2),L2(3),'o', Color='black')
+% text(L2(1)+0.005,L2(2),L2(3)+0.005,'L2','interpreter','latex','FontSize', 12)
+% hold on;
+% plot3(L1(1),L1(2),L1(3),'o', Color='black')
+% text(L1(1)+0.005,L1(2),L1(3)+0.005,'L1','interpreter','latex','FontSize', 12)
+% hold on;
 
 % Plot view
 view(10,15);
 
 % Save txt file
-time = [0:2.6667e-06*step:simdur/4.343]';
-state_history = [time, Y]
-dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/Halo_orbit_files/Erdem1.txt', state_history, 'delimiter', '\t')
+time = [0:step/86400:simdur]';
+state_history = [time, Y];
+dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/Halo_orbit_files/Erdem_original.txt', state_history, 'delimiter', '\t', 'precision', 10)
 
-
-
+view(10,15);
 

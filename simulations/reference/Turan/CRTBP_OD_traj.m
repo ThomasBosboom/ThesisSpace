@@ -41,16 +41,6 @@ function [Y] = CRTBP_OD_traj(SC1, SC2, simdur, step)
 %load initial states
 IC_CRTBP
  
-%simulation duration in days
-daysnum=simdur;
-steptu = 2.6667e-06*step;
-
-%9.752753388846403e-07 = 1mm/s 
-%2.599104078947392e-06 = 1km
-%384747.963km = 1LU
-%1/4.343day   = 1TU
-%1.025351467559547e+03 conversion parameter (LU/TU to m/s)
-
 % 1:EML2south, 2:EML2south,3:EML2north, 4:EML2north 5:EML1south 6:EML1south,
 % 7:EML1north  8:EML1north 9:Lunar Elliptic 10:Lunar Polar-Circular
 % 11:NRHO EML2south, 12:NRHO EML1south 13:NRHO EML2north, 
@@ -63,12 +53,17 @@ Sc_2nd=SC2;
 Y0_true = [IC(Sc_1st,:) IC(Sc_2nd,:)]';
 
 %Gravational constant
-G=6.67408E-11;
+G=6.67259e-11;
 mu=0.012155650403207;
-% mu=0.012153614091891635;
+m1=5.973698990946545e+24;
+m2=7.347671776396872e+22;
+mu = m2/(m1+m2);
+a = 3.84747963e8;
+tu = sqrt(a^3/(G*(m1+m2)))/86400
+rot = 1/(tu*86400)
 
 % Simulation duration in TU
-t_end = (daysnum/4.343);
+t_end = (simdur/tu);
 
 %Initial state 
 Y = Y0_true;
@@ -78,10 +73,10 @@ options=odeset('RelTol',1e-12,'AbsTol',1e-22);
 
 % Trajectory
 % 1st S/C
-[~,xx]=ode113('CRTBP',[0:steptu:t_end], Y(1:6)',options,[],1,mu);
+[~,xx]=ode113('CRTBP',[0:rot*step:t_end], Y(1:6)',options,[],1,mu);
 Y1=xx'; 
 % 2nd S/C
-[~,xxx]=ode113('CRTBP',[0:steptu:t_end], Y(7:12)',options,[],1,mu);
+[~,xxx]=ode113('CRTBP',[0:rot*step:t_end], Y(7:12)',options,[],1,mu);
 Y2=xxx';
 % Combined State
 Y=[Y1; Y2]';

@@ -44,7 +44,7 @@ dy0 = -InitialConditions(5);
 % z0 = InitialConditions(3);
 % dy0 = -InitialConditions(5);
 
-Y_3OA = [L2*au+x0; 0; z0; 0; L2*au-(L2*au*ne+dy0)/ne; 0]/au
+% Y_3OA = [L2*au+x0; 0; z0; 0; L2*au-(L2*au*ne+dy0)/ne; 0]/au
 Y_3OA = [1.147342612325716;0;-0.151423081776634;0;-0.219954169502041;0];
 i = 1; Y_final = zeros(1,42); t_0 = 0; h = 0.0001;
 [T2, ~, ~] = findT2(Y_3OA, 0, 10, h, Io, mu, 1);
@@ -127,7 +127,7 @@ set(gca,'ZTickLabel',[]); zlabel('Z')
 %% Nominal Orbit Acquisition for numOrbs Number of Orbits
 fprintf('Propogating for %2.0f periods (~%3.0f days)..\n',numOrbs, -numOrbs*T2*2/ne/24/60/60)
 h = T2/1500; % "Time"-step size
-t_0 = 0; t_end = 2*T2; Y_nominal = zeros(1,42); i = 1;
+t_0 = 0; t_end = 6*T2; Y_nominal = zeros(1,42); i = 1;
 y0 = y_guess; 
 Io = [I6(:,1); I6(:,2); I6(:,3); I6(:,4); I6(:,5); I6(:,6)];
 Y_nominal(1,1:6) = y_guess; Y_base = zeros(1,6);
@@ -385,12 +385,48 @@ t_list;
 Y_delta_save = [t_list', Y_delta(i, 1:6)];
 
 % Specify the path to your text file
-file_path = 'C:\Users\thoma\OneDrive\Documenten\GitHub\ThesisSpace\simulations\reference\Halo_orbit_files\Erdem_old.txt';
+file_path = 'C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/Halo_orbit_files/Erdem_original.txt';
 file_data = importdata(file_path);
 
 time = file_data(:,1);
 lpf_state = file_data(:,2:7);
-lpf_state_interp = interp1(time, lpf_state, t_list', 'spline', 'extrap');
+lpf_state_interp = interp1(time, lpf_state, t_list'*4.3484, 'spline', 'extrap');
+state_interp = [t_list', lpf_state_interp, Y_delta(i, 1:6)];
 
-dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/Simulations/Reference/Halo_orbit_files/Erdem.txt', [t_list', lpf_state_interp, Y_delta(i, 1:6)], 'delimiter', '\t', 'precision', 10)
+% dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/Halo_orbit_files/Erdem.txt', state_interp, 'delimiter', '\t', 'precision', 10)
+% 
+
+time_step_size = 0:0.001/4.3484:t_list(end);
+state_interp = interp1(t_list', state_interp, time_step_size, 'spline', 'extrap');
+lpf_state_interp = interp1(t_list', lpf_state_interp, time_step_size, 'spline', 'extrap');
+state_interp(:,1) = time_step_size*4.3484;
+
+state_interp(:,2:7) = lpf_state_interp;
+
+% lumio_state_interp = interp1(t_list', Y_delta(i, 1:6), time, 'spline', 'extrap');
+
+
+dlmwrite('C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/Halo_orbit_files/Erdem.txt', state_interp, 'delimiter', '\t', 'precision', 10)
+
+figure()
+plot3(state_interp(:,2),state_interp(:,3),state_interp(:,4),'Linewidth',2)
+
+
+figure() % Planar Views of the Stable (Differentially Corrected) Orbit
+subplot(1,3,1)
+plot(state_interp(:,2), state_interp(:,3), 'k', 'LineWidth', 1.5); hold on
+xlabel('X'); ylabel('Y'); axis square; box off; title('X-Y Plot')
+% xlim([min(Y(:,1))*.9975 max(Y(:,2))*1.0025]); ylim([-max(Y(:,1))*1.1 max(Y(:,2))*1.1])
+
+subplot(1,3,2)
+plot(state_interp(:,3), state_interp(:,4), 'k', 'LineWidth', 1.5); hold on
+xlabel('Y'); ylabel('Z'); axis square; box off; title('Y-Z Plot')
+% xlim([min(Y(:,2))*.9975 max(Y(:,3))*1.0025]); ylim([-max(Y(:,2))*1.1 max(Y(:,3))*1.1])
+
+subplot(1,3,3)
+plot(state_interp(:,2), state_interp(:,4), 'k', 'LineWidth', 1.5); hold on
+xlabel('X'); ylabel('Z'); axis square; box off; title('X-Z Plot')
+% xlim([min(Y(:,1))*.9975 max(Y(:,3))*1.0025]); ylim([-max(Y(:,1))*1.1 max(Y(:,3))*1.1])
+
+view(10,15);
 
