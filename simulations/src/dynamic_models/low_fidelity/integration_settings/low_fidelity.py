@@ -92,26 +92,27 @@ class LowFidelityDynamicModel(DynamicModelBase):
         return initial_state
 
 
-    def get_closest_initial_state(self):
+    def get_closest_initial_state(self, step_size=0.05):
 
         self.set_initial_cartesian_moon_state()
 
-        state_history_erdem = validation_LUMIO.get_synodic_state_history_erdem()[:,1:]
-        print(constants.GRAVITATIONAL_CONSTANT, self.bodies.get("Earth").mass, self.bodies.get("Moon").mass, self.distance_between_primaries)
-        # epochs_synodic, state_history_erdem = validation_LUMIO.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
-        #                                                                                 self.bodies.get("Earth").mass,
-        #                                                                                 self.bodies.get("Moon").mass,
-        #                                                                                 self.distance_between_primaries,
-        #                                                                                 self.propagation_time,
-        #                                                                                 0.005)
-        state_history_polimi = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO, get_full_history=True, get_dict=False)
+        # state_history_synodic = validation_LUMIO.get_synodic_state_history_erdem()[:,1:]
+        # print(constants.GRAVITATIONAL_CONSTANT, self.bodies.get("Earth").mass, self.bodies.get("Moon").mass, self.distance_between_primaries)
+        _, state_history_synodic = validation_LUMIO.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
+                                                                            self.bodies.get("Earth").mass,
+                                                                            self.bodies.get("Moon").mass,
+                                                                            self.distance_between_primaries,
+                                                                            14, # max 14 days, to save run time, full period halo orbit approximate
+                                                                            step_size)
+        reference_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, step_size=step_size, satellite=self.name_LPO, get_full_history=True, get_dict=False)
+        # reference_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO, get_full_history=False, get_dict=False)
         distance_array = np.empty((0, 1))
         initial_state_history = np.empty((0, 12))
-        for initial_state_barycenter_fixed in state_history_erdem:
+        for initial_state_barycenter_fixed in state_history_synodic:
 
             self.initial_state = self.convert_synodic_to_inertial_state(initial_state_barycenter_fixed)
 
-            distance = np.linalg.norm(self.initial_state[6:12]-state_history_polimi[0])
+            distance = np.linalg.norm(self.initial_state[6:12]-reference_state_LUMIO[0])
 
             distance_array = np.vstack((distance_array, distance))
             initial_state_history = np.vstack((initial_state_history, self.initial_state))
@@ -119,9 +120,15 @@ class LowFidelityDynamicModel(DynamicModelBase):
         min_distance_index = np.argmin(distance_array)
         closest_initial_state = initial_state_history[min_distance_index]
 
+        # print("reference lpf", reference_state_LPF)
+        # print("initial state early 1: ", closest_initial_state)
+        # closest_initial_state[:6] = initial_state_history[0,:6]
+
+        # print("initial state early 2: ", closest_initial_state)
+
         # ax = plt.figure().add_subplot(projection='3d')
         # plt.plot(initial_state_history[:, 6], initial_state_history[:, 7], initial_state_history[:, 8])
-        # plt.plot(state_history_polimi[0, 0], state_history_polimi[0,1], state_history_polimi[0,2], marker='o', color="red")
+        # plt.plot(reference_state_LUMIO[0, 0], reference_state_LUMIO[0,1], reference_state_LUMIO[0,2], marker='o', color="red")
         # plt.plot(closest_initial_state[6], closest_initial_state[7], closest_initial_state[8], marker='o', color="blue")
         # ax.set_xlabel('X [m]')
         # ax.set_ylabel('Y [m]')
@@ -191,6 +198,7 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
         if self.custom_initial_state is None:
             self.initial_state = self.get_closest_initial_state()
+            # print("initial state later: ", self.initial_state)
         else:
             self.initial_state = self.convert_synodic_to_inertial_state(self.custom_initial_state)
             self.custom_initial_state[0] = self.custom_initial_state[0] + (1-self.mu)
