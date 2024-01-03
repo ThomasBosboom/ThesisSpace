@@ -6,9 +6,8 @@ from tudatpy.kernel.astro import time_conversion
 
 class Interpolator:
 
-    def __init__(self, dynamic_model_object, step_size=0.005, kind='cubic', epoch_in_MJD=True):
+    def __init__(self, step_size=0.005, kind='cubic', epoch_in_MJD=True):
 
-        self.dynamic_model_object = dynamic_model_object
         self.step_size = step_size*constants.JULIAN_DAY
         self.kind = kind
         self.epoch_in_MJD = epoch_in_MJD
@@ -26,12 +25,12 @@ class Interpolator:
             return interpolated_history
 
 
-    def get_results(self):
+    def get_propagator_results(self, dynamic_model_object):
 
         # Get simulation results from each dynamic model
-        self.dynamics_simulator, self.variational_equations_solver = self.dynamic_model_object.get_propagated_orbit()
-        self.simulation_start_epoch = self.dynamic_model_object.simulation_start_epoch
-        self.simulation_end_epoch = self.dynamic_model_object.simulation_end_epoch
+        self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagated_orbit()
+        self.simulation_start_epoch = dynamic_model_object.simulation_start_epoch
+        self.simulation_end_epoch = dynamic_model_object.simulation_end_epoch
 
         # Extract the variational_equations_solver results
         epochs                          = np.stack(list(self.variational_equations_solver.state_history.keys()))
@@ -40,6 +39,7 @@ class Interpolator:
 
         # Define updated time vector that is the same for all dynamic models irrespective of their own time vector
         interp_epochs = np.arange(self.simulation_start_epoch, self.simulation_end_epoch+self.step_size, self.step_size)
+        print(interp_epochs)
 
         # Perform interpolation using on the results from self.variational_equations_solver
         interp_state_history = self.interp_function(epochs, interp_epochs, state_history)
