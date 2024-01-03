@@ -20,5 +20,5 @@ conda activate tudat-space
 
 For more information, go to one of the documentation of tudatpy.
 
-[website](https://docs.tudat.space/en/latest/)
-[website](https://py.api.tudat.space/en/latest/index.html)
+- [Main Documentation](https://docs.tudat.space/en/latest/)
+- [API Reference](https://py.api.tudat.space/en/latest/index.html)
