@@ -17,7 +17,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 # Own
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from dynamic_models import validation_LUMIO
-from dynamic_models.low_fidelity.integration_settings import *
+from dynamic_models.low_fidelity.three_body_problem import *
 from dynamic_models.high_fidelity.point_mass import *
 from dynamic_models.high_fidelity.point_mass_srp import *
 from dynamic_models.high_fidelity.spherical_harmonics import *
