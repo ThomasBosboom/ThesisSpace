@@ -39,7 +39,6 @@ class Interpolator:
 
         # Define updated time vector that is the same for all dynamic models irrespective of their own time vector
         interp_epochs = np.arange(self.simulation_start_epoch, self.simulation_end_epoch+self.step_size, self.step_size)
-        print(interp_epochs)
 
         # Perform interpolation using on the results from self.variational_equations_solver
         interp_state_history = self.interp_function(epochs, interp_epochs, state_history)
