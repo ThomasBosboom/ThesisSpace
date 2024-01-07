@@ -23,7 +23,7 @@ class SynodicToInertialHistoryConverter:
         rsw_to_inertial_rotation_matrix = frame_conversion.rsw_to_inertial_rotation_matrix(inertial_moon_state)
 
         # Determine rotation rate and direction with respect to synodic frame (so only rotation w of rsw is relevant)
-        rotation_rate = self.dynamic_model_object.rotation_rate
+        # rotation_rate = self.dynamic_model_object.rotation_rate
         m = self.dynamic_model_object.bodies.get("Moon").mass
         r_norm = np.linalg.norm(inertial_moon_state[:3])
         v_norm = np.linalg.norm(inertial_moon_state[3:])
@@ -42,8 +42,8 @@ class SynodicToInertialHistoryConverter:
 
     def convert_state_nondim_to_dim_state(self, synodic_state, inertial_moon_state):
 
-        lu_cr3bp = self.dynamic_model_object.lu_cr3bp
-        tu_cr3bp = self.dynamic_model_object.lu_cr3bp
+        # lu_cr3bp = self.dynamic_model_object.lu_cr3bp
+        # tu_cr3bp = self.dynamic_model_object.lu_cr3bp
 
         lu_cr3bp = np.linalg.norm(inertial_moon_state[:3])
         tu_cr3bp = 1/np.sqrt((self.dynamic_model_object.gravitational_parameter_primary + \
@@ -137,7 +137,7 @@ class InertialToSynodicHistoryConverter:
         rsw_to_inertial_rotation_matrix = frame_conversion.rsw_to_inertial_rotation_matrix(inertial_moon_state)
 
         # Determine rotation rate and direction with respect to synodic frame (so only rotation w of rsw is relevant)
-        rotation_rate = self.dynamic_model_object.rotation_rate
+        # rotation_rate = self.dynamic_model_object.rotation_rate
         m = self.dynamic_model_object.bodies.get("Moon").mass
         r_norm = np.linalg.norm(inertial_moon_state[:3])
         v_norm = np.linalg.norm(inertial_moon_state[3:])
@@ -156,8 +156,8 @@ class InertialToSynodicHistoryConverter:
 
     def convert_state_dim_to_nondim_state(self, synodic_state, inertial_moon_state):
 
-        lu_cr3bp = self.dynamic_model_object.lu_cr3bp
-        tu_cr3bp = self.dynamic_model_object.lu_cr3bp
+        # lu_cr3bp = self.dynamic_model_object.lu_cr3bp
+        # tu_cr3bp = self.dynamic_model_object.lu_cr3bp
 
         lu_cr3bp = np.linalg.norm(inertial_moon_state[:3])
         tu_cr3bp = 1/np.sqrt((self.dynamic_model_object.gravitational_parameter_primary + \
