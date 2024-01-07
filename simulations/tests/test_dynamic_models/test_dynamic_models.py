@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import itertools
+import time
 
 # Define path to import src files
 script_directory = os.path.dirname(os.path.realpath(__file__))
@@ -23,7 +24,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 from tests import utils
 from src.dynamic_models import validation_LUMIO
 from src.dynamic_models import Interpolator, FrameConverter, TraditionalLowFidelity
-from src.dynamic_models.low_fidelity.integration_settings import *
+from src.dynamic_models.low_fidelity.three_body_problem import *
 from src.dynamic_models.high_fidelity.point_mass import *
 from src.dynamic_models.high_fidelity.point_mass_srp import *
 from src.dynamic_models.high_fidelity.spherical_harmonics import *
@@ -34,28 +35,14 @@ from src.estimation_models import EstimationModel
 
 class TestFrameConversions:
 
-    # simulation_start_epoch_MJD = [60390]
-    # propagation_time = [1]
-    # tolerance = [1e-3]
-
-    # all_combinations = itertools.product(simulation_start_epoch_MJD, propagation_time, tolerance)
-    # @pytest.mark.parametrize("simulation_start_epoch_MJD, propagation_time, tolerance", all_combinations)
-    # def test_initial_states_dynamic_models(self, simulation_start_epoch_MJD, propagation_time, tolerance, extras, step_size = 0.001):
-
-    #     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
-    #     for dynamic_model in utils.convert_model_objects_to_list(dynamic_model_objects):
-
-    #         state_history_dict = dynamic_model.get_propagated_orbit()[0].state_history
-    #         print(utils.convert_dictionary_to_array(state_history_dict)[1][0,:])
+    @pytest.mark.parametrize(
+    "simulation_start_epoch_MJD, propagation_time, durations",
+    [
+        (60390, 50, [7, 14, 28, 42, 49]),
+    ])
 
 
-    simulation_start_epoch_MJD = [60390]
-    propagation_time = [50]
-    tolerance = [1e-3]
-
-    all_combinations = itertools.product(simulation_start_epoch_MJD, propagation_time, tolerance)
-    @pytest.mark.parametrize("simulation_start_epoch_MJD, propagation_time, tolerance", all_combinations)
-    def test_validation_crtbp(self, simulation_start_epoch_MJD, propagation_time, tolerance, extras, step_size = 0.001):
+    def test_validation_crtbp(self, simulation_start_epoch_MJD, propagation_time, durations, extras, step_size = 0.001):
 
         # Define initial state for both tudatpy and classic simulations
         custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
@@ -93,20 +80,8 @@ class TestFrameConversions:
             FrameConverter.SynodicToInertialHistoryConverter(dynamic_model, step_size=step_size).get_results(synodic_state_history_erdem)
 
 
-
-        # fig = plt.figure()
-        # ax = fig.add_subplot(111, projection='3d')
-        # plt.title("test figure")
-        # plt.plot(state_history_synodic[:,0], state_history_synodic[:,1], state_history_synodic[:,2])
-        # plt.plot(state_history_synodic[:,6], state_history_synodic[:,7], state_history_synodic[:,8])
-        # # plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2])
-        # # plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8])
-        # # plt.show()
-
-
-
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
+        fig1_3d = plt.figure()
+        ax = fig1_3d.add_subplot(111, projection='3d')
         plt.title("Comparison tudat versus classical CRTBP")
         plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2], label="LPF classic", color="gray")
         plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8], label="LUMIO classic", color="gray")
@@ -121,7 +96,6 @@ class TestFrameConversions:
 
         ### Printing histories in inertial frame ###
         fontsize = 16
-        durations = [7, 14, 28, 42, 49]
         fig1, axs1 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
         fig2, axs2 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
 
@@ -165,7 +139,7 @@ class TestFrameConversions:
                     ax[2].set_xlabel('X [-]')
                     ax[2].set_ylabel('Z [-]')
 
-                    fig.legend(["LPF classic", "LPF tudat", "LPF halo", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+                    fig.legend(["LPF halo", "LPF classic", "LPF tudat", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
 
                 if k==1:
 
@@ -187,9 +161,9 @@ class TestFrameConversions:
                     ax[2].set_xlabel('X [-]')
                     ax[2].set_ylabel('Z [-]')
 
-                    fig.legend(["LPF classic", "LPF tudat", "LPF halo"])
+                    fig.legend(["LPF halo", "LPF classic", "LPF tudat"])
 
-                fig.suptitle("Comparison position CRTBP models, synodic non-dim barycentric rotating frame", fontsize=fontsize)
+                fig.suptitle("Comparison position CRTBP models, synodic frame", fontsize=fontsize)
 
         plt.tight_layout()
         # plt.show()
@@ -262,7 +236,7 @@ class TestFrameConversions:
 
                     fig.legend(["LUMIO classic", "LUMIO tudat", "LUMIO halo"])
 
-                fig.suptitle("Comparison velocities CRTBP models, synodic non-dim barycentric rotating frame", fontsize=fontsize)
+                fig.suptitle("Comparison velocities CRTBP models, synodic frame", fontsize=fontsize)
 
         plt.tight_layout()
         # plt.show()
@@ -313,9 +287,9 @@ class TestFrameConversions:
                     ax[2].set_xlabel('X [m]')
                     ax[2].set_ylabel('Z [m]')
 
-                    fig.legend(["LPF classic", "LPF tudat", "LPF halo", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+                    fig.legend(["LPF halo", "LPF classic", "LPF tudat", "LUMIO halo", "LUMIO classic", "LUMIO tudat"])
 
-                fig.suptitle("Comparison position CRTBP models, inertial Earth-centered frame", fontsize=fontsize)
+                fig.suptitle("Comparison position CRTBP models, inertial frame", fontsize=fontsize)
 
         plt.tight_layout()
         # plt.show()
@@ -334,42 +308,37 @@ class TestFrameConversions:
 
                 j = int(durations[i]/(step_size))
 
-                if k==0:
+                ax[0].plot(state_history_classic_erdem[:j,3], state_history_classic_erdem[:j,4], label="LPF halo", color="black")
+                ax[0].plot(state_history_classic[:j,3], state_history_classic[:j,4], label="LPF classic", color="gray")
+                ax[0].plot(state_history[:j,3], state_history[:j,4], label="LPF tudat", color="red")
+                ax[0].plot(state_history_classic[:j,9], state_history_classic[:j,10], label="LUMIO classic", color="gray")
+                ax[0].plot(state_history[:j,9], state_history[:j,10], label="LUMIO tudat", color="blue")
+                ax[0].plot(state_history_classic_erdem[:j,9], state_history_classic_erdem[:j,10], label="LUMIO halo", color="black")
+                ax[0].set_xlabel('VX [m/s]')
+                ax[0].set_ylabel('VY [m/s]')
 
-                    ax[0].plot(state_history_classic_erdem[:j,3], state_history_classic_erdem[:j,4], label="LPF halo", color="black")
-                    ax[0].plot(state_history_classic[:j,3], state_history_classic[:j,4], label="LPF classic", color="gray")
-                    ax[0].plot(state_history[:j,3], state_history[:j,4], label="LPF tudat", color="red")
-                    ax[0].plot(state_history_classic[:j,9], state_history_classic[:j,10], label="LUMIO classic", color="gray")
-                    ax[0].plot(state_history[:j,9], state_history[:j,10], label="LUMIO tudat", color="blue")
-                    ax[0].plot(state_history_classic_erdem[:j,9], state_history_classic_erdem[:j,10], label="LUMIO halo", color="black")
-                    ax[0].set_xlabel('VX [m/s]')
-                    ax[0].set_ylabel('VY [m/s]')
+                ax[1].plot(state_history_classic_erdem[:j,4], state_history_classic_erdem[:j,5], label="LPF halo", color="black")
+                ax[1].plot(state_history_classic[:j,4], state_history_classic[:j,5], label="LPF classic", color="gray")
+                ax[1].plot(state_history[:j,4], state_history[:j,5], label="LPF tudat", color="red")
+                ax[1].plot(state_history_classic[:j,10], state_history_classic[:j,11], label="LUMIO classic", color="gray")
+                ax[1].plot(state_history[:j,10], state_history[:j,11], label="LUMIO tudat", color="blue")
+                ax[1].plot(state_history_classic_erdem[:j,10], state_history_classic_erdem[:j,11], label="LUMIO halo", color="black")
+                ax[1].set_xlabel('VY [m/s]')
+                ax[1].set_ylabel('VZ [m/s]')
 
-                    ax[1].plot(state_history_classic_erdem[:j,4], state_history_classic_erdem[:j,5], label="LPF halo", color="black")
-                    ax[1].plot(state_history_classic[:j,4], state_history_classic[:j,5], label="LPF classic", color="gray")
-                    ax[1].plot(state_history[:j,4], state_history[:j,5], label="LPF tudat", color="red")
-                    ax[1].plot(state_history_classic[:j,10], state_history_classic[:j,11], label="LUMIO classic", color="gray")
-                    ax[1].plot(state_history[:j,10], state_history[:j,11], label="LUMIO tudat", color="blue")
-                    ax[1].plot(state_history_classic_erdem[:j,10], state_history_classic_erdem[:j,11], label="LUMIO halo", color="black")
-                    ax[1].set_xlabel('VY [m/s]')
-                    ax[1].set_ylabel('VZ [m/s]')
+                ax[2].plot(state_history_classic_erdem[:j,3], state_history_classic_erdem[:j,5], label="LPF halo", color="black")
+                ax[2].plot(state_history_classic[:j,3], state_history_classic[:j,5], label="LPF classic", color="gray")
+                ax[2].plot(state_history[:j,3], state_history[:j,5], label="LPF tudat", color="red")
+                ax[2].plot(state_history_classic[:j,9], state_history_classic[:j,11], label="LUMIO classic", color="gray")
+                ax[2].plot(state_history[:j,9], state_history[:j,11], label="LUMIO tudat", color="blue")
+                ax[2].plot(state_history_classic_erdem[:j,9], state_history_classic_erdem[:j,11], label="LUMIO halo", color="black")
+                ax[2].set_xlabel('VX [m/s]')
+                ax[2].set_ylabel('VZ [m/s]')
 
-                    ax[2].plot(state_history_classic_erdem[:j,3], state_history_classic_erdem[:j,5], label="LPF halo", color="black")
-                    ax[2].plot(state_history_classic[:j,3], state_history_classic[:j,5], label="LPF classic", color="gray")
-                    ax[2].plot(state_history[:j,3], state_history[:j,5], label="LPF tudat", color="red")
-                    ax[2].plot(state_history_classic[:j,9], state_history_classic[:j,11], label="LUMIO classic", color="gray")
-                    ax[2].plot(state_history[:j,9], state_history[:j,11], label="LUMIO tudat", color="blue")
-                    ax[2].plot(state_history_classic_erdem[:j,9], state_history_classic_erdem[:j,11], label="LUMIO halo", color="black")
-                    ax[2].set_xlabel('VX [m/s]')
-                    ax[2].set_ylabel('VZ [m/s]')
-
-                    fig.legend(["LPF halo", "LPF classic", "LPF tudat", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
-
-                fig.suptitle("Comparison velocities CRTBP models, inertial Earth-centered frame", fontsize=fontsize)
-
+                fig.legend(["LPF halo", "LPF classic", "LPF tudat", "LUMIO classic", "LUMIO tudat", "LUMIO halo"])
+            fig.suptitle("Comparison velocities CRTBP models, inertial frame", fontsize=fontsize)
         plt.tight_layout()
         # plt.show()
-
 
 
         # Calculate the percentage difference for each entry
@@ -472,35 +441,8 @@ class TestFrameConversions:
         plt.legend()
         # plt.show()
 
-
-
-
-        # keplerian_state_Moon_Earth = np.empty(np.shape(state_history_classic[:,:6]))
-        # keplerian_state_LPF_Moon = keplerian_state_Moon_Earth.copy()
-        # keplerian_state_Moon_Earth_classic = keplerian_state_Moon_Earth.copy()
-        # keplerian_state_LPF_Moon_classic = keplerian_state_Moon_Earth.copy()
-        # for epoch, state in enumerate(keplerian_state_Moon_Earth):
-        #     keplerian_state_Moon_Earth[epoch] = element_conversion.cartesian_to_keplerian(dependent_variables_history[epoch,0:6], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
-        #     keplerian_state_LPF_Moon[epoch] = element_conversion.cartesian_to_keplerian(state_history[epoch,0:6]-dependent_variables_history[epoch,0:6], dynamic_model.gravitational_parameter_secondary)
-        #     keplerian_state_Moon_Earth_classic[epoch] = element_conversion.cartesian_to_keplerian(dependent_variables_history_classic[epoch,6:12], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
-        #     keplerian_state_LPF_Moon_classic[epoch] = element_conversion.cartesian_to_keplerian(state_history_classic[epoch,0:6]-dependent_variables_history_classic[epoch,6:12], dynamic_model.gravitational_parameter_secondary)
-
-
-        # fig4, axs = plt.subplots(2, 1, figsize=(11.69,8.27), constrained_layout=True)
-        # axs[0].set_title("Moon w.r.t. Earth")
-        # axs[0].plot(epochs, dependent_variables_history[:,18:24], label=[r"$a$", r"$e$", r"$i$", r"$\omega$", r"$\Omega$", r"$\theta$"])
-        # axs[1].set_title("LPF w.r.t. Moon")
-        # axs[1].plot(epochs, dependent_variables_history[:,24:30], label=[r"$a$", r"$e$", r"$i$", r"$\omega$", r"$\Omega$", r"$\theta$"])
-
-        # plt.suptitle("State comparison of classic and tudat CRTBP model parameters. Time step: "+str(propagation_time)+" days")
-        # [ax.grid(alpha=0.5, linestyle='--') for ax in axs]
-        # plt.suptitle("Keplerian states")
-        # fig2.legend(loc='lower center', bbox_to_anchor=(0.0, -1))
-        # plt.legend()
-        # plt.show()
-
-        utils.save_figures_to_folder("test_validation_crtbp", extras, [fig1, fig2, fig3, fig4, fig5, fig6, fig7], [simulation_start_epoch_MJD, propagation_time, tolerance])
-
+        utils.save_figures_to_folder("test_validation_crtbp", extras, [fig1, fig2, fig3, fig4, fig5, fig6, fig7], [simulation_start_epoch_MJD, propagation_time])
+        utils.save_figures_to_folder("test_validation_crtbp", extras, [fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
 
 
 
@@ -509,102 +451,320 @@ class TestOutputsDynamicalModels:
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        # (60390, 10),
-    ])
-
-    def test_estimation_models(self, simulation_start_epoch_MJD, propagation_time):
-
-        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
-        estimation_model_objects = utils.get_estimation_model_objects(EstimationModel, dynamic_model_objects)
-
-        for estimation_model in utils.convert_model_objects_to_list(estimation_model_objects):
-
-            print(estimation_model.get_estimation_results()[0].correlations)
-
-
-    @pytest.mark.parametrize(
-    "simulation_start_epoch_MJD, propagation_time",
-    [
-        # (60390, 10),
-        # (60395, 10),
         (60390, 14),
     ])
 
-    def test_difference_reference_model(self, simulation_start_epoch_MJD, propagation_time, extras, step_size=0.01):
+    def test_loading_time_models(self, simulation_start_epoch_MJD, propagation_time, extras):
 
+        time_dict = {}
+        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
         dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
+        for model_type, model_names in dynamic_model_objects.items():
+            for model_name, dynamic_models in model_names.items():
+                time_list = []
+                for dynamic_model in dynamic_models:
+                    start_time = time.time()
+                    _, _ = dynamic_model.get_propagated_orbit()
+                    time_list.append(time.time()-start_time)
+                time_dict[model_name] = time_list
 
-        # Create a figure and three subplots side by side
-        fig1, axs1 = plt.subplots(6, 1, figsize=(15, 5))
-        for dynamic_model in utils.convert_model_objects_to_list(dynamic_model_objects):
+        fig, axs = plt.subplots(1, len(list(time_dict.keys())), figsize=(10, 6), sharey=True, constrained_layout=True)
+        for i, (key, values) in enumerate(time_dict.items()):
+            axs[i].bar(range(len(values)), values, label=key)
+            axs[i].set_xlabel(key)
+            axs[i].set_ylabel('Run time')
+            axs[i].legend(loc="upper left")
+            axs[i].set_xticks(range(max([len(value) for value in time_dict.values()])))
 
-            setattr(dynamic_model, "current_coefficient_set", propagation_setup.integrator.CoefficientSets.rkdp_87)
+        plt.title(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
+        plt.tight_layout()
+        # plt.show()
 
-            # Extract simulation histories numerical solution
+        utils.save_figures_to_folder("test_loading_time_models", extras, [fig], [simulation_start_epoch_MJD, propagation_time])
+
+
+    @pytest.mark.parametrize(
+    "simulation_start_epoch_MJD, propagation_time, durations",
+    [
+        (60390, 50, [7, 14, 28, 42, 49]),
+    ])
+
+    def test_difference_high_and_low_fidelity(self, simulation_start_epoch_MJD, propagation_time, durations, extras, step_size=0.001):
+
+        package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+
+        # Pick only the first of teach model name
+        dynamic_models = utils.get_first_of_model_types(dynamic_model_objects)
+
+        # Adjust to match initial state
+        # dynamic_models[0] = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=utils.synodic_initial_state)
+
+        # Extract simulation histories of classic CRTBP halo continuation model
+        synodic_state_history_erdem = validation_LUMIO.get_synodic_state_history_erdem()[:int(propagation_time/0.001),1:]
+
+        epochs_classic_erdem, state_history_classic_erdem, dependent_variables_history_classic_erdem = \
+            FrameConverter.SynodicToInertialHistoryConverter(dynamic_models[0], step_size=step_size).get_results(synodic_state_history_erdem)
+
+        # Generate figures
+        fig1, axs1 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+        fig2, axs2 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+        fig3, axs3 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+        fig4, axs4 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+
+        figs_list = [[fig1, fig2],[fig3, fig4]]
+        axs_list = [[axs1, axs2],[axs3, axs4]]
+
+        fontsize = 16
+        figure_titles = ["position", "velocity"]
+        frames = ["inertial", "synodic"]
+        satellite_labels = ["LPF", "LUMIO"]
+        subplot_labels = [[r'X [m]', r'Y [m]', r'Z [m]', r'VX [m/s]', r'VY [m/s]', r'VZ [m/s]'],
+                            [r'X [-]', r'Y [-]', r'Z [-]', r'VX [-]', r'VY [-]', r'VZ [-]']]
+        labels = ["LPF halo", "LUMIO halo", "Moon", "LPF tudat high", "LUMIO tudat high", "LPF tudat low", "LUMIO tudat low"]
+        figure_colors = ["lightgray", "lightgray", "gray", "red", "blue", "red", "blue"]
+
+
+        for m, dynamic_model in enumerate(dynamic_models[:2]):
+
+            # Extra simulation histories of tudat models
             epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
+                Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model)
 
-            reference_state_history = np.concatenate((validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
-                                                      validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
-                                                      axis=1)
+            epochs_synodic, state_history_synodic = \
+                FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
 
-            print(np.shape(state_history), np.shape(reference_state_history))
-            print(state_history[0,:])
-            print(reference_state_history[0,:])
+            for index, figs in enumerate(figs_list):
+                axs = axs_list[index]
+                for i, fig in enumerate(figs):
+                    for k, ax in enumerate(axs[i]):
+                        j = int(durations[k]/step_size)
+                        for l in range(len(ax)):
+                            for n in range(len(satellite_labels)-1):
 
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-            plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
-            plt.plot(state_history[:,6], state_history[:,7], state_history[:,8])
-            plt.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2])
-            plt.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8])
-            plt.show()
+                                if index == 0:
 
-            # plt.plot(np.linalg.norm(state_history[:,:3], axis=1))
-            # plt.plot(np.linalg.norm(reference_state_history[:,:3], axis=1))
-            # plt.plot(np.linalg.norm(state_history[:,6:9], axis=1))
-            # plt.plot(np.linalg.norm(reference_state_history[:,6:9], axis=1))
-            # plt.show()
+                                    # ax[l].plot(state_history_classic_erdem[:j,6*n+3*i+l%3], state_history_classic_erdem[:j,6*n+3*i+(l+1)%3], color=figure_colors[0])
+                                    # ax[l].plot(state_history_classic_erdem[:j,6*(n+1)+3*i+l%3], state_history_classic_erdem[:j,6*(n+1)+3*i+(l+1)%3], color=figure_colors[1])
 
-            # Define the titles and data for the subplots
-            figure_titles = ["Position difference w.r.t reference state", "Velocity difference w.r.t reference state"]
-            subplot_ylabels = ['X [m]', 'Y [m]', 'Z [m]', 'VX [m/s]', 'VY [m/s]', 'VZ [m/s]']
-            data_to_plot = [state_history-reference_state_history]
-            print(data_to_plot[0][:,0])
+                                    if m != 0:
+                                        ax[l].plot(dependent_variables_history[:j,3*i+l%3], dependent_variables_history[:j,3*i+(l+1)%3], color=figure_colors[2], lw=0.5, label=labels[2])
+                                        ax[l].plot(state_history[:j,6*n+3*i+l%3], state_history[:j,6*n+3*i+(l+1)%3], color=figure_colors[3], label=labels[3])
+                                        ax[l].plot(state_history[:j,6*(n+1)+3*i+l%3], state_history[:j,6*(n+1)+3*i+(l+1)%3], color=figure_colors[4], label=labels[4])
+                                    else:
+                                        ax[l].plot(dependent_variables_history[:j,3*i+l%3], dependent_variables_history[:j,3*i+(l+1)%3], color=figure_colors[2], lw=0.5, ls="--", label=labels[2])
+                                        ax[l].plot([None, None], color=figure_colors[3], label=labels[3])
+                                        ax[l].plot([None, None], color=figure_colors[4], label=labels[4])
+                                        ax[l].plot(state_history[:j,6*n+3*i+l%3], state_history[:j,6*n+3*i+(l+1)%3], color=figure_colors[5], ls="--", label=labels[5])
+                                        ax[l].plot(state_history[:j,6*(n+1)+3*i+l%3], state_history[:j,6*(n+1)+3*i+(l+1)%3], color=figure_colors[6], ls="--", label=labels[6])
 
-            # Plot the state histories for each entry across all models
-            for state_index in range(6):
-                axs1[state_index].plot(epoch, data_to_plot[0][:,state_index])
-                axs1[state_index].plot(epoch, data_to_plot[0][:,6+state_index])
+                                else:
 
+                                    # ax[l].plot(synodic_state_history_erdem[:j,6*n+3*i+l%3], synodic_state_history_erdem[:j,6*n+3*i+(l+1)%3], color=figure_colors[0])
+                                    # ax[l].plot(synodic_state_history_erdem[:j,6*(n+1)+3*i+l%3], synodic_state_history_erdem[:j,6*(n+1)+3*i+(l+1)%3], color=figure_colors[1])
+                                    # ax[l].plot([None,None])
+                                    if m != 0:
+                                        ax[l].plot(state_history_synodic[:j,6*n+3*i+l%3], state_history_synodic[:j,6*n+3*i+(l+1)%3], color=figure_colors[3])
+                                        ax[l].plot(state_history_synodic[:j,6*(n+1)+3*i+l%3], state_history_synodic[:j,6*(n+1)+3*i+(l+1)%3], color=figure_colors[4])
+                                    else:
+                                        ax[l].plot([None, None], color=figure_colors[3])
+                                        ax[l].plot([None, None], color=figure_colors[4])
+                                        ax[l].plot(state_history_synodic[:j,6*n+3*i+l%3], state_history_synodic[:j,6*n+3*i+(l+1)%3], color=figure_colors[3], ls="--")
+                                        ax[l].plot(state_history_synodic[:j,6*(n+1)+3*i+l%3], state_history_synodic[:j,6*(n+1)+3*i+(l+1)%3], color=figure_colors[4], ls="--")
 
-        for state_index in range(6):
-            axs1[state_index].set_ylabel(subplot_ylabels[state_index])
-            axs1[state_index].grid(alpha=0.5, linestyle='--')
+                                ax[l].set_xlabel(subplot_labels[index][3*i+l%3])
+                                ax[l].set_ylabel(subplot_labels[index][3*i+(l+1)%3])
+                                ax[l].grid(alpha=0.5, linestyle='--')
+                                ax[l].ticklabel_format(axis="y", scilimits=(0,0))
 
-        fig.suptitle("State difference w.r.t. reference states")
+                            if index == 0:
+                                fig.legend(["Moon", "LPF tudat high", "LUMIO tudat high", "LPF tudat low", "LUMIO tudat low"])
+                            else:
+                                fig.legend(["LPF tudat high", "LUMIO tudat high", "LPF tudat low", "LUMIO tudat low"])
 
-        # plt.legend()
-        plt.show()
+                        if l == 3:
+                            ax[l].invert_xaxis()
+                            ax[l].invert_yaxis()
 
-        # Create a folder named after the function
-        utils.save_figures_to_folder("test_difference_reference_model", extras, [fig1], [simulation_start_epoch_MJD, propagation_time])
+                        ax[0].title.set_text(str(durations[k])+ " days")
+                    fig.suptitle(f"Comparison {figure_titles[i]} low and high fidelity models, {frames[index]} frame", fontsize=fontsize)
+
+        plt.tight_layout()
+        # plt.show()
+
+        utils.save_figures_to_folder("test_difference_high_and_low_fidelity", extras, list(itertools.chain(*figs_list)), [simulation_start_epoch_MJD, propagation_time])
+
 
 
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        # (60390, 20),
+        (60390, 14),
         # (60395, 10),
-        # (60400, 10),
+        # (60390, 10),
+    ])
+
+    def test_difference_to_reference_model(self, simulation_start_epoch_MJD, propagation_time, extras, step_size=0.01):
+
+        # Plot absolute state difference for every model
+
+        # Generate plot settings
+        fontsize = 12
+        figs = []
+        axs = []
+        for i in range(2):
+            fig, ax = plt.subplots(2, 1, figsize=(14, 5), layout="constrained", sharex=True)
+            figs.append(fig)
+            axs.append(ax)
+        ylabels = [r"||$\Delta \mathbf{r}$||",r"||$\Delta \mathbf{v}$||"]
+        colors = [[["black"], ["black"]],[["darkred", "red", "darksalmon", "lightsalmon"],["steelblue", "blue", "deepskyblue", "lightblue"]]]
+        satellite_labels = ["LPF", "LUMIO"]
+        model_name_abbreviations = [["CRTBP"],["PM", "PM SRP", "SH", "SH SRP"]]
+        markers = ["o", "v", "^", "<", ">", "s", "h", "D", "*", "p","8"]
+
+
+        # Generate dynamic model objects
+        run_only_first = False
+        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+        for f, fig in enumerate(figs):
+            ax = axs[f]
+            legend_labels = []
+            for m, (model_type, model_names) in enumerate(dynamic_model_objects.items()):
+
+                labels = []
+                for i, (model_name, dynamic_models) in enumerate(model_names.items()):
+
+                    if run_only_first:
+                        dynamic_models = list(dynamic_models[:1])
+                    for d, dynamic_model in enumerate(dynamic_models):
+
+                        # Extract simulation histories numerical solution
+                        epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
+                            Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
+
+                        reference_state_history = np.concatenate((validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
+                                                                validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
+                                                                axis=1)
+
+                        data_to_plot = state_history-reference_state_history
+
+                        for k in range(2):
+                            ax[0+k].plot(epochs, np.linalg.norm(data_to_plot[:,6*f+3*k:6*f+3*k+3], axis=1), color=colors[m][f][i], marker=markers[d], label=model_name, markersize=1)
+
+                        labels.append(model_name_abbreviations[m][i]+" "+str(d+1))
+
+                legend_labels.append(labels)
+
+                for i in range(2):
+                    ax[i].grid(alpha=0.5, linestyle='--')
+                    ax[i].set_ylabel(ylabels[i%2])
+                    ax[i].set_yscale("log")
+
+            fig.legend(list(np.concatenate(legend_labels)), ncol=3, title="Models")
+            fig.suptitle(f"Absolute difference dynamic models and truth, {satellite_labels[f]}", fontsize=fontsize)
+
+        # plt.show()
+
+
+        assert 1 == 1
+
+        utils.save_figures_to_folder("test_difference_to_reference_model", extras, figs, [simulation_start_epoch_MJD, propagation_time])
+
+
+
+
+        package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+
+        figs = []
+        axs = []
+        for i, (model_type, model_names) in enumerate(dynamic_model_objects.items()):
+
+            model_names = model_names.keys()
+
+            fig_model_type = []
+            axs_model_type = []
+            for j in range(len(model_names)):
+                fig, ax = plt.subplots(6, 1, figsize=(13, 7), sharex=True)
+                fig_model_type.append(fig)
+                axs_model_type.append(ax)
+
+            figs.append(fig_model_type)
+            axs.append(axs_model_type)
+
+            for k, model_name in enumerate(model_names):
+                for dynamic_model in dynamic_model_objects[model_type][model_name]:
+
+                    # Extract simulation histories numerical solution
+                    epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
+                        Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
+
+                    reference_state_history = np.concatenate((validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
+                                                            validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
+                                                            axis=1)
+
+                    fig1_3d = plt.figure()
+                    ax = fig1_3d.add_subplot(111, projection='3d')
+                    plt.title("Comparison states tudat and reference")
+                    plt.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF tudat", color="red")
+                    plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO tudat", color="blue")
+                    plt.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF reference", color="salmon")
+                    plt.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8], label="LUMIO reference", color="lightskyblue")
+                    plt.legend()
+                    # plt.show()
+
+                    # Define the titles and data for the subplots
+                    fontsize = 16
+                    subplot_ylabels = [r'$\Delta$X [m]', r'$\Delta$Y [m]', r'$\Delta$Z [m]', \
+                                       r'$\Delta$VX [m/s]', r'$\Delta$VY [m/s]', r'$\Delta$VZ [m/s]']
+                    subplot_labels = ["LPF", "LUMIO"]
+                    data_to_plot = [state_history-reference_state_history]
+
+                    # Plot the state histories for each entry across all models
+                    for state_index in range(6):
+                        axs[i][k][state_index].plot(epochs, data_to_plot[0][:,state_index], color="red")
+                        axs[i][k][state_index].plot(epochs, data_to_plot[0][:,6+state_index], color="blue")
+
+                for state_index in range(6):
+                    axs[i][k][state_index].set_ylabel(subplot_ylabels[state_index])
+                    axs[i][k][state_index].grid(alpha=0.5, linestyle='--')
+                    axs[i][k][state_index].ticklabel_format(axis='y', scilimits=(0,0))
+                    figs[i][k].suptitle(f"State difference w.r.t. reference, {model_type}, {model_name}", fontsize=fontsize)
+                    axs[i][k][-1].set_xlabel(f"Epoch (MJD)")
+
+                figs[i][k].legend(subplot_labels)
+                plt.tight_layout()
+        # plt.show()
+
+        utils.save_figures_to_folder("test_difference_to_reference_model", extras, [fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
+        utils.save_figures_to_folder("test_difference_to_reference_model", extras, list(np.concatenate(figs)), [simulation_start_epoch_MJD, propagation_time])
+
+
+
+
+
+
+
+
+
+
+
+
+
+    @pytest.mark.parametrize(
+    "simulation_start_epoch_MJD, propagation_time",
+    [
+        # (60390, 14),
     ])
 
     def test_observability_effectiveness(self, simulation_start_epoch_MJD, propagation_time, extras):
 
         # Plot the observability history and compare them to the different models
-        fig, axs = plt.subplots(2, 1, figsize=(15, 5))
+        fig, axs = plt.subplots(2, 1, figsize=(10, 5))
 
-        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
+        package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
         estimation_model_objects = utils.get_estimation_model_objects(EstimationModel, dynamic_model_objects)
 
         for estimation_model in utils.convert_model_objects_to_list(estimation_model_objects):
@@ -618,14 +778,10 @@ class TestOutputsDynamicalModels:
             epoch_range, epoch_doppler = utils.convert_epochs_to_MJD(epoch_range), utils.convert_epochs_to_MJD(epoch_doppler)
 
             # Define the titles for the subplots
+            fontsize = 16
             subplot_titles = ["Range measurements", "Range-rate measurements"]
             subplot_labels = ["LPF", "LUMIO"]
-
-            # Data to plot
             data_to_plot = [epoch_range, information_matrix_history_range, epoch_doppler, information_matrix_history_doppler]
-
-            print(information_matrix_history_range, np.shape(information_matrix_history_range))
-            print(information_matrix_history_doppler, np.shape(information_matrix_history_doppler))
 
             # Iterate through subplots and data
             for i, ax in enumerate(axs):
@@ -635,42 +791,55 @@ class TestOutputsDynamicalModels:
                     ax.plot(epoch, np.max(np.linalg.eigvals(data_to_plot[1+i*2][:,0:3,0:3]), axis=1, keepdims=True), color="red")
                     ax.set_xlabel(r"Time since $t_0$"+ " [days] ("+str(simulation_start_epoch_MJD)+" MJD)")
                     ax.set_ylabel(r"$\sqrt{\max(\lambda_r(t))}$ [-]")
-                    ax.set_xlim(min(epoch), max(epoch))
+                    # ax.set_xlim(min(epoch), max(epoch))
                     ax.set_title(subplot_titles[i])
 
                 ax.set_yscale("log")
                 ax.legend(subplot_labels)
                 ax.grid(alpha=0.5, linestyle='--')
 
-        plt.suptitle("Observability effectiveness comparison of high and low fidelity models. Time step: "+str(propagation_time)+" days")
+        plt.suptitle("Observability effectiveness comparison of high and low fidelity models. Time step: "+str(propagation_time)+" days", fontsize=fontsize)
         plt.tight_layout()
         # plt.show()
 
-        # Create a folder named after the function
         utils.save_figures_to_folder("test_observability_effectiveness", extras, [fig], [simulation_start_epoch_MJD, propagation_time])
 
 
+# import matplotlib.pyplot as plt
 
-import numpy as np
-import pandas as pd
+# data = {
+#     'three_body_problem': [3.58284068107605],
+#     'point_mass': [9.095354557037354, 10.117196321487427, 11.420943260192871, 13.259814262390137, 16.021060466766357, 19.226678371429443, 22.45508646965027, 24.722658157348633],
+#     'point_mass_srp': [10.055527687072754, 11.619261980056763, 13.202752113342285, 16.24797010421753, 15.367884874343872, 17.392045736312866, 18.93115234375, 20.2774076461792]
+# }
 
-# Example data (replace these with your actual arrays)
-array1 = np.array([1, 2, 3, 4])
-array2 = np.array([1.2, 1.8, 3.1, 4.5])
+# # Extract keys and values# set width of bar
+# barWidth = 0.1
+# fig = plt.subplots(figsize =(12, 8))
 
-# Calculate the percentage difference for each entry
-percentage_difference = np.abs((array2 - array1) / array1) * 100
+# # set height of bar
+# IT = [12, 30, 1, 8, 22]
+# ECE = [28, 6, 16, 5, 10]
+# CSE = [29, 3, 24, 25, 17]
 
-# Create a DataFrame
-data = {'Array 1': array1, 'Array 2': array2, 'Percentage Difference': percentage_difference}
-df = pd.DataFrame(data)
+# # Set position of bar on X axis
+# br1 = np.arange(len(IT))
+# br2 = [x + barWidth for x in br1]
+# br3 = [x + barWidth for x in br2]
 
-# Transpose the DataFrame
-df_transposed = df.transpose()
+# # Make the plot
+# plt.bar(br1, IT, color ='r', width = barWidth,
+#         edgecolor ='grey', label ='IT')
+# plt.bar(br2, ECE, color ='g', width = barWidth,
+#         edgecolor ='grey', label ='ECE')
+# plt.bar(br3, CSE, color ='b', width = barWidth,
+#         edgecolor ='grey', label ='CSE')
 
-# Export the transposed DataFrame to a LaTeX table
-latex_table_transposed = df_transposed.to_latex()
+# # Adding Xticks
+# plt.xlabel('Branch', fontweight ='bold', fontsize = 15)
+# plt.ylabel('Students passed', fontweight ='bold', fontsize = 15)
+# plt.xticks([r + barWidth for r in range(3)],
+#         ['2015', '2016', '2017'])
 
-# Display the LaTeX table
-print(latex_table_transposed)
-
+# plt.legend()
+# plt.show()
