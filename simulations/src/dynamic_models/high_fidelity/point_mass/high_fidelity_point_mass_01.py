@@ -178,6 +178,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
 # epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
 #     Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.001).get_propagator_results(dynamic_model)
 
+# print(states[0,:])
 # ax = plt.figure().add_subplot(projection='3d')
 # plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
 # plt.plot(dependent_variables_history[:,0], dependent_variables_history[:,1], dependent_variables_history[:,2])
