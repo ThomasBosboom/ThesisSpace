@@ -62,6 +62,8 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  s
     # Example: User-defined epoch for interpolation
     user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
         time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))+69.1826417446136475
+    user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
+        time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))
     user_end_epoch = user_start_epoch + propagation_time*constants.JULIAN_DAY
 
     # Perform interpolation using SciPy's interp1d
@@ -95,7 +97,8 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  s
 
 
 
-# # print(get_reference_state_history(60390.00, 5, satellite="LPF", get_dict=False, get_full_history=True))
+# print(get_reference_state_history(60390.00, 0.05, satellite="LPF", get_dict=False, get_full_history=True, get_epoch_in_array=True))
+# print(get_reference_state_history(60390.00, 0.05, satellite="LUMIO", get_dict=False, get_full_history=True, get_epoch_in_array=True))
 # # print(get_reference_state_history(60390.00, 5, satellite="LUMIO", get_dict=False, get_full_history=False))
 # states = get_reference_state_history(60390.00, 28, satellite="LUMIO", body="moon", get_dict=False, get_full_history=True)
 # import matplotlib.pyplot as plt
