@@ -18,6 +18,7 @@ sys.path.append(os.path.dirname(parent_dir))
 from dynamic_models import validation_LUMIO
 from DynamicModelBase import DynamicModelBase
 
+
 class HighFidelityDynamicModel(DynamicModelBase):
 
     def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None):
@@ -44,6 +45,16 @@ class HighFidelityDynamicModel(DynamicModelBase):
             self.bodies.create_empty_body(body)
             self.bodies.get_body(body).mass = self.bodies_mass[index]
 
+        # Create radiation pressure settings, and add to vehicle
+        occulting_bodies_dict = dict()
+        occulting_bodies_dict[ "Sun" ] = [self.name_primary, self.name_secondary]
+        for index, body in enumerate(self.bodies_to_propagate):
+            self.bodies.create_empty_body(body)
+            self.bodies.get_body(body).mass = self.bodies_mass[index]
+            vehicle_target_settings = environment_setup.radiation_pressure.cannonball_radiation_target(
+                self.bodies_reference_area_radiation[index], self.bodies_radiation_pressure_coefficient[index], occulting_bodies_dict)
+            environment_setup.add_radiation_pressure_target_model(self.bodies, body, vehicle_target_settings)
+
 
     def set_acceleration_settings(self):
 
@@ -53,10 +64,13 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.acceleration_settings_on_spacecrafts = dict()
         for index, spacecraft in enumerate([self.name_ELO, self.name_LPO]):
             acceleration_settings_on_spacecraft = {
-                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(10,10)],
-                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(30,30)]}
+                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(5,5)],
+                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(5,5)]}
             for body in self.new_bodies_to_create:
                 acceleration_settings_on_spacecraft[body] = [propagation_setup.acceleration.point_mass_gravity()]
+                if body == "Sun":
+                    acceleration_settings_on_spacecraft[body].append(propagation_setup.acceleration.radiation_pressure())
+
             self.acceleration_settings_on_spacecrafts[spacecraft] = acceleration_settings_on_spacecraft
 
         # Create global accelerations dictionary.
@@ -96,6 +110,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
                                                                                            self.current_coefficient_set)
 
 
+
     def set_dependent_variables_to_save(self):
 
         self.set_integration_settings()
@@ -118,11 +133,15 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.spherical_harmonic_terms_acceleration_norm(body_to_propagate, body_to_create, [(2,0), (2,1), (2,2)]) \
-                        for body_to_propagate in self.bodies_to_propagate for body_to_create in [self.name_primary, self.name_secondary]])
+                        for body_to_propagate in self.bodies_to_propagate for body_to_create in [self.name_primary, self.name_secondary] ])
+
+        self.dependent_variables_to_save.extend([
+            propagation_setup.dependent_variable.single_acceleration_norm(
+                    propagation_setup.acceleration.radiation_pressure_type, body_to_propagate, body) \
+                        for body_to_propagate in self.bodies_to_propagate for body in ["Sun"]])
 
         self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.body_mass(self.name_primary),
                                                  propagation_setup.dependent_variable.body_mass(self.name_secondary)])
-
 
     def set_termination_settings(self):
 
@@ -169,16 +188,13 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         return dynamics_simulator, variational_equations_solver
 
-
 # test2 = HighFidelityDynamicModel(60390, 28)
 # dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
 
 # print(np.shape(dep_var))
 # ax = plt.figure()
-# # plt.plot(states[:,0], states[:,1], states[:,2])
-# # plt.plot(states[:,6], states[:,7], states[:,8])
-# plt.plot(dep_var[:,-12:-9])
-# plt.plot(dep_var[:,-9:-6])
+# plt.plot(dep_var[:,:2], label="lpf")
+# # plt.plot(dep_var[:,8:16], label="lumio")
 # plt.legend()
 # plt.yscale("log")
 # plt.show()

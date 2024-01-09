@@ -64,8 +64,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.acceleration_settings_on_spacecrafts = dict()
         for index, spacecraft in enumerate([self.name_ELO, self.name_LPO]):
             acceleration_settings_on_spacecraft = {
-                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(20,20)],
-                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(20,20)]}
+                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(10,10)],
+                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(5,5)]}
             for body in self.new_bodies_to_create:
                 acceleration_settings_on_spacecraft[body] = [propagation_setup.acceleration.point_mass_gravity()]
                 if body == "Sun":
@@ -187,3 +187,14 @@ class HighFidelityDynamicModel(DynamicModelBase):
                 simulate_dynamics_on_creation=True)
 
         return dynamics_simulator, variational_equations_solver
+
+# test2 = HighFidelityDynamicModel(60390, 28)
+# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
+
+# print(np.shape(dep_var))
+# ax = plt.figure()
+# plt.plot(dep_var[:,:2], label="lpf")
+# # plt.plot(dep_var[:,8:16], label="lumio")
+# plt.legend()
+# plt.yscale("log")
+# plt.show()
