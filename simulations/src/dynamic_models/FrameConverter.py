@@ -4,16 +4,16 @@ from tudatpy.kernel import constants
 from scipy.interpolate import interp1d
 from tudatpy.kernel.astro import time_conversion, frame_conversion
 import Interpolator
-import TraditionalLowFidelity
+# import TraditionalLowFidelity
 
 
 class SynodicToInertialHistoryConverter:
 
-    def __init__(self, dynamic_model_object, step_size=0.001):
+    def __init__(self, dynamic_model, step_size=0.001):
 
-        self.dynamic_model_object = dynamic_model_object
-        self.propagation_time = dynamic_model_object.propagation_time
-        self.mu = dynamic_model_object.mu
+        self.dynamic_model = dynamic_model
+        self.propagation_time = dynamic_model.propagation_time
+        self.mu = dynamic_model.mu
         self.step_size = step_size
 
 
@@ -23,8 +23,8 @@ class SynodicToInertialHistoryConverter:
         rsw_to_inertial_rotation_matrix = frame_conversion.rsw_to_inertial_rotation_matrix(inertial_moon_state)
 
         # Determine rotation rate and direction with respect to synodic frame (so only rotation w of rsw is relevant)
-        # rotation_rate = self.dynamic_model_object.rotation_rate
-        m = self.dynamic_model_object.bodies.get("Moon").mass
+        # rotation_rate = self.dynamic_model.rotation_rate
+        m = self.dynamic_model.bodies.get("Moon").mass
         r_norm = np.linalg.norm(inertial_moon_state[:3])
         v_norm = np.linalg.norm(inertial_moon_state[3:])
         h = m*r_norm*v_norm
@@ -42,12 +42,12 @@ class SynodicToInertialHistoryConverter:
 
     def convert_state_nondim_to_dim_state(self, synodic_state, inertial_moon_state):
 
-        # lu_cr3bp = self.dynamic_model_object.lu_cr3bp
-        # tu_cr3bp = self.dynamic_model_object.lu_cr3bp
+        # lu_cr3bp = self.dynamic_model.lu_cr3bp
+        # tu_cr3bp = self.dynamic_model.lu_cr3bp
 
         lu_cr3bp = np.linalg.norm(inertial_moon_state[:3])
-        tu_cr3bp = 1/np.sqrt((self.dynamic_model_object.gravitational_parameter_primary + \
-            self.dynamic_model_object.gravitational_parameter_secondary)/lu_cr3bp**3)
+        tu_cr3bp = 1/np.sqrt((self.dynamic_model.gravitational_parameter_primary + \
+            self.dynamic_model.gravitational_parameter_secondary)/lu_cr3bp**3)
 
         return np.concatenate((synodic_state[:3]*lu_cr3bp, synodic_state[3:]*lu_cr3bp/tu_cr3bp))
 
@@ -92,7 +92,7 @@ class SynodicToInertialHistoryConverter:
     def get_results(self, synodic_state_history):
 
         epochs, _, dependent_variables_history, _ = \
-            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model_object)
+            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model)
 
         # Generate history of classical CRTBP
         state_rotating_bary_lpf, state_rotating_bary_lumio = synodic_state_history[:,:6], synodic_state_history[:,6:]
@@ -123,11 +123,11 @@ class SynodicToInertialHistoryConverter:
 
 class InertialToSynodicHistoryConverter:
 
-    def __init__(self, dynamic_model_object, step_size=0.001):
+    def __init__(self, dynamic_model, step_size=0.001):
 
-        self.dynamic_model_object = dynamic_model_object
-        self.propagation_time = dynamic_model_object.propagation_time
-        self.mu = dynamic_model_object.mu
+        self.dynamic_model = dynamic_model
+        self.propagation_time = dynamic_model.propagation_time
+        self.mu = dynamic_model.mu
         self.step_size = step_size
 
 
@@ -137,8 +137,8 @@ class InertialToSynodicHistoryConverter:
         rsw_to_inertial_rotation_matrix = frame_conversion.rsw_to_inertial_rotation_matrix(inertial_moon_state)
 
         # Determine rotation rate and direction with respect to synodic frame (so only rotation w of rsw is relevant)
-        # rotation_rate = self.dynamic_model_object.rotation_rate
-        m = self.dynamic_model_object.bodies.get("Moon").mass
+        # rotation_rate = self.dynamic_model.rotation_rate
+        m = self.dynamic_model.bodies.get("Moon").mass
         r_norm = np.linalg.norm(inertial_moon_state[:3])
         v_norm = np.linalg.norm(inertial_moon_state[3:])
         h = m*r_norm*v_norm
@@ -156,12 +156,12 @@ class InertialToSynodicHistoryConverter:
 
     def convert_state_dim_to_nondim_state(self, synodic_state, inertial_moon_state):
 
-        # lu_cr3bp = self.dynamic_model_object.lu_cr3bp
-        # tu_cr3bp = self.dynamic_model_object.lu_cr3bp
+        # lu_cr3bp = self.dynamic_model.lu_cr3bp
+        # tu_cr3bp = self.dynamic_model.lu_cr3bp
 
         lu_cr3bp = np.linalg.norm(inertial_moon_state[:3])
-        tu_cr3bp = 1/np.sqrt((self.dynamic_model_object.gravitational_parameter_primary + \
-            self.dynamic_model_object.gravitational_parameter_secondary)/lu_cr3bp**3)
+        tu_cr3bp = 1/np.sqrt((self.dynamic_model.gravitational_parameter_primary + \
+            self.dynamic_model.gravitational_parameter_secondary)/lu_cr3bp**3)
 
         return np.concatenate((synodic_state[:3]/lu_cr3bp, synodic_state[3:]/(lu_cr3bp/tu_cr3bp)))
 
@@ -206,7 +206,7 @@ class InertialToSynodicHistoryConverter:
     def get_results(self, inertial_state_history):
 
         epochs, _, dependent_variables_history, _ = \
-            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model_object)
+            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model)
 
         # Split states into spacecraft states
         state_inertial_lpf, state_inertial_lumio = inertial_state_history[:,:6], inertial_state_history[:,6:]
