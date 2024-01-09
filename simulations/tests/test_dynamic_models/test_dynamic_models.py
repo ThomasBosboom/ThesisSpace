@@ -32,7 +32,6 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import EstimationModel
 
 
-
 class TestFrameConversions:
 
     @pytest.mark.parametrize(
@@ -82,14 +81,17 @@ class TestFrameConversions:
 
         fig1_3d = plt.figure()
         ax = fig1_3d.add_subplot(111, projection='3d')
-        plt.title("Comparison tudat versus classical CRTBP")
+        plt.title("Tudat versus true halo versus classical CRTBP")
         plt.plot(state_history_classic[:,0], state_history_classic[:,1], state_history_classic[:,2], label="LPF classic", color="gray")
         plt.plot(state_history_classic[:,6], state_history_classic[:,7], state_history_classic[:,8], label="LUMIO classic", color="gray")
         plt.plot(state_history_classic_erdem[:,0], state_history_classic_erdem[:,1], state_history_classic_erdem[:,2], label="LPF halo", color="black")
         plt.plot(state_history_classic_erdem[:,6], state_history_classic_erdem[:,7], state_history_classic_erdem[:,8], label="LUMIO halo", color="black")
         plt.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF tudat", color="red")
         plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO tudat", color="blue")
-        plt.legend()
+        ax.set_xlabel('X [m]')
+        ax.set_ylabel('Y [m]')
+        ax.set_zlabel('Z [m]')
+        plt.legend(loc="upper right")
         # plt.show()
 
 
@@ -341,47 +343,6 @@ class TestFrameConversions:
         # plt.show()
 
 
-        # Calculate the percentage difference for each entry
-        percentage_difference = np.abs((dependent_variables_history[0,0:6] - dependent_variables_history_classic[0,6:12])/dependent_variables_history_classic[0,6:12]) * 100
-        print(percentage_difference)
-        percentage_difference = np.abs((state_history[0,0:6] - state_history_classic[0,0:6])/state_history_classic[0,0:6]) * 100
-        print(percentage_difference)
-        percentage_difference = np.abs((state_history[0,6:12] - state_history_classic[0,6:12])/state_history_classic[0,6:12]) * 100
-        print(percentage_difference)
-        percentage_difference = np.abs((state_history[0,0:6]-dependent_variables_history[0,6:12] - (state_history_classic[0,0:6]-dependent_variables_history[0,6:12]))/(state_history_classic[0,0:6]-dependent_variables_history[0,6:12])) * 100
-        print(percentage_difference)
-
-
-
-        Keplerian_state_Moon_Earth_tudat = element_conversion.cartesian_to_keplerian(dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
-        Keplerian_state_Moon_Earth_classic = element_conversion.cartesian_to_keplerian(dependent_variables_history_classic[0,6:12], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary)
-
-        Keplerian_state_LPF_Moon_tudat = element_conversion.cartesian_to_keplerian(state_history[0,0:6]-dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_secondary)
-        Keplerian_state_LPF_Moon_classic = element_conversion.cartesian_to_keplerian(state_history_classic[0,0:6]-dependent_variables_history_classic[0,6:12], dynamic_model.gravitational_parameter_secondary)
-
-        percentage_difference = np.abs((Keplerian_state_Moon_Earth_tudat-Keplerian_state_Moon_Earth_classic)/Keplerian_state_Moon_Earth_classic) * 100
-        print(percentage_difference)
-        percentage_difference = np.abs((Keplerian_state_LPF_Moon_tudat-Keplerian_state_LPF_Moon_classic)/Keplerian_state_LPF_Moon_classic) * 100
-        print(percentage_difference)
-
-        Keplerian_state_LPF_Moon_frontiers = np.array([5737.4e3, 6.1e-1, 57.83*np.pi/180, 90*np.pi/180, 61.55*np.pi/180, 0])
-        print(Keplerian_state_LPF_Moon_frontiers)
-
-        percentage_difference = np.abs((Keplerian_state_LPF_Moon_frontiers-Keplerian_state_LPF_Moon_tudat)/Keplerian_state_LPF_Moon_tudat) * 100
-        print(percentage_difference)
-        percentage_difference = np.abs((Keplerian_state_LPF_Moon_frontiers-Keplerian_state_LPF_Moon_classic)/Keplerian_state_LPF_Moon_classic) * 100
-        print(percentage_difference)
-
-        print("==== Keplerian states tudat ====")
-        print("Moon w.r.t. Earth: ", element_conversion.cartesian_to_keplerian(dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary))
-        print("LPF w.r.t. Moon: ", element_conversion.cartesian_to_keplerian(state_history[0,0:6]-dependent_variables_history[0,0:6], dynamic_model.gravitational_parameter_secondary))
-
-        print("==== Keplerian states classic ====")
-        print("Moon w.r.t. Earth: ", element_conversion.cartesian_to_keplerian(dependent_variables_history_classic[0,6:12], dynamic_model.gravitational_parameter_primary+dynamic_model.gravitational_parameter_secondary))
-        print("LPF w.r.t. Moon: ", element_conversion.cartesian_to_keplerian(state_history_classic[0,0:6]-dependent_variables_history_classic[0,6:12], dynamic_model.gravitational_parameter_secondary))
-
-
-
         fig7, axs = plt.subplots(6, 1, figsize=(9,10), constrained_layout=True)
 
         axs[0].set_title("Position states tudat")
@@ -446,12 +407,12 @@ class TestFrameConversions:
 
 
 
-class TestOutputsDynamicalModels:
+class TestOutputsDynamicModels:
 
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        (60390, 14),
+        # (60390, 14),
     ])
 
     def test_loading_time_models(self, simulation_start_epoch_MJD, propagation_time, extras):
@@ -459,6 +420,7 @@ class TestOutputsDynamicalModels:
         time_dict = {}
         package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
         dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
+        print(dynamic_model_objects)
         for model_type, model_names in dynamic_model_objects.items():
             for model_name, dynamic_models in model_names.items():
                 time_list = []
@@ -468,17 +430,15 @@ class TestOutputsDynamicalModels:
                     time_list.append(time.time()-start_time)
                 time_dict[model_name] = time_list
 
-        fig, axs = plt.subplots(1, len(list(time_dict.keys())), figsize=(10, 6), sharey=True, constrained_layout=True)
+        fig, axs = plt.subplots(1, len(list(time_dict.keys())), figsize=(10, 4), sharey=True)
         for i, (key, values) in enumerate(time_dict.items()):
-            axs[i].bar(range(len(values)), values, label=key)
+            axs[i].bar(range(1, len(values)+1), values, label=key)
             axs[i].set_xlabel(key)
-            axs[i].set_ylabel('Run time')
-            axs[i].legend(loc="upper left")
-            axs[i].set_xticks(range(max([len(value) for value in time_dict.values()])))
+            axs[i].set_xticks(range(1, 1+max([len(value) for value in time_dict.values()])))
+            axs[i].set_yscale("log")
 
-        plt.title(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
-        plt.tight_layout()
-        # plt.show()
+        axs[0].set_ylabel('Run time [s]')
+        fig.suptitle(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
 
         utils.save_figures_to_folder("test_loading_time_models", extras, [fig], [simulation_start_epoch_MJD, propagation_time])
 
@@ -486,7 +446,7 @@ class TestOutputsDynamicalModels:
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time, durations",
     [
-        (60390, 50, [7, 14, 28, 42, 49]),
+        # (60390, 50, [7, 14, 28, 42, 49]),
     ])
 
     def test_difference_high_and_low_fidelity(self, simulation_start_epoch_MJD, propagation_time, durations, extras, step_size=0.001):
@@ -524,6 +484,10 @@ class TestOutputsDynamicalModels:
         labels = ["LPF halo", "LUMIO halo", "Moon", "LPF tudat high", "LUMIO tudat high", "LPF tudat low", "LUMIO tudat low"]
         figure_colors = ["lightgray", "lightgray", "gray", "red", "blue", "red", "blue"]
 
+        fig1_3d = plt.figure()
+        ax_3d = fig1_3d.add_subplot(111, projection='3d')
+        ax_3d.suptitle(f"Tudat high versus low models, {propagation_time} days")
+
 
         for m, dynamic_model in enumerate(dynamic_models[:2]):
 
@@ -534,6 +498,13 @@ class TestOutputsDynamicalModels:
             epochs_synodic, state_history_synodic = \
                 FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
 
+
+            ax_3d.plot(state_history_classic_erdem[:,0], state_history_classic_erdem[:,1], state_history_classic_erdem[:,2], label="LPF low_fidelity", color="red", ls="--")
+            ax_3d.plot(state_history_classic_erdem[:,6], state_history_classic_erdem[:,7], state_history_classic_erdem[:,8], label="LUMIO low_fidelity", color="blue", ls="--")
+            ax_3d.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF high_fidelity", color="red")
+            ax_3d.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO high_fidelity", color="blue")
+
+            # Plot the plane time evolutions in synodic and inertial frame
             for index, figs in enumerate(figs_list):
                 axs = axs_list[index]
                 for i, fig in enumerate(figs):
@@ -592,6 +563,12 @@ class TestOutputsDynamicalModels:
         plt.tight_layout()
         # plt.show()
 
+        ax_3d.set_xlabel('X [m]')
+        ax_3d.set_ylabel('Y [m]')
+        ax_3d.set_zlabel('Z [m]')
+        fig1_3d.legend(loc="upper right")
+
+        utils.save_figures_to_folder("test_difference_high_and_low_fidelity", extras, [fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
         utils.save_figures_to_folder("test_difference_high_and_low_fidelity", extras, list(itertools.chain(*figs_list)), [simulation_start_epoch_MJD, propagation_time])
 
 
@@ -599,14 +576,11 @@ class TestOutputsDynamicalModels:
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        (60390, 14),
-        # (60395, 10),
+        (60390, 1)
         # (60390, 10),
     ])
 
     def test_difference_to_reference_model(self, simulation_start_epoch_MJD, propagation_time, extras, step_size=0.01):
-
-        # Plot absolute state difference for every model
 
         # Generate plot settings
         fontsize = 12
@@ -617,16 +591,15 @@ class TestOutputsDynamicalModels:
             figs.append(fig)
             axs.append(ax)
         ylabels = [r"||$\Delta \mathbf{r}$||",r"||$\Delta \mathbf{v}$||"]
-        colors = [[["black"], ["black"]],[["darkred", "red", "darksalmon", "lightsalmon"],["steelblue", "blue", "deepskyblue", "lightblue"]]]
+        colors = [[["black"], ["black"]],[["darkred", "red", "darksalmon", "peachpuff"],["steelblue", "blue", "deepskyblue", "lightblue"]]]
         satellite_labels = ["LPF", "LUMIO"]
         model_name_abbreviations = [["CRTBP"],["PM", "PM SRP", "SH", "SH SRP"]]
         markers = ["o", "v", "^", "<", ">", "s", "h", "D", "*", "p","8"]
 
-
         # Generate dynamic model objects
         run_only_first = False
         package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
         for f, fig in enumerate(figs):
             ax = axs[f]
             legend_labels = []
@@ -650,9 +623,10 @@ class TestOutputsDynamicalModels:
                         data_to_plot = state_history-reference_state_history
 
                         for k in range(2):
-                            ax[0+k].plot(epochs, np.linalg.norm(data_to_plot[:,6*f+3*k:6*f+3*k+3], axis=1), color=colors[m][f][i], marker=markers[d], label=model_name, markersize=1)
+                            ax[0+k].plot(epochs, np.linalg.norm(data_to_plot[:,6*f+3*k:6*f+3*k+3], axis=1), color=colors[m][f][i], marker=markers[d], label=model_name, markersize=3)
 
                         labels.append(model_name_abbreviations[m][i]+" "+str(d+1))
+                        print(labels)
 
                 legend_labels.append(labels)
 
@@ -661,15 +635,13 @@ class TestOutputsDynamicalModels:
                     ax[i].set_ylabel(ylabels[i%2])
                     ax[i].set_yscale("log")
 
-            fig.legend(list(np.concatenate(legend_labels)), ncol=3, title="Models")
-            fig.suptitle(f"Absolute difference dynamic models and truth, {satellite_labels[f]}", fontsize=fontsize)
+            fig.legend(list(np.concatenate(legend_labels)), ncol=3, title="Models", loc="upper left")
+            fig.suptitle(f"Absolute difference dynamic models and reference, {satellite_labels[f]}", fontsize=fontsize)
+            plt.xlabel(f"Epoch since first measurement", fontsize=fontsize)
 
-        # plt.show()
+        plt.show()
 
-
-        assert 1 == 1
-
-        utils.save_figures_to_folder("test_difference_to_reference_model", extras, figs, [simulation_start_epoch_MJD, propagation_time])
+        # utils.save_figures_to_folder("test_difference_to_reference_model", extras, figs, [simulation_start_epoch_MJD, propagation_time])
 
 
 
@@ -711,6 +683,9 @@ class TestOutputsDynamicalModels:
                     plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO tudat", color="blue")
                     plt.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF reference", color="salmon")
                     plt.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8], label="LUMIO reference", color="lightskyblue")
+                    ax.set_xlabel('X [m]')
+                    ax.set_ylabel('Y [m]')
+                    ax.set_zlabel('Z [m]')
                     plt.legend()
                     # plt.show()
 
@@ -746,16 +721,10 @@ class TestOutputsDynamicalModels:
 
 
 
-
-
-
-
-
-
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        # (60390, 14),
+        (60390, 14),
     ])
 
     def test_observability_effectiveness(self, simulation_start_epoch_MJD, propagation_time, extras):
@@ -763,8 +732,11 @@ class TestOutputsDynamicalModels:
         # Plot the observability history and compare them to the different models
         fig, axs = plt.subplots(2, 1, figsize=(10, 5))
 
-        package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+        package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]}
         dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+        custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+                                        1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+        dynamic_model_objects["low_fidelity"]["three_body_problem"][0] = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
         estimation_model_objects = utils.get_estimation_model_objects(EstimationModel, dynamic_model_objects)
 
         for estimation_model in utils.convert_model_objects_to_list(estimation_model_objects):
@@ -789,7 +761,7 @@ class TestOutputsDynamicalModels:
                     epoch = data_to_plot[i*2]
                     ax.plot(epoch, np.max(np.linalg.eigvals(data_to_plot[1+i*2][:,6:9,6:9]), axis=1, keepdims=True), color="blue")
                     ax.plot(epoch, np.max(np.linalg.eigvals(data_to_plot[1+i*2][:,0:3,0:3]), axis=1, keepdims=True), color="red")
-                    ax.set_xlabel(r"Time since $t_0$"+ " [days] ("+str(simulation_start_epoch_MJD)+" MJD)")
+                    ax.set_xlabel(r"Time since start propagation")
                     ax.set_ylabel(r"$\sqrt{\max(\lambda_r(t))}$ [-]")
                     # ax.set_xlim(min(epoch), max(epoch))
                     ax.set_title(subplot_titles[i])
@@ -803,43 +775,3 @@ class TestOutputsDynamicalModels:
         # plt.show()
 
         utils.save_figures_to_folder("test_observability_effectiveness", extras, [fig], [simulation_start_epoch_MJD, propagation_time])
-
-
-# import matplotlib.pyplot as plt
-
-# data = {
-#     'three_body_problem': [3.58284068107605],
-#     'point_mass': [9.095354557037354, 10.117196321487427, 11.420943260192871, 13.259814262390137, 16.021060466766357, 19.226678371429443, 22.45508646965027, 24.722658157348633],
-#     'point_mass_srp': [10.055527687072754, 11.619261980056763, 13.202752113342285, 16.24797010421753, 15.367884874343872, 17.392045736312866, 18.93115234375, 20.2774076461792]
-# }
-
-# # Extract keys and values# set width of bar
-# barWidth = 0.1
-# fig = plt.subplots(figsize =(12, 8))
-
-# # set height of bar
-# IT = [12, 30, 1, 8, 22]
-# ECE = [28, 6, 16, 5, 10]
-# CSE = [29, 3, 24, 25, 17]
-
-# # Set position of bar on X axis
-# br1 = np.arange(len(IT))
-# br2 = [x + barWidth for x in br1]
-# br3 = [x + barWidth for x in br2]
-
-# # Make the plot
-# plt.bar(br1, IT, color ='r', width = barWidth,
-#         edgecolor ='grey', label ='IT')
-# plt.bar(br2, ECE, color ='g', width = barWidth,
-#         edgecolor ='grey', label ='ECE')
-# plt.bar(br3, CSE, color ='b', width = barWidth,
-#         edgecolor ='grey', label ='CSE')
-
-# # Adding Xticks
-# plt.xlabel('Branch', fontweight ='bold', fontsize = 15)
-# plt.ylabel('Students passed', fontweight ='bold', fontsize = 15)
-# plt.xticks([r + barWidth for r in range(3)],
-#         ['2015', '2016', '2017'])
-
-# plt.legend()
-# plt.show()
