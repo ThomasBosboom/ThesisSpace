@@ -7,7 +7,12 @@ import numpy as np
 # tudatpy
 from tudatpy.kernel.astro import time_conversion
 
+# Own
+from src.dynamic_models import Interpolator
+
 parent_dir = os.path.dirname(os.path.dirname(__file__))
+
+
 
 package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
 def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict):
@@ -78,18 +83,6 @@ def convert_model_objects_to_list(model_objects, specific_model_type=None):
     return model_objects_list
 
 
-# def convert_model_objects_to_list_1(model_objects, specific_model_type=None):
-
-#     models_nested = []
-#     for value in model_objects.values():
-#         if isinstance(value, list):
-#             models_nested.append(value)
-#         elif isinstance(value, dict):
-#             models_nested.append(convert_model_objects_to_list_1(value))
-
-#     return models_nested
-
-
 def convert_dictionary_to_array(dictionary):
 
     keys = np.stack(list(dictionary.keys()), axis=0)
@@ -101,18 +94,73 @@ def convert_dictionary_to_array(dictionary):
 def save_figures_to_folder(folder_name, extras, figs=[], labels=[], save_to_report=True):
 
     # Save the figure to designated folder belong to the respective test method
-    os.makedirs(folder_name, exist_ok=True)
+    # os.makedirs(folder_name, exist_ok=True)
+    # for i, fig in enumerate(figs):
+    #     base_string = "_".join([str(label) for label in labels])
+    #     if save_to_report:
+    #         file_name = f"fig{i+1}_{base_string}.png"
+    #     else:
+    #         file_name = f"fig_3d{i+1}_{base_string}.png"
+    #     figure_path = os.path.join(folder_name, file_name)
+    #     fig.savefig(figure_path)
+    #     if save_to_report:
+    #         extras.append(pytest_html.extras.png(figure_path))
+
+    base_folder = "figures"
+    if not os.path.exists(base_folder):
+        os.makedirs(base_folder, exist_ok=True)
+
+    figure_folder = os.path.join(base_folder, folder_name)
+
+    if not os.path.exists(figure_folder):
+        os.makedirs(figure_folder, exist_ok=True)
+
     for i, fig in enumerate(figs):
         base_string = "_".join([str(label) for label in labels])
         if save_to_report:
             file_name = f"fig{i+1}_{base_string}.png"
         else:
             file_name = f"fig_3d{i+1}_{base_string}.png"
-        figure_path = os.path.join(folder_name, file_name)
+        figure_path = os.path.join(figure_folder, file_name)
         fig.savefig(figure_path)
         if save_to_report:
             extras.append(pytest_html.extras.png(figure_path))
 
+
+def get_interpolated_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_time, package_dict=None, step_size=0.01):
+
+    if package_dict is not None:
+        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+    else:
+        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
+    dynamic_model_objects_results = dynamic_model_objects.copy()
+    for model_type, model_names in dynamic_model_objects.items():
+        for model_name, dynamic_models in model_names.items():
+            for dynamic_model in dynamic_models:
+                # print(dynamic_model)
+                dynamic_model_objects_results[model_type][model_name] = \
+                    list(Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model))
+
+    return dynamic_model_objects_results
+
+
+def get_interpolated_estimation_model_objects_results(estimation_model, dynamic_model_objects, package_dict=None):
+
+    if package_dict is not None:
+        dynamic_model_objects = get_dynamic_model_objects(simulations, propagation_time, package_dict=package_dict)
+        estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
+    else:
+        estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
+
+    estimation_model_objects_results = estimation_model_objects.copy()
+    for model_type, model_names in estimation_model_objects.items():
+        for model_name, estimation_models in model_names.items():
+            for estimation_model in estimation_models:
+                print(estimation_model)
+                estimation_model_objects_results[model_type][model_name] = \
+                    list(estimation_model.get_estimation_results())
+
+    return estimation_model_objects_results
 
 
 def convert_epochs_to_MJD(epochs):
@@ -134,13 +182,6 @@ def get_first_of_model_types(dynamic_model_objects):
 
 
 
-# def iterate_model_objects(model_objects):
-
-#     for i, (model_type, model_names) in enumerate(model_objects.items()):
-
-#         model_names = model_names.keys()
-#         for k, model_name in enumerate(model_names):
-#             for dynamic_model in dynamic_model_objects[model_type][model_name]:
 
 
 
