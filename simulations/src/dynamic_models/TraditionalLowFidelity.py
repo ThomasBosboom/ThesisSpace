@@ -49,116 +49,116 @@ class TraditionalLowFidelity:
         return self.t*self.tstar, odeint(self.get_equations_of_motion, state_rotating_bary_0, self.t)
 
 
-    def get_jacobi_constant_history(self, state_rotating_barycenter):
+    # def get_jacobi_constant_history(self, state_rotating_barycenter):
 
-        X_rot     = np.array(state_rotating_barycenter[:, 0])
-        Y_rot     = np.array(state_rotating_barycenter[:, 1])
-        Z_rot     = np.array(state_rotating_barycenter[:, 2])
-        X_dot_rot = np.array(state_rotating_barycenter[:, 3])
-        Y_dot_rot = np.array(state_rotating_barycenter[:, 4])
-        Z_dot_rot = np.array(state_rotating_barycenter[:, 5])
+    #     X_rot     = np.array(state_rotating_barycenter[:, 0])
+    #     Y_rot     = np.array(state_rotating_barycenter[:, 1])
+    #     Z_rot     = np.array(state_rotating_barycenter[:, 2])
+    #     X_dot_rot = np.array(state_rotating_barycenter[:, 3])
+    #     Y_dot_rot = np.array(state_rotating_barycenter[:, 4])
+    #     Z_dot_rot = np.array(state_rotating_barycenter[:, 5])
 
-        return 2*((1-self.mu)/np.sqrt((X_rot+self.mu)**2+Y_rot**2+Z_rot**2)+self.mu/np.sqrt((X_rot+self.mu-1)**2+Y_rot**2+Z_rot**2))+X_rot**2+Y_rot**2-(X_dot_rot**2+Y_dot_rot**2+Z_dot_rot**2)
-
-
-    def convert_state_nondim_to_dim(self, state_nondim, state_primary_to_secondary):
-
-        state_history_dim = np.empty((np.shape(state_nondim)[0],6))
-        for epoch, state in enumerate(state_nondim):
-            lstar = np.linalg.norm(state_primary_to_secondary[epoch,:3])
-            tstar = np.sqrt(lstar**3/(self.G*(self.m1+self.m2)))
-            state_history_dim[epoch] = np.array([lstar, lstar, lstar, lstar/tstar, lstar/tstar, lstar/tstar])*state
-
-        return state_history_dim
+    #     return 2*((1-self.mu)/np.sqrt((X_rot+self.mu)**2+Y_rot**2+Z_rot**2)+self.mu/np.sqrt((X_rot+self.mu-1)**2+Y_rot**2+Z_rot**2))+X_rot**2+Y_rot**2-(X_dot_rot**2+Y_dot_rot**2+Z_dot_rot**2)
 
 
-    def convert_state_dim_to_nondim(self, state_dim):
+    # def convert_state_nondim_to_dim(self, state_nondim, state_primary_to_secondary):
 
-        return np.array([1/self.lstar, 1/self.lstar, 1/self.lstar, 1/(self.lstar/self.tstar), 1/(self.lstar/self.tstar), 1/(self.lstar/self.tstar)])*state_dim/1000
+    #     state_history_dim = np.empty((np.shape(state_nondim)[0],6))
+    #     for epoch, state in enumerate(state_nondim):
+    #         lstar = np.linalg.norm(state_primary_to_secondary[epoch,:3])
+    #         tstar = np.sqrt(lstar**3/(self.G*(self.m1+self.m2)))
+    #         state_history_dim[epoch] = np.array([lstar, lstar, lstar, lstar/tstar, lstar/tstar, lstar/tstar])*state
 
-
-    def convert_state_barycentric_to_body(self, state_barycentric, body, state_type="inertial"):
-
-        if state_type == "inertial":
-            if body == "primary":
-                return state_barycentric - self.state_m1*state_barycentric
-            if body == "secondary":
-                return state_barycentric - self.state_m2*state_barycentric
-
-        elif state_type == "rotating":
-            state_body = state_barycentric
-            if body == "primary":
-                for epoch, state in enumerate(state_body):
-                    state_body[epoch, 0] = state_body[epoch, 0] - (self.mu)
-                return state_body
-            if body == "secondary":
-                for epoch, state in enumerate(state_body):
-                    state_body[epoch, 0] = state_body[epoch, 0] - (1-self.mu)
-                return state_body
+    #     return state_history_dim
 
 
-    def convert_state_body_to_barycentric(self, state_body, body, state_type="inertial"):
+    # def convert_state_dim_to_nondim(self, state_dim):
 
-        if state_type == "inertial":
-            if body == "primary":
-                return state_body + self.state_m1*state_body
-            if body == "secondary":
-                return state_body + self.state_m2*state_body
-
-        elif state_type == "rotating":
-            state_barycentric = state_body
-            if body == "primary":
-                for epoch, state in enumerate(state_barycentric):
-                    state_barycentric[epoch, 0] = state_barycentric[epoch, 0] + (self.mu)
-                return state_barycentric
-            if body == "secondary":
-                for epoch, state in enumerate(state_barycentric):
-                    state_barycentric[epoch, 0] = state_barycentric[epoch, 0] + (1-self.mu)
-                return state_barycentric
+    #     return np.array([1/self.lstar, 1/self.lstar, 1/self.lstar, 1/(self.lstar/self.tstar), 1/(self.lstar/self.tstar), 1/(self.lstar/self.tstar)])*state_dim/1000
 
 
-    def convert_state_rotating_to_inertial(self, state_rotating):
+    # def convert_state_barycentric_to_body(self, state_barycentric, body, state_type="inertial"):
 
-        state_inertial_barycenter = np.empty((np.shape(state_rotating)[0], np.shape(state_rotating)[1]))
-        for i, time in enumerate(self.t):
+    #     if state_type == "inertial":
+    #         if body == "primary":
+    #             return state_barycentric - self.state_m1*state_barycentric
+    #         if body == "secondary":
+    #             return state_barycentric - self.state_m2*state_barycentric
 
-            rotation_matrix = np.array([[np.cos(time), -np.sin(time), 0],
-                                        [np.sin(time),  np.cos(time), 0],
-                                        [0,             0,            1]])
-
-            rotation_matrix_dot = np.array([[-np.sin(time), -np.cos(time), 0],
-                                            [ np.cos(time), -np.sin(time), 0],
-                                            [ 0,             0,            1]])
-
-            transformation_matrix = np.block([[rotation_matrix,     np.zeros((3,3))],
-                                              [rotation_matrix_dot, rotation_matrix]])
-
-            state_inertial_barycenter[i] = np.dot(transformation_matrix, state_rotating[i,:])
-
-        return state_inertial_barycenter
+    #     elif state_type == "rotating":
+    #         state_body = state_barycentric
+    #         if body == "primary":
+    #             for epoch, state in enumerate(state_body):
+    #                 state_body[epoch, 0] = state_body[epoch, 0] - (self.mu)
+    #             return state_body
+    #         if body == "secondary":
+    #             for epoch, state in enumerate(state_body):
+    #                 state_body[epoch, 0] = state_body[epoch, 0] - (1-self.mu)
+    #             return state_body
 
 
-    def convert_state_inertial_to_rotating(self, state_inertial):
+    # def convert_state_body_to_barycentric(self, state_body, body, state_type="inertial"):
 
-        state_rotating  = np.empty((np.shape(state_inertial)[0], np.shape(state_inertial)[1]))
-        for i, time in enumerate(self.t):
+    #     if state_type == "inertial":
+    #         if body == "primary":
+    #             return state_body + self.state_m1*state_body
+    #         if body == "secondary":
+    #             return state_body + self.state_m2*state_body
 
-            rotation_matrix = np.array([[np.cos(time), -np.sin(time), 0],
-                                        [np.sin(time),  np.cos(time), 0],
-                                        [0,             0,            1]])
+    #     elif state_type == "rotating":
+    #         state_barycentric = state_body
+    #         if body == "primary":
+    #             for epoch, state in enumerate(state_barycentric):
+    #                 state_barycentric[epoch, 0] = state_barycentric[epoch, 0] + (self.mu)
+    #             return state_barycentric
+    #         if body == "secondary":
+    #             for epoch, state in enumerate(state_barycentric):
+    #                 state_barycentric[epoch, 0] = state_barycentric[epoch, 0] + (1-self.mu)
+    #             return state_barycentric
 
-            rotation_matrix_dot = np.array([[-np.sin(time), -np.cos(time), 0],
-                                            [ np.cos(time), -np.sin(time), 0],
-                                            [ 0,             0,            1]])
 
-            transformation_matrix = np.block([[rotation_matrix,     np.zeros((3,3))],
-                                              [rotation_matrix_dot, rotation_matrix]])
+    # def convert_state_rotating_to_inertial(self, state_rotating):
 
-            transformation_matrix_inverse = np.linalg.inv(transformation_matrix)
+    #     state_inertial_barycenter = np.empty((np.shape(state_rotating)[0], np.shape(state_rotating)[1]))
+    #     for i, time in enumerate(self.t):
 
-            state_rotating[i] = np.dot(transformation_matrix_inverse,state_inertial[i,:])
+    #         rotation_matrix = np.array([[np.cos(time), -np.sin(time), 0],
+    #                                     [np.sin(time),  np.cos(time), 0],
+    #                                     [0,             0,            1]])
 
-        return state_rotating
+    #         rotation_matrix_dot = np.array([[-np.sin(time), -np.cos(time), 0],
+    #                                         [ np.cos(time), -np.sin(time), 0],
+    #                                         [ 0,             0,            1]])
+
+    #         transformation_matrix = np.block([[rotation_matrix,     np.zeros((3,3))],
+    #                                           [rotation_matrix_dot, rotation_matrix]])
+
+    #         state_inertial_barycenter[i] = np.dot(transformation_matrix, state_rotating[i,:])
+
+    #     return state_inertial_barycenter
+
+
+    # def convert_state_inertial_to_rotating(self, state_inertial):
+
+    #     state_rotating  = np.empty((np.shape(state_inertial)[0], np.shape(state_inertial)[1]))
+    #     for i, time in enumerate(self.t):
+
+    #         rotation_matrix = np.array([[np.cos(time), -np.sin(time), 0],
+    #                                     [np.sin(time),  np.cos(time), 0],
+    #                                     [0,             0,            1]])
+
+    #         rotation_matrix_dot = np.array([[-np.sin(time), -np.cos(time), 0],
+    #                                         [ np.cos(time), -np.sin(time), 0],
+    #                                         [ 0,             0,            1]])
+
+    #         transformation_matrix = np.block([[rotation_matrix,     np.zeros((3,3))],
+    #                                           [rotation_matrix_dot, rotation_matrix]])
+
+    #         transformation_matrix_inverse = np.linalg.inv(transformation_matrix)
+
+    #         state_rotating[i] = np.dot(transformation_matrix_inverse,state_inertial[i,:])
+
+    #     return state_rotating
 
 
 # G  = 6.67408E-11
