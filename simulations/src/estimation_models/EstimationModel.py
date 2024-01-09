@@ -241,10 +241,8 @@ class EstimationModel:
         # plt.show()
 
         return estimation_output, \
-               propagated_formal_errors, \
-               propagated_covariance, \
-               covariance_history, \
-               information_matrix_history, \
+               propagated_formal_errors, propagated_covariance, \
+               covariance_history, information_matrix_history, \
                self.observations
 
 
