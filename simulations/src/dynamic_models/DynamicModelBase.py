@@ -28,11 +28,11 @@ class DynamicModelBase:
             time_conversion.modified_julian_day_to_julian_day(self.simulation_start_epoch_MJD+self.propagation_time))
 
         # Define constant environment settings
-        self.bodies_to_create = [self.name_primary, self.name_secondary]
-        self.central_bodies = [self.name_primary, self.name_primary]
-        self.bodies_to_propagate = [self.name_ELO, self.name_LPO]
         self.global_frame_origin = self.name_primary
         self.global_frame_orientation = 'J2000'
+        self.central_bodies = [self.name_primary, self.name_primary]
+        self.bodies_to_create = [self.name_primary, self.name_secondary]
+        self.bodies_to_propagate = [self.name_ELO, self.name_LPO]
         self.bodies_mass = [280, 22.3]
         self.bodies_reference_area_radiation = [3.0, 0.41064]
         self.bodies_radiation_pressure_coefficient = [1.8, 1.08]
