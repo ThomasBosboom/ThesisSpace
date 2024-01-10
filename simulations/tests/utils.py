@@ -59,38 +59,6 @@ def get_estimation_model_objects(estimation_model, dynamic_model_objects):
     return estimation_model_objects
 
 
-def convert_model_objects_to_list(model_objects, specific_model_type=None):
-
-    model_type_list = []
-    model_names_list = []
-    model_objects_list = []
-    for model_type, model_names in model_objects.items():
-        if specific_model_type is not None:
-            if model_type == specific_model_type:
-                model_type_list.append(specific_model_type)
-                model_names_list.append(model_names)
-                for model_name, models in model_names.items():
-                    for model in models:
-                        model_objects_list.append(model)
-
-        else:
-            model_type_list.append(model_type)
-            model_names_list.append(model_names)
-            for model_name, models in model_names.items():
-                for model in models:
-                    model_objects_list.append(model)
-
-    return model_objects_list
-
-
-def convert_dictionary_to_array(dictionary):
-
-    keys = np.stack(list(dictionary.keys()), axis=0)
-    values = np.stack(list(dictionary.values()), axis=0)
-
-    return keys, values
-
-
 def save_figures_to_folder(folder_name, extras, figs=[], labels=[], save_to_report=True):
 
     # Save the figure to designated folder belong to the respective test method
@@ -137,19 +105,20 @@ def get_interpolated_dynamic_model_objects_results(simulation_start_epoch_MJD, p
     for model_type, model_names in dynamic_model_objects.items():
         for model_name, dynamic_models in model_names.items():
             for dynamic_model in dynamic_models:
-                # print(dynamic_model)
+                print(dynamic_model)
                 dynamic_model_objects_results[model_type][model_name] = \
                     list(Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model))
 
     return dynamic_model_objects_results
 
 
-def get_interpolated_estimation_model_objects_results(estimation_model, dynamic_model_objects, package_dict=None):
+def get_interpolated_estimation_model_objects_results(simulation_start_epoch_MJD, propagation_time, estimation_model, package_dict=None):
 
     if package_dict is not None:
-        dynamic_model_objects = get_dynamic_model_objects(simulations, propagation_time, package_dict=package_dict)
+        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
         estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
     else:
+        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
         estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
 
     estimation_model_objects_results = estimation_model_objects.copy()
@@ -161,6 +130,38 @@ def get_interpolated_estimation_model_objects_results(estimation_model, dynamic_
                     list(estimation_model.get_estimation_results())
 
     return estimation_model_objects_results
+
+
+def convert_model_objects_to_list(model_objects, specific_model_type=None):
+
+    model_type_list = []
+    model_names_list = []
+    model_objects_list = []
+    for model_type, model_names in model_objects.items():
+        if specific_model_type is not None:
+            if model_type == specific_model_type:
+                model_type_list.append(specific_model_type)
+                model_names_list.append(model_names)
+                for model_name, models in model_names.items():
+                    for model in models:
+                        model_objects_list.append(model)
+
+        else:
+            model_type_list.append(model_type)
+            model_names_list.append(model_names)
+            for model_name, models in model_names.items():
+                for model in models:
+                    model_objects_list.append(model)
+
+    return model_objects_list
+
+
+def convert_dictionary_to_array(dictionary):
+
+    keys = np.stack(list(dictionary.keys()), axis=0)
+    values = np.stack(list(dictionary.values()), axis=0)
+
+    return keys, values
 
 
 def convert_epochs_to_MJD(epochs):
@@ -182,49 +183,6 @@ def get_first_of_model_types(dynamic_model_objects):
 
 
 
-
-
-
-
-
-
-
+# Commonly used parameters
 synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
                                   1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-
-
-
-
-
-# Define a dictionary with configurations for LPF and LUMIO
-plot_config_LPF = {
-    'label': 'Example Label',
-    'color': 'blue',
-    'linestyle': '--',
-    'linewidth': 2,
-    'marker': 'o'
-}
-
-plot_config_LUMIO = {
-    'label': 'Example Label',
-    'color': 'blue',
-    'linestyle': '--',
-    'linewidth': 2,
-    'marker': 'o'
-}
-
-plot_config_primary = {
-    'label': 'Example Label',
-    'color': 'blue',
-    'linestyle': '--',
-    'linewidth': 2,
-    'marker': 'o'
-}
-
-plot_config_secondary = {
-    'label': 'Example Label',
-    'color': 'blue',
-    'linestyle': '--',
-    'linewidth': 2,
-    'marker': 'o'
-}
