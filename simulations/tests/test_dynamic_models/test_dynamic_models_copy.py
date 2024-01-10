@@ -29,29 +29,66 @@ from src.dynamic_models.high_fidelity.point_mass import *
 from src.dynamic_models.high_fidelity.point_mass_srp import *
 from src.dynamic_models.high_fidelity.spherical_harmonics import *
 from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
-from src.estimation_models import EstimationModel
+from src.estimation_models import estimation_model
 
 
 
 
 
-package_dict = {"high_fidelity": ["point_mass", "point_mass_srp"]}
-dynamic_model_objects = utils.get_dynamic_model_objects(60390, 0.2, package_dict=package_dict)
-# print(utils.get_interpolated_dynamic_model_objects_results(60390, .2, package_dict=package_dict)["high_fidelity"]["point_mass"])
-# print(utils.get_interpolated_estimation_model_objects_results(EstimationModel, dynamic_model_objects)["high_fidelity"]["point_mass"][-1])
 
-def test(arg1, arg2):
-    return arg1+arg2
 
-# Define a fixture to calculate the expensive result
-@pytest.fixture
-def expensive_result(request):
-    # return utils.get_interpolated_dynamic_model_objects_results(request.param, request.param, package_dict=package_dict)
-    return test(request.param ,request.param)
+# # Fixture function to set up multiple sets of sample data
+# @pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time")], scope="module")
+# def generated_test_data(request):
+#     package_dict = {"high_fidelity": ["point_mass", "point_mass_srp"]}
+#     return utils.get_interpolated_dynamic_model_objects_results(*request.param, package_dict=package_dict, step_size=0.1)
+#     # return utils.get_interpolated_estimation_model_objects_results(estimation_model, dynamic_model_objects)["high_fidelity"]["point_mass"][-1]
 
-# Use the fixture with parametrize in your test function
-@pytest.mark.parametrize("expensive_result", [(60390, 1)], indirect=["expensive_result"])
-def test_your_function(expensive_result, input_args):
 
-    initial_state = expensive_result["high_fidelity"]["point_mass"][0][0,0]
-    assert initial_state == 1
+# # Using the parametrize decorator with the indirect parameter
+# @pytest.mark.parametrize("generated_test_data", [(60390,1), (60395, 1), (60450,1)], indirect=True)
+# def test_sample_data_with_indirect(generated_test_data):
+#     print(generated_test_data)
+#     assert isinstance(generated_test_data, dict)
+
+
+# @pytest.mark.parametrize("generated_test_data", [(60390,1), (60390,1), (60450,1)], indirect=True)
+# def test_sample_data_with_indirect_2(generated_test_data):
+#     print(generated_test_data)
+#     assert isinstance(generated_test_data, dict)
+
+
+package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+
+@pytest.fixture(scope="module")
+def generated_test_data():
+    return utils.get_interpolated_dynamic_model_objects_results(60390,50, package_dict=package_dict, step_size=0.1)
+
+@pytest.fixture(scope="module")
+def generated_test_data_estimation():
+
+    return utils.get_interpolated_estimation_model_objects_results(60390,50, estimation_model, package_dict=package_dict)["high_fidelity"]["point_mass"][-1]
+
+# Using the parametrize decorator with the indirect parameter
+# @pytest.mark.parametrize("generated_test_data", [(60390,1), (60395, 1), (60450,1)], indirect=True)
+def test_sample_data_with_indirect(generated_test_data):
+    print(generated_test_data)
+    assert isinstance(generated_test_data, dict)
+
+def test_sample_data_with_indirect_1(generated_test_data):
+    print(generated_test_data)
+    assert isinstance(generated_test_data, dict)
+
+def test_sample_data_with_indirect_2(generated_test_data):
+    print(generated_test_data)
+    assert isinstance(generated_test_data, dict)
+
+
+# @pytest.mark.parametrize("generated_test_data", [(60390,1), (60390,1), (60450,1)], indirect=True)
+def test_sample_data_with_indirect_3(generated_test_data_estimation):
+    print(generated_test_data_estimation)
+    assert isinstance(generated_test_data_estimation, dict)
+
+def test_sample_data_with_indirect_3(generated_test_data_estimation):
+    print(generated_test_data_estimation)
+    assert isinstance(generated_test_data_estimation, dict)
