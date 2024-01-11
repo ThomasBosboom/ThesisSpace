@@ -3,6 +3,8 @@ import os
 import sys
 import pytest_html
 import numpy as np
+import time
+import inspect
 
 # tudatpy
 from tudatpy.kernel.astro import time_conversion
@@ -13,9 +15,12 @@ from src.dynamic_models import Interpolator
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
+def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None):
 
-package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
-def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict):
+    if package_dict is None:
+        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+    else:
+        package_dict = package_dict
 
     dynamic_model_objects = {}
     for package_type, package_name_list in package_dict.items():
@@ -34,16 +39,32 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, pack
                     module = __import__(module_path, fromlist=[file_name])
 
                     if package_type == "low_fidelity":
-                        DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time)
+                        DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
                     else:
-                        DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time)
+                        DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
 
                     sub_dict[package_name_list[package_name_counter]].extend([DynamicModel])
                     dynamic_model_objects[package_type] = sub_dict
 
             package_name_counter += 1
 
-    return dynamic_model_objects
+    if get_only_first:
+        result_dict = {}
+        for key, inner_dict in dynamic_model_objects.items():
+            if inner_dict and isinstance(inner_dict, dict):
+                updated_inner_dict = {}
+                for subkey, sublist in inner_dict.items():
+                    if sublist and isinstance(sublist, list):
+                        updated_inner_dict[subkey] = [sublist[0]]
+                    else:
+                        updated_inner_dict[subkey] = sublist
+
+                result_dict[key] = updated_inner_dict
+
+        return result_dict
+
+    else:
+        return dynamic_model_objects
 
 
 def get_estimation_model_objects(estimation_model, dynamic_model_objects):
@@ -59,27 +80,16 @@ def get_estimation_model_objects(estimation_model, dynamic_model_objects):
     return estimation_model_objects
 
 
-def save_figures_to_folder(folder_name, extras, figs=[], labels=[], save_to_report=True):
+def save_figures_to_folder(figs=[], labels=[], save_to_report=True):
 
-    # Save the figure to designated folder belong to the respective test method
-    # os.makedirs(folder_name, exist_ok=True)
-    # for i, fig in enumerate(figs):
-    #     base_string = "_".join([str(label) for label in labels])
-    #     if save_to_report:
-    #         file_name = f"fig{i+1}_{base_string}.png"
-    #     else:
-    #         file_name = f"fig_3d{i+1}_{base_string}.png"
-    #     figure_path = os.path.join(folder_name, file_name)
-    #     fig.savefig(figure_path)
-    #     if save_to_report:
-    #         extras.append(pytest_html.extras.png(figure_path))
+    extras = []
+    folder_name = inspect.currentframe().f_back.f_code.co_name
 
     base_folder = "figures"
     if not os.path.exists(base_folder):
         os.makedirs(base_folder, exist_ok=True)
 
     figure_folder = os.path.join(base_folder, folder_name)
-
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder, exist_ok=True)
 
@@ -95,41 +105,67 @@ def save_figures_to_folder(folder_name, extras, figs=[], labels=[], save_to_repo
             extras.append(pytest_html.extras.png(figure_path))
 
 
-def get_interpolated_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_time, package_dict=None, step_size=0.01):
+def get_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None, step_size=0.01):
 
-    if package_dict is not None:
-        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
-    else:
-        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
+    dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD,
+                                                      propagation_time,
+                                                      package_dict=package_dict,
+                                                      get_only_first=get_only_first,
+                                                      custom_initial_state=custom_initial_state)
+
     dynamic_model_objects_results = dynamic_model_objects.copy()
     for model_type, model_names in dynamic_model_objects.items():
         for model_name, dynamic_models in model_names.items():
-            for dynamic_model in dynamic_models:
-                print(dynamic_model)
-                dynamic_model_objects_results[model_type][model_name] = \
-                    list(Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model))
+            for i, dynamic_model in enumerate(dynamic_models):
+
+                start_time = time.time()
+                results_list = list(Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model))
+                results_list.append(time.time()-start_time)
+                dynamic_model_objects_results[model_type][model_name][i] = results_list
 
     return dynamic_model_objects_results
 
 
-def get_interpolated_estimation_model_objects_results(simulation_start_epoch_MJD, propagation_time, estimation_model, package_dict=None):
+def get_estimation_model_objects_results(dynamic_model_objects, estimation_model, get_only_first=False):
 
-    if package_dict is not None:
-        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
-        estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
-    else:
-        dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
-        estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
+    estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
+
+    if get_only_first:
+        result_dict = {}
+        for key, inner_dict in estimation_model_objects.items():
+            if inner_dict and isinstance(inner_dict, dict):
+                updated_inner_dict = {}
+                for subkey, sublist in inner_dict.items():
+                    if sublist and isinstance(sublist, list):
+                        updated_inner_dict[subkey] = [sublist[0]]
+                    else:
+                        updated_inner_dict[subkey] = sublist
+                result_dict[key] = updated_inner_dict
+        estimation_model_objects = result_dict
 
     estimation_model_objects_results = estimation_model_objects.copy()
     for model_type, model_names in estimation_model_objects.items():
         for model_name, estimation_models in model_names.items():
-            for estimation_model in estimation_models:
-                print(estimation_model)
-                estimation_model_objects_results[model_type][model_name] = \
-                    list(estimation_model.get_estimation_results())
+            for i, estimation_model in enumerate(estimation_models):
+
+                start_time = time.time()
+                results_list = list(estimation_model.get_estimation_results())
+                results_list.append(time.time()-start_time)
+                estimation_model_objects_results[model_type][model_name][i] = results_list
 
     return estimation_model_objects_results
+
+
+def get_first_of_model_types(model_objects):
+
+    result_dict = {}
+    for key, inner_dict in model_objects.items():
+        if inner_dict and isinstance(inner_dict, dict):
+            first_elements = inner_dict.get(next(iter(inner_dict), None), [])[:1]
+            result_dict[key] = {list(inner_dict.keys())[0]: first_elements}
+
+    return result_dict
+
 
 
 def convert_model_objects_to_list(model_objects, specific_model_type=None):
@@ -154,6 +190,22 @@ def convert_model_objects_to_list(model_objects, specific_model_type=None):
                     model_objects_list.append(model)
 
     return model_objects_list
+
+
+def get_model_result_for_given_entry(dynamic_model_objects_results, entry_num):
+
+
+    for model_type, model_names in dynamic_model_objects_results.items():
+        for model_name, model_results in model_names.items():
+            result_list_model_name = []
+            for model_result in model_results:
+                print(model_name, model_result[entry_num])
+                result_list_model_name.append(model_result[entry_num])
+            dynamic_model_objects_results[model_type][model_name] = result_list_model_name
+
+    return dynamic_model_objects_results
+
+
 
 
 def convert_dictionary_to_array(dictionary):
@@ -186,3 +238,4 @@ def get_first_of_model_types(dynamic_model_objects):
 # Commonly used parameters
 synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
                                   1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+

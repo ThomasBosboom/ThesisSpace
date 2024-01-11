@@ -402,8 +402,8 @@ class TestFrameConversions:
         plt.legend()
         # plt.show()
 
-        utils.save_figures_to_folder("test_validation_crtbp", extras, [fig1, fig2, fig3, fig4, fig5, fig6, fig7], [simulation_start_epoch_MJD, propagation_time])
-        utils.save_figures_to_folder("test_validation_crtbp", extras, [fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
+        utils.save_figures_to_folder([fig1, fig2, fig3, fig4, fig5, fig6, fig7], [simulation_start_epoch_MJD, propagation_time])
+        utils.save_figures_to_folder([fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
 
 
 
@@ -440,7 +440,7 @@ class TestOutputsDynamicModels:
         axs[0].set_ylabel('Run time [s]')
         fig.suptitle(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
 
-        utils.save_figures_to_folder("test_loading_time_models", extras, [fig], [simulation_start_epoch_MJD, propagation_time])
+        utils.save_figures_to_folder([fig], [simulation_start_epoch_MJD, propagation_time])
 
 
     @pytest.mark.parametrize(
@@ -568,8 +568,8 @@ class TestOutputsDynamicModels:
         ax_3d.set_zlabel('Z [m]')
         fig1_3d.legend(loc="upper right")
 
-        utils.save_figures_to_folder("test_difference_high_and_low_fidelity", extras, [fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
-        utils.save_figures_to_folder("test_difference_high_and_low_fidelity", extras, list(itertools.chain(*figs_list)), [simulation_start_epoch_MJD, propagation_time])
+        utils.save_figures_to_folder([fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
+        utils.save_figures_to_folder(list(itertools.chain(*figs_list)), [simulation_start_epoch_MJD, propagation_time])
 
 
 
@@ -641,7 +641,7 @@ class TestOutputsDynamicModels:
 
         plt.show()
 
-        # utils.save_figures_to_folder("test_difference_to_reference_model", extras, figs, [simulation_start_epoch_MJD, propagation_time])
+        # utils.save_figures_to_folder(figs, [simulation_start_epoch_MJD, propagation_time])
 
 
 
@@ -712,8 +712,8 @@ class TestOutputsDynamicModels:
                 plt.tight_layout()
         # plt.show()
 
-        utils.save_figures_to_folder("test_difference_to_reference_model", extras, [fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
-        utils.save_figures_to_folder("test_difference_to_reference_model", extras, list(np.concatenate(figs)), [simulation_start_epoch_MJD, propagation_time])
+        utils.save_figures_to_folder([fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
+        utils.save_figures_to_folder(list(np.concatenate(figs)), [simulation_start_epoch_MJD, propagation_time])
 
 
 
@@ -774,4 +774,4 @@ class TestOutputsDynamicModels:
         plt.tight_layout()
         # plt.show()
 
-        utils.save_figures_to_folder("test_observability_effectiveness", extras, [fig], [simulation_start_epoch_MJD, propagation_time])
+        utils.save_figures_to_folder([fig], [simulation_start_epoch_MJD, propagation_time])
