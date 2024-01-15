@@ -160,10 +160,13 @@ class EstimationModel:
             self.observation_settings_list,
             self.dynamic_model.propagator_settings)
 
+        # Extract observation simulators
+        self.observation_simulators = self.estimator.observation_simulators
+
         # Simulate required observations
         self.simulated_observations = estimation.simulate_observations(
             self.observation_simulation_settings,
-            self.estimator.observation_simulators,
+            self.observation_simulators,
             self.dynamic_model.bodies)
 
         self.single_observation_set_lists = [self.simulated_observations.get_single_link_and_type_observations(observation.one_way_range_type, self.link_definition),
@@ -174,6 +177,7 @@ class EstimationModel:
 
         self.set_simulated_observations()
 
+
         # Create input object for the estimation
         convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=maximum_iterations)
         estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
@@ -181,7 +185,7 @@ class EstimationModel:
                                                       inverse_apriori_covariance=np.linalg.inv(apriori_covariance))
 
         # Set methodological options
-        estimation_input.define_estimation_settings(save_state_history_per_iteration=False)
+        estimation_input.define_estimation_settings(save_state_history_per_iteration=True)
 
         # Define weighting of the observations in the inversion
         weights_per_observable = {estimation_setup.observation.one_way_range_type: self.noise_range**-2,
@@ -191,7 +195,6 @@ class EstimationModel:
         # Run the estimation
         with util.redirect_std(redirect_out=True):
             estimation_output = self.estimator.perform_estimation(estimation_input)
-        # initial_states_updated = self.parameters_to_estimate.parameter_vector
 
         # Propagate formal errors and covariance over the course of estimation window
         output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 60)
@@ -253,20 +256,34 @@ class EstimationModel:
         return self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
 
 
-# model = high_fidelity_point_mass_srp_01.HighFidelityDynamicModel(60390, 28)
-# # model = LowFidelityDynamicModel.LowFidelityDynamicModel(60390, 14)
-# estimation_model = EstimationModel(model)
+model = high_fidelity_point_mass_srp_01.HighFidelityDynamicModel(60390, 1)
+# model = LowFidelityDynamicModel.LowFidelityDynamicModel(60390, 14)
+estimation_model = EstimationModel(model)
 
-# estimation_output = estimation_model.get_estimation_results()[0]
+estimation_output = estimation_model.get_estimation_results()[0]
 
-# parameter_history = estimation_output.parameter_history
-# residual_history = estimation_output.residual_history
-# covariance = estimation_output.covariance
-# formal_errors = estimation_output.formal_errors
-# print(parameter_history)
+parameter_history = estimation_output.parameter_history
+residual_history = estimation_output.residual_history
+covariance = estimation_output.covariance
+formal_errors = estimation_output.formal_errors
+simulation_results_per_iteration = estimation_output.simulation_results_per_iteration
+# fig = plt.figure()
+# for i, simulation_result in enumerate(simulation_results_per_iteration):
+#     print(simulation_result.dynamics_results.state_history)
+#     print(simulation_result.dynamics_results.dependent_variable_history)
+#     print(simulation_result.state_transition_matrix_history)
+#     plt.plot(np.vstack(list(simulation_result.dynamics_results.state_history.values()))[:,0], label=str(i))
+
+# plt.legend()
+# plt.show()
+
+
+print(parameter_history)
 # print(residual_history, np.shape(residual_history))
 # print(covariance)
 # print(formal_errors)
+# print(covariance)
+
 
 # propagated_formal_errors = estimation_model.get_estimation_results()[1]
 # observations = estimation_model.get_estimation_results()[-1]
