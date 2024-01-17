@@ -44,48 +44,34 @@ def estimation_model_objects_results(request):
     dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
     return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, request.param[-1])
 
-# class Test:
-
-#     package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-#     @pytest.mark.parametrize("dynamic_model_objects_results", [(60390,1, package_dict, False, None)], indirect=True)
-#     def test_dynamic_model_objects_results(self, dynamic_model_objects_results):
-
-#         # print(dynamic_model_objects_results["high_fidelity"]["point_mass"][0][-1])
-
-#         # Iterate through the top-level keys
-#         key_count = 0
-#         for top_level_key in dynamic_model_objects_results:
-#             if isinstance(dynamic_model_objects_results[top_level_key], dict):
-#                 key_count += len(dynamic_model_objects_results[top_level_key])
-
-#         run_times_dict = utils.get_model_result_for_given_entry(dynamic_model_objects_results, -1)
 
 
-#         ### Plot run times for each model
-#         fig, axs = plt.subplots(1, key_count, figsize=(10, 3*key_count), sharey=True)
-#         for j, (model_types, model_names) in enumerate(run_times_dict.items()):
-#             for i, (key, values) in enumerate(model_names.items()):
-#                 axs[i+j].bar(range(1, len(values)+1), values, label=key)
-#                 axs[i+j].set_xlabel(key)
-#                 axs[i+j].set_xticks(range(1, 1+max([len(value) for value in  values])))
-#                 axs[i+j].set_yscale("log")
+class Test:
 
-#         axs[0].set_ylabel('Run time [s]')
-#         # fig.suptitle(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
-#         utils.save_figures_to_folder([fig], [])
+    package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+    @pytest.mark.parametrize("dynamic_model_objects_results", [(60390,1, package_dict, False, None)], indirect=True)
+    def test_dynamic_model_objects_results(self, dynamic_model_objects_results):
 
-#     @pytest.mark.parametrize("estimation_model_objects_results", [(60390,1, package_dict, True, None)], indirect=True)
-#     def test_estimation_model_objects_results(self, estimation_model_objects_results):
+        # Iterate through the top-level keys
+        key_count = 0
+        for top_level_key in dynamic_model_objects_results:
+            if isinstance(dynamic_model_objects_results[top_level_key], dict):
+                key_count += len(dynamic_model_objects_results[top_level_key])
 
-#         fig1, axs1 = plt.subplots(1, 3, figsize=(14, 3*1), layout="constrained")
-#         utils.save_figures_to_folder([fig1], [])
+        run_times_dict = utils.get_model_result_for_given_entry(dynamic_model_objects_results, -1)
+
+    @pytest.mark.parametrize("estimation_model_objects_results", [(60390,1, package_dict, True, None)], indirect=True)
+    def test_estimation_model_objects_results(self, estimation_model_objects_results):
+
+        fig1, axs1 = plt.subplots(1, 3, figsize=(14, 3*1), layout="constrained")
+        utils.save_figures_to_folder([fig1], [])
 
 
 
-class Test2:
+class TestMonteCarlo:
 
 
-    def test_monte_carlo(self):
+    def test_dynamic_model_run_times(self):
 
         package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
         get_only_first=False
@@ -149,51 +135,6 @@ class Test2:
         fig.legend(handles=[legend_handles[0]], loc='upper right')
         fig.suptitle(f"Mean run time dynamic models, varying start epoch, 1 day")
         utils.save_figures_to_folder([fig], [])
-
-
-
-
-    # package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-    # params = "simulation_start_epoch_MJD, propagation_time, package_dict, get_first_only, custom_initial_state"
-    # @pytest.mark.parametrize(params, [(60390,1, package_dict, False, None)])
-    # def test_dynamic_model_objects_results(self, dynamic_model_objects_results):
-
-    #     dynamic_model_objects_results = utils.get_dynamic_model_objects_results(*request.param, step_size=0.1)
-
-    #     # Iterate through the top-level keys
-    #     key_count = 0
-    #     for top_level_key in dynamic_model_objects_results:
-    #         if isinstance(dynamic_model_objects_results[top_level_key], dict):
-    #             key_count += len(dynamic_model_objects_results[top_level_key])
-
-    #     print(key_count)
-
-    #     run_times_dict = utils.get_model_result_for_given_entry(dynamic_model_objects_results, -1)
-    #     # print(run_times)
-
-    #     ### Plot run times for each model
-    #     fig, axs = plt.subplots(1, key_count, figsize=(10, 3*key_count), sharey=True)
-    #     for j, (model_types, model_names) in enumerate(run_times_dict.items()):
-    #         for i, (key, values) in enumerate(model_names.items()):
-    #             axs[i+j].bar(range(1, len(values)+1), values, label=key)
-    #             axs[i+j].set_xlabel(key)
-    #             axs[i+j].set_xticks(range(1, 1+max([len(value) for value in run_times_dict.values()])))
-    #             axs[i+j].set_yscale("log")
-
-    #     axs[0].set_ylabel('Run time [s]')
-    #     # fig.suptitle(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
-    #     utils.save_figures_to_folder([fig], [])
-
-    # @pytest.mark.parametrize(params, [(60390,1, package_dict, True, None)])
-    # def test_estimation_model_objects_results(self, *params):
-
-    #     print(estimation_model_objects_results)
-    #     print(estimation_model_objects_results["high_fidelity"]["point_mass"][0][-1])
-
-    #     fig1, axs1 = plt.subplots(1, 3, figsize=(14, 3*1), layout="constrained")
-    #     utils.save_figures_to_folder([fig1], [])
-
-
 
 
 

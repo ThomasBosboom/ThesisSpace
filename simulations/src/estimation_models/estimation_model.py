@@ -28,11 +28,11 @@ from dynamic_models.high_fidelity.spherical_harmonics_srp import *
 
 class EstimationModel:
 
-    def __init__(self, dynamic_model, observation_model):
+    def __init__(self, dynamic_model, truth_model):
 
         # Loading dynamic model
         self.dynamic_model = dynamic_model
-        self.truth_model = observation_model
+        self.truth_model = truth_model
 
         # Defining basis for observations
         self.bias_range = 10.0
@@ -41,8 +41,8 @@ class EstimationModel:
         self.noise_doppler = 0.00097
         self.observation_step_size_range = 1000
         self.observation_step_size_doppler = 1000
-        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_range)
-        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_doppler)
+        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, self.observation_step_size_range)
+        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+30, self.dynamic_model.simulation_end_epoch-30, self.observation_step_size_doppler)
 
 
     def set_observation_model_settings(self):
@@ -50,14 +50,12 @@ class EstimationModel:
         self.dynamic_model.set_environment_settings()
 
         # Define the uplink link ends for one-way observable
-        link_ends = {observation.receiver: observation.body_origin_link_end_id(self.dynamic_model.name_ELO),
-                     observation.transmitter: observation.body_origin_link_end_id(self.dynamic_model.name_LPO)}
+        link_ends = {observation.transmitter: observation.body_origin_link_end_id(self.dynamic_model.name_LPO),
+                     observation.retransmitter: observation.body_origin_link_end_id(self.dynamic_model.name_ELO),
+                     observation.receiver: observation.body_origin_link_end_id(self.dynamic_model.name_LPO)}
         self.link_definition = observation.LinkDefinition(link_ends)
 
-        self.link_definition = {
-            "LPF": self.link_definition,
-            "LUMIO": self.link_definition,
-        }
+        self.link_definition = {"n_way_system": self.link_definition}
 
         # Define settings for light-time calculations
         light_time_correction_settings = observation.first_order_relativistic_light_time_correction(self.dynamic_model.bodies_to_create)
@@ -68,11 +66,11 @@ class EstimationModel:
 
         # Create observation settings for each link/observable
         self.observation_settings_list = list()
-        for body in self.link_definition.keys():
-            self.observation_settings_list.extend([observation.one_way_range(self.link_definition[body],
+        for link in self.link_definition.keys():
+            self.observation_settings_list.extend([observation.two_way_range(self.link_definition[link],
                                                                         light_time_correction_settings = [light_time_correction_settings],
                                                                         bias_settings = range_bias_settings),
-                                                   observation.one_way_doppler_instantaneous(self.link_definition[body],
+                                                   observation.two_way_doppler_averaged(self.link_definition[link],
                                                                         light_time_correction_settings = [light_time_correction_settings],
                                                                         bias_settings = doppler_bias_settings)])
 
@@ -83,13 +81,13 @@ class EstimationModel:
 
         # Define observation simulation times for each link
         self.observation_simulation_settings = list()
-        for body in self.link_definition.keys():
-            self.observation_simulation_settings.extend([observation.tabulated_simulation_settings(observation.one_way_range_type,
-                                                                                                self.link_definition[body],
+        for link in self.link_definition.keys():
+            self.observation_simulation_settings.extend([observation.tabulated_simulation_settings(observation.n_way_range_type,
+                                                                                                self.link_definition[link],
                                                                                                 self.observation_times_range,
                                                                                                 reference_link_end_type = observation.transmitter),
-                                                         observation.tabulated_simulation_settings(observation.one_way_instantaneous_doppler_type,
-                                                                                                self.link_definition[body],
+                                                         observation.tabulated_simulation_settings(observation.n_way_averaged_doppler_type,
+                                                                                                self.link_definition[link],
                                                                                                 self.observation_times_doppler,
                                                                                                 reference_link_end_type = observation.transmitter)])
 
@@ -103,6 +101,10 @@ class EstimationModel:
             self.observation_simulation_settings,
             self.noise_doppler,
             observation.one_way_instantaneous_doppler_type)
+
+        # Provide ancillary settings for n-way observables
+        observation.two_way_range_ancilliary_settings(retransmission_delay = 0.1)
+        # observation.n_way_doppler_ancilliary_settings(integration_time = 0.5, link_end_delays = [0.1])
 
         # Create viability settings
         viability_setting_list = [observation.body_occultation_viability([self.dynamic_model.name_ELO, self.dynamic_model.name_LPO], self.dynamic_model.name_secondary)]
@@ -168,8 +170,8 @@ class EstimationModel:
         # for observable_type, observation_sets in self.sorted_observation_sets.items():
         #     for observation_set in observation_sets.values():
         #         for single_observation_set in observation_set:
-                    # print(observable_type, observation_set, single_observation_set)
-                    # plt.plot(single_observation_set.observation_times, single_observation_set.concatenated_observations)
+        #             print(observable_type, observation_set, single_observation_set)
+        #             plt.plot(single_observation_set.observation_times, single_observation_set.concatenated_observations)
         # plt.show()
 
 
@@ -194,8 +196,8 @@ class EstimationModel:
         estimation_input.define_estimation_settings(save_state_history_per_iteration=False)
 
         # Define weighting of the observations in the inversion
-        weights_per_observable = {estimation_setup.observation.one_way_range_type: self.noise_range**-2,
-                                  estimation_setup.observation.one_way_instantaneous_doppler_type: self.noise_doppler**-2}
+        weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise_range**-2,
+                                  estimation_setup.observation.n_way_averaged_doppler_type: self.noise_doppler**-2}
         estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
         # Run the estimation
@@ -249,7 +251,7 @@ class EstimationModel:
 
         # fig = plt.figure()
         # for i, (observable_type, information_sets) in enumerate(total_information_dict.items()):
-        #     for k in range(1,2,1):
+        #     for k in range(len(observation_sets.values())):
         #         information_dict = total_covariance_dict[observable_type][0][k]
 
         #         epochs = np.array(list(information_dict.keys()))
@@ -284,10 +286,10 @@ class EstimationModel:
 custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 
-# dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
-# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
-dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
-truth_model = high_fidelity_point_mass_srp_01.HighFidelityDynamicModel(60390, 14)
+dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
+truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
+# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
+# truth_model = high_fidelity_point_mass_srp_01.HighFidelityDynamicModel(60390, 14)
 estimation_model = EstimationModel(dynamic_model, truth_model)
 
 estimation_output = estimation_model.get_estimation_results()[0]
@@ -296,4 +298,5 @@ parameter_history = estimation_output.parameter_history
 residual_history = estimation_output.residual_history
 covariance = estimation_output.covariance
 formal_errors = estimation_output.formal_errors
-print(estimation_output.weighted_design_matrix, np.shape(estimation_output.weighted_design_matrix))
+print(formal_errors)
+print(parameter_history)
