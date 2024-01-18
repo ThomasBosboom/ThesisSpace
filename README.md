@@ -1,10 +1,13 @@
 # LPF-LUMIO Autonomous Satellite Navigation Test and Validation Tool
 
-This repository reflects the work for the Master Thesis of Thomas Bosboom with Stefano Speretta as supervisor.
+This repository reflects the work for the Master Thesis of Thomas Bosboom with Stefano Speretta as supervisor. Also great thanks to Erdem Turan for providing additional aid regarding the Matlab documentation for the halo orbit generation used for the CRTBP validation purposes.
+
+## File structure
 
 The code has the following structure:
-- The folder [report](report/) contains the contents related to the report of thesis work.
+- The folder [report](report/) contains the contents related to the reporting aspect of this thesis. These files are the same as shown in the literature study and final report. 
 - The folder [simulations](simulations/) contains the underlying code that is used in the report. Within this folder, one can find the actual source code and the code used for testing and plotting in [src](simulations/src/) and [tests](simulations/tests/) respectively. These folders contain information used from reference data. This can be found in [reference](simulations/reference/).
+
 
 ## Installation
 
