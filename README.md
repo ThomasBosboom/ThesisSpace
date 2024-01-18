@@ -5,7 +5,8 @@ This repository reflects the work for the Master Thesis of Thomas Bosboom with S
 The code has the following structure:
 - [report](report/) contains the contents related to the report of thesis work.
 - [simulations](simulations/) contains the underlying code that is used in the report.
-  within this folder, one can find the actual source code and the code used for testing and plooing in [src](simulations/src/) and [tests](simulations/tests/) respectively.
+  
+  Within this folder, one can find the actual source code and the code used for testing and plooing in [src](simulations/src/) and [tests](simulations/tests/) respectively. These folders contain information used from reference data. This can be found in [reference](simulations/reference/).
 
 For proper installation follow this guide. The installation of tudatpy is supported exclusively through the use of a conda package manager,
 such as Miniconda or Anaconda. For new users, and Windows users in particular, the use of Anaconda is recommended.
