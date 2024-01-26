@@ -41,6 +41,11 @@ class EstimationModel:
         self.noise_doppler = 0.00097
         self.observation_step_size_range = 1000
         self.observation_step_size_doppler = 1000
+        self.retransmission_delay = 6
+        self.integration_time = 0.5
+        self.time_drift_bias = 6.9e-8
+
+        # Creating observation time vector
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, self.observation_step_size_range)
         self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+30, self.dynamic_model.simulation_end_epoch-30, self.observation_step_size_doppler)
 
@@ -55,23 +60,29 @@ class EstimationModel:
                      observation.receiver: observation.body_origin_link_end_id(self.dynamic_model.name_LPO)}
         self.link_definition = observation.LinkDefinition(link_ends)
 
-        self.link_definition = {"n_way_system": self.link_definition}
+        self.link_definition = {"two_way_system": self.link_definition}
 
         # Define settings for light-time calculations
-        light_time_correction_settings = observation.first_order_relativistic_light_time_correction(self.dynamic_model.bodies_to_create)
+        light_time_correction_settings = list()
+        correcting_bodies = list(set(self.truth_model.bodies_to_create).intersection(self.dynamic_model.bodies_to_create))
+        for correcting_body in correcting_bodies:
+            light_time_correction_settings.append(observation.first_order_relativistic_light_time_correction(correcting_bodies))
 
         # Define settings for range and doppler bias
-        range_bias_settings = observation.absolute_bias([self.bias_range])
+        range_bias_settings = observation.combined_bias([observation.absolute_bias([self.bias_range]),
+                                                         observation.time_drift_bias(bias_value = np.array([self.time_drift_bias]),
+                                                                                     time_link_end = observation.transmitter,
+                                                                                     ref_epoch = self.dynamic_model.simulation_start_epoch)])
         doppler_bias_settings = observation.absolute_bias([self.bias_doppler])
 
         # Create observation settings for each link/observable
         self.observation_settings_list = list()
         for link in self.link_definition.keys():
             self.observation_settings_list.extend([observation.two_way_range(self.link_definition[link],
-                                                                        light_time_correction_settings = [light_time_correction_settings],
+                                                                        light_time_correction_settings = light_time_correction_settings,
                                                                         bias_settings = range_bias_settings),
                                                    observation.two_way_doppler_averaged(self.link_definition[link],
-                                                                        light_time_correction_settings = [light_time_correction_settings],
+                                                                        light_time_correction_settings = light_time_correction_settings,
                                                                         bias_settings = doppler_bias_settings)])
 
 
@@ -103,8 +114,9 @@ class EstimationModel:
             observation.one_way_instantaneous_doppler_type)
 
         # Provide ancillary settings for n-way observables
-        observation.two_way_range_ancilliary_settings(retransmission_delay = 0.1)
-        # observation.n_way_doppler_ancilliary_settings(integration_time = 0.5, link_end_delays = [0.1])
+        observation.two_way_range_ancilliary_settings(retransmission_delay = self.retransmission_delay)
+        observation.n_way_doppler_ancilliary_settings(integration_time = self.integration_time,
+                                                      link_end_delays = [self.retransmission_delay])
 
         # Create viability settings
         viability_setting_list = [observation.body_occultation_viability([self.dynamic_model.name_ELO, self.dynamic_model.name_LPO], self.dynamic_model.name_secondary)]
@@ -166,13 +178,6 @@ class EstimationModel:
 
         # Get sorted observation sets
         self.sorted_observation_sets = self.simulated_observations.sorted_observation_sets
-        # ax = plt.figure()
-        # for observable_type, observation_sets in self.sorted_observation_sets.items():
-        #     for observation_set in observation_sets.values():
-        #         for single_observation_set in observation_set:
-        #             print(observable_type, observation_set, single_observation_set)
-        #             plt.plot(single_observation_set.observation_times, single_observation_set.concatenated_observations)
-        # plt.show()
 
 
     def get_estimation_results(self, apriori_covariance=np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2, maximum_iterations=2):
@@ -193,7 +198,7 @@ class EstimationModel:
                                                       inverse_apriori_covariance=np.linalg.inv(apriori_covariance))
 
         # Set methodological options
-        estimation_input.define_estimation_settings(save_state_history_per_iteration=False)
+        estimation_input.define_estimation_settings(save_state_history_per_iteration=True)
 
         # Define weighting of the observations in the inversion
         weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise_range**-2,
@@ -219,13 +224,16 @@ class EstimationModel:
             state_transition_interface=self.estimator.state_transition_interface,
             output_times=output_times)
 
-
         # Generate information and covariance histories based on all the combinations of observables and link definitions
-        total_information_dict = self.sorted_observation_sets.copy()
-        total_covariance_dict = self.sorted_observation_sets.copy()
+        total_information_dict = dict()
+        total_covariance_dict = dict()
         len_obs_list = []
         for i, (observable_type, observation_sets) in enumerate(self.sorted_observation_sets.items()):
+            total_information_dict[observable_type] = dict()
+            total_covariance_dict[observable_type] = dict()
             for j, observation_set in enumerate(observation_sets.values()):
+                total_information_dict[observable_type][j] = list()
+                total_covariance_dict[observable_type][j] = list()
                 for k, single_observation_set in enumerate(observation_set):
 
                     epochs = single_observation_set.observation_times
@@ -246,33 +254,36 @@ class EstimationModel:
                         information_dict[key] = information_dict[key] + np.linalg.inv(apriori_covariance)
                         covariance_dict[key] = np.linalg.inv(information_dict[key])
 
-                    total_covariance_dict[observable_type][0][k] = covariance_dict
-                    total_information_dict[observable_type][0][k] = information_dict
+                    total_information_dict[observable_type][j].append(information_dict)
+                    total_covariance_dict[observable_type][j].append(covariance_dict)
+
 
         # fig = plt.figure()
         # for i, (observable_type, information_sets) in enumerate(total_information_dict.items()):
-        #     for k in range(len(observation_sets.values())):
-        #         information_dict = total_covariance_dict[observable_type][0][k]
+        #     for j, observation_set in enumerate(observation_sets.values()):
+        #         for k, single_observation_set in enumerate(observation_set):
+        #             information_dict = total_information_dict[observable_type][j][k]
+        #             epochs = np.array(list(information_dict.keys()))
+        #             information_matrix_history = np.array(list(information_dict.values()))
+        #             observability_lpf = np.max(np.linalg.eigvals(information_matrix_history[:,0:3,0:3]), axis=1, keepdims=True)
+        #             observability_lumio = np.max(np.linalg.eigvals(information_matrix_history[:,6:9,6:9]), axis=1, keepdims=True)
+        #             # observability_lpf = np.max(np.linalg.eigvals(information_matrix_history[:,3:6,3:6]), axis=1, keepdims=True)
+        #             # observability_lumio = np.max(np.linalg.eigvals(information_matrix_history[:,9:12,9:12]), axis=1, keepdims=True)
 
-        #         epochs = np.array(list(information_dict.keys()))
-        #         information_matrix_history = np.array(list(information_dict.values()))
-        #         observability_lpf = np.max(np.linalg.eigvals(information_matrix_history[:,0:3,0:3]), axis=1, keepdims=True)
-        #         observability_lumio = np.max(np.linalg.eigvals(information_matrix_history[:,6:9,6:9]), axis=1, keepdims=True)
-        #         # observability_lpf = np.max(np.linalg.eigvals(information_matrix_history[:,3:6,3:6]), axis=1, keepdims=True)
-        #         # observability_lumio = np.max(np.linalg.eigvals(information_matrix_history[:,9:12,9:12]), axis=1, keepdims=True)
-
-        #         plt.plot(epochs, observability_lpf, label="LPF")
-        #         plt.plot(epochs, observability_lumio, label="LUMIO")
-        #         plt.yscale("log")
-        #         plt.grid()
+        #             plt.plot(epochs, observability_lpf, label="LPF")
+        #             plt.plot(epochs, observability_lumio, label="LUMIO")
+        #             plt.yscale("log")
+        #             plt.grid()
 
         # plt.legend()
         # plt.show()
 
+
         return estimation_output, \
                propagated_formal_errors, propagated_covariance, \
                total_covariance_dict, total_information_dict, \
-               self.sorted_observation_sets
+               self.sorted_observation_sets, \
+            #    self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
 
 
     def get_propagated_orbit(self):
@@ -283,20 +294,56 @@ class EstimationModel:
 
 
 
-custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-                                1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+#                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 
-dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
-truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
+# # dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
+# # truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
 # dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
-# truth_model = high_fidelity_point_mass_srp_01.HighFidelityDynamicModel(60390, 14)
-estimation_model = EstimationModel(dynamic_model, truth_model)
+# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
+# estimation_model = EstimationModel(dynamic_model, truth_model)
 
-estimation_output = estimation_model.get_estimation_results()[0]
+# estimation_output = estimation_model.get_estimation_results()[0]
 
-parameter_history = estimation_output.parameter_history
-residual_history = estimation_output.residual_history
-covariance = estimation_output.covariance
-formal_errors = estimation_output.formal_errors
-print(formal_errors)
-print(parameter_history)
+# parameter_history = estimation_output.parameter_history
+# residual_history = estimation_output.residual_history
+# covariance = estimation_output.covariance
+# formal_errors = estimation_output.formal_errors
+
+# fig = plt.figure()
+# simulation_results_per_iteration = estimation_output.simulation_results_per_iteration
+# base_state_history = simulation_results_per_iteration[0].dynamics_results.state_history
+# base_epochs = np.stack(list(base_state_history.keys()))
+# base_state_history = np.stack(list(base_state_history.values()))
+# for simulation_result_per_iteration in simulation_results_per_iteration:
+#     state_history = simulation_result_per_iteration.dynamics_results.state_history
+#     epochs = np.stack(list(state_history.keys()))
+#     state_history = np.stack(list(state_history.values()))
+
+#     # print(state_history, np.shape(state_history))
+#     plt.plot(epochs, np.linalg.norm(state_history[:,6:9]-base_state_history[:,6:9], axis=1))
+
+#     print(state_history[0,:]-base_state_history[0,:])
+
+# # plt.yscale("log")
+# plt.show()
+
+
+
+# fig = plt.figure()
+# dynamics_simulator = estimation_model.get_estimation_results()[-2]
+# print(dynamics_simulator)
+
+# state_history = dynamics_simulator.state_history
+# print(state_history, np.shape(state_history))
+
+# epochs = np.stack(list(state_history.keys()))
+# state_history = np.stack(list(state_history.values()))
+
+# print(state_history, np.shape(state_history))
+
+# # plt.plot(state_history[:,6], state_history[:,7])
+# plt.plot(epochs, np.linalg.norm(state_history[:,0:3], axis=1))
+
+# # plt.yscale("log")
+# plt.show()

@@ -11,6 +11,7 @@ from tudatpy.kernel.astro import time_conversion
 
 # Own
 from src.dynamic_models import Interpolator
+from src.dynamic_models.full_fidelity import *
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -67,13 +68,16 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, pack
         return dynamic_model_objects
 
 
-def get_estimation_model_objects(estimation_model, dynamic_model_objects):
+def get_estimation_model_objects(estimation_model, dynamic_model_objects, truth_model=None):
 
     estimation_model_objects = {}
     for package_type, package_names in dynamic_model_objects.items():
         submodels_dict = {}
         for package_name, dynamic_models in package_names.items():
-            submodels = [estimation_model.EstimationModel(dynamic_model) for dynamic_model in dynamic_models]
+            if truth_model is None:
+                print(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
+                truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
+            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model) for dynamic_model in dynamic_models]
             submodels_dict[package_name] = submodels
         estimation_model_objects[package_type] = submodels_dict
 
@@ -105,7 +109,7 @@ def save_figures_to_folder(figs=[], labels=[], save_to_report=True):
             extras.append(pytest_html.extras.png(figure_path))
 
 
-def get_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None, step_size=0.01):
+def get_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None, step_size=0.01, epoch_in_MJD=True, entry_list=None):
 
     dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD,
                                                       propagation_time,
@@ -119,16 +123,25 @@ def get_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_ti
             for i, dynamic_model in enumerate(dynamic_models):
 
                 start_time = time.time()
-                results_list = list(Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model))
+                results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagator_results(dynamic_model))
                 results_list.append(time.time()-start_time)
                 dynamic_model_objects_results[model_type][model_name][i] = results_list
+
+    if entry_list is not None:
+        for model_type, model_names in dynamic_model_objects_results.items():
+            for model_name, model_results in model_names.items():
+                for i, model_result in enumerate(model_results):
+                    model_result_list = []
+                    for entry in entry_list:
+                        model_result_list.append(model_result[entry])
+                    dynamic_model_objects_results[model_type][model_name][i] = model_result_list
 
     return dynamic_model_objects_results
 
 
-def get_estimation_model_objects_results(dynamic_model_objects, estimation_model, get_only_first=False):
+def get_estimation_model_objects_results(dynamic_model_objects, estimation_model, truth_model=None, get_only_first=False, entry_list=None):
 
-    estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects)
+    estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects, truth_model=truth_model)
 
     if get_only_first:
         result_dict = {}
@@ -153,6 +166,15 @@ def get_estimation_model_objects_results(dynamic_model_objects, estimation_model
                 results_list.append(time.time()-start_time)
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 
+    if entry_list is not None:
+        for model_type, model_names in estimation_model_objects_results.items():
+            for model_name, model_results in model_names.items():
+                for i, model_result in enumerate(model_results):
+                    model_result_list = []
+                    for entry in entry_list:
+                        model_result_list.append(model_result[entry])
+                    estimation_model_objects_results[model_type][model_name][i] = model_result_list
+
     return estimation_model_objects_results
 
 
@@ -165,7 +187,6 @@ def get_first_of_model_types(model_objects):
             result_dict[key] = {list(inner_dict.keys())[0]: first_elements}
 
     return result_dict
-
 
 
 def convert_model_objects_to_list(model_objects, specific_model_type=None):
@@ -192,20 +213,17 @@ def convert_model_objects_to_list(model_objects, specific_model_type=None):
     return model_objects_list
 
 
-def get_model_result_for_given_entry(dynamic_model_objects_results, entry_num):
+# def get_model_result_for_given_entry(dynamic_model_objects_results, entry_list):
 
+#     for model_type, model_names in dynamic_model_objects_results.items():
+#         for model_name, model_results in model_names.items():
+#             result_list_model_name = []
+#             for model_result in model_results:
+#                 for entry in entry_list:
+#                     result_list_model_name.append(model_result[entry])
+#             dynamic_model_objects_results[model_type][model_name] = result_list_model_name
 
-    for model_type, model_names in dynamic_model_objects_results.items():
-        for model_name, model_results in model_names.items():
-            result_list_model_name = []
-            for model_result in model_results:
-                print(model_name, model_result[entry_num])
-                result_list_model_name.append(model_result[entry_num])
-            dynamic_model_objects_results[model_type][model_name] = result_list_model_name
-
-    return dynamic_model_objects_results
-
-
+#     return dynamic_model_objects_results
 
 
 def convert_dictionary_to_array(dictionary):
@@ -224,18 +242,16 @@ def convert_epochs_to_MJD(epochs):
     return epochs_MJD
 
 
-def get_first_of_model_types(dynamic_model_objects):
+# def get_first_of_model_types(dynamic_model_objects):
 
-    dynamic_models = []
-    for model_type, model_names in dynamic_model_objects.items():
-        for model_name, models in model_names.items():
-            dynamic_models.append(models[0])
+#     dynamic_models = []
+#     for model_type, model_names in dynamic_model_objects.items():
+#         for model_name, models in model_names.items():
+#             dynamic_models.append(models[0])
 
-    return dynamic_models
-
+#     return dynamic_models
 
 
 # Commonly used parameters
 synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
                                   1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-

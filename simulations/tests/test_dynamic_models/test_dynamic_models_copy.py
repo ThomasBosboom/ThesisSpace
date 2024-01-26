@@ -3,8 +3,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools
-import time
+import statistics
 
 # Define path to import src files
 script_directory = os.path.dirname(os.path.realpath(__file__))
@@ -32,49 +31,50 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 
-# Fixture function to set up multiple sets of sample data
-@pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_first_only", "custom_initial_state")],
-                scope="module")
-def dynamic_model_objects_results(request):
-    return utils.get_dynamic_model_objects_results(*request.param, step_size=0.1)
+# # Fixture function to set up multiple sets of sample data
+# @pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_first_only", "custom_initial_state")],
+#                 scope="module")
+# def dynamic_model_objects_results(request):
+#     return utils.get_dynamic_model_objects_results(*request.param, step_size=0.1)
 
-@pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_first_only", "custom_initial_state")],
-                scope="module")
-def estimation_model_objects_results(request):
-    dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
-    return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, request.param[-1])
+# @pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_first_only", "custom_initial_state")],
+#                 scope="module")
+# def estimation_model_objects_results(request):
+#     dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
+#     return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, request.param[-1])
 
 
 
-class Test:
+# class Test:
 
-    package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-    @pytest.mark.parametrize("dynamic_model_objects_results", [(60390,1, package_dict, False, None)], indirect=True)
-    def test_dynamic_model_objects_results(self, dynamic_model_objects_results):
+#     package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+#     @pytest.mark.parametrize("dynamic_model_objects_results", [(60390,1, package_dict, False, None)], indirect=True)
+#     def test_dynamic_model_objects_results(self, dynamic_model_objects_results):
 
-        # Iterate through the top-level keys
-        key_count = 0
-        for top_level_key in dynamic_model_objects_results:
-            if isinstance(dynamic_model_objects_results[top_level_key], dict):
-                key_count += len(dynamic_model_objects_results[top_level_key])
+#         # Iterate through the top-level keys
+#         key_count = 0
+#         for top_level_key in dynamic_model_objects_results:
+#             if isinstance(dynamic_model_objects_results[top_level_key], dict):
+#                 key_count += len(dynamic_model_objects_results[top_level_key])
 
-        run_times_dict = utils.get_model_result_for_given_entry(dynamic_model_objects_results, -1)
+#         run_times_dict = utils.get_model_result_for_given_entry(dynamic_model_objects_results, [-1])
 
-    @pytest.mark.parametrize("estimation_model_objects_results", [(60390,1, package_dict, True, None)], indirect=True)
-    def test_estimation_model_objects_results(self, estimation_model_objects_results):
+    # @pytest.mark.parametrize("estimation_model_objects_results", [(60390,1, package_dict, True, None)], indirect=True)
+    # def test_estimation_model_objects_results(self, estimation_model_objects_results):
 
-        fig1, axs1 = plt.subplots(1, 3, figsize=(14, 3*1), layout="constrained")
-        utils.save_figures_to_folder([fig1], [])
+    #     fig1, axs1 = plt.subplots(1, 3, figsize=(14, 3*1), layout="constrained")
+    #     utils.save_figures_to_folder([fig1], [])
 
 
 
 class TestMonteCarlo:
 
-
     def test_dynamic_model_run_times(self):
 
         package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
-        get_only_first=False
+        propagation_time = 1
+        get_only_first = False
+        custom_initial_state = None
 
         # Initialize dictionaries to store accumulated values
         accumulator_dict = {
@@ -85,18 +85,17 @@ class TestMonteCarlo:
         }
 
         for start_epoch in range(60390, 60414, 1):
-            params = (start_epoch, 1, package_dict, get_only_first, None)
-            dynamic_model_objects_results = utils.get_dynamic_model_objects_results(*params, step_size=0.1)
-            run_times_dict = utils.get_model_result_for_given_entry(dynamic_model_objects_results, -1)
+            params = (start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
+            run_times_dict = utils.get_dynamic_model_objects_results(*params, step_size=0.1, entry_list=[-1])
 
             # Accumulate values during the loop
             for fidelity_key, sub_dict in run_times_dict.items():
                 for i, (subkey, subvalue_list) in enumerate(sub_dict.items()):
                     for j, subvalue in enumerate(subvalue_list):
-                        accumulator_dict[fidelity_key][subkey][j].append(subvalue)
+                        for k, entry in enumerate(subvalue):
+                            accumulator_dict[fidelity_key][subkey][j].append(entry)
 
         # Calculate averages and standard deviations
-        import statistics
         result_dict = {
             fidelity_key: {
                 subkey: [
@@ -111,14 +110,12 @@ class TestMonteCarlo:
             for fidelity_key, sub_dict in accumulator_dict.items()
         }
 
-
         ### Plot run times for each model
         keys_list = [["CRTBP"], ["PM", "PM SRP", "SH", "SH SRP"]]
         key_count = sum(len(sublist) for sublist in package_dict.values())
         fig, axs = plt.subplots(1, key_count, figsize=(8, 0.75*key_count), sharey=True)
         for i, (model_types, model_names) in enumerate(result_dict.items()):
             for j, (key, values) in enumerate(model_names.items()):
-                print(values)
                 averages = []
                 std_devs = []
                 for subvalue in values:
