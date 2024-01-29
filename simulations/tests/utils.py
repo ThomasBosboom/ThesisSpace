@@ -124,7 +124,7 @@ def get_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_ti
             for i, dynamic_model in enumerate(dynamic_models):
 
                 start_time = time.time()
-                results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagator_results(dynamic_model))
+                results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model))
                 results_list.append(time.time()-start_time)
                 dynamic_model_objects_results[model_type][model_name][i] = results_list
 

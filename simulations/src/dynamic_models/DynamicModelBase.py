@@ -71,9 +71,9 @@ class DynamicModelBase:
         pass
 
 
-    def set_propagator_settings(self):
+    def set_propagator_settings(self, estimated_initial_state=None):
         pass
 
 
-    def get_propagation_simulator(self):
+    def get_propagation_simulator(self, estimated_initial_state=None):
         pass

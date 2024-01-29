@@ -91,7 +91,7 @@ class SynodicToInertialHistoryConverter:
     def get_results(self, synodic_state_history):
 
         epochs, _, dependent_variables_history, _ = \
-            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model)
+            Interpolator.Interpolator(step_size=self.step_size).get_propagation_results(self.dynamic_model)
 
         # Generate history of classical CRTBP
         state_rotating_bary_lpf, state_rotating_bary_lumio = synodic_state_history[:,:6], synodic_state_history[:,6:]
@@ -205,7 +205,7 @@ class InertialToSynodicHistoryConverter:
     def get_results(self, inertial_state_history):
 
         epochs, _, dependent_variables_history, _ = \
-            Interpolator.Interpolator(step_size=self.step_size).get_propagator_results(self.dynamic_model)
+            Interpolator.Interpolator(step_size=self.step_size).get_propagation_results(self.dynamic_model)
 
         # Split states into spacecraft states
         state_inertial_lpf, state_inertial_lumio = inertial_state_history[:,:6], inertial_state_history[:,6:]

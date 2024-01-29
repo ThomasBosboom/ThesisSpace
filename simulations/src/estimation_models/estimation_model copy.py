@@ -264,28 +264,27 @@ class EstimationModel:
                     total_covariance_dict[observable_type][j].append(covariance_dict)
 
 
-        dynamics_simulator, variational_equations_solver = self.dynamic_model.get_propagation_simulator(estimated_initial_state=estimation_output.parameter_history[:,0])
-        # dynamics_simulator = numerical_simulation.create_dynamics_simulator(self.dynamic_model.bodies, self.dynamic_model.propagator_settings)
-        state_history_dynamic_model_initial = np.stack(list(dynamics_simulator.state_history.values()))
-        epochs_dynamic_model_initial = np.stack(list(dynamics_simulator.state_history.keys()))
-
-        dynamics_simulator, variational_equations_solver = self.dynamic_model.get_propagation_simulator(estimated_initial_state=estimation_output.parameter_history[:,-1])
-        # dynamics_simulator = numerical_simulation.create_dynamics_simulator(self.dynamic_model.bodies, self.dynamic_model.propagator_settings)
-        state_history_dynamic_model_final = np.stack(list(dynamics_simulator.state_history.values()))
-        epochs_dynamic_model_final = np.stack(list(dynamics_simulator.state_history.keys()))
-
-        dynamics_simulator = numerical_simulation.create_dynamics_simulator(self.truth_model.bodies, self.truth_model.propagator_settings)
-        state_history_observations = np.stack(list(dynamics_simulator.state_history.values()))
-        epochs_observations = np.stack(list(dynamics_simulator.state_history.keys()))
 
         fig = plt.figure()
-        plt.plot(epochs_dynamic_model_initial, state_history_dynamic_model_initial[:,:3], color="red")
-        plt.plot(epochs_dynamic_model_final, state_history_dynamic_model_final[:,:3], color="red", ls="--")
-        plt.plot(epochs_observations, state_history_observations[:,:3], color="blue")
 
-        # fig = plt.figure()
-        # plt.plot(epochs_dynamic_model_initial[:], np.linalg.norm(state_history_dynamic_model_initial[:,:3]-state_history_dynamic_model_final[:-1,:3], axis=1))
-        # plt.yscale("log")
+        import Interpolator
+        epochs, state_history_dynamic_model_initial, dependent_variables_history, state_transition_matrix_history = \
+            Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.001).get_propagation_results(self.dynamic_model,estimated_initial_state=estimation_output.parameter_history[:,0])
+        plt.plot(epochs, state_history_dynamic_model_initial[:,:3], color="red")
+        epochs, state_history_dynamic_model_final, dependent_variables_history, state_transition_matrix_history = \
+            Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.001).get_propagation_results(self.dynamic_model,estimated_initial_state=estimation_output.parameter_history[:,-1])
+        plt.plot(epochs, state_history_dynamic_model_final[:,:3], color="red", ls="--")
+        epochs, state_history_observations, dependent_variables_history, state_transition_matrix_history = \
+            Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.001).get_propagation_results(self.truth_model,estimated_initial_state=None)
+        plt.plot(epochs, state_history_observations[:,:3], color="blue")
+
+        # plt.show()
+
+        fig = plt.figure()
+        plt.plot(epochs, np.linalg.norm(state_history_dynamic_model_initial[:,:3]-state_history_dynamic_model_final[:,:3], axis=1))
+        plt.plot(epochs, np.linalg.norm(state_history_observations[:,:3]-state_history_dynamic_model_initial[:,:3], axis=1))
+        plt.plot(epochs, np.linalg.norm(state_history_observations[:,:3]-state_history_dynamic_model_final[:,:3], axis=1))
+        plt.yscale("log")
 
         fig1_3d = plt.figure()
         ax = fig1_3d.add_subplot(111, projection='3d')
@@ -305,7 +304,7 @@ class EstimationModel:
             #    self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
 
 
-    def get_propagation_simulator(self):
+    def get_propagation_simulator(self, estimated_initial_state=None):
 
         self.set_simulated_observations()
 
@@ -313,13 +312,12 @@ class EstimationModel:
 
 
 
-custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-                                1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-
+# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+#                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 # dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
 # truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
 dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
-truth_model = high_fidelity_spherical_harmonics_03_2_2_10_10.HighFidelityDynamicModel(60390, 14)
+truth_model = high_fidelity_spherical_harmonics_srp_03_2_2_10_10.HighFidelityDynamicModel(60390, 14)
 
 apriori_covariance=np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance)

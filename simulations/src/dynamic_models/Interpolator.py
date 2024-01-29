@@ -14,6 +14,7 @@ class Interpolator:
 
 
     def interp_function(self, epochs, interp_epochs, history):
+
         if history.ndim == 2:
             interp_function = interp1d(epochs, history, axis=0, kind=self.kind, fill_value='extrapolate')
             return interp_function(interp_epochs)
@@ -25,10 +26,13 @@ class Interpolator:
             return interpolated_history
 
 
-    def get_propagator_results(self, dynamic_model_object):
+    def get_propagation_results(self, dynamic_model_object, estimated_initial_state=None):
 
         # Get simulation results from each dynamic model
-        self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator()
+        if estimated_initial_state is not None:
+            self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator(estimated_initial_state=estimated_initial_state)
+        else:
+            self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator()
         self.simulation_start_epoch = dynamic_model_object.simulation_start_epoch
         self.simulation_end_epoch = dynamic_model_object.simulation_end_epoch
 

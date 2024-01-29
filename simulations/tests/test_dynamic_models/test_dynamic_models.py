@@ -52,7 +52,7 @@ class TestFrameConversions:
 
         # Extract simulation histories tudatpy solution
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-            Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model)
+            Interpolator.Interpolator(step_size=step_size).get_propagation_results(dynamic_model)
 
         # Convert back to synodic
         epochs_synodic, state_history_synodic = \
@@ -493,7 +493,7 @@ class TestOutputsDynamicModels:
 
             # Extra simulation histories of tudat models
             epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                Interpolator.Interpolator(step_size=step_size).get_propagator_results(dynamic_model)
+                Interpolator.Interpolator(step_size=step_size).get_propagation_results(dynamic_model)
 
             epochs_synodic, state_history_synodic = \
                 FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
@@ -614,7 +614,7 @@ class TestOutputsDynamicModels:
 
                         # Extract simulation histories numerical solution
                         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                            Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
+                            Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(dynamic_model)
 
                         reference_state_history = np.concatenate((validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
                                                                 validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
@@ -670,7 +670,7 @@ class TestOutputsDynamicModels:
 
                     # Extract simulation histories numerical solution
                     epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                        Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
+                        Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(dynamic_model)
 
                     reference_state_history = np.concatenate((validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
                                                             validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),

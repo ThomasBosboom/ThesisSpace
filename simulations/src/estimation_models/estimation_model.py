@@ -281,7 +281,7 @@ class EstimationModel:
             #    self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
 
 
-    def get_propagation_simulator(self):
+    def get_propagation_simulator(self, estimated_initial_state=None):
 
         self.set_simulated_observations()
 

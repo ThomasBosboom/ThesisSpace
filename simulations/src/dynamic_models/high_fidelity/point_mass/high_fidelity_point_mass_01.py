@@ -179,7 +179,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
 # import Interpolator
 # epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.001).get_propagator_results(dynamic_model)
+#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.001).get_propagation_results(dynamic_model)
 
 # print(states[0,:])
 # ax = plt.figure().add_subplot(projection='3d')

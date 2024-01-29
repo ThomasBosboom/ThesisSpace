@@ -239,9 +239,12 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.termination_settings = propagation_setup.propagator.time_termination(self.simulation_end_epoch)
 
 
-    def set_propagator_settings(self):
+    def set_propagator_settings(self, estimated_initial_state=None):
 
         self.set_termination_settings()
+
+        if estimated_initial_state is not None:
+            self.initial_state = estimated_initial_state
 
         # Create propagation settings
         self.propagator_settings = propagation_setup.propagator.translational(
@@ -255,9 +258,9 @@ class HighFidelityDynamicModel(DynamicModelBase):
             output_variables= self.dependent_variables_to_save)
 
 
-    def get_propagation_simulator(self):
+    def get_propagation_simulator(self, estimated_initial_state=None):
 
-        self.set_propagator_settings()
+        self.set_propagator_settings(estimated_initial_state=estimated_initial_state)
 
         print("been here")
         # Create simulation object and propagate dynamics.
