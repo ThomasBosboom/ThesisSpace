@@ -28,11 +28,14 @@ from dynamic_models.high_fidelity.spherical_harmonics_srp import *
 
 class EstimationModel:
 
-    def __init__(self, dynamic_model, truth_model):
+    def __init__(self, dynamic_model, truth_model, apriori_covariance=None):
 
         # Loading dynamic model
         self.dynamic_model = dynamic_model
         self.truth_model = truth_model
+
+        # Loading apriori covariance
+        self.apriori_covariance = apriori_covariance
 
         # Defining basis for observations
         self.bias_range = 10.0
@@ -163,7 +166,7 @@ class EstimationModel:
 
         # Create the parameters that will be estimated
         self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.dynamic_model.bodies)
-        self.truth_parameters = self.parameters_to_estimate.parameter_vector
+        # self.truth_parameters = self.parameters_to_estimate.parameter_vector
 
 
     def set_simulated_observations(self):
@@ -180,7 +183,7 @@ class EstimationModel:
         self.sorted_observation_sets = self.simulated_observations.sorted_observation_sets
 
 
-    def get_estimation_results(self, apriori_covariance=np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2, maximum_iterations=2):
+    def get_estimation_results(self, maximum_iterations=3):
 
         self.set_simulated_observations()
 
@@ -193,9 +196,13 @@ class EstimationModel:
 
         # Create input object for the estimation
         convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=maximum_iterations)
-        estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
-                                                      convergence_checker=convergence_checker,
-                                                      inverse_apriori_covariance=np.linalg.inv(apriori_covariance))
+        if self.apriori_covariance is None:
+            estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
+                                                          convergence_checker=convergence_checker)
+        else:
+            estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
+                                                          convergence_checker=convergence_checker,
+                                                          inverse_apriori_covariance=np.linalg.inv(self.apriori_covariance))
 
         # Set methodological options
         estimation_input.define_estimation_settings(save_state_history_per_iteration=True)
@@ -208,21 +215,30 @@ class EstimationModel:
         # Run the estimation
         with util.redirect_std(redirect_out=True):
             estimation_output = self.estimator.perform_estimation(estimation_input)
-        updated_parameters = self.parameters_to_estimate.parameter_vector
-        estimation_error = self.truth_parameters - updated_parameters
+        # updated_parameters = self.parameters_to_estimate.parameter_vector
+        # estimation_error = self.truth_parameters - updated_parameters
+        # print(estimation_error)
+        # print(estimation_output.formal_errors)
 
-        # Propagate formal errors and covariance over the course of estimation window
-        output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 60)
 
-        propagated_formal_errors = estimation.propagate_formal_errors_split_output(
-            initial_covariance=apriori_covariance,
-            state_transition_interface=self.estimator.state_transition_interface,
-            output_times=output_times)
 
-        propagated_covariance = estimation.propagate_covariance_split_output(
-            initial_covariance=apriori_covariance,
-            state_transition_interface=self.estimator.state_transition_interface,
-            output_times=output_times)
+        # if self.apriori_covariance is not None:
+
+            # # Propagate formal errors and covariance over the course of estimation window
+            # output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 60)
+
+            # propagated_formal_errors = estimation.propagate_formal_errors_split_output(
+            #     initial_covariance=self.apriori_covariance,
+            #     state_transition_interface=self.estimator.state_transition_interface,
+            #     output_times=output_times)
+
+            # propagated_covariance = estimation.propagate_covariance_split_output(
+            #     initial_covariance=self.apriori_covariance,
+            #     state_transition_interface=self.estimator.state_transition_interface,
+            #     output_times=output_times)
+
+            # propagated_covariance = np.array(propagated_covariance[1])
+            # print("propagated_covariance", propagated_covariance[-1])
 
         # Generate information and covariance histories based on all the combinations of observables and link definitions
         total_information_dict = dict()
@@ -245,42 +261,21 @@ class EstimationModel:
                     total_information = 0
                     for index, weighted_design_matrix in enumerate(weighted_design_matrix_history):
                         epoch = epochs[index]
-                        current_information = total_information + np.dot(weighted_design_matrix.T, weighted_design_matrix)
+                        current_information = np.dot(weighted_design_matrix.T, weighted_design_matrix)
                         information_dict[epoch] = current_information
-                        measured_information = current_information
+                        total_information = current_information
 
                     covariance_dict = dict()
                     for key in information_dict:
-                        information_dict[key] = information_dict[key] + np.linalg.inv(apriori_covariance)
+                        if self.apriori_covariance is not None:
+                            information_dict[key] = information_dict[key] + np.linalg.inv(self.apriori_covariance)
                         covariance_dict[key] = np.linalg.inv(information_dict[key])
 
                     total_information_dict[observable_type][j].append(information_dict)
                     total_covariance_dict[observable_type][j].append(covariance_dict)
 
 
-        # fig = plt.figure()
-        # for i, (observable_type, information_sets) in enumerate(total_information_dict.items()):
-        #     for j, observation_set in enumerate(observation_sets.values()):
-        #         for k, single_observation_set in enumerate(observation_set):
-        #             information_dict = total_information_dict[observable_type][j][k]
-        #             epochs = np.array(list(information_dict.keys()))
-        #             information_matrix_history = np.array(list(information_dict.values()))
-        #             observability_lpf = np.max(np.linalg.eigvals(information_matrix_history[:,0:3,0:3]), axis=1, keepdims=True)
-        #             observability_lumio = np.max(np.linalg.eigvals(information_matrix_history[:,6:9,6:9]), axis=1, keepdims=True)
-        #             # observability_lpf = np.max(np.linalg.eigvals(information_matrix_history[:,3:6,3:6]), axis=1, keepdims=True)
-        #             # observability_lumio = np.max(np.linalg.eigvals(information_matrix_history[:,9:12,9:12]), axis=1, keepdims=True)
-
-        #             plt.plot(epochs, observability_lpf, label="LPF")
-        #             plt.plot(epochs, observability_lumio, label="LUMIO")
-        #             plt.yscale("log")
-        #             plt.grid()
-
-        # plt.legend()
-        # plt.show()
-
-
         return estimation_output, \
-               propagated_formal_errors, propagated_covariance, \
                total_covariance_dict, total_information_dict, \
                self.sorted_observation_sets, \
             #    self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
@@ -299,9 +294,11 @@ class EstimationModel:
 
 # # dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
 # # truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
-# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
-# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
-# estimation_model = EstimationModel(dynamic_model, truth_model)
+# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 1)
+# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 1)
+
+# apriori_covariance=np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+# estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance)
 
 # estimation_output = estimation_model.get_estimation_results()[0]
 
