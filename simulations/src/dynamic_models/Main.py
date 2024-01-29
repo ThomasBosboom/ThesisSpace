@@ -20,7 +20,7 @@ sys.path.append(parent_dir)
 
 # Own
 from tests import utils
-from src.dynamic_models import validation_LUMIO
+from src.dynamic_models import validation
 from src.dynamic_models import Interpolator, FrameConverter, TraditionalLowFidelity
 from src.dynamic_models.full_fidelity import *
 from src.dynamic_models.low_fidelity.three_body_problem import *

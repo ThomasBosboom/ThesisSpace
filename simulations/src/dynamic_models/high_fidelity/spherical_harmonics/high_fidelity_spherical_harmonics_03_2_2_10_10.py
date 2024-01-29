@@ -15,7 +15,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(parent_dir))
 
 # Own
-from dynamic_models import validation_LUMIO
+from dynamic_models import validation
 from DynamicModelBase import DynamicModelBase
 
 class HighFidelityDynamicModel(DynamicModelBase):
@@ -71,8 +71,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_acceleration_settings()
 
-        initial_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
-        initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+        initial_state_LPF = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        initial_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
         if self.custom_initial_state is not None:
             self.initial_state = self.custom_initial_state
@@ -149,7 +149,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagated_orbit(self):
+    def get_propagation_simulator(self):
 
         self.set_propagator_settings()
 
@@ -169,16 +169,3 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         return dynamics_simulator, variational_equations_solver
 
-
-# test2 = HighFidelityDynamicModel(60390, 28)
-# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
-
-# print(np.shape(dep_var))
-# ax = plt.figure()
-# # plt.plot(states[:,0], states[:,1], states[:,2])
-# # plt.plot(states[:,6], states[:,7], states[:,8])
-# plt.plot(dep_var[:,-12:-9])
-# plt.plot(dep_var[:,-9:-6])
-# plt.legend()
-# plt.yscale("log")
-# plt.show()

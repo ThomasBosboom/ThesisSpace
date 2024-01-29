@@ -14,7 +14,7 @@ from tudatpy.kernel.astro import time_conversion, element_conversion
 from tudatpy.kernel.interface import spice
 from tudatpy.kernel.math import interpolators, root_finders
 from tudatpy.kernel import constants
-import validation_LUMIO
+import validation
 
 import miscellaneous
 
@@ -54,7 +54,7 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
 
 
     # if fidelity=="low":
-        
+
     #     # Define the ephemeris frame
     #     body_settings.get(name_secondary).ephemeris_settings = environment_setup.ephemeris.custom_ephemeris(
     #         miscellaneous.get_circular_orbit_states_1,
@@ -90,7 +90,7 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
     # CREATE ACCELERATIONS ####################################################
     ###########################################################################
 
-    
+
     if fidelity == "high":
 
         # Define accelerations acting on vehicle.
@@ -156,7 +156,7 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
     # CREATE INITIAL STATE ####################################################
     ###########################################################################
 
-        
+
     moon_initial_state = spice.get_body_cartesian_state_at_epoch(
             target_body_name = name_secondary,
             observer_body_name = central_bodies[0],
@@ -166,14 +166,14 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
         )
 
     if fidelity == "low":
-        moon_initial_state_adjusted = miscellaneous.get_circular_initial_orbit_state(semimajor_axis=3.8474796e8, 
+        moon_initial_state_adjusted = miscellaneous.get_circular_initial_orbit_state(semimajor_axis=3.8474796e8,
                                                                                      position_vector=moon_initial_state[:3],
                                                                                      gravitational_parameter=spice.get_body_gravitational_parameter(name_primary))
 
         translation_vector = moon_initial_state[:3] - moon_initial_state_adjusted[:3]
         moon_initial_state = moon_initial_state_adjusted + np.hstack((translation_vector, np.zeros((3))))
         moon_initial_state = moon_initial_state_adjusted
-        
+
         # print(moon_initial_state_adjusted, np.linalg.norm(moon_initial_state_adjusted[:3]))
         # print("kepler: ", element_conversion.cartesian_to_keplerian(np.array([moon_initial_state]).T, spice.get_body_gravitational_parameter(name_primary)))
 
@@ -181,7 +181,7 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
 
         if name_spacecraft == "LUMIO":
 
-            system_initial_state = validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time)[0][0]
+            system_initial_state = validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time)[0][0]
 
         if name_spacecraft == "LPF":
 
@@ -201,7 +201,7 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
 
             system_initial_state = np.concatenate((system_initial_state,moon_initial_state))
 
-    
+
     else:
 
         system_initial_state = initial_state
@@ -209,13 +209,13 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
         if propagate_moon==True:
 
             system_initial_state = np.concatenate((system_initial_state,moon_initial_state))
-    
+
 
 
     ###########################################################################
     # CREATE PROPAGATION SETTINGS #############################################
     ###########################################################################
-    
+
     # Define required outputs
     dependent_variables_to_save = [
         propagation_setup.dependent_variable.total_acceleration(name_spacecraft),
@@ -249,10 +249,10 @@ def get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_s
 
     # Create simulation object and propagate dynamics.
     dynamics_simulator = numerical_simulation.create_dynamics_simulator(
-        bodies, 
+        bodies,
         propagator_settings
     )
-    
+
     # Setup parameters settings to propagate the state transition matrix
     parameter_settings = estimation_setup.parameter.initial_states(propagator_settings, bodies)# Create the parameters that will be estimated
     parameters_to_estimate = estimation_setup.create_parameter_set(parameter_settings, bodies)
@@ -281,14 +281,14 @@ def get_corrected_initial_state(state_history, state_transition_matrix_history, 
 
     R_i = 1e-2*np.eye(3)
     Q = 1e-1*np.eye(3)
-        
+
     sum_array = np.zeros((3,3))
     sum_array_2 = np.zeros(3)
     for index, t_i in enumerate(target_point_epochs):
         t_i = int(t_i)
         t_c = int(t_c)
         t_v = int(t_v)
-        
+
         Phi_tvti_rv = np.dot(state_transition_matrix_history[t_v], np.linalg.inv(state_transition_matrix_history[t_i]))[3:,:3]
         Phi_tcti_rv = np.dot(state_transition_matrix_history[t_c], np.linalg.inv(state_transition_matrix_history[t_i]))[3:,:3]
         Phi_tcti_rr = np.dot(state_transition_matrix_history[t_c], np.linalg.inv(state_transition_matrix_history[t_i]))[:3,:3]
@@ -296,20 +296,20 @@ def get_corrected_initial_state(state_history, state_transition_matrix_history, 
 
         alpha_i = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rr
         beta_i  = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rv
-        
+
         if index == 0: t_v_old = correction_epochs[index]
         else: t_v_old = correction_epochs[index-1]
         # print(index, t_i, t_v, t_c, int(t_v-t_v_old))
         delta_state_cutoff = np.dot(state_transition_matrix_history[t_c], np.linalg.inv(state_transition_matrix_history[0])) @ initial_delta_state # assuming no OD
         sum_array_2 = np.add(sum_array_2, alpha_i @ delta_state_cutoff[:3] + beta_i @ delta_state_cutoff[3:])
-        
+
     A = -np.linalg.inv(sum_array+ (Q.T+Q))
     delta_v_sk_array = A @ sum_array_2
 
     # delta_state_correction = np.dot(state_transition_matrix_history[t_v], np.linalg.inv(state_transition_matrix_history[int(t_v-t_v_old)])) @ initial_delta_state
 
     corrected_initial_state = np.concatenate((np.zeros(3),delta_v_sk_array))
-   
+
     return corrected_initial_state
 
 
@@ -360,7 +360,7 @@ def get_corrected_initial_state(state_history, state_transition_matrix_history, 
     print(delta_v)
 
     state_history[correction_epoch, 3:] = state_history[correction_epoch, 3:] + delta_v
-        
+
     return state_history[correction_epoch]
 
 
@@ -368,7 +368,7 @@ def get_corrected_initial_state(state_history, state_transition_matrix_history, 
 def get_differential_corrector(simulation_start_epoch_MJD, propagation_time, fixed_step_size, name_spacecraft, fidelity, target_point_epoch, iterations=5):
 
     state_history, _, state_transition_matrix_history = get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_step_size, name_spacecraft, fidelity)
-    # reference_state_history = validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, fixed_step_size=fixed_step_size)[0]
+    # reference_state_history = validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, fixed_step_size=fixed_step_size)[0]
     reference_state_history = get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_step_size, name_spacecraft, "high")[0]
     final_state_deviation = state_history[target_point_epoch] - reference_state_history[target_point_epoch]
     final_state_transition_matrix = state_transition_matrix_history[target_point_epoch]
@@ -389,7 +389,7 @@ def get_differential_corrector(simulation_start_epoch_MJD, propagation_time, fix
 
         state_history_corrected, _, _ = get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_step_size, name_spacecraft, fidelity, initial_state=initial_state_corrected)
 
-        final_state_deviation_corrected = state_history_corrected[target_point_epoch]  - reference_state_history[target_point_epoch] 
+        final_state_deviation_corrected = state_history_corrected[target_point_epoch]  - reference_state_history[target_point_epoch]
 
         # print(np.linalg.norm(delta_v), delta_v)
         # print(initial_state_corrected)
@@ -402,7 +402,7 @@ def get_differential_corrector(simulation_start_epoch_MJD, propagation_time, fix
 # def get_simulation_results_corrected(simulation_start_epoch_MJD, propagation_time, fixed_step_size, name_spacecraft, fidelity, initial_delta_state, propagate_moon=True, initial_state="standard", central_body="Earth"):
 
 #     state_history, _, state_transition_matrix_history = get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_step_size, name_spacecraft, fidelity, propagate_moon=propagate_moon, initial_state="standard", central_body=central_body)
-    
+
 #     arc_epochs = np.arange(0, np.shape(state_history)[0], 7/fixed_step_size)
 #     correction_epochs = np.delete(arc_epochs, np.arange(3, len(arc_epochs), 4))
 #     # cutoff_epochs = correction_epochs - 0.5/fixed_step_size*np.ones(np.shape(correction_epochs))
@@ -427,7 +427,7 @@ def get_differential_corrector(simulation_start_epoch_MJD, propagation_time, fix
 
 #         # print(corrected_initial_state)
 
-        
+
 
 
 simulation_start_epoch_MJD = 60390
@@ -438,7 +438,7 @@ central_body = "Earth"
 
 state_history, _, state_transition_matrix_history = get_simulation_results(simulation_start_epoch_MJD, propagation_time, fixed_step_size, "LUMIO", "high", propagate_moon=propagate_moon, central_body=central_body)
 
-reference_state_history = validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD,propagation_time, fixed_step_size=fixed_step_size)[0]
+reference_state_history = validation.get_reference_state_history(simulation_start_epoch_MJD,propagation_time, fixed_step_size=fixed_step_size)[0]
 correction_epoch = int((1)/fixed_step_size)
 cut_off_epoch = correction_epoch
 target_point_epoch = int((8)/fixed_step_size)

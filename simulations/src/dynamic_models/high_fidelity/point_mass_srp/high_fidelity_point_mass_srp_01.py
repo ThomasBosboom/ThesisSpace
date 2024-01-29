@@ -16,7 +16,7 @@ parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
 # Own
-from dynamic_models import validation_LUMIO
+from dynamic_models import validation
 from DynamicModelBase import DynamicModelBase
 
 
@@ -86,8 +86,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_acceleration_settings()
 
-        initial_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
-        initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+        initial_state_LPF = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        initial_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
         if self.custom_initial_state is not None:
             self.initial_state = self.custom_initial_state
@@ -167,7 +167,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagated_orbit(self):
+    def get_propagation_simulator(self):
 
         self.set_propagator_settings()
 
@@ -190,7 +190,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
 
 # test2 = HighFidelityDynamicModel(60450, 10)
-# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
+# dep_var = np.stack(list(test2.get_propagation_simulator()[0].dependent_variable_history.values()))
 
 # print(np.shape(dep_var))
 # ax = plt.figure()

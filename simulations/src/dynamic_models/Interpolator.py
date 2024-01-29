@@ -28,7 +28,7 @@ class Interpolator:
     def get_propagator_results(self, dynamic_model_object):
 
         # Get simulation results from each dynamic model
-        self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagated_orbit()
+        self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator()
         self.simulation_start_epoch = dynamic_model_object.simulation_start_epoch
         self.simulation_end_epoch = dynamic_model_object.simulation_end_epoch
 

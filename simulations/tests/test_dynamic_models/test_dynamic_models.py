@@ -22,7 +22,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 # Own
 from tests import utils
-from src.dynamic_models import validation_LUMIO
+from src.dynamic_models import validation
 from src.dynamic_models import Interpolator, FrameConverter, TraditionalLowFidelity
 from src.dynamic_models.low_fidelity.three_body_problem import *
 from src.dynamic_models.high_fidelity.point_mass import *
@@ -59,7 +59,7 @@ class TestFrameConversions:
             FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
 
         # Extract synodic simulation histories classical solution
-        epochs_synodic, synodic_state_history = validation_LUMIO.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
+        epochs_synodic, synodic_state_history = validation.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
                                                                                            dynamic_model.bodies.get("Earth").mass,
                                                                                            dynamic_model.bodies.get("Moon").mass,
                                                                                            dynamic_model.distance_between_primaries,
@@ -68,7 +68,7 @@ class TestFrameConversions:
                                                                                            custom_initial_state=custom_initial_state)
 
         # Extract synodic simulation histories classical solution Erdem's continuation model (breaks of other than 0.001)
-        synodic_state_history_erdem = validation_LUMIO.get_synodic_state_history_erdem()[:int(propagation_time/0.001),1:]
+        synodic_state_history_erdem = validation.get_synodic_state_history_erdem()[:int(propagation_time/0.001),1:]
 
         # Extract converted inertial states (works only with low-fidelity dynamic model)
         epochs_classic, state_history_classic, dependent_variables_history_classic = \
@@ -426,7 +426,7 @@ class TestOutputsDynamicModels:
                 time_list = []
                 for dynamic_model in dynamic_models:
                     start_time = time.time()
-                    _, _ = dynamic_model.get_propagated_orbit()
+                    _, _ = dynamic_model.get_propagation_simulator()
                     time_list.append(time.time()-start_time)
                 time_dict[model_name] = time_list
 
@@ -461,7 +461,7 @@ class TestOutputsDynamicModels:
         # dynamic_models[0] = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=utils.synodic_initial_state)
 
         # Extract simulation histories of classic CRTBP halo continuation model
-        synodic_state_history_erdem = validation_LUMIO.get_synodic_state_history_erdem()[:int(propagation_time/0.001),1:]
+        synodic_state_history_erdem = validation.get_synodic_state_history_erdem()[:int(propagation_time/0.001),1:]
 
         epochs_classic_erdem, state_history_classic_erdem, dependent_variables_history_classic_erdem = \
             FrameConverter.SynodicToInertialHistoryConverter(dynamic_models[0], step_size=step_size).get_results(synodic_state_history_erdem)
@@ -616,8 +616,8 @@ class TestOutputsDynamicModels:
                         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
                             Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
 
-                        reference_state_history = np.concatenate((validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
-                                                                validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
+                        reference_state_history = np.concatenate((validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
+                                                                validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
                                                                 axis=1)
 
                         data_to_plot = state_history-reference_state_history
@@ -672,8 +672,8 @@ class TestOutputsDynamicModels:
                     epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
                         Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagator_results(dynamic_model)
 
-                    reference_state_history = np.concatenate((validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
-                                                            validation_LUMIO.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
+                    reference_state_history = np.concatenate((validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
+                                                            validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
                                                             axis=1)
 
                     fig1_3d = plt.figure()

@@ -15,7 +15,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(parent_dir))
 
 # Own
-from dynamic_models import validation_LUMIO
+from dynamic_models import validation
 from DynamicModelBase import DynamicModelBase
 
 
@@ -96,16 +96,16 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
         self.set_initial_cartesian_moon_state()
 
-        # state_history_synodic = validation_LUMIO.get_synodic_state_history_erdem()[:,1:]
+        # state_history_synodic = validation.get_synodic_state_history_erdem()[:,1:]
         # print(constants.GRAVITATIONAL_CONSTANT, self.bodies.get("Earth").mass, self.bodies.get("Moon").mass, self.distance_between_primaries)
-        _, state_history_synodic = validation_LUMIO.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
+        _, state_history_synodic = validation.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
                                                                             self.bodies.get("Earth").mass,
                                                                             self.bodies.get("Moon").mass,
                                                                             self.distance_between_primaries,
                                                                             14, # max 14 days, to save run time, full period halo orbit approximate
                                                                             step_size)
-        reference_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, step_size=step_size, satellite=self.name_LPO, get_full_history=True, get_dict=False)
-        # reference_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO, get_full_history=False, get_dict=False)
+        reference_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, step_size=step_size, satellite=self.name_LPO, get_full_history=True, get_dict=False)
+        # reference_state_LPF = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO, get_full_history=False, get_dict=False)
         distance_array = np.empty((0, 1))
         initial_state_history = np.empty((0, 12))
         for initial_state_barycenter_fixed in state_history_synodic:
@@ -198,7 +198,6 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
         if self.custom_initial_state is None:
             self.initial_state = self.get_closest_initial_state()
-            # print("initial state later: ", self.initial_state)
         else:
             self.initial_state = self.convert_synodic_to_inertial_state(self.custom_initial_state)
             self.custom_initial_state[0] = self.custom_initial_state[0] + (1-self.mu)
@@ -270,7 +269,7 @@ class LowFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagated_orbit(self):
+    def get_propagation_simulator(self):
 
         self.set_propagator_settings()
 
@@ -295,8 +294,8 @@ class LowFidelityDynamicModel(DynamicModelBase):
 # custom_initial_state = np.array([0.985141349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0, \
 #                                          1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
 # test2 = LowFidelityDynamicModel(60390, 28)
-# dep_var = np.stack(list(test2.get_propagated_orbit()[0].dependent_variable_history.values()))
-# states = np.stack(list(test2.get_propagated_orbit()[0].state_history.values()))
+# dep_var = np.stack(list(test2.get_propagation_simulator()[0].dependent_variable_history.values()))
+# states = np.stack(list(test2.get_propagation_simulator()[0].state_history.values()))
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection='3d')

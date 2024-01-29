@@ -17,7 +17,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(parent_dir)
 
 # Own
-from dynamic_models import validation_LUMIO
+from dynamic_models import validation
 from DynamicModelBase import DynamicModelBase
 
 
@@ -171,7 +171,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
             initial_state_LPF = np.add(initial_state_lpf_moon, moon_initial_state)
 
             # Define the initial state of LUMIO
-            initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+            initial_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
             # Combine the initial states
             self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
@@ -255,7 +255,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
             output_variables= self.dependent_variables_to_save)
 
 
-    def get_propagated_orbit(self):
+    def get_propagation_simulator(self):
 
         self.set_propagator_settings()
 
@@ -280,7 +280,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
 
 # test = HighFidelityDynamicModel(60390, 365)
-# dynamics_simulator = test.get_propagated_orbit()
+# dynamics_simulator = test.get_propagation_simulator()
 
 # state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.state_history.items()], dtype=object)
 # moon_state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.dependent_variable_history.items()], dtype=object)

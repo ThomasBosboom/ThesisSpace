@@ -15,7 +15,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(parent_dir))
 
 # Own
-from dynamic_models import validation_LUMIO
+from dynamic_models import validation
 from DynamicModelBase import DynamicModelBase
 
 
@@ -72,8 +72,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_acceleration_settings()
 
-        initial_state_LPF = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
-        initial_state_LUMIO = validation_LUMIO.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+        initial_state_LPF = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        initial_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
         if self.custom_initial_state is not None:
             self.initial_state = self.custom_initial_state
@@ -149,7 +149,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagated_orbit(self, estimated_initial_state=None):
+    def get_propagation_simulator(self, estimated_initial_state=None):
 
         self.set_propagator_settings(estimated_initial_state=estimated_initial_state)
 
@@ -174,8 +174,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 #  -2.16728817e+03, -7.88098467e+02, -3.10537998e+08 , 2.49423157e+08,
 #   1.74937757e+08, -9.93171842e+02, -7.66408514e+02, -5.25173280e+02])
 # dynamic_model = HighFidelityDynamicModel(60390, 10)
-# dep_var = np.stack(list(dynamic_model.get_propagated_orbit()[0].dependent_variable_history.values()))
-# states = np.stack(list(dynamic_model.get_propagated_orbit()[0].state_history.values()))
+# dep_var = np.stack(list(dynamic_model.get_propagation_simulator()[0].dependent_variable_history.values()))
+# states = np.stack(list(dynamic_model.get_propagation_simulator()[0].state_history.values()))
 
 # import Interpolator
 # epochs, state_history, dependent_variables_history, state_transition_matrix_history = \

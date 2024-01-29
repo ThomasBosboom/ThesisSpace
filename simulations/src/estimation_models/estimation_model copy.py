@@ -16,7 +16,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 # Own
-from dynamic_models import validation_LUMIO
+from dynamic_models import validation
 from dynamic_models.full_fidelity import *
 from dynamic_models.low_fidelity.three_body_problem import *
 from dynamic_models.high_fidelity.point_mass import *
@@ -264,12 +264,12 @@ class EstimationModel:
                     total_covariance_dict[observable_type][j].append(covariance_dict)
 
 
-        dynamics_simulator, variational_equations_solver = self.dynamic_model.get_propagated_orbit(estimated_initial_state=self.dynamic_model.initial_state)
+        dynamics_simulator, variational_equations_solver = self.dynamic_model.get_propagation_simulator(estimated_initial_state=estimation_output.parameter_history[:,0])
         # dynamics_simulator = numerical_simulation.create_dynamics_simulator(self.dynamic_model.bodies, self.dynamic_model.propagator_settings)
         state_history_dynamic_model_initial = np.stack(list(dynamics_simulator.state_history.values()))
         epochs_dynamic_model_initial = np.stack(list(dynamics_simulator.state_history.keys()))
 
-        dynamics_simulator, variational_equations_solver = self.dynamic_model.get_propagated_orbit(estimated_initial_state=estimation_output.parameter_history[:,-1])
+        dynamics_simulator, variational_equations_solver = self.dynamic_model.get_propagation_simulator(estimated_initial_state=estimation_output.parameter_history[:,-1])
         # dynamics_simulator = numerical_simulation.create_dynamics_simulator(self.dynamic_model.bodies, self.dynamic_model.propagator_settings)
         state_history_dynamic_model_final = np.stack(list(dynamics_simulator.state_history.values()))
         epochs_dynamic_model_final = np.stack(list(dynamics_simulator.state_history.keys()))
@@ -283,16 +283,9 @@ class EstimationModel:
         plt.plot(epochs_dynamic_model_final, state_history_dynamic_model_final[:,:3], color="red", ls="--")
         plt.plot(epochs_observations, state_history_observations[:,:3], color="blue")
 
-        fig = plt.figure()
+        # fig = plt.figure()
         # plt.plot(epochs_dynamic_model_initial[:], np.linalg.norm(state_history_dynamic_model_initial[:,:3]-state_history_dynamic_model_final[:-1,:3], axis=1))
         # plt.yscale("log")
-
-
-        # parameter_history = estimation_output.parameter_history
-        # print("parameter history", parameter_history)
-        # print("parameter_vector", parameter_history[:,-1])
-        # print("difference vectors", parameter_history[:,-1]-state_history[0,:])
-
 
         fig1_3d = plt.figure()
         ax = fig1_3d.add_subplot(111, projection='3d')
@@ -312,7 +305,7 @@ class EstimationModel:
             #    self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
 
 
-    def get_propagated_orbit(self):
+    def get_propagation_simulator(self):
 
         self.set_simulated_observations()
 

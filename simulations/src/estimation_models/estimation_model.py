@@ -16,7 +16,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 # Own
-from dynamic_models import validation_LUMIO
+from dynamic_models import validation
 from dynamic_models.full_fidelity import *
 from dynamic_models.low_fidelity.three_body_problem import *
 from dynamic_models.high_fidelity.point_mass import *
@@ -281,7 +281,7 @@ class EstimationModel:
             #    self.estimator.variational_solver.dynamics_simulator, self.estimator.variational_solver
 
 
-    def get_propagated_orbit(self):
+    def get_propagation_simulator(self):
 
         self.set_simulated_observations()
 

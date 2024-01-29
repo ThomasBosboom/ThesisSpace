@@ -75,5 +75,5 @@ class DynamicModelBase:
         pass
 
 
-    def get_propagated_orbit(self):
+    def get_propagation_simulator(self):
         pass
