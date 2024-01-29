@@ -68,16 +68,17 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, pack
         return dynamic_model_objects
 
 
-def get_estimation_model_objects(estimation_model, dynamic_model_objects, truth_model=None):
+def get_estimation_model_objects(estimation_model, dynamic_model_objects, custom_truth_model=None, apriori_covariance=None):
 
     estimation_model_objects = {}
     for package_type, package_names in dynamic_model_objects.items():
         submodels_dict = {}
         for package_name, dynamic_models in package_names.items():
-            if truth_model is None:
-                print(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
+            if custom_truth_model is None:
                 truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
-            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model) for dynamic_model in dynamic_models]
+            else:
+                truth_model = custom_truth_model
+            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance) for dynamic_model in dynamic_models]
             submodels_dict[package_name] = submodels
         estimation_model_objects[package_type] = submodels_dict
 
@@ -139,9 +140,9 @@ def get_dynamic_model_objects_results(simulation_start_epoch_MJD, propagation_ti
     return dynamic_model_objects_results
 
 
-def get_estimation_model_objects_results(dynamic_model_objects, estimation_model, truth_model=None, get_only_first=False, entry_list=None):
+def get_estimation_model_objects_results(dynamic_model_objects, estimation_model, custom_truth_model=None, get_only_first=False, entry_list=None, apriori_covariance=None):
 
-    estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects, truth_model=truth_model)
+    estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects, custom_truth_model=custom_truth_model, apriori_covariance=apriori_covariance)
 
     if get_only_first:
         result_dict = {}
