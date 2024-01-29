@@ -3,7 +3,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
-import itertools
+import statistics
 import time
 
 # Define path to import src files
@@ -53,26 +53,79 @@ def estimation_model_objects_results():
     dynamic_model_objects = utils.get_dynamic_model_objects(*params)
     truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2])
 
-    return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, truth_model, get_only_first=get_only_first, entry_list=entry_list)
+    return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=get_only_first, entry_list=entry_list)
 
 
 ### Define adjustable fixture for custom generations
-@pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_only_first", "custom_initial_state")],
+@pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_only_fist", "custom_initial_state")],
                 scope="module")
 def custom_estimation_model_objects_results(request):
     dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
     truth_model = full_fidelity.HighFidelityDynamicModel(*request.param[:2], custom_initial_state=request.param[-1])
-    return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, truth_model, get_first_only=False, entry_list=None)
+    return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=None)
 
 
+class TestObservability:
 
+
+    package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]}
+    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60390, 14, package_dict, True, None)], indirect=True)
+    def test_observability_history(self, custom_estimation_model_objects_results):
+
+        model_type = "low_fidelity"
+        model_name = "three_body_problem"
+        model_entry = 0
+        total_information_dict = custom_estimation_model_objects_results[model_type][model_name][model_entry][-3]
+
+        fig, axs = plt.subplots(4, 1, figsize=(8.3, 11.7), sharex=True)
+        for i, (observable_type, information_sets) in enumerate(total_information_dict.items()):
+
+            for j, information_set in enumerate(information_sets.values()):
+                for k, single_information_set in enumerate(information_set):
+                    information_dict = total_information_dict[observable_type][j][k]
+                    epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
+                    information_matrix_history = np.array(list(information_dict.values()))
+
+                    for m in range(2):
+                        observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
+                        observability_lumio = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]]))
+                        observability_lpf_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1, keepdims=True))
+                        observability_lumio_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1, keepdims=True))
+
+                        axs[2*i+m].plot(epochs, observability_lpf_total, label="total", color="darkred")
+                        axs[2*i+m].plot(epochs, observability_lumio_total, label="total", color="darkblue")
+
+                        ls = ["solid", "dashed", "dotted"]
+                        label = [[r"$\mathbf{x}$", r"$\mathbf{y}$", r"$\mathbf{z}$"],[r"$\mathbf{\dot{x}}$", r"$\mathbf{\dot{y}}$", r"$\mathbf{\dot{z}}$"]]
+                        ylabels = [r"$\sqrt{\mathbf{\Lambda_{r}}}$ [-]", r"$\sqrt{\mathbf{\Lambda_{v}}}$ [-]"]
+                        observable_types = ["two-way range", "two-way doppler"]
+                        for l in range(3):
+                            axs[2*i+m].plot(epochs, observability_lpf[:,l], label=label[m][l], color="red", ls=ls[l])
+                            axs[2*i+m].plot(epochs, observability_lumio[:,l], label=label[m][l], color="blue", ls=ls[l])
+
+                        axs[2*i+m].set_ylabel(ylabels[m])
+                        axs[2*i+m].set_yscale("log")
+                        axs[2*i+m].grid(alpha=0.5, linestyle='--')
+
+                        if i == 0:
+                            axs[2*i+m].legend()
+
+                    axs[2*i].set_title(observable_types[i])
+                    axs[-1].set_xlabel(r"Time since start propagation")
+
+            # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+        fig.suptitle("Observability effectiveness ")
+        plt.show()
+
+        utils.save_figures_to_folder([fig], [])
 
 
 class TestEstimationOutput:
 
     def test_correlations(self, estimation_model_objects_results):
 
-        fig, axs = plt.subplots(1, 5, figsize=(9, 6), sharey=True, sharex=True)
+        fig, axs = plt.subplots(1, 5, figsize=(10, 4), sharey=True, sharex=True)
         keys_list = [["CRTBP"], ["PM", "PM SRP", "SH", "SH SRP"]]
         images = []
 
@@ -105,7 +158,7 @@ class TestMonteCarlo:
         simulation_start_epoch = 60390
         propagation_time = 1
         package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
-        get_only_first = True
+        get_only_first = False
         custom_initial_state = None
 
         # Initialize dictionaries to store accumulated values
@@ -117,12 +170,12 @@ class TestMonteCarlo:
         }
 
         # Start the monte carlo simulation with 14 1-day estimations with different starting epochs
-        for start_epoch in range(60390, 60392, 1):
+        for start_epoch in range(60390, 60404, 1):
             params = (start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
 
             dynamic_model_objects = utils.get_dynamic_model_objects(*params)
             truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2], custom_initial_state=params[-1])
-            run_times_dict = utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, truth_model, get_only_first=False, entry_list=[-1])
+            run_times_dict = utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=[-1])
 
             # Accumulate values during the loop
             for fidelity_key, sub_dict in run_times_dict.items():
@@ -167,6 +220,7 @@ class TestMonteCarlo:
         legend_handles = [plt.Line2D([0], [0], color='black', markersize=5, label=r'1$\sigma$ Std Dev')]
         fig.legend(handles=[legend_handles[0]], loc='upper right')
         fig.suptitle(f"Mean run time estimation models, varying start epoch, 1 day")
+
         utils.save_figures_to_folder([fig], [])
 
 
