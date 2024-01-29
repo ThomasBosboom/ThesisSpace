@@ -4,7 +4,6 @@ from tudatpy.kernel import constants
 from scipy.interpolate import interp1d
 from tudatpy.kernel.astro import time_conversion, frame_conversion
 import Interpolator
-# import TraditionalLowFidelity
 
 
 class SynodicToInertialHistoryConverter:
