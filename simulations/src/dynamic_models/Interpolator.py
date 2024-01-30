@@ -26,11 +26,11 @@ class Interpolator:
             return interpolated_history
 
 
-    def get_propagation_results(self, dynamic_model_object, estimated_initial_state=None):
+    def get_propagation_results(self, dynamic_model_object, estimated_parameter_vector=None):
 
         # Get simulation results from each dynamic model
-        if estimated_initial_state is not None:
-            self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator(estimated_initial_state=estimated_initial_state)
+        if estimated_parameter_vector is not None:
+            self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator(estimated_parameter_vector=estimated_parameter_vector)
         else:
             self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator()
         self.simulation_start_epoch = dynamic_model_object.simulation_start_epoch
