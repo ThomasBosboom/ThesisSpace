@@ -129,7 +129,7 @@ class EstimationModel:
             viability_setting_list)
 
 
-    def observation_simulators(self):
+    def set_observation_simulators(self):
 
         self.set_observation_simulation_settings()
         self.truth_model.set_propagator_settings()
@@ -139,7 +139,7 @@ class EstimationModel:
 
         # Run propagation
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(self.truth_model.bodies, self.truth_model.propagator_settings)
-        self.state_history_simulated_observations = dynamics_simulator.state_history
+        # self.state_history_simulated_observations = dynamics_simulator.state_history
 
         # dynamics_simulator = numerical_simulation.create_dynamics_simulator(self.truth_model.bodies, self.truth_model.propagator_settings)
         # self.state_history_dynamic = dynamics_simulator.state_history
@@ -152,9 +152,23 @@ class EstimationModel:
             self.observation_settings_list, self.truth_model.bodies)
 
 
+    def set_simulated_observations(self):
+
+        self.set_observation_simulators()
+
+        # Get LPF and LUMIO simulated observations as ObservationCollection
+        self.simulated_observations = estimation.simulate_observations(
+            self.observation_simulation_settings,
+            self.observation_simulators,
+            self.truth_model.bodies)
+
+        # Get sorted observation sets
+        self.sorted_observation_sets = self.simulated_observations.sorted_observation_sets
+
+
     def set_parameters_to_estimate(self, estimated_initial_state=None):
 
-        self.observation_simulators()
+        self.set_simulated_observations()
         self.dynamic_model.set_propagator_settings(estimated_initial_state=estimated_initial_state)
 
         # print(self.dynamic_model.propagator_settings)
@@ -170,8 +184,8 @@ class EstimationModel:
         # Add estimated parameters to the sensitivity matrix that will be propagated
         # self.parameter_settings.append(estimation_setup.parameter.gravitational_parameter(self.dynamic_model.name_primary))
         # self.parameter_settings.append(estimation_setup.parameter.gravitational_parameter(self.dynamic_model.name_secondary))
-        # self.parameter_settings.append(estimation_setup.parameter.absolute_observation_bias(self.link_definition, observation.one_way_range_type))
-        # self.parameter_settings.append(estimation_setup.parameter.absolute_observation_bias(self.link_definition, observation.one_way_instantaneous_doppler_type))
+        # self.parameter_settings.append(estimation_setup.parameter.absolute_observation_bias(self.link_definition, observation.n_way_range_type))
+        # self.parameter_settings.append(estimation_setup.parameter.absolute_observation_bias(self.link_definition, observation.n_way_averaged_doppler_type))
 
         # Depending on the dynamic model
         # self.parameter_settings.append(estimation_setup.parameter.radiation_pressure_coefficient(self.dynamic_model.name_ELO))
@@ -182,23 +196,10 @@ class EstimationModel:
         # self.truth_parameters = self.parameters_to_estimate.parameter_vector
 
 
-    def set_simulated_observations(self):
 
-        self.set_parameters_to_estimate()
+    def set_estimator_settings(self, estimated_initial_state=None, maximum_iterations=3):
 
-        # Get LPF and LUMIO simulated observations as ObservationCollection
-        self.simulated_observations = estimation.simulate_observations(
-            self.observation_simulation_settings,
-            self.observation_simulators,
-            self.truth_model.bodies)
-
-        # Get sorted observation sets
-        self.sorted_observation_sets = self.simulated_observations.sorted_observation_sets
-
-
-    def get_estimation_results(self, maximum_iterations=3):
-
-        self.set_simulated_observations()
+        self.set_parameters_to_estimate(estimated_initial_state=estimated_initial_state)
 
         # Create the estimator
         self.estimator = numerical_simulation.Estimator(
@@ -210,24 +211,29 @@ class EstimationModel:
         # Create input object for the estimation
         convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=maximum_iterations)
         if self.apriori_covariance is None:
-            estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
-                                                          convergence_checker=convergence_checker)
+            self.estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
+                                                               convergence_checker=convergence_checker)
         else:
-            estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
-                                                          convergence_checker=convergence_checker,
-                                                          inverse_apriori_covariance=np.linalg.inv(self.apriori_covariance))
+            self.estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
+                                                               convergence_checker=convergence_checker,
+                                                               inverse_apriori_covariance=np.linalg.inv(self.apriori_covariance))
 
         # Set methodological options
-        estimation_input.define_estimation_settings(reintegrate_variational_equations=False,
-                                                    save_state_history_per_iteration=True)
+        self.estimation_input.define_estimation_settings(reintegrate_variational_equations=False,
+                                                         save_state_history_per_iteration=True)
 
         # Define weighting of the observations in the inversion
         weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise_range**-2,
                                   estimation_setup.observation.n_way_averaged_doppler_type: self.noise_doppler**-2}
-        estimation_input.set_constant_weight_per_observable(weights_per_observable)
+        self.estimation_input.set_constant_weight_per_observable(weights_per_observable)
+
+
+    def get_estimation_results(self):
+
+        self.set_estimator_settings()
 
         # Run the estimation
-        estimation_output = self.estimator.perform_estimation(estimation_input)
+        estimation_output = self.estimator.perform_estimation(self.estimation_input)
 
         # Generate information and covariance histories based on all the combinations of observables and link definitions
         total_information_dict = dict()
@@ -263,6 +269,8 @@ class EstimationModel:
                     total_information_dict[observable_type][j].append(information_dict)
                     total_covariance_dict[observable_type][j].append(covariance_dict)
 
+
+        # Update the estimator with the latest parameter values to generate dynamics simulators with latest dynamics for next batch
 
 
         fig = plt.figure()
@@ -317,7 +325,7 @@ class EstimationModel:
 # dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
 # truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
 dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 14)
-truth_model = high_fidelity_spherical_harmonics_srp_03_2_2_10_10.HighFidelityDynamicModel(60390, 14)
+truth_model = high_fidelity_point_mass_05.HighFidelityDynamicModel(60390, 14)
 
 apriori_covariance=np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance)
