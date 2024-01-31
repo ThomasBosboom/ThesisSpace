@@ -30,7 +30,7 @@ from dynamic_models.high_fidelity.spherical_harmonics_srp import *
 
 class EstimationModel:
 
-    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, consider_covariance=None):
+    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, include_consider_parameters=False):
 
         # Loading dynamic model
         self.dynamic_model = dynamic_model
@@ -38,7 +38,7 @@ class EstimationModel:
 
         # Loading apriori covariance
         self.apriori_covariance = apriori_covariance
-        self.consider_covariance = consider_covariance
+        self.include_consider_parameters = include_consider_parameters
 
         # Defining basis for observations
         self.bias_range = 10.0
@@ -162,7 +162,7 @@ class EstimationModel:
         self.sorted_observation_sets = self.simulated_observations.sorted_observation_sets
 
 
-    def set_parameters_to_estimate(self, estimated_parameter_vector=None, include_consider_parameters=True):
+    def set_parameters_to_estimate(self, estimated_parameter_vector=None):
 
         self.set_simulated_observations()
         self.dynamic_model.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
@@ -170,7 +170,7 @@ class EstimationModel:
         # Setup parameters settings to propagate the state transition matrix
         self.parameter_settings = estimation_setup.parameter.initial_states(self.dynamic_model.propagator_settings, self.dynamic_model.bodies)
 
-        if include_consider_parameters:
+        if self.include_consider_parameters:
 
             # Add estimated parameters to the sensitivity matrix that will be propagated
             self.parameter_settings.append(estimation_setup.parameter.absolute_observation_bias(self.link_definition["two_way_system"], observation.n_way_range_type))
@@ -303,13 +303,13 @@ class EstimationModel:
 
 # custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
 #                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-# dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
-# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state)
+# dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=custom_initial_state)
+# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=custom_initial_state)
 dynamic_model = high_fidelity_point_mass_07.HighFidelityDynamicModel(60390, 14)
-truth_model = high_fidelity_point_mass_srp_08.HighFidelityDynamicModel(60390, 14)
+truth_model = high_fidelity_spherical_harmonics_srp_04_2_2_20_20.HighFidelityDynamicModel(60390, 14)
 apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e2, 1e2, 1e2, 1e2])**2
 consider_covariance = None
-estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance)
+estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=None, include_consider_parameters=False)
 
 estimation_output = estimation_model.get_estimation_results()[0]
 parameter_history = estimation_output.parameter_history
@@ -317,5 +317,6 @@ residual_history = estimation_output.residual_history
 covariance = estimation_output.covariance
 formal_errors = estimation_output.formal_errors
 design_matrix = estimation_output.design_matrix
+
 print(design_matrix[0,:])
 print(parameter_history[:,-1])

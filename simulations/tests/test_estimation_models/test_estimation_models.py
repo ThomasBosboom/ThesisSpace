@@ -53,7 +53,7 @@ def estimation_model_objects_results():
     dynamic_model_objects = utils.get_dynamic_model_objects(*params)
     truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2])
 
-    return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=get_only_first, entry_list=entry_list)
+    return utils.get_estimation_model_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=get_only_first, entry_list=entry_list)
 
 
 ### Define adjustable fixture for custom generations
@@ -62,14 +62,13 @@ def estimation_model_objects_results():
 def custom_estimation_model_objects_results(request):
     dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
     truth_model = full_fidelity.HighFidelityDynamicModel(*request.param[:2], custom_initial_state=request.param[-1])
-    return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=None)
+    return utils.get_estimation_model_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=None)
 
 
 class TestObservability:
 
-
-    package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]}
-    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60390, 14, package_dict, True, None)], indirect=True)
+    package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["spherical_harmonics"]}
+    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 1, None, False, None)], indirect=True)
     def test_observability_history(self, custom_estimation_model_objects_results):
 
         model_type = "low_fidelity"
@@ -116,7 +115,7 @@ class TestObservability:
             # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
         fig.suptitle("Observability effectiveness ")
-        plt.show()
+        # plt.show()
 
         utils.save_figures_to_folder([fig], [])
 
@@ -157,8 +156,8 @@ class TestMonteCarlo:
 
         simulation_start_epoch = 60390
         propagation_time = 1
-        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
-        get_only_first = False
+        package_dict = {"low_fidelity": ["three_body_problem"]}
+        get_only_first = True
         custom_initial_state = None
 
         # Initialize dictionaries to store accumulated values
@@ -171,11 +170,11 @@ class TestMonteCarlo:
 
         # Start the monte carlo simulation with 14 1-day estimations with different starting epochs
         for start_epoch in range(60390, 60404, 1):
-            params = (start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
 
+            params = (start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
             dynamic_model_objects = utils.get_dynamic_model_objects(*params)
             truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2], custom_initial_state=params[-1])
-            run_times_dict = utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=[-1])
+            run_times_dict = utils.get_estimation_model_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=[-1])
 
             # Accumulate values during the loop
             for fidelity_key, sub_dict in run_times_dict.items():
@@ -221,7 +220,7 @@ class TestMonteCarlo:
         fig.legend(handles=[legend_handles[0]], loc='upper right')
         fig.suptitle(f"Mean run time estimation models, varying start epoch, 1 day")
 
-        utils.save_figures_to_folder([fig], [])
+        utils.save_figures_to_folder([fig], [60390, 1])
 
 
 
@@ -229,41 +228,41 @@ class TestMonteCarlo:
 
 
 
-class Test:
+# class Test:
 
 
-    def test_observation_residuals(self, estimation_model_objects_results):
+#     def test_observation_residuals(self, estimation_model_objects_results):
 
 
-        print("estimation_model_objects_results", estimation_model_objects_results)
-        print("test", estimation_model_objects_results["high_fidelity"]["point_mass"][0])
+#         print("estimation_model_objects_results", estimation_model_objects_results)
+#         print("test", estimation_model_objects_results["high_fidelity"]["point_mass"][0])
 
-        fig, axs = plt.subplots(3, 1, figsize=(10, 5))
-        model_count = 0
-        for model_type, model_names in estimation_model_objects_results.items():
-            for model_name in model_names:
-                print(estimation_model_objects_results[model_type][model_name][0])
-                residual_history = estimation_model_objects_results[model_type][model_name][0][0].residual_history[:,:]
-                # concatenated_times = estimation_model_objects_results[model_type][model_name][0][-2].concatenated_times
-                # print(concatenated_times)
-                axs[model_count].plot(residual_history, marker="o")
-                model_count += 1
-        plt.show()
+#         fig, axs = plt.subplots(3, 1, figsize=(10, 5))
+#         model_count = 0
+#         for model_type, model_names in estimation_model_objects_results.items():
+#             for model_name in model_names:
+#                 print(estimation_model_objects_results[model_type][model_name][0])
+#                 residual_history = estimation_model_objects_results[model_type][model_name][0][0].residual_history[:,:]
+#                 # concatenated_times = estimation_model_objects_results[model_type][model_name][0][-2].concatenated_times
+#                 # print(concatenated_times)
+#                 axs[model_count].plot(residual_history, marker="o")
+#                 model_count += 1
+#         plt.show()
 
-        fig, axs = plt.subplots(3, 3, figsize=(10, 5))
-        model_count = 0
-        for model_type, model_names in estimation_model_objects_results.items():
-            plane_count = 0
-            for model_name in model_names:
-                state_history = estimation_model_objects_results[model_type][model_name][0][0].residual_history[:,:]
-                axs[model_count][model_count].plot(residual_history, marker="o")
-                plane_count += 1
-                model_count += 1
+#         fig, axs = plt.subplots(3, 3, figsize=(10, 5))
+#         model_count = 0
+#         for model_type, model_names in estimation_model_objects_results.items():
+#             plane_count = 0
+#             for model_name in model_names:
+#                 state_history = estimation_model_objects_results[model_type][model_name][0][0].residual_history[:,:]
+#                 axs[model_count][model_count].plot(residual_history, marker="o")
+#                 plane_count += 1
+#                 model_count += 1
 
-        plt.show()
+#         plt.show()
 
 
-        utils.save_figures_to_folder([fig], [])
+#         utils.save_figures_to_folder([fig], [])
 
 
 
@@ -282,7 +281,7 @@ class Test:
     #     dynamic_model_objects = utils.get_dynamic_model_objects(*params)
 
     #     truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2])
-    #     estimation_model_objects_results = utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, truth_model, get_only_first=False)
+    #     estimation_model_objects_results = utils.get_estimation_model_results(dynamic_model_objects, estimation_model, truth_model, get_only_first=False)
 
     #     sorted_observation_sets = estimation_model_objects_results["high_fidelity"]["point_mass"][0][-2]
 

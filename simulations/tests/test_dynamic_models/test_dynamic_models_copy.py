@@ -35,13 +35,13 @@ from src.estimation_models import estimation_model
 # @pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_first_only", "custom_initial_state")],
 #                 scope="module")
 # def dynamic_model_objects_results(request):
-#     return utils.get_dynamic_model_objects_results(*request.param, step_size=0.1)
+#     return utils.get_dynamic_model_results(*request.param, step_size=0.1)
 
 # @pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_first_only", "custom_initial_state")],
 #                 scope="module")
 # def estimation_model_objects_results(request):
 #     dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
-#     return utils.get_estimation_model_objects_results(dynamic_model_objects, estimation_model, request.param[-1])
+#     return utils.get_estimation_model_results(dynamic_model_objects, estimation_model, request.param[-1])
 
 
 
@@ -86,7 +86,7 @@ class TestMonteCarlo:
 
         for start_epoch in range(60390, 60414, 1):
             params = (start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
-            run_times_dict = utils.get_dynamic_model_objects_results(*params, step_size=0.1, entry_list=[-1])
+            run_times_dict = utils.get_dynamic_model_results(*params, step_size=0.1, entry_list=[-1])
 
             # Accumulate values during the loop
             for fidelity_key, sub_dict in run_times_dict.items():

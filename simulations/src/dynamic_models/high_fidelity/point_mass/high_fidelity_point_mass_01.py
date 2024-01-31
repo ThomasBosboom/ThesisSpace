@@ -133,11 +133,9 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_termination_settings()
 
-        print("been here in propagator settings")
         if estimated_parameter_vector is not None:
             self.initial_state = estimated_parameter_vector[:12]
 
-        print("been here in propagator settings too")
         # Create propagation settings
         self.propagator_settings = propagation_setup.propagator.translational(
             self.central_bodies,
@@ -153,16 +151,12 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
     def get_propagation_simulator(self, estimated_parameter_vector=None, solve_variational_equations=True):
 
-        print('been here in the model')
         self.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
 
-        print('been here in the model')
         # Create simulation object and propagate dynamics.
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
             self.bodies,
             self.propagator_settings)
-
-        print('been here in the model too')
 
         # Setup parameters settings to propagate the state transition matrix
         if solve_variational_equations:
@@ -179,26 +173,3 @@ class HighFidelityDynamicModel(DynamicModelBase):
         else:
 
             return dynamics_simulator
-
-
-# custom_initial_state = np.array([-2.81273933e+08, 2.51467647e+08, 1.46454096e+08, -1.16911938e+03,
-#  -2.16728817e+03, -7.88098467e+02, -3.10537998e+08 , 2.49423157e+08,
-#   1.74937757e+08, -9.93171842e+02, -7.66408514e+02, -5.25173280e+02])
-# dynamic_model = HighFidelityDynamicModel(60390, 10)
-# dep_var = np.stack(list(dynamic_model.get_propagation_simulator()[0].dependent_variable_history.values()))
-# states = np.stack(list(dynamic_model.get_propagation_simulator()[0].state_history.values()))
-
-# import Interpolator
-# epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.001).get_propagation_results(dynamic_model)
-
-# print(states[0,:])
-# ax = plt.figure().add_subplot(projection='3d')
-# plt.plot(state_history[:,0], state_history[:,1], state_history[:,2])
-# plt.plot(dependent_variables_history[:,0], dependent_variables_history[:,1], dependent_variables_history[:,2])
-# plt.legend()
-# plt.show()
-# # ax = plt.figure()
-# plt.plot(dep_var[:,18:24])
-# plt.legend()
-# plt.show()

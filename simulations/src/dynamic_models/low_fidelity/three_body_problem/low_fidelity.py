@@ -96,8 +96,6 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
         self.set_initial_cartesian_moon_state()
 
-        # state_history_synodic = validation.get_synodic_state_history_erdem()[:,1:]
-        # print(constants.GRAVITATIONAL_CONSTANT, self.bodies.get("Earth").mass, self.bodies.get("Moon").mass, self.distance_between_primaries)
         _, state_history_synodic = validation.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
                                                                             self.bodies.get("Earth").mass,
                                                                             self.bodies.get("Moon").mass,
@@ -105,7 +103,6 @@ class LowFidelityDynamicModel(DynamicModelBase):
                                                                             14, # max 14 days, to save run time, full period halo orbit approximate
                                                                             step_size)
         reference_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, step_size=step_size, satellite=self.name_LPO, get_full_history=True, get_dict=False)
-        # reference_state_LPF = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO, get_full_history=False, get_dict=False)
         distance_array = np.empty((0, 1))
         initial_state_history = np.empty((0, 12))
         for initial_state_barycenter_fixed in state_history_synodic:
@@ -120,11 +117,6 @@ class LowFidelityDynamicModel(DynamicModelBase):
         min_distance_index = np.argmin(distance_array)
         closest_initial_state = initial_state_history[min_distance_index]
 
-        # print("reference lpf", reference_state_LPF)
-        # print("initial state early 1: ", closest_initial_state)
-        # closest_initial_state[:6] = initial_state_history[0,:6]
-
-        # print("initial state early 2: ", closest_initial_state)
 
         # ax = plt.figure().add_subplot(projection='3d')
         # plt.plot(initial_state_history[:, 6], initial_state_history[:, 7], initial_state_history[:, 8])
@@ -310,20 +302,3 @@ class LowFidelityDynamicModel(DynamicModelBase):
 # plt.plot(states[:,0], states[:,1], states[:,2])
 # plt.plot(states[:,6], states[:,7], states[:,8])
 # plt.show()
-
-
-# print(np.shape(dep_var))
-# ax = plt.figure()
-# plt.plot(dep_var[:,18:24])
-# plt.legend()
-# # plt.yscale("log")
-# # plt.show()
-
-# ax = plt.figure()
-# plt.plot(dep_var[:,24:30])
-# plt.legend()
-# # plt.yscale("log")
-# # plt.show()
-
-# # print(dep_var[0,18:24])
-# # print(dep_var[0,24:30])
