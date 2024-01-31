@@ -133,9 +133,11 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_termination_settings()
 
+        print("been here in propagator settings")
         if estimated_parameter_vector is not None:
             self.initial_state = estimated_parameter_vector[:12]
 
+        print("been here in propagator settings too")
         # Create propagation settings
         self.propagator_settings = propagation_setup.propagator.translational(
             self.central_bodies,
@@ -149,25 +151,34 @@ class HighFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagation_simulator(self, estimated_parameter_vector=None):
+    def get_propagation_simulator(self, estimated_parameter_vector=None, solve_variational_equations=True):
 
+        print('been here in the model')
         self.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
 
+        print('been here in the model')
         # Create simulation object and propagate dynamics.
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
             self.bodies,
             self.propagator_settings)
 
-        # Setup parameters settings to propagate the state transition matrix
-        self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
-        self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
-        variational_equations_solver = numerical_simulation.create_variational_equations_solver(
-                self.bodies,
-                self.propagator_settings,
-                self.parameters_to_estimate,
-                simulate_dynamics_on_creation=True)
+        print('been here in the model too')
 
-        return dynamics_simulator, variational_equations_solver
+        # Setup parameters settings to propagate the state transition matrix
+        if solve_variational_equations:
+            self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
+            self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
+            variational_equations_solver = numerical_simulation.create_variational_equations_solver(
+                    self.bodies,
+                    self.propagator_settings,
+                    self.parameters_to_estimate,
+                    simulate_dynamics_on_creation=True)
+
+            return dynamics_simulator, variational_equations_solver
+
+        else:
+
+            return dynamics_simulator
 
 
 # custom_initial_state = np.array([-2.81273933e+08, 2.51467647e+08, 1.46454096e+08, -1.16911938e+03,

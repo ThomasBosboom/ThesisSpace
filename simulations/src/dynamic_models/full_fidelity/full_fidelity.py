@@ -258,29 +258,30 @@ class HighFidelityDynamicModel(DynamicModelBase):
             output_variables= self.dependent_variables_to_save)
 
 
-    def get_propagation_simulator(self, estimated_parameter_vector=None):
+    def get_propagation_simulator(self, estimated_parameter_vector=None, solve_variational_equations=True):
 
         self.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
 
-        print("been here")
         # Create simulation object and propagate dynamics.
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
             self.bodies,
             self.propagator_settings)
 
-        print("been here too")
-
         # Setup parameters settings to propagate the state transition matrix
-        # self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
-        # self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
-        # variational_equations_solver = numerical_simulation.create_variational_equations_solver(
-        #         self.bodies,
-        #         self.propagator_settings,
-        #         self.parameters_to_estimate,
-        #         simulate_dynamics_on_creation=True)
+        if solve_variational_equations:
+            self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
+            self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
+            variational_equations_solver = numerical_simulation.create_variational_equations_solver(
+                    self.bodies,
+                    self.propagator_settings,
+                    self.parameters_to_estimate,
+                    simulate_dynamics_on_creation=True)
 
-        return dynamics_simulator
+            return dynamics_simulator, variational_equations_solver
 
+        else:
+
+            return dynamics_simulator
 
 # test = HighFidelityDynamicModel(60390, 365)
 # dynamics_simulator = test.get_propagation_simulator()

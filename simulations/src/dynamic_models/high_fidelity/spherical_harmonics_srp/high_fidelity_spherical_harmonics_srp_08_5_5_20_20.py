@@ -171,7 +171,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagation_simulator(self, estimated_parameter_vector=None):
+    def get_propagation_simulator(self, estimated_parameter_vector=None, solve_variational_equations=True):
 
         self.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
 
@@ -181,12 +181,17 @@ class HighFidelityDynamicModel(DynamicModelBase):
             self.propagator_settings)
 
         # Setup parameters settings to propagate the state transition matrix
-        self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
-        self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
-        variational_equations_solver = numerical_simulation.create_variational_equations_solver(
-                self.bodies,
-                self.propagator_settings,
-                self.parameters_to_estimate,
-                simulate_dynamics_on_creation=True)
+        if solve_variational_equations:
+            self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
+            self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
+            variational_equations_solver = numerical_simulation.create_variational_equations_solver(
+                    self.bodies,
+                    self.propagator_settings,
+                    self.parameters_to_estimate,
+                    simulate_dynamics_on_creation=True)
 
-        return dynamics_simulator, variational_equations_solver
+            return dynamics_simulator, variational_equations_solver
+
+        else:
+
+            return dynamics_simulator
