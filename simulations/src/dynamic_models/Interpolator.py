@@ -26,18 +26,18 @@ class Interpolator:
             return interpolated_history
 
 
-    def get_propagation_results(self, dynamic_model_object, estimated_parameter_vector=None, solve_variational_equations=True):
+    def get_propagation_results(self, dynamic_model_object, estimated_parameter_vector=None, solve_variational_equations=True, custom_propagation_time=None):
 
         # Get simulation results from each dynamic model
-        # if estimated_parameter_vector is not None:
         if solve_variational_equations:
             self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator(estimated_parameter_vector=estimated_parameter_vector,
-                                                                                                                        solve_variational_equations=solve_variational_equations)
+                                                                                                                        solve_variational_equations=solve_variational_equations,
+                                                                                                                        custom_propagation_time=custom_propagation_time)
         else:
             self.dynamics_simulator = dynamic_model_object.get_propagation_simulator(estimated_parameter_vector=estimated_parameter_vector,
-                                                                                     solve_variational_equations=solve_variational_equations)
-        # else:
-        #     self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator(solve_variational_equations=solve_variational_equations)
+                                                                                     solve_variational_equations=solve_variational_equations,
+                                                                                     custom_propagation_time=custom_propagation_time)
+
         self.simulation_start_epoch = dynamic_model_object.simulation_start_epoch
         self.simulation_end_epoch = dynamic_model_object.simulation_end_epoch
 

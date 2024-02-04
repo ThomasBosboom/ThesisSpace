@@ -45,8 +45,8 @@ class EstimationModel:
         self.bias_doppler = 0.001
         self.noise_range = 2.98
         self.noise_doppler = 0.00097
-        self.observation_step_size_range = 1000
-        self.observation_step_size_doppler = 1000
+        self.observation_step_size_range = 100
+        self.observation_step_size_doppler = 100
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-8
@@ -249,7 +249,7 @@ class EstimationModel:
                     total_information = 0
                     for index, weighted_design_matrix in enumerate(weighted_design_matrix_history):
                         epoch = epochs[index]
-                        current_information = np.dot(weighted_design_matrix.T, weighted_design_matrix)
+                        current_information = total_information + np.dot(weighted_design_matrix.T, weighted_design_matrix)
                         information_dict[epoch] = current_information
                         total_information = current_information
 

@@ -51,7 +51,7 @@ def read_textfiles(data_type, satellite="LUMIO"):
 
 
 
-def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  step_size=0.001, satellite="LUMIO",body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
+def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  step_size=0.001, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
 
     state_history = read_textfiles("state", satellite=satellite)
     if body == "satellite":
