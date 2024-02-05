@@ -55,6 +55,7 @@ class StationKeeping:
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
 
+        print(np.shape(state_deviation_history))
         # fig = plt.figure()
         # # print(np.shape(state_deviation_history))
         # # plt.plot(state_deviation_history[:,0:3])
@@ -78,14 +79,14 @@ class StationKeeping:
         Phi_tcti_rr = Phi_tcti[6:9,6:9]
         Phi_tcti_rv = Phi_tcti[6:9,9:12]
 
-        R_i = 1e-2*np.eye(3)
-        Q = 1e-1*np.eye(3)
+        # R_i = 1e-2*np.eye(3)
+        # Q = 1e-1*np.eye(3)
 
-        A = -np.linalg.inv(np.add((Q.T+Q), Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tvti_rv))
-        alpha_i = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rr
-        beta_i  = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rv
+        # A = -np.linalg.inv(np.add((Q.T+Q), Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tvti_rv))
+        # alpha_i = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rr
+        # beta_i  = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rv
 
-        delta_v = A @ (alpha_i @ dr_tc + beta_i @ dv_tc)
+        # delta_v = A @ (alpha_i @ dr_tc + beta_i @ dv_tc)
 
         # print(A)
         # print(alpha_i)
@@ -100,10 +101,6 @@ class StationKeeping:
         delta_v = -np.linalg.inv(Phi_tvti_rv) @ Phi_tvti_rr @ dr_tc - dv_tc
 
         state_history[i_tv, 9:12] += delta_v
-
-
-
-
 
         # return state_history[i_tv, :]
         return delta_v

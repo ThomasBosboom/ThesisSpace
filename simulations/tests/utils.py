@@ -68,7 +68,11 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, pack
         return dynamic_model_objects
 
 
-def get_estimation_model_objects(estimation_model, dynamic_model_objects, custom_truth_model=None, apriori_covariance=None):
+def get_estimation_model_objects(estimation_model,
+                                 dynamic_model_objects,
+                                 custom_truth_model=None,
+                                 apriori_covariance=None,
+                                 initial_state_error=None):
 
     estimation_model_objects = {}
     for package_type, package_names in dynamic_model_objects.items():
@@ -81,7 +85,7 @@ def get_estimation_model_objects(estimation_model, dynamic_model_objects, custom
             else:
                 truth_model = custom_truth_model
             # print(package_type, package_name)
-            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance) for dynamic_model in dynamic_models]
+            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error) for dynamic_model in dynamic_models]
 
             submodels_dict[package_name] = submodels
         estimation_model_objects[package_type] = submodels_dict
@@ -114,7 +118,14 @@ def save_figures_to_folder(figs=[], labels=[], save_to_report=True):
             extras.append(pytest_html.extras.png(figure_path))
 
 
-def get_dynamic_model_results(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None, step_size=0.01, epoch_in_MJD=True, entry_list=None):
+def get_dynamic_model_results(simulation_start_epoch_MJD,
+                              propagation_time,
+                              package_dict=None,
+                              get_only_first=False,
+                              custom_initial_state=None,
+                              step_size=0.01,
+                              epoch_in_MJD=True,
+                              entry_list=None):
 
     dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD,
                                                       propagation_time,
@@ -144,9 +155,19 @@ def get_dynamic_model_results(simulation_start_epoch_MJD, propagation_time, pack
     return dynamic_model_objects_results
 
 
-def get_estimation_model_results(dynamic_model_objects, estimation_model, custom_truth_model=None, get_only_first=False, entry_list=None, apriori_covariance=None):
+def get_estimation_model_results(dynamic_model_objects,
+                                 estimation_model,
+                                 custom_truth_model=None,
+                                 get_only_first=False,
+                                 entry_list=None,
+                                 apriori_covariance=None,
+                                 initial_state_error=None):
 
-    estimation_model_objects = get_estimation_model_objects(estimation_model, dynamic_model_objects, custom_truth_model=custom_truth_model, apriori_covariance=apriori_covariance)
+    estimation_model_objects = get_estimation_model_objects(estimation_model,
+                                                            dynamic_model_objects,
+                                                            custom_truth_model=custom_truth_model,
+                                                            apriori_covariance=apriori_covariance,
+                                                            initial_state_error=initial_state_error)
 
     if get_only_first:
         result_dict = {}

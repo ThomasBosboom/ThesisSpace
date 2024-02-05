@@ -30,7 +30,7 @@ from dynamic_models.high_fidelity.spherical_harmonics_srp import *
 
 class EstimationModel:
 
-    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, include_consider_parameters=False):
+    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_state_error=None, include_consider_parameters=False):
 
         # Loading dynamic model
         self.dynamic_model = dynamic_model
@@ -39,6 +39,9 @@ class EstimationModel:
         # Loading apriori covariance
         self.apriori_covariance = apriori_covariance
         self.include_consider_parameters = include_consider_parameters
+
+        # Setting up initial state error
+        self.initial_state_error = initial_state_error
 
         # Defining basis for observations
         self.bias_range = 10.0
@@ -52,8 +55,8 @@ class EstimationModel:
         self.time_drift_bias = 6.9e-8
 
         # Creating observation time vector
-        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_range)
-        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+500, self.dynamic_model.simulation_end_epoch-500, self.observation_step_size_doppler)
+        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+1000, self.dynamic_model.simulation_end_epoch-1000, self.observation_step_size_range)
+        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+1000, self.dynamic_model.simulation_end_epoch-1000, self.observation_step_size_doppler)
 
 
     def set_observation_model_settings(self):
@@ -165,7 +168,7 @@ class EstimationModel:
     def set_parameters_to_estimate(self, estimated_parameter_vector=None):
 
         self.set_simulated_observations()
-        self.dynamic_model.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
+        self.dynamic_model.set_propagator_settings()
 
         # Setup parameters settings to propagate the state transition matrix
         self.parameter_settings = estimation_setup.parameter.initial_states(self.dynamic_model.propagator_settings, self.dynamic_model.bodies)
@@ -189,9 +192,9 @@ class EstimationModel:
 
 
 
-    def set_estimator_settings(self, estimated_parameter_vector=None, maximum_iterations=3):
+    def set_estimator_settings(self, maximum_iterations=3):
 
-        self.set_parameters_to_estimate(estimated_parameter_vector=estimated_parameter_vector)
+        self.set_parameters_to_estimate()
 
         # Create the estimator
         self.estimator = numerical_simulation.Estimator(
@@ -199,6 +202,19 @@ class EstimationModel:
             self.parameters_to_estimate,
             self.observation_settings_list,
             self.dynamic_model.propagator_settings)
+
+
+        # Save the true parameters to later analyse the error
+        self.truth_parameters = self.parameters_to_estimate.parameter_vector
+
+        # Perturb the initial state estimate from the truth (500 m in position, 0.001 m/s in velocity)
+        if self.initial_state_error is not None:
+            self.perturbed_parameters = self.truth_parameters.copy()
+            for i in range(3):
+                for j in range(2):
+                    self.perturbed_parameters[i+6*j] += self.initial_state_error[i+6*j]
+                    self.perturbed_parameters[i+6*j+3] += self.initial_state_error[i+6*j+3]
+            self.parameters_to_estimate.parameter_vector = self.perturbed_parameters
 
         # Create input object for the estimation
         convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=maximum_iterations)
@@ -231,6 +247,7 @@ class EstimationModel:
         # Generate information and covariance histories based on all the combinations of observables and link definitions
         total_information_dict = dict()
         total_covariance_dict = dict()
+        single_information_dict = dict()
         len_obs_list = []
         for i, (observable_type, observation_sets) in enumerate(self.sorted_observation_sets.items()):
             total_information_dict[observable_type] = dict()
@@ -250,6 +267,7 @@ class EstimationModel:
                     for index, weighted_design_matrix in enumerate(weighted_design_matrix_history):
                         epoch = epochs[index]
                         current_information = total_information + np.dot(weighted_design_matrix.T, weighted_design_matrix)
+                        single_information_dict[epoch] = np.dot(weighted_design_matrix.T, weighted_design_matrix)
                         information_dict[epoch] = current_information
                         total_information = current_information
 
@@ -262,43 +280,7 @@ class EstimationModel:
                     total_information_dict[observable_type][j].append(information_dict)
                     total_covariance_dict[observable_type][j].append(covariance_dict)
 
-
-        # # Update the estimator with the latest parameter values to generate dynamics simulators with latest dynamics for next batch
-        # epochs, state_history_dynamic_model_initial, dependent_variables_history, state_transition_matrix_history = \
-        #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.001).get_propagation_results(self.dynamic_model,estimated_parameter_vector=estimation_output.parameter_history[:,0])
-
-        # epochs, state_history_dynamic_model_final, dependent_variables_history, state_transition_matrix_history = \
-        #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.001).get_propagation_results(self.dynamic_model,estimated_parameter_vector=estimation_output.parameter_history[:,-1])
-
-        # epochs, state_history_observations, dependent_variables_history, state_transition_matrix_history = \
-        #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.001).get_propagation_results(self.truth_model,estimated_parameter_vector=None)
-
-        # fig = plt.figure()
-        # plt.plot(epochs, state_history_dynamic_model_initial[:,6:9], color="red")
-        # plt.plot(epochs, state_history_dynamic_model_final[:,6:9], color="red", ls="--")
-        # plt.plot(epochs, state_history_observations[:,6:9], color="blue")
-
-        # fig = plt.figure()
-        # plt.plot(epochs, np.linalg.norm(state_history_dynamic_model_initial[:,:3]-state_history_dynamic_model_final[:,:3], axis=1))
-        # plt.plot(epochs, np.linalg.norm(state_history_observations[:,:3]-state_history_dynamic_model_initial[:,:3], axis=1))
-        # plt.plot(epochs, np.linalg.norm(state_history_observations[:,:3]-state_history_dynamic_model_final[:,:3], axis=1))
-        # plt.yscale("log")
-
-        # fig1_3d = plt.figure()
-        # ax = fig1_3d.add_subplot(111, projection='3d')
-        # plt.plot(state_history_observations[:,0], state_history_observations[:,1], state_history_observations[:,2], label="LPF truth", color="red")
-        # plt.plot(state_history_observations[:,6], state_history_observations[:,7], state_history_observations[:,8], label="LUMIO truth", color="blue")
-        # plt.plot(state_history_dynamic_model_final[:,0], state_history_dynamic_model_final[:,1], state_history_dynamic_model_final[:,2], label="LPF final", color="red")
-        # plt.plot(state_history_dynamic_model_final[:,6], state_history_dynamic_model_final[:,7], state_history_dynamic_model_final[:,8], label="LUMIO final", color="blue")
-        # ax.set_xlabel('X [m]')
-        # ax.set_ylabel('Y [m]')
-        # ax.set_zlabel('Z [m]')
-        # plt.legend(loc="upper right")
-        # plt.show()
-
-        print("Estimation finished.")
-
-        return estimation_output, \
+        return estimation_output, single_information_dict, \
                total_covariance_dict, total_information_dict, \
                self.sorted_observation_sets
 

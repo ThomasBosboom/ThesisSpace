@@ -68,7 +68,7 @@ def custom_estimation_model_objects_results(request):
 class TestObservability:
 
     package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["spherical_harmonics"]}
-    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 1, None, False, None)], indirect=True)
+    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 1, package_dict, True, None)], indirect=True)
     def test_observability_history(self, custom_estimation_model_objects_results):
 
         model_type = "low_fidelity"

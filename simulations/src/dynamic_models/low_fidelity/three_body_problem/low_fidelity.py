@@ -24,8 +24,9 @@ class LowFidelityDynamicModel(DynamicModelBase):
     def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
 
-        # Get CRTBP characteristics
         self.custom_initial_state = custom_initial_state
+
+        # Get CRTBP characteristics
         self.distance_between_primaries = 3.84747963e8
         self.eccentricity = 0
         self.bodies_mass = [0,0]
