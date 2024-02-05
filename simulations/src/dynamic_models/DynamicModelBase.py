@@ -67,7 +67,7 @@ class DynamicModelBase:
         pass
 
 
-    def set_termination_settings(self):
+    def set_termination_settings(self, estimated_parameter_vector=None, custom_propagation_time=None):
         pass
 
 

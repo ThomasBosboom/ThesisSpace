@@ -55,34 +55,28 @@ class StationKeeping:
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
 
-        print(np.shape(state_deviation_history))
-        # plt.plot(state_deviation_history[:,0:3])
-        plt.plot(state_deviation_history[:,6:9])
-        # plt.plot(state_history[:,6:9])
-        # plt.plot(reference_state_history[:,6:9])
-        plt.show()
+        # fig = plt.figure()
+        # # print(np.shape(state_deviation_history))
+        # # plt.plot(state_deviation_history[:,0:3])
+        # plt.plot(state_deviation_history[:,6:9])
+        # # plt.plot(state_history[:,6:9])
+        # # plt.plot(reference_state_history[:,6:9])
+        # plt.show()
 
-        cut_off_epoch_index = int(cut_off_epoch/self.step_size)
-        correction_epoch_index = int(correction_epoch/self.step_size)
-        target_point_epoch_index = int(target_point_epoch/self.step_size)
-        dr_tc = state_deviation_history[correction_epoch_index,6:9]
-        dv_tc = state_deviation_history[correction_epoch_index,9:12]
-        dr_ti = state_deviation_history[target_point_epoch_index,6:9]
+        i_tc = int(cut_off_epoch/self.step_size)
+        i_tv = int(correction_epoch/self.step_size)
+        i_ti = int(target_point_epoch/self.step_size)
+        dr_tc = state_deviation_history[i_tv,6:9]
+        dv_tc = state_deviation_history[i_tv,9:12]
+        dr_ti = state_deviation_history[i_ti,6:9]
 
         Phi = state_transition_matrix_history
-        # Phi_tcti = np.linalg.inv(Phi[target_point_epoch_index]) @ Phi[cut_off_epoch_index]
-        # Phi_tvti = np.linalg.inv(Phi[target_point_epoch_index]) @ Phi[cut_off_epoch_index]
-        Phi_tcti = np.linalg.inv(Phi[cut_off_epoch_index]) @ Phi[target_point_epoch_index]
-        Phi_tvti = np.linalg.inv(Phi[correction_epoch_index]) @ Phi[target_point_epoch_index]
+        Phi_tcti = np.linalg.inv(Phi[i_tc]) @ Phi[i_ti]
+        Phi_tvti = np.linalg.inv(Phi[i_tv]) @ Phi[i_ti]
         Phi_tvti_rr = Phi_tvti[6:9,6:9]
         Phi_tvti_rv = Phi_tvti[6:9,9:12]
         Phi_tcti_rr = Phi_tcti[6:9,6:9]
         Phi_tcti_rv = Phi_tcti[6:9,9:12]
-
-        print(Phi_tvti_rr)
-        print(Phi_tvti_rv)
-        print(Phi_tcti_rr)
-        print(Phi_tcti_rv)
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)
@@ -93,36 +87,56 @@ class StationKeeping:
 
         delta_v = A @ (alpha_i @ dr_tc + beta_i @ dv_tc)
 
-        print(A)
-        print(alpha_i)
-        print(beta_i)
-        print("=======")
-        print(dr_tc)
-        print(alpha_i @ dr_tc)
-        print(dv_tc)
-        print(beta_i @ dv_tc)
-        print(delta_v, np.linalg.norm(delta_v))
+        # print(A)
+        # print(alpha_i)
+        # print(beta_i)
+        # print("=======")
+        # print(dr_tc)
+        # print(alpha_i @ dr_tc)
+        # print(dv_tc)
+        # print(beta_i @ dv_tc)
+        # print(delta_v, np.linalg.norm(delta_v))
 
-        corrected_initial_state = state_history[correction_epoch_index, 9:12] + delta_v
+        delta_v = -np.linalg.inv(Phi_tvti_rv) @ Phi_tvti_rr @ dr_tc - dv_tc
 
-        return corrected_initial_state
-
-
-
-dynamic_model_objects = utils.get_dynamic_model_objects(60390,
-                                                        1,
-                                                        package_dict=None,
-                                                        get_only_first=False,
-                                                        custom_initial_state=None)
-
-dynamic_model_object = dynamic_model_objects["high_fidelity"]["point_mass"][0]
+        state_history[i_tv, 9:12] += delta_v
 
 
-station_keeping = StationKeeping(dynamic_model_object, custom_propagation_time=14, step_size=0.01)
 
-lists = [[0, 7]]
-for list1 in lists:
-    print(list1)
-    corrected_state_vector = station_keeping.get_corrected_state_vector(correction_epoch=list1[0], target_point_epoch=list1[1], cut_off_epoch=0)
+
+
+        # return state_history[i_tv, :]
+        return delta_v
+
+
+
+# dynamic_model_objects = utils.get_dynamic_model_objects(60390,
+#                                                         1,
+#                                                         package_dict=None,
+#                                                         get_only_first=False,
+#                                                         custom_initial_state=None)
+
+# dynamic_model_object = dynamic_model_objects["high_fidelity"]["point_mass"][0]
+
+
+# estimated_parameter_vector = np.array([-2.80124757e+08,  2.53324773e+08,  1.46943725e+08, -1.61475000e+03,
+#  -2.23501900e+03, -2.97165000e+02, -3.10469279e+08,  2.49476176e+08,
+#   1.74974083e+08, -9.93405005e+02, -7.66336485e+02, -5.24990115e+02])
+# # estimated_parameter_vector = np.array([-3.34034721e+08,  1.91822727e+08,  1.11599990e+08, -1.22117098e+02,
+# #  -7.02102813e+02, -9.74268692e+02, -3.83003556e+08,  1.80616085e+08,
+# #   1.22244565e+08, -6.84093312e+02, -8.16786564e+02, -6.68493579e+02])
+# station_keeping = StationKeeping(dynamic_model_object, estimated_parameter_vector=estimated_parameter_vector, custom_propagation_time=28, step_size=0.01)
+
+# lists = [[0, 20]]
+# for list1 in lists:
+#     print(list1)
+#     corrected_state_vector = station_keeping.get_corrected_state_vector(correction_epoch=list1[0], target_point_epoch=list1[1], cut_off_epoch=0)
+#     print("corrected_state_vector:", corrected_state_vector)
+
+
+
+
+
+
 
 

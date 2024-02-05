@@ -124,17 +124,21 @@ class HighFidelityDynamicModel(DynamicModelBase):
                                                  propagation_setup.dependent_variable.body_mass(self.name_secondary)])
 
 
-    def set_termination_settings(self):
+    def set_termination_settings(self, custom_propagation_time=None):
 
         self.set_dependent_variables_to_save()
 
         # Create termination settings
+        if custom_propagation_time is not None:
+            from tudatpy.kernel import constants
+            self.simulation_end_epoch = self.simulation_start_epoch + custom_propagation_time*constants.JULIAN_DAY
+
         self.termination_settings = propagation_setup.propagator.time_termination(self.simulation_end_epoch)
 
 
-    def set_propagator_settings(self, estimated_parameter_vector=None):
+    def set_propagator_settings(self, estimated_parameter_vector=None, custom_propagation_time=None):
 
-        self.set_termination_settings()
+        self.set_termination_settings(custom_propagation_time=custom_propagation_time)
 
         if estimated_parameter_vector is not None:
             self.initial_state = estimated_parameter_vector[:12]
@@ -152,9 +156,10 @@ class HighFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagation_simulator(self, estimated_parameter_vector=None, solve_variational_equations=True):
+    def get_propagation_simulator(self, estimated_parameter_vector=None, solve_variational_equations=True, custom_propagation_time=None):
 
-        self.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
+        self.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector,
+                                     custom_propagation_time=custom_propagation_time)
 
         # Create simulation object and propagate dynamics.
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
