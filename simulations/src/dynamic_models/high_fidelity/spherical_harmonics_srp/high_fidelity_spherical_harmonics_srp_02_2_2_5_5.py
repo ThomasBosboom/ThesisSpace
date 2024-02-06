@@ -21,10 +21,11 @@ from DynamicModelBase import DynamicModelBase
 
 class HighFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None, custom_propagation_time=None):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
 
         self.custom_initial_state = custom_initial_state
+        self.custom_propagation_time = custom_propagation_time
 
         self.new_bodies_to_create = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
         for new_body in self.new_bodies_to_create:
@@ -149,15 +150,18 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.set_dependent_variables_to_save()
 
         # Create termination settings
+        if self.custom_propagation_time is not None:
+            self.simulation_end_epoch = self.simulation_start_epoch + self.custom_propagation_time*constants.JULIAN_DAY
+
         self.termination_settings = propagation_setup.propagator.time_termination(self.simulation_end_epoch)
 
 
-    def set_propagator_settings(self, estimated_parameter_vector=None):
+    def set_propagator_settings(self):
 
         self.set_termination_settings()
 
-        if estimated_parameter_vector is not None:
-            self.initial_state = estimated_parameter_vector[:12]
+        if self.custom_initial_state is not None:
+            self.initial_state = self.custom_initial_state
 
         # Create propagation settings
         self.propagator_settings = propagation_setup.propagator.translational(
@@ -172,9 +176,9 @@ class HighFidelityDynamicModel(DynamicModelBase):
         )
 
 
-    def get_propagation_simulator(self, estimated_parameter_vector=None):
+    def get_propagation_simulator(self, solve_variational_equations=True):
 
-        self.set_propagator_settings(estimated_parameter_vector=estimated_parameter_vector)
+        self.set_propagator_settings()
 
         # Create simulation object and propagate dynamics.
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
@@ -182,13 +186,17 @@ class HighFidelityDynamicModel(DynamicModelBase):
             self.propagator_settings)
 
         # Setup parameters settings to propagate the state transition matrix
-        self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
-        self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
-        variational_equations_solver = numerical_simulation.create_variational_equations_solver(
-                self.bodies,
-                self.propagator_settings,
-                self.parameters_to_estimate,
-                simulate_dynamics_on_creation=True)
+        if solve_variational_equations:
+            self.parameter_settings = estimation_setup.parameter.initial_states(self.propagator_settings, self.bodies)
+            self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.bodies)
+            variational_equations_solver = numerical_simulation.create_variational_equations_solver(
+                    self.bodies,
+                    self.propagator_settings,
+                    self.parameters_to_estimate,
+                    simulate_dynamics_on_creation=True)
 
-        return dynamics_simulator, variational_equations_solver
+            return dynamics_simulator, variational_equations_solver
 
+        else:
+
+            return dynamics_simulator

@@ -74,14 +74,14 @@ class TestObservability:
         model_type = "low_fidelity"
         model_name = "three_body_problem"
         model_entry = 0
-        total_information_dict = custom_estimation_model_objects_results[model_type][model_name][model_entry][-3]
+        single_information_dict = custom_estimation_model_objects_results[model_type][model_name][model_entry][1]
 
         fig, axs = plt.subplots(4, 1, figsize=(8.3, 11.7), sharex=True)
-        for i, (observable_type, information_sets) in enumerate(total_information_dict.items()):
+        for i, (observable_type, information_sets) in enumerate(single_information_dict.items()):
 
             for j, information_set in enumerate(information_sets.values()):
                 for k, single_information_set in enumerate(information_set):
-                    information_dict = total_information_dict[observable_type][j][k]
+                    information_dict = single_information_dict[observable_type][j][k]
                     epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
                     information_matrix_history = np.array(list(information_dict.values()))
 

@@ -44,19 +44,19 @@ class EstimationModel:
         self.initial_state_error = initial_state_error
 
         # Defining basis for observations
-        self.bias_range = 10.0
-        self.bias_doppler = 0.001
+        self.bias_range = 0
+        self.bias_doppler = 0.000
         self.noise_range = 2.98
         self.noise_doppler = 0.00097
-        self.observation_step_size_range = 100
-        self.observation_step_size_doppler = 100
+        self.observation_step_size_range = 1200
+        self.observation_step_size_doppler = 1200
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-8
 
         # Creating observation time vector
-        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+1000, self.dynamic_model.simulation_end_epoch-1000, self.observation_step_size_range)
-        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+1000, self.dynamic_model.simulation_end_epoch-1000, self.observation_step_size_doppler)
+        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+1200, self.dynamic_model.simulation_end_epoch-1200, self.observation_step_size_range)
+        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+1200, self.dynamic_model.simulation_end_epoch-1200, self.observation_step_size_doppler)
 
 
     def set_observation_model_settings(self):
@@ -115,12 +115,12 @@ class EstimationModel:
         observation.add_gaussian_noise_to_observable(
             self.observation_simulation_settings,
             self.noise_range,
-            observation.one_way_range_type)
+            observation.n_way_range_type)
 
         observation.add_gaussian_noise_to_observable(
             self.observation_simulation_settings,
             self.noise_doppler,
-            observation.one_way_instantaneous_doppler_type)
+            observation.n_way_averaged_doppler_type)
 
         # Provide ancillary settings for n-way observables
         observation.two_way_range_ancilliary_settings(retransmission_delay = self.retransmission_delay)
@@ -165,7 +165,7 @@ class EstimationModel:
         self.sorted_observation_sets = self.simulated_observations.sorted_observation_sets
 
 
-    def set_parameters_to_estimate(self, estimated_parameter_vector=None):
+    def set_parameters_to_estimate(self):
 
         self.set_simulated_observations()
         self.dynamic_model.set_propagator_settings()
@@ -192,7 +192,7 @@ class EstimationModel:
 
 
 
-    def set_estimator_settings(self, maximum_iterations=3):
+    def set_estimator_settings(self, maximum_iterations=4):
 
         self.set_parameters_to_estimate()
 
@@ -247,29 +247,55 @@ class EstimationModel:
         # Generate information and covariance histories based on all the combinations of observables and link definitions
         total_information_dict = dict()
         total_covariance_dict = dict()
-        single_information_dict = dict()
+        total_single_information_dict = dict()
+        total_information_vector_dict = dict()
         len_obs_list = []
         for i, (observable_type, observation_sets) in enumerate(self.sorted_observation_sets.items()):
             total_information_dict[observable_type] = dict()
             total_covariance_dict[observable_type] = dict()
+            total_single_information_dict[observable_type] = dict()
+            total_information_vector_dict[observable_type] = dict()
             for j, observation_set in enumerate(observation_sets.values()):
                 total_information_dict[observable_type][j] = list()
                 total_covariance_dict[observable_type][j] = list()
+                total_single_information_dict[observable_type][j] = list()
+                total_information_vector_dict[observable_type][j] = list()
                 for k, single_observation_set in enumerate(observation_set):
 
                     epochs = single_observation_set.observation_times
                     len_obs_list.append(len(epochs))
 
                     weighted_design_matrix_history = np.stack([estimation_output.weighted_design_matrix[sum(len_obs_list[:-1]):sum(len_obs_list), :]], axis=1)
+                    design_matrix_history = np.stack([estimation_output.design_matrix[sum(len_obs_list[:-1]):sum(len_obs_list), :]], axis=1)
+                    residual_history = estimation_output.residual_history[sum(len_obs_list[:-1]):sum(len_obs_list), -1]
+                    observation_weight_history = self.estimation_input.weight_matrix_diagonal[sum(len_obs_list[:-1]):sum(len_obs_list)]
+                    # print(observation_weight_history)
+                    # print(self.estimation_input.weight_matrix_diagonal, np.shape(self.estimation_input.weight_matrix_diagonal))
 
                     information_dict = dict()
+                    single_information_dict = dict()
+                    information_vector_dict = dict()
                     total_information = 0
+                    total_information_vector = 0
                     for index, weighted_design_matrix in enumerate(weighted_design_matrix_history):
+
                         epoch = epochs[index]
-                        current_information = total_information + np.dot(weighted_design_matrix.T, weighted_design_matrix)
-                        single_information_dict[epoch] = np.dot(weighted_design_matrix.T, weighted_design_matrix)
+
+                        weighted_design_matrix_product = np.dot(weighted_design_matrix.T, weighted_design_matrix)
+                        design_matrix = design_matrix_history[index]
+                        residual = residual_history[index]
+                        observation_weight = observation_weight_history[index]
+
+                        # Calculate the information matrix
+                        current_information = total_information + weighted_design_matrix_product
+                        single_information_dict[epoch] = weighted_design_matrix_product
                         information_dict[epoch] = current_information
                         total_information = current_information
+
+                        # Calculate the information vector
+                        current_information_vector = total_information_vector + np.dot(np.dot(design_matrix.T, observation_weight), residual)
+                        information_vector_dict[epoch] = current_information_vector
+                        total_information_vector = current_information_vector
 
                     covariance_dict = dict()
                     for key in information_dict:
@@ -279,27 +305,71 @@ class EstimationModel:
 
                     total_information_dict[observable_type][j].append(information_dict)
                     total_covariance_dict[observable_type][j].append(covariance_dict)
+                    total_single_information_dict[observable_type][j].append(single_information_dict)
+                    total_information_vector_dict[observable_type][j].append(information_vector_dict)
 
-        return estimation_output, single_information_dict, \
+        return estimation_output, total_single_information_dict, \
                total_covariance_dict, total_information_dict, \
                self.sorted_observation_sets
 
 
 # custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
 #                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-# dynamic_model = low_fidelity.LowFidelityDynamicModel(60400, 14, custom_initial_state=custom_initial_state)
-# truth_model = low_fidelity.LowFidelityDynamicModel(60400, 14, custom_initial_state=custom_initial_state)
-# dynamic_model = high_fidelity_point_mass_srp_06.HighFidelityDynamicModel(60390, 1)
-# truth_model = high_fidelity_spherical_harmonics_srp_03_2_2_10_10.HighFidelityDynamicModel(60390, 1)
-# apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e2, 1e2, 1e2, 1e2])**2
-# estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, include_consider_parameters=True)
+# dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 1, custom_initial_state=custom_initial_state)
+# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 1, custom_initial_state=custom_initial_state)
+# # dynamic_model = high_fidelity_point_mass_08.HighFidelityDynamicModel(60390, 1)
+# # truth_model = high_fidelity_spherical_harmonics_srp_03_2_2_10_10.HighFidelityDynamicModel(60390, 1)
+# apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+# estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance)
 
-# estimation_output = estimation_model.get_estimation_results()[0]
+
+# results = estimation_model.get_estimation_results()
+# estimation_output = results[0]
 # parameter_history = estimation_output.parameter_history
 # residual_history = estimation_output.residual_history
 # covariance = estimation_output.covariance
 # formal_errors = estimation_output.formal_errors
-# design_matrix = estimation_output.design_matrix
+# weighted_design_matrix = estimation_output.weighted_design_matrix
+# residual_history = estimation_output.residual_history
 
-# print(design_matrix[0,:])
-# print(parameter_history[:,-1])
+# # print(weighted_design_matrix[0,:], np.shape(weighted_design_matrix))
+# # print(parameter_history[:,-1])
+# # print(residual_history, np.shape(residual_history))
+
+
+# print(results[-1])
+# for i, (observable_type, information_sets) in enumerate(results[-1].items()):
+#     for j, observation_set in enumerate(information_sets.values()):
+#         for k, single_observation_set in enumerate(observation_set):
+#             print(i, j, k, observable_type, single_observation_set)
+
+#             print(single_observation_set.link_definition)
+#             # print(single_observation_set.observation_times)
+#             # print(single_observation_set.concatenated_observations)
+
+
+#             residual_history = estimation_output.residual_history
+
+#             fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
+#             subplots_list = [ax1, ax2, ax3, ax4]
+
+#             index = int(len(single_observation_set.observation_times))
+#             for l in range(4):
+#                 subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
+#                 subplots_list[l].set_ylabel("Observation Residual")
+#                 subplots_list[l].set_title("Iteration "+str(l+1))
+
+#             ax3.set_xlabel("Time since J2000 [s]")
+#             ax4.set_xlabel("Time since J2000 [s]")
+
+
+#             final_residuals = estimation_output.final_residuals
+
+#             plt.figure(figsize=(9,5))
+#             plt.hist(final_residuals[i*index:(i+1)*index], 25)
+#             plt.xlabel('Final iteration range-rate residual')
+#             plt.ylabel('Occurences [-]')
+#             plt.title('Histogram of residuals on final iteration')
+
+#             plt.tight_layout()
+#             plt.show()

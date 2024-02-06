@@ -31,10 +31,6 @@ class Interpolator:
         dynamic_model_object.custom_initial_state = estimated_parameter_vector
         dynamic_model_object.custom_propagation_time = custom_propagation_time
 
-        print(dynamic_model_object.custom_initial_state)
-        print(dynamic_model_object.custom_propagation_time)
-
-
         # Get simulation results from each dynamic model
         if solve_variational_equations:
             self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator(solve_variational_equations=solve_variational_equations)

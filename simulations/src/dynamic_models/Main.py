@@ -30,13 +30,13 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 # Mission time settings
-mission_time = 4
+mission_time = 5
 mission_start_epoch = 60390
 mission_end_epoch = 60390 + mission_time
 
 # Argument settings for dynamic models to be used in estimation
 simulation_start_epoch = mission_start_epoch
-propagation_time = 1
+propagation_time = 0.5
 package_dict = {"high_fidelity": ["point_mass"]}
 get_only_first = True
 custom_initial_state = None
@@ -76,7 +76,7 @@ while simulation_start_epoch < mission_end_epoch:
 
     # Define the truth model to simulate the observations
     # high_fidelity_spherical_harmonics_srp_01_2_2_2_2
-    truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(simulation_start_epoch,
+    truth_model = high_fidelity_point_mass_srp_06.HighFidelityDynamicModel(simulation_start_epoch,
                                                                        propagation_time,
                                                                        custom_initial_state=custom_initial_state_truth)
 
@@ -128,13 +128,13 @@ while simulation_start_epoch < mission_end_epoch:
 
     # Set condition on the maximum amount of error allowed before the station-keeping should take place
     # print("Difference final and reference: ", np.abs(reference_state_final[0,6:9]-reference_state_history[0,6:9]))
-    print("param vec: ", estimation_output.parameter_history[:,-1])
+    # print("param vec: ", estimation_output.parameter_history[:,-1])
     station_keeping_object = StationKeeping.StationKeeping(dynamic_model_object,
                                                            estimated_parameter_vector=estimation_output.parameter_history[:,-1],
                                                            custom_propagation_time=8)
 
     delta_v = station_keeping_object.get_corrected_state_vector(correction_epoch=0+propagation_time,
-                                                                target_point_epoch=1+propagation_time,
+                                                                target_point_epoch=7+propagation_time,
                                                                 cut_off_epoch=0)
     print("done station keeping: ", delta_v)
 
@@ -150,10 +150,11 @@ while simulation_start_epoch < mission_end_epoch:
     # print(custom_initial_state, simulation_start_epoch)
     custom_initial_state = state_history_final[-1,:]
     simulation_start_epoch += propagation_time
-    # state_history_final[-1,9:12] = state_history_final[-1,9:12] + delta_v
+    state_history_final[-1,9:12] = state_history_final[-1,9:12] + delta_v
     custom_initial_state = state_history_final[-1,:]
     custom_initial_state_truth = state_history_truth[-1,:]
     apriori_covariance = final_covariance
+    # initial_state_error = estimation_errors
 
     # Storing some plots
     ax.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF ref", color="green")
@@ -187,34 +188,34 @@ plt.legend()
 plt.show()
 
 
-dynamic_model_objects = utils.get_dynamic_model_objects(mission_start_epoch,
-                                                        mission_time,
-                                                        package_dict=None,
-                                                        get_only_first=False,
-                                                        custom_initial_state=None)
+# dynamic_model_objects = utils.get_dynamic_model_objects(mission_start_epoch,
+#                                                         mission_time,
+#                                                         package_dict=None,
+#                                                         get_only_first=False,
+#                                                         custom_initial_state=None)
 
-epochs, state_history_full, _ = \
-    Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.01).get_propagation_results(dynamic_model_objects[model_type][model_name][model_number],
-                                                                                          estimated_parameter_vector=None,
-                                                                                          solve_variational_equations=False)
+# epochs, state_history_full, _ = \
+#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.01).get_propagation_results(dynamic_model_objects[model_type][model_name][model_number],
+#                                                                                           estimated_parameter_vector=None,
+#                                                                                           solve_variational_equations=False)
 
-epochs, state_history_full_truth, _ = \
-    Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.01).get_propagation_results(dynamic_model_objects["high_fidelity"]["point_mass_srp"][0],
-                                                                                          estimated_parameter_vector=None,
-                                                                                          solve_variational_equations=False)
+# epochs, state_history_full_truth, _ = \
+#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.01).get_propagation_results(dynamic_model_objects["high_fidelity"]["point_mass_srp"][0],
+#                                                                                           estimated_parameter_vector=None,
+#                                                                                           solve_variational_equations=False)
 
 
 
-ax.plot(state_history_full_truth[:,0], state_history_full_truth[:,1], state_history_full_truth[:,2], label="LPF truth", color="red", ls="--")
-ax.plot(state_history_full_truth[:,6], state_history_full_truth[:,7], state_history_full_truth[:,8], label="LUMIO truth", color="blue", ls="--")
-ax.plot(state_history_full[:,0], state_history_full[:,1], state_history_full[:,2], label="LPF", color="gray", ls="--")
-ax.plot(state_history_full[:,6], state_history_full[:,7], state_history_full[:,8], label="LUMIO", color="gray", ls="--")
+# ax.plot(state_history_full_truth[:,0], state_history_full_truth[:,1], state_history_full_truth[:,2], label="LPF truth", color="red", ls="--")
+# ax.plot(state_history_full_truth[:,6], state_history_full_truth[:,7], state_history_full_truth[:,8], label="LUMIO truth", color="blue", ls="--")
+# ax.plot(state_history_full[:,0], state_history_full[:,1], state_history_full[:,2], label="LPF", color="gray", ls="--")
+# ax.plot(state_history_full[:,6], state_history_full[:,7], state_history_full[:,8], label="LUMIO", color="gray", ls="--")
 
-ax.set_xlabel('X [m]')
-ax.set_ylabel('Y [m]')
-ax.set_zlabel('Z [m]')
-plt.legend(loc="upper right")
-plt.show()
+# ax.set_xlabel('X [m]')
+# ax.set_ylabel('Y [m]')
+# ax.set_zlabel('Z [m]')
+# plt.legend(loc="upper right")
+# plt.show()
 
 # estimation_errors_history = np.array(estimation_error_dict)
 # formal_errors_history = np.array(formal_error_dict)

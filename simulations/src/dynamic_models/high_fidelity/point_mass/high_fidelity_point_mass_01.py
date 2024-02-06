@@ -25,7 +25,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
 
         self.custom_initial_state = custom_initial_state
-        self.custom_propagation_time = None
+        self.custom_propagation_time = custom_propagation_time
 
         self.new_bodies_to_create = ["Sun"]
         for new_body in self.new_bodies_to_create:
@@ -128,7 +128,6 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         # Create termination settings
         if self.custom_propagation_time is not None:
-            from tudatpy.kernel import constants
             self.simulation_end_epoch = self.simulation_start_epoch + self.custom_propagation_time*constants.JULIAN_DAY
 
         self.termination_settings = propagation_setup.propagator.time_termination(self.simulation_end_epoch)
@@ -138,8 +137,6 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_termination_settings()
 
-        # if estimated_parameter_vector is not None:
-        # self.initial_state = estimated_parameter_vector[:12]
         if self.custom_initial_state is not None:
             self.initial_state = self.custom_initial_state
 
