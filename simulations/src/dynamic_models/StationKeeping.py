@@ -102,8 +102,7 @@ class StationKeeping:
 
         state_history[i_tv, 9:12] += delta_v
 
-        # return state_history[i_tv, :]
-        return delta_v
+        return state_history[i_tv]
 
 
 
