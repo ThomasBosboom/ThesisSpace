@@ -53,7 +53,7 @@ def estimation_model_objects_results():
     dynamic_model_objects = utils.get_dynamic_model_objects(*params)
     truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2])
 
-    return utils.get_estimation_model_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=get_only_first, entry_list=entry_list)
+    return utils.get_estimation_model_results(dynamic_model_objects, custom_truth_model=truth_model, get_only_first=get_only_first, entry_list=entry_list)
 
 
 ### Define adjustable fixture for custom generations
@@ -61,13 +61,13 @@ def estimation_model_objects_results():
                 scope="module")
 def custom_estimation_model_objects_results(request):
     dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
-    truth_model = full_fidelity.HighFidelityDynamicModel(*request.param[:2], custom_initial_state=request.param[-1])
-    return utils.get_estimation_model_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=None)
+    truth_model = low_fidelity.LowFidelityDynamicModel(*request.param[:2], custom_initial_state=request.param[-1])
+    return utils.get_estimation_model_results(dynamic_model_objects, custom_truth_model=truth_model, get_only_first=False, entry_list=None)
 
 
 class TestObservability:
 
-    package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["spherical_harmonics"]}
+    package_dict = {"low_fidelity": ["three_body_problem"]}
     @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 1, package_dict, True, None)], indirect=True)
     def test_observability_history(self, custom_estimation_model_objects_results):
 
@@ -172,9 +172,10 @@ class TestMonteCarlo:
         for start_epoch in range(60390, 60404, 1):
 
             params = (start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
+            print(params)
             dynamic_model_objects = utils.get_dynamic_model_objects(*params)
             truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2], custom_initial_state=params[-1])
-            run_times_dict = utils.get_estimation_model_results(dynamic_model_objects, estimation_model, custom_truth_model=truth_model, get_only_first=False, entry_list=[-1])
+            run_times_dict = utils.get_estimation_model_results(dynamic_model_objects, custom_truth_model=truth_model, get_only_first=False, entry_list=[-1])
 
             # Accumulate values during the loop
             for fidelity_key, sub_dict in run_times_dict.items():
@@ -281,7 +282,7 @@ class TestMonteCarlo:
     #     dynamic_model_objects = utils.get_dynamic_model_objects(*params)
 
     #     truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2])
-    #     estimation_model_objects_results = utils.get_estimation_model_results(dynamic_model_objects, estimation_model, truth_model, get_only_first=False)
+    #     estimation_model_objects_results = utils.get_estimation_model_results(dynamic_model_objects, truth_model, get_only_first=False)
 
     #     sorted_observation_sets = estimation_model_objects_results["high_fidelity"]["point_mass"][0][-2]
 

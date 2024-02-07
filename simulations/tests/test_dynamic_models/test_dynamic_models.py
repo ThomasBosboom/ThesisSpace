@@ -48,11 +48,11 @@ class TestFrameConversions:
                                         1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 
         # Generate LowFidelityDynamicModel object only
-        dynamic_model = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
+        dynamic_model = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, use_synodic_state=True)
 
         # Extract simulation histories tudatpy solution
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-            Interpolator.Interpolator(step_size=step_size).get_propagation_results(dynamic_model)
+            Interpolator.Interpolator(step_size=step_size).get_propagation_results(dynamic_model, estimated_parameter_vector=custom_initial_state)
 
         # Convert back to synodic
         epochs_synodic, state_history_synodic = \
@@ -412,7 +412,7 @@ class TestOutputsDynamicModels:
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time",
     [
-        # (60390, 14),
+        (60390, 14),
     ])
 
     def test_loading_time_models(self, simulation_start_epoch_MJD, propagation_time, extras):
@@ -446,7 +446,7 @@ class TestOutputsDynamicModels:
     @pytest.mark.parametrize(
     "simulation_start_epoch_MJD, propagation_time, durations",
     [
-        # (60390, 50, [7, 14, 28, 42, 49]),
+        (60390, 50, [7, 14, 28, 42, 49]),
     ])
 
     def test_difference_high_and_low_fidelity(self, simulation_start_epoch_MJD, propagation_time, durations, extras, step_size=0.001):

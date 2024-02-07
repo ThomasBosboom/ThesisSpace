@@ -12,6 +12,7 @@ from tudatpy.kernel.astro import time_conversion
 # Own
 from src.dynamic_models import Interpolator
 from src.dynamic_models.full_fidelity import *
+from src.estimation_models import estimation_model
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -68,8 +69,7 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, pack
         return dynamic_model_objects
 
 
-def get_estimation_model_objects(estimation_model,
-                                 dynamic_model_objects,
+def get_estimation_model_objects(dynamic_model_objects,
                                  custom_truth_model=None,
                                  apriori_covariance=None,
                                  initial_state_error=None):
@@ -84,7 +84,7 @@ def get_estimation_model_objects(estimation_model,
                 truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
-            # print(package_type, package_name)
+
             submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error) for dynamic_model in dynamic_models]
 
             submodels_dict[package_name] = submodels
@@ -156,18 +156,20 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
 
 
 def get_estimation_model_results(dynamic_model_objects,
-                                 estimation_model,
+                                 custom_estimation_model_objects=None,
                                  custom_truth_model=None,
                                  get_only_first=False,
                                  entry_list=None,
                                  apriori_covariance=None,
                                  initial_state_error=None):
 
-    estimation_model_objects = get_estimation_model_objects(estimation_model,
-                                                            dynamic_model_objects,
-                                                            custom_truth_model=custom_truth_model,
-                                                            apriori_covariance=apriori_covariance,
-                                                            initial_state_error=initial_state_error)
+    if custom_estimation_model_objects is None:
+        estimation_model_objects = get_estimation_model_objects(dynamic_model_objects,
+                                                                custom_truth_model=custom_truth_model,
+                                                                apriori_covariance=apriori_covariance,
+                                                                initial_state_error=initial_state_error)
+    else:
+        estimation_model_objects = custom_estimation_model_objects
 
     if get_only_first:
         result_dict = {}

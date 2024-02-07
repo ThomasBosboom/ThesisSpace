@@ -21,11 +21,13 @@ from DynamicModelBase import DynamicModelBase
 
 class LowFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None, custom_propagation_time=None):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None, custom_propagation_time=None, use_synodic_state=False):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
 
         self.custom_initial_state = custom_initial_state
         self.custom_propagation_time = custom_propagation_time
+
+        self.use_synodic_state = use_synodic_state
 
         # Get CRTBP characteristics
         self.distance_between_primaries = 3.84747963e8
@@ -193,9 +195,12 @@ class LowFidelityDynamicModel(DynamicModelBase):
         if self.custom_initial_state is None:
             self.initial_state = self.get_closest_initial_state()
         else:
-            self.initial_state = self.convert_synodic_to_inertial_state(self.custom_initial_state)
-            self.custom_initial_state[0] = self.custom_initial_state[0] + (1-self.mu)
-            self.custom_initial_state[6] = self.custom_initial_state[6] + (1-self.mu)
+            if self.use_synodic_state:
+                self.initial_state = self.convert_synodic_to_inertial_state(self.custom_initial_state)
+                self.custom_initial_state[0] = self.custom_initial_state[0] + (1-self.mu)
+                self.custom_initial_state[6] = self.custom_initial_state[6] + (1-self.mu)
+            else:
+                self.initial_state = self.custom_initial_state
 
 
     def set_integration_settings(self):
@@ -253,8 +258,10 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
         self.set_termination_settings()
 
-        if self.custom_initial_state is not None:
-            self.initial_state = self.custom_initial_state
+        # if self.custom_initial_state is not None:
+        #     self.initial_state = self.custom_initial_state
+
+        # self.initial_state = self.custom_initial_state
 
         # Create propagation settings
         self.propagator_settings = propagation_setup.propagator.translational(
@@ -296,14 +303,18 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
 
 
-# custom_initial_state = np.array([0.985141349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0, \
-#                                          1.1473302, 0, -0.15142308, 0, -0.21994554, 0])
-# test2 = LowFidelityDynamicModel(60390, 28)
-# dep_var = np.stack(list(test2.get_propagation_simulator()[0].dependent_variable_history.values()))
-# states = np.stack(list(test2.get_propagation_simulator()[0].state_history.values()))
+# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+#                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+# test1 = LowFidelityDynamicModel(60390, 28, custom_initial_state=custom_initial_state, use_synodic_state=True)
+# states1 = np.stack(list(test1.get_propagation_simulator()[0].state_history.values()))
+
+# test2 = LowFidelityDynamicModel(60390, 28, custom_initial_state=None)
+# states2 = np.stack(list(test2.get_propagation_simulator()[0].state_history.values()))
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111, projection='3d')
-# plt.plot(states[:,0], states[:,1], states[:,2])
-# plt.plot(states[:,6], states[:,7], states[:,8])
+# plt.plot(states1[:,0], states1[:,1], states1[:,2])
+# plt.plot(states1[:,6], states1[:,7], states1[:,8])
+# plt.plot(states2[:,0], states2[:,1], states2[:,2])
+# plt.plot(states2[:,6], states2[:,7], states2[:,8])
 # plt.show()
