@@ -30,13 +30,13 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 # Mission time settings
-mission_time = 3
+mission_time = 28
 mission_start_epoch = 60390
 mission_end_epoch = 60390 + mission_time
 
 # Initial estimation setup
 simulation_start_epoch = mission_start_epoch
-propagation_time = 0.5
+propagation_time = 1
 package_dict = {"high_fidelity": ["point_mass"]}
 get_only_first = True
 custom_initial_state = None
@@ -135,15 +135,6 @@ while simulation_start_epoch < mission_end_epoch:
                                                                                               solve_variational_equations=False)
 
 
-    # Set condition on the maximum amount of error allowed before the station-keeping should take place
-    station_keeping_object = StationKeeping.StationKeeping(dynamic_model_object,
-                                                           estimated_parameter_vector=estimation_output.parameter_history[:,-1],
-                                                           custom_propagation_time=6)
-
-    delta_v = station_keeping_object.get_corrected_state_vector(correction_epoch=0+propagation_time,
-                                                                target_point_epoch=4+propagation_time,
-                                                                cut_off_epoch=0+propagation_time)
-    print("done station keeping: ", delta_v)
 
     # Add current relevant information to the total
 
@@ -156,21 +147,33 @@ while simulation_start_epoch < mission_end_epoch:
     propagated_covariance_dict.update(propagated_covariance)
     propagated_formal_errors_dict.update(propagated_formal_errors)
 
-    print("estimation errors")
-    estimation_errors_magnitude = np.sqrt(np.square(estimation_errors[6:9]).sum())
-    print(estimation_errors[6:9], estimation_errors_magnitude)
-    print("formal errors")
-    propagated_formal_errors_magnitude = np.sqrt(np.square(np.stack(list(propagated_formal_errors.values()))[0, 6:9]).sum())
-    print(np.stack(list(propagated_formal_errors.values()))[0, 6:9], propagated_formal_errors_magnitude)
-    if propagated_formal_errors_magnitude < 1000:
-        print("CONVERGENCE AT ", simulation_start_epoch)
+    # print("estimation errors")
+    # estimation_errors_magnitude = np.sqrt(np.square(estimation_errors[6:9]).sum())
+    # print(estimation_errors[6:9], estimation_errors_magnitude)
+    # print("formal errors")
+    # propagated_formal_errors_magnitude = np.sqrt(np.square(np.stack(list(propagated_formal_errors.values()))[0, 6:9]).sum())
+    # print(np.stack(list(propagated_formal_errors.values()))[0, 6:9], propagated_formal_errors_magnitude)
+    # if propagated_formal_errors_magnitude < 1000:
+    #     print("CONVERGENCE AT ", simulation_start_epoch)
 
     # Update settings for next batch
-    simulation_start_epoch += propagation_time
-    # state_history_final[-1,9:12] = state_history_final[-1,9:12] + delta_v
     custom_initial_state = state_history_final[-1,:]
     custom_initial_state_truth = state_history_truth[-1,:]
     apriori_covariance = np.array(list(propagated_covariance.values()))[-1]
+
+    # Set condition on the maximum amount of error allowed before the station-keeping should take place
+    if int((simulation_start_epoch-mission_start_epoch)%4) == 0 and simulation_start_epoch != mission_start_epoch:
+
+        station_keeping_object = StationKeeping.StationKeeping(dynamic_model_object,
+                                                            estimated_parameter_vector=estimation_output.parameter_history[:,-1],
+                                                            custom_propagation_time=6)
+
+        custom_initial_state = station_keeping_object.get_corrected_state_vector(correction_epoch=0+propagation_time,
+                                                                    target_point_epoch=4+propagation_time,
+                                                                    cut_off_epoch=0+propagation_time)
+
+    simulation_start_epoch += propagation_time
+
 
     # Storing some plots
     ax.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF ref", color="green")
@@ -190,6 +193,8 @@ propagated_covariance_epochs = np.stack(list(propagated_covariance_dict.keys()))
 propagated_covariance_history = np.stack(list(propagated_covariance_dict.values()))
 estimation_error_epochs = np.stack(list(full_estimation_error_dict.keys()))
 estimation_error_history = np.stack(list(full_estimation_error_dict.values()))
+reference_state_deviation_epochs = np.stack(list(reference_state_deviation_dict.keys()))
+reference_state_deviation_history = np.stack(list(reference_state_deviation_dict.values()))
 
 propagated_formal_errors_epochs = np.stack(list(propagated_formal_errors_dict.keys()))
 propagated_formal_errors_history = np.stack(list(propagated_formal_errors_dict.values()))
@@ -199,6 +204,9 @@ estimation_error_history = np.array([interp1d(estimation_error_epochs, state, ki
 
 
 plt.plot(propagated_formal_errors_history[:,6:9])
+plt.show()
+
+plt.plot(reference_state_deviation_history[:,6:9])
 plt.show()
 
 fig = plt.figure()
