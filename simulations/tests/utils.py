@@ -270,6 +270,25 @@ def convert_epochs_to_MJD(epochs):
     return epochs_MJD
 
 
+def convert_epochs_to_MJD(epochs, full_array=True):
+
+    if full_array:
+        return np.array([time_conversion.julian_day_to_modified_julian_day(\
+                    time_conversion.seconds_since_epoch_to_julian_day(epoch)) for epoch in epochs])
+    else:
+        return time_conversion.julian_day_to_modified_julian_day(\
+                    time_conversion.seconds_since_epoch_to_julian_day(epochs))
+
+
+def convert_MJD_to_epoch(epochs, full_array=True):
+
+    if full_array:
+        return np.array([time_conversion.julian_day_to_seconds_since_epoch(\
+                    time_conversion.modified_julian_day_to_julian_day(epoch)) for epoch in epochs])
+    else:
+        return time_conversion.julian_day_to_seconds_since_epoch(\
+                    time_conversion.modified_julian_day_to_julian_day(epochs))
+
 # def get_first_of_model_types(dynamic_model_objects):
 
 #     dynamic_models = []

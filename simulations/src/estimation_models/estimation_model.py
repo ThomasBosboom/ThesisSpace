@@ -48,8 +48,8 @@ class EstimationModel:
         self.bias_doppler = 0
         self.noise_range = 2.98
         self.noise_doppler = 0.00097
-        self.observation_step_size_range = 120
-        self.observation_step_size_doppler = 120
+        self.observation_step_size_range = 1000
+        self.observation_step_size_doppler = 1000
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-8
@@ -241,19 +241,23 @@ class EstimationModel:
             estimation_output = self.estimator.perform_estimation(self.estimation_input)
 
         # Propagate formal errors and covariance over the course of estimation window
-        output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 60)
+        output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 100)
         # output_times = self.observation_times_range
 
-        propagated_covariance_dict = dict()
         propagated_formal_errors_dict = dict()
         propagated_formal_errors_dict.update(zip(*estimation.propagate_formal_errors_split_output(
             initial_covariance=estimation_output.covariance,
             state_transition_interface=self.estimator.state_transition_interface,
             output_times=output_times)))
+
+        propagated_covariance_dict = dict()
         propagated_covariance_dict.update(zip(*estimation.propagate_covariance_split_output(
             initial_covariance=estimation_output.covariance,
             state_transition_interface=self.estimator.state_transition_interface,
             output_times=output_times)))
+
+        # plt.plot(np.stack(list(propagated_formal_errors_dict.values()))[:,6:9])
+        # plt.show()
 
         # print("estimated formal errors: ")
         # print(estimation_output.formal_errors)
@@ -321,7 +325,7 @@ class EstimationModel:
         return estimation_output, total_single_information_dict, \
                total_covariance_dict, total_information_dict, \
                propagated_covariance_dict, propagated_formal_errors_dict,\
-               self.sorted_observation_sets
+               self.sorted_observation_sets, self.estimator
 
 
 # custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
