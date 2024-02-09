@@ -11,7 +11,7 @@ from tudatpy.kernel.astro import time_conversion
 
 # Own
 from src.dynamic_models import Interpolator
-from src.dynamic_models.full_fidelity import *
+from src.dynamic_models.full_fidelity.full_fidelity import *
 from src.estimation_models import estimation_model
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))

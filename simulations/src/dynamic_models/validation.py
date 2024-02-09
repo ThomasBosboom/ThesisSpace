@@ -51,7 +51,7 @@ def read_textfiles(data_type, satellite="LUMIO"):
 
 
 
-def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  step_size=0.001, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
+def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, custom_dynamic_model=None, step_size=0.001, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
 
     state_history = read_textfiles("state", satellite=satellite)
     if body == "satellite":
@@ -64,7 +64,9 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  s
         time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))+69.1826417446136475
     user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
         time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))
-    user_end_epoch = user_start_epoch + propagation_time*constants.JULIAN_DAY
+    # user_end_epoch = user_start_epoch + propagation_time*constants.JULIAN_DAY
+    user_end_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
+        time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD+propagation_time))
 
     # Perform interpolation using SciPy's interp1d
     epochs = state_history[:, 1]
@@ -72,17 +74,34 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time,  s
     interp_func = interp1d(epochs, state_vectors, axis=0, kind=interpolation_kind, fill_value='extrapolate')
     interpolated_state = interp_func(user_start_epoch)
 
+    # print("amounts validation: ", (user_end_epoch+step_size*constants.JULIAN_DAY-user_start_epoch)/step_size)
     interpolated_states = np.zeros((1,6))
     epochs = np.arange(user_start_epoch, user_end_epoch+step_size*constants.JULIAN_DAY, step_size*constants.JULIAN_DAY)
+    # print("validation before: ", np.shape(epochs), user_start_epoch, user_end_epoch, step_size*constants.JULIAN_DAY)
+    i = 0
     for epoch in epochs:
         interpolated_states = np.vstack((interpolated_states, interp_func(epoch)))
+        i += 1
+        # print("interpolated_states shape: ", np.shape(interpolated_states))
     interpolated_states = np.delete(interpolated_states, 0, 0)
+    # print("interpolated_states shape: ", np.shape(interpolated_states))
+
+
+    # print("validation after: ", np.shape(interpolated_states))
 
     # Create a dictionary with epochs as keys and vectors as values
     data_dict = {epoch: vector for epoch, vector in zip(epochs, interpolated_states) \
                     if epoch <= user_end_epoch \
                         and epoch >= user_start_epoch}
 
+    data_dict = {epoch: vector for epoch, vector in zip(epochs, interpolated_states) \
+                    if epoch-step_size*constants.JULIAN_DAY <= user_end_epoch \
+                        and epoch >= user_start_epoch}
+
+    # print("validation: ", np.shape(np.vstack(list(data_dict.values()))))
+    # print("epoch comparison start: ", epochs[0], user_start_epoch)
+    # print("epoch comparison end: ", epochs[-1], user_end_epoch)
+    # print("==========")
     if get_dict == False:
         if get_full_history == True:
             if get_epoch_in_array == True:

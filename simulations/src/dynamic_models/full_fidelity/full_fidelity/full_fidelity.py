@@ -12,21 +12,19 @@ from tudatpy.kernel.astro import element_conversion, time_conversion
 from tudatpy.kernel.interface import spice
 
 # Define path to import src files
-sys.path.append(os.path.dirname(os.path.realpath(__file__)))
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(parent_dir)
+sys.path.append(os.path.dirname(parent_dir))
 
 # Own
 from dynamic_models import validation
 from DynamicModelBase import DynamicModelBase
-
 
 def read_coeffs(scaled=True):
     # DLAM-1 coefficients are in GEODYN format
     # See https://earth.gsfc.nasa.gov/sites/default/files/volume3.pdf
 
     # Specify the file path
-    root_dir = Path(__file__).resolve().parent.parent.parent.parent
+    root_dir = Path(__file__).resolve().parent.parent.parent.parent.parent
     file_path = root_dir / "reference" / "lunar_albedo" / "DLAM-1.txt"
 
     with open(file_path) as f:

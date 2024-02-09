@@ -46,17 +46,17 @@ class EstimationModel:
         # Defining basis for observations
         self.bias_range = 10
         self.bias_doppler = 0
-        self.noise_range = 2.98
+        self.noise_range = 2.98e2
         self.noise_doppler = 0.00097
-        self.observation_step_size_range = 1000
-        self.observation_step_size_doppler = 1000
+        self.observation_step_size_range = 100
+        self.observation_step_size_doppler = 100
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-8
 
         # Creating observation time vector
-        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+1200, self.dynamic_model.simulation_end_epoch-1200, self.observation_step_size_range)
-        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+1200, self.dynamic_model.simulation_end_epoch-1200, self.observation_step_size_doppler)
+        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+50, self.dynamic_model.simulation_end_epoch-50, self.observation_step_size_range)
+        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+50, self.dynamic_model.simulation_end_epoch-50, self.observation_step_size_doppler)
 
 
     def set_observation_model_settings(self):
@@ -332,7 +332,7 @@ class EstimationModel:
 #                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 # dynamic_model = low_fidelity.LowFidelityDynamicModel(60400, 1, custom_initial_state=None, use_synodic_state=False)
 # # truth_model = low_fidelity.LowFidelityDynamicModel(60400, 1, custom_initial_state=None, use_synodic_state=False)
-# # dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60400, 5)
+# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60400, 1)
 # truth_model = high_fidelity_spherical_harmonics_srp_04_2_2_20_20.HighFidelityDynamicModel(60400, 1)
 # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 # initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
@@ -354,7 +354,7 @@ class EstimationModel:
 
 
 # print(results[-1])
-# for i, (observable_type, information_sets) in enumerate(results[-1].items()):
+# for i, (observable_type, information_sets) in enumerate(results[-2].items()):
 #     for j, observation_set in enumerate(information_sets.values()):
 #         for k, single_observation_set in enumerate(observation_set):
 

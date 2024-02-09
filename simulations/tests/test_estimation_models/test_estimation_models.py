@@ -24,7 +24,7 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 from tests import utils
 from src.dynamic_models import validation
 from src.dynamic_models import Interpolator, FrameConverter, TraditionalLowFidelity
-from src.dynamic_models.full_fidelity import *
+from src.dynamic_models.full_fidelity.full_fidelity import *
 from src.dynamic_models.low_fidelity.three_body_problem import *
 from src.dynamic_models.high_fidelity.point_mass import *
 from src.dynamic_models.high_fidelity.point_mass_srp import *

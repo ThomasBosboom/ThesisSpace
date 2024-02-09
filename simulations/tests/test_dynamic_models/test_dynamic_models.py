@@ -52,7 +52,7 @@ class TestFrameConversions:
 
         # Extract simulation histories tudatpy solution
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-            Interpolator.Interpolator(step_size=step_size).get_propagation_results(dynamic_model, estimated_parameter_vector=custom_initial_state)
+            Interpolator.Interpolator(step_size=step_size).get_propagation_results(dynamic_model, custom_initial_state=custom_initial_state)
 
         # Convert back to synodic
         epochs_synodic, state_history_synodic = \
@@ -737,7 +737,7 @@ class TestOutputsDynamicModels:
         custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
                                         1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
         dynamic_model_objects["low_fidelity"]["three_body_problem"][0] = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
-        estimation_model_objects = utils.get_estimation_model_objects(estimation_model, dynamic_model_objects)
+        estimation_model_objects = utils.get_estimation_model_objects(dynamic_model_objects)
 
         for estimation_model in utils.convert_model_objects_to_list(estimation_model_objects):
 

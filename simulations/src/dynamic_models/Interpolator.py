@@ -26,9 +26,9 @@ class Interpolator:
             return interpolated_history
 
 
-    def get_propagation_results(self, dynamic_model_object, estimated_parameter_vector=None, solve_variational_equations=True, custom_propagation_time=None):
+    def get_propagation_results(self, dynamic_model_object, custom_initial_state=None, solve_variational_equations=True, custom_propagation_time=None):
 
-        dynamic_model_object.custom_initial_state = estimated_parameter_vector
+        dynamic_model_object.custom_initial_state = custom_initial_state
         dynamic_model_object.custom_propagation_time = custom_propagation_time
 
         # Get simulation results from each dynamic model
@@ -41,7 +41,9 @@ class Interpolator:
         self.simulation_end_epoch = dynamic_model_object.simulation_end_epoch
 
         # Define updated time vector that is the same for all dynamic models irrespective of their own time vector
+        # print("amounts interpolation: ", (self.simulation_end_epoch+self.step_size-self.simulation_start_epoch)/self.step_size)
         interp_epochs = np.arange(self.simulation_start_epoch, self.simulation_end_epoch+self.step_size, self.step_size)
+        # print("interpolation: ", np.shape(interp_epochs), self.simulation_start_epoch, self.simulation_end_epoch, self.step_size)
 
         if solve_variational_equations:
              # Extract the variational_equations_solver results

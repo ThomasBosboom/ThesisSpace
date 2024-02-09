@@ -67,13 +67,13 @@ class DynamicModelBase:
         pass
 
 
-    def set_termination_settings(self, estimated_parameter_vector=None, custom_propagation_time=None):
+    def set_termination_settings(self, custom_initial_state=None, custom_propagation_time=None):
         pass
 
 
-    def set_propagator_settings(self, estimated_parameter_vector=None):
+    def set_propagator_settings(self, custom_initial_state=None):
         pass
 
 
-    def get_propagation_simulator(self, estimated_parameter_vector=None):
+    def get_propagation_simulator(self, custom_initial_state=None):
         pass

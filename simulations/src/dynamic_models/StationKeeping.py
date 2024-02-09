@@ -20,7 +20,7 @@ from src.dynamic_models import Interpolator
 
 class StationKeeping:
 
-    def __init__(self, dynamic_model_object, estimated_parameter_vector=None, custom_propagation_time=14, step_size=0.001):
+    def __init__(self, dynamic_model_object, custom_initial_state=None, custom_propagation_time=14, step_size=0.001):
 
         self.dynamic_model_object = dynamic_model_object
         self.dynamic_model_object.propagation_time = custom_propagation_time
@@ -28,7 +28,7 @@ class StationKeeping:
         self.simulation_end_epoch = self.dynamic_model_object.simulation_end_epoch
         self.propagation_time = self.dynamic_model_object.propagation_time
 
-        self.estimated_parameter_vector = estimated_parameter_vector
+        self.custom_initial_state = custom_initial_state
         self.custom_propagation_time = custom_propagation_time
         self.step_size = step_size
 
@@ -38,7 +38,7 @@ class StationKeeping:
         # Propagate the results of the dynamic model to generate target points
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
             Interpolator.Interpolator(epoch_in_MJD=False, step_size=self.step_size).get_propagation_results(self.dynamic_model_object,
-                                                                                                            estimated_parameter_vector=self.estimated_parameter_vector,
+                                                                                                            custom_initial_state=self.custom_initial_state,
                                                                                                             custom_propagation_time=self.custom_propagation_time)
 
         # Get the reference orbit states
@@ -115,13 +115,13 @@ class StationKeeping:
 # dynamic_model_object = dynamic_model_objects["high_fidelity"]["point_mass"][0]
 
 
-# estimated_parameter_vector = np.array([-2.80124757e+08,  2.53324773e+08,  1.46943725e+08, -1.61475000e+03,
+# custom_initial_state = np.array([-2.80124757e+08,  2.53324773e+08,  1.46943725e+08, -1.61475000e+03,
 #  -2.23501900e+03, -2.97165000e+02, -3.10469279e+08,  2.49476176e+08,
 #   1.74974083e+08, -9.93405005e+02, -7.66336485e+02, -5.24990115e+02])
-# # estimated_parameter_vector = np.array([-3.34034721e+08,  1.91822727e+08,  1.11599990e+08, -1.22117098e+02,
+# # custom_initial_state = np.array([-3.34034721e+08,  1.91822727e+08,  1.11599990e+08, -1.22117098e+02,
 # #  -7.02102813e+02, -9.74268692e+02, -3.83003556e+08,  1.80616085e+08,
 # #   1.22244565e+08, -6.84093312e+02, -8.16786564e+02, -6.68493579e+02])
-# station_keeping = StationKeeping(dynamic_model_object, estimated_parameter_vector=estimated_parameter_vector, custom_propagation_time=28, step_size=0.01)
+# station_keeping = StationKeeping(dynamic_model_object, custom_initial_state=custom_initial_state, custom_propagation_time=28, step_size=0.01)
 
 # lists = [[0, 20]]
 # for list1 in lists:
