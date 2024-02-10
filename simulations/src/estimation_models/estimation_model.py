@@ -44,12 +44,12 @@ class EstimationModel:
         self.initial_state_error = initial_state_error
 
         # Defining basis for observations
-        self.bias_range = 10
+        self.bias_range = 10e-10
         self.bias_doppler = 0
-        self.noise_range = 2.98e2
+        self.noise_range = 102.44
         self.noise_doppler = 0.00097
-        self.observation_step_size_range = 100
-        self.observation_step_size_doppler = 100
+        self.observation_step_size_range = 1000
+        self.observation_step_size_doppler = 1000
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-8
@@ -82,17 +82,13 @@ class EstimationModel:
                                                          observation.time_drift_bias(bias_value = np.array([self.time_drift_bias]),
                                                                                      time_link_end = observation.transmitter,
                                                                                      ref_epoch = self.dynamic_model.simulation_start_epoch)])
-        doppler_bias_settings = observation.absolute_bias([self.bias_doppler])
 
         # Create observation settings for each link/observable
         self.observation_settings_list = list()
         for link in self.link_definition.keys():
             self.observation_settings_list.extend([observation.two_way_range(self.link_definition[link],
                                                                         light_time_correction_settings = light_time_correction_settings,
-                                                                        bias_settings = range_bias_settings),
-                                                   observation.two_way_doppler_averaged(self.link_definition[link],
-                                                                        light_time_correction_settings = light_time_correction_settings,
-                                                                        bias_settings = doppler_bias_settings)])
+                                                                        bias_settings = range_bias_settings)])
 
 
     def set_observation_simulation_settings(self):
@@ -105,10 +101,6 @@ class EstimationModel:
             self.observation_simulation_settings.extend([observation.tabulated_simulation_settings(observation.n_way_range_type,
                                                                                                 self.link_definition[link],
                                                                                                 self.observation_times_range,
-                                                                                                reference_link_end_type = observation.transmitter),
-                                                         observation.tabulated_simulation_settings(observation.n_way_averaged_doppler_type,
-                                                                                                self.link_definition[link],
-                                                                                                self.observation_times_doppler,
                                                                                                 reference_link_end_type = observation.transmitter)])
 
         # Add noise levels to observations
@@ -117,15 +109,8 @@ class EstimationModel:
             self.noise_range,
             observation.n_way_range_type)
 
-        observation.add_gaussian_noise_to_observable(
-            self.observation_simulation_settings,
-            self.noise_doppler,
-            observation.n_way_averaged_doppler_type)
-
         # Provide ancillary settings for n-way observables
         observation.two_way_range_ancilliary_settings(retransmission_delay = self.retransmission_delay)
-        observation.n_way_doppler_ancilliary_settings(integration_time = self.integration_time,
-                                                      link_end_delays = [self.retransmission_delay])
 
         # Create viability settings
         viability_setting_list = [observation.body_occultation_viability([self.dynamic_model.name_ELO, self.dynamic_model.name_LPO], self.dynamic_model.name_secondary)]
@@ -227,8 +212,7 @@ class EstimationModel:
                                                          save_state_history_per_iteration=True)
 
         # Define weighting of the observations in the inversion
-        weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise_range**-2,
-                                  estimation_setup.observation.n_way_averaged_doppler_type: self.noise_doppler**-2}
+        weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise_range**-2}
         self.estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
 
@@ -236,25 +220,30 @@ class EstimationModel:
 
         self.set_estimator_settings()
 
+        # print("deviation true and perturbed: ", self.perturbed_parameters-self.truth_parameters)
+        # print("initial_state_error: ", self.initial_state_error)
         # Run the estimation
         with util.redirect_std(redirect_out=True):
             estimation_output = self.estimator.perform_estimation(self.estimation_input)
 
-        # Propagate formal errors and covariance over the course of estimation window
-        output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 100)
-        # output_times = self.observation_times_range
 
-        propagated_formal_errors_dict = dict()
-        propagated_formal_errors_dict.update(zip(*estimation.propagate_formal_errors_split_output(
-            initial_covariance=estimation_output.covariance,
-            state_transition_interface=self.estimator.state_transition_interface,
-            output_times=output_times)))
+        # print("deviation final from initial estimate", self.parameters_to_estimate.parameter_vector-self.perturbed_parameters)
 
-        propagated_covariance_dict = dict()
-        propagated_covariance_dict.update(zip(*estimation.propagate_covariance_split_output(
-            initial_covariance=estimation_output.covariance,
-            state_transition_interface=self.estimator.state_transition_interface,
-            output_times=output_times)))
+        # # Propagate formal errors and covariance over the course of estimation window
+        # output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 100)
+        # # output_times = self.observation_times_range
+
+        # propagated_formal_errors_dict = dict()
+        # propagated_formal_errors_dict.update(zip(*estimation.propagate_formal_errors_split_output(
+        #     initial_covariance=estimation_output.covariance,
+        #     state_transition_interface=self.estimator.state_transition_interface,
+        #     output_times=output_times)))
+
+        # propagated_covariance_dict = dict()
+        # propagated_covariance_dict.update(zip(*estimation.propagate_covariance_split_output(
+        #     initial_covariance=estimation_output.covariance,
+        #     state_transition_interface=self.estimator.state_transition_interface,
+        #     output_times=output_times)))
 
         # plt.plot(np.stack(list(propagated_formal_errors_dict.values()))[:,6:9])
         # plt.show()
@@ -324,7 +313,6 @@ class EstimationModel:
 
         return estimation_output, total_single_information_dict, \
                total_covariance_dict, total_information_dict, \
-               propagated_covariance_dict, propagated_formal_errors_dict,\
                self.sorted_observation_sets, self.estimator
 
 
