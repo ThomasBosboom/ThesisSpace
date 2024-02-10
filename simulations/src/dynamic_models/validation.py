@@ -64,9 +64,9 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
         time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))+69.1826417446136475
     user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
         time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))
-    # user_end_epoch = user_start_epoch + propagation_time*constants.JULIAN_DAY
-    user_end_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
-        time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD+propagation_time))
+    user_end_epoch = user_start_epoch + propagation_time*constants.JULIAN_DAY
+    # user_end_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
+    #     time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD+propagation_time))
 
     # Perform interpolation using SciPy's interp1d
     epochs = state_history[:, 1]
@@ -94,9 +94,9 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
                     if epoch <= user_end_epoch \
                         and epoch >= user_start_epoch}
 
-    data_dict = {epoch: vector for epoch, vector in zip(epochs, interpolated_states) \
-                    if epoch-step_size*constants.JULIAN_DAY <= user_end_epoch \
-                        and epoch >= user_start_epoch}
+    # data_dict = {epoch: vector for epoch, vector in zip(epochs, interpolated_states) \
+    #                 if epoch-step_size*constants.JULIAN_DAY <= user_end_epoch \
+    #                     and epoch >= user_start_epoch}
 
     # print("validation: ", np.shape(np.vstack(list(data_dict.values()))))
     # print("epoch comparison start: ", epochs[0], user_start_epoch)
