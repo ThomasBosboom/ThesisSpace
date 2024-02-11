@@ -44,7 +44,7 @@ class EstimationModel:
         self.initial_state_error = initial_state_error
 
         # Defining basis for observations
-        self.bias_range = 10e-10
+        self.bias_range = 0
         self.bias_doppler = 0
         self.noise_range = 102.44
         self.noise_doppler = 0.00097
@@ -216,14 +216,14 @@ class EstimationModel:
         self.estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
 
-    def get_estimation_results(self):
+    def get_estimation_results(self, redirect_out=True):
 
         self.set_estimator_settings()
 
         # print("deviation true and perturbed: ", self.perturbed_parameters-self.truth_parameters)
         # print("initial_state_error: ", self.initial_state_error)
         # Run the estimation
-        with util.redirect_std(redirect_out=True):
+        with util.redirect_std(redirect_out=redirect_out):
             estimation_output = self.estimator.perform_estimation(self.estimation_input)
 
 
@@ -319,9 +319,9 @@ class EstimationModel:
 # custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
 #                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 # dynamic_model = low_fidelity.LowFidelityDynamicModel(60400, 1, custom_initial_state=None, use_synodic_state=False)
-# # truth_model = low_fidelity.LowFidelityDynamicModel(60400, 1, custom_initial_state=None, use_synodic_state=False)
-# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60400, 1)
-# truth_model = high_fidelity_spherical_harmonics_srp_04_2_2_20_20.HighFidelityDynamicModel(60400, 1)
+# truth_model = low_fidelity.LowFidelityDynamicModel(60400, 1, custom_initial_state=None, use_synodic_state=False)
+# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60400, 5)
+# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60400, 5)
 # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 # initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
 # estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
@@ -336,12 +336,7 @@ class EstimationModel:
 # weighted_design_matrix = estimation_output.weighted_design_matrix
 # residual_history = estimation_output.residual_history
 
-# print(weighted_design_matrix[0,:], np.shape(weighted_design_matrix))
-# print(parameter_history[:,-1])
-# print(residual_history, np.shape(residual_history))
-
-
-# print(results[-1])
+# print(parameter_history[:,-1]-parameter_history[:,0])
 # for i, (observable_type, information_sets) in enumerate(results[-2].items()):
 #     for j, observation_set in enumerate(information_sets.values()):
 #         for k, single_observation_set in enumerate(observation_set):

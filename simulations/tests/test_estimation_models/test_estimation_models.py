@@ -68,7 +68,7 @@ def custom_estimation_model_objects_results(request):
 class TestObservability:
 
     package_dict = {"low_fidelity": ["three_body_problem"]}
-    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 1, package_dict, True, None)], indirect=True)
+    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 14, package_dict, True, None)], indirect=True)
     def test_observability_history(self, custom_estimation_model_objects_results):
 
         model_type = "low_fidelity"
@@ -76,7 +76,7 @@ class TestObservability:
         model_entry = 0
         single_information_dict = custom_estimation_model_objects_results[model_type][model_name][model_entry][1]
 
-        fig, axs = plt.subplots(4, 1, figsize=(8.3, 11.7), sharex=True)
+        fig, axs = plt.subplots(2, 1, figsize=(8.3, 5.7), sharex=True)
         for i, (observable_type, information_sets) in enumerate(single_information_dict.items()):
 
             for j, information_set in enumerate(information_sets.values()):
@@ -94,13 +94,14 @@ class TestObservability:
                         axs[2*i+m].plot(epochs, observability_lpf_total, label="total", color="darkred")
                         axs[2*i+m].plot(epochs, observability_lumio_total, label="total", color="darkblue")
 
-                        ls = ["solid", "dashed", "dotted"]
+                        ls = ["dashdot", "dashed", "dotted"]
                         label = [[r"$\mathbf{x}$", r"$\mathbf{y}$", r"$\mathbf{z}$"],[r"$\mathbf{\dot{x}}$", r"$\mathbf{\dot{y}}$", r"$\mathbf{\dot{z}}$"]]
                         ylabels = [r"$\sqrt{\mathbf{\Lambda_{r}}}$ [-]", r"$\sqrt{\mathbf{\Lambda_{v}}}$ [-]"]
                         observable_types = ["two-way range", "two-way doppler"]
                         for l in range(3):
-                            axs[2*i+m].plot(epochs, observability_lpf[:,l], label=label[m][l], color="red", ls=ls[l])
-                            axs[2*i+m].plot(epochs, observability_lumio[:,l], label=label[m][l], color="blue", ls=ls[l])
+                            alpha=0.3
+                            axs[2*i+m].plot(epochs, observability_lpf[:,l], label=label[m][l], color="red", ls=ls[l], alpha=alpha)
+                            axs[2*i+m].plot(epochs, observability_lumio[:,l], label=label[m][l], color="blue", ls=ls[l], alpha=alpha)
 
                         axs[2*i+m].set_ylabel(ylabels[m])
                         axs[2*i+m].set_yscale("log")

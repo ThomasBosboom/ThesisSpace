@@ -32,23 +32,23 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 # Mission time settings
-mission_time = 5
+mission_time = 25
 mission_start_epoch = 60390
 mission_end_epoch = mission_start_epoch + mission_time
 
 # Initial estimation setup
-simulation_start_epoch = mission_start_epoch
-propagation_time = 1
+mission_epoch = mission_start_epoch
+propagation_time = 0.5
 batch_start_times = np.arange(mission_start_epoch, mission_end_epoch, propagation_time)
 batch_end_times = np.arange(propagation_time+mission_start_epoch, propagation_time+mission_end_epoch, propagation_time)
 # batch_start_times = np.array([60390, 60391, 60392, 60393, 60394])
 # batch_end_times = np.array([60390.5, 60391.5, 60392.5, 60394, 60395])
 # batch_start_times = np.array([60390, 60395.2, 60405.5, 60416.5])
 # batch_end_times = np.array([60392.3, 60397.2, 60407.5, 60418])
-batch_start_times = np.array([60390, 60391, 60392, 60393])
-batch_end_times = np.array([60391, 60392, 60393, 60394])
+# batch_start_times = np.array([60390, 60391, 60392, 60393])
+# batch_end_times = np.array([60391, 60392, 60393, 60394])
 batch_times = np.round(batch_end_times - batch_start_times, 2)
-propagation_times = np.round(np.concatenate((np.diff(batch_start_times), [2*batch_times[-1]])), 2)
+propagation_times = np.round(np.concatenate((np.diff(batch_start_times), [1*batch_times[-1]])), 2)
 observation_windows = list(zip(batch_start_times, batch_end_times))
 print(batch_times)
 print(propagation_times)
@@ -81,14 +81,15 @@ full_state_errors_dict = dict()
 full_propagated_covariance_dict = dict()
 full_propagated_formal_errors_dict = dict()
 
-while simulation_start_epoch < mission_end_epoch:
+while mission_epoch < mission_end_epoch:
 
     print(f"Estimation of batch {batch_count}, duration {batch_times[batch_count]} days: {batch_start_times[batch_count]} until {batch_end_times[batch_count]}")
 
     print(batch_start_times[batch_count])
     print(batch_times[batch_count])
-    print(custom_initial_state)
-    print(custom_initial_state_truth)
+    if batch_count != 0:
+        print(custom_initial_state-custom_initial_state_truth)
+        print(custom_initial_state-state_history_final[-1,:])
 
     # Define dynamic models and select one to test the estimation on
     dynamic_model_objects = utils.get_dynamic_model_objects(batch_start_times[batch_count],
@@ -99,7 +100,7 @@ while simulation_start_epoch < mission_end_epoch:
 
     dynamic_model_object = dynamic_model_objects[model_type][model_name][model_number]
 
-    print(dynamic_model_object)
+    # print(dynamic_model_object)
 
     # Define the truth model to simulate the observations
     # high_fidelity_spherical_harmonics_srp_04_2_2_20_20
@@ -140,7 +141,7 @@ while simulation_start_epoch < mission_end_epoch:
     estimator = estimation_model_objects_result[-2]
 
     output_times = np.arange(utils.convert_MJD_to_epoch(batch_start_times[batch_count], full_array=False),
-                             utils.convert_MJD_to_epoch(batch_start_times[batch_count]+propagation_times[batch_count], full_array=False)+step_size*constants.JULIAN_DAY,
+                             utils.convert_MJD_to_epoch(batch_start_times[batch_count]+propagation_times[batch_count]+step_size, full_array=False),
                              step_size*constants.JULIAN_DAY)
 
     print(output_times[0], output_times[-1], (output_times[-1]-output_times[0])/constants.JULIAN_DAY)
@@ -157,10 +158,10 @@ while simulation_start_epoch < mission_end_epoch:
         state_transition_interface=estimator.state_transition_interface,
         output_times=output_times)))
 
-    state_transition_interface = estimator.state_transition_interface
-    print(state_transition_interface.full_state_transition_sensitivity_at_epoch(output_times[0]))
+    # state_transition_interface = estimator.state_transition_interface
+    # print("Initial STM: ", state_transition_interface.full_state_transition_sensitivity_at_epoch(output_times[0]))
+    # print("Difference output and initial covariance: ", estimation_output.covariance-np.stack(list(propagated_covariance.values()))[0])
 
-    print(np.stack(list(propagated_covariance.keys())))
     # Update the reference orbit that the estimated orbit should follow
     reference_state_history = list()
     for body in dynamic_model_object.bodies_to_propagate:
@@ -174,7 +175,6 @@ while simulation_start_epoch < mission_end_epoch:
 
 
     # Update the estimator with the final parameter values to generate dynamics simulation with final dynamics for next batch
-
     epochs, state_history_initial, dependent_variables_history_initial = \
         Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
                                                                                               custom_initial_state=parameter_history[:,0],
@@ -197,8 +197,8 @@ while simulation_start_epoch < mission_end_epoch:
 
     # Add current relevant information to the total
     estimation_errors = state_history_truth[0,:] - state_history_final[0,:]
-    batch_formal_error_dict.update({simulation_start_epoch: formal_errors})
-    batch_estimation_error_dict.update({simulation_start_epoch: estimation_errors})
+    batch_formal_error_dict.update({mission_epoch: formal_errors})
+    batch_estimation_error_dict.update({mission_epoch: estimation_errors})
     intermediate_covariance_dict.update(total_covariance_dict)
     full_estimation_error_dict.update(dict(zip(epochs, state_history_truth-state_history_final)))
     full_reference_state_deviation_dict.update(dict(zip(epochs, reference_state_history-state_history_final)))
@@ -206,6 +206,10 @@ while simulation_start_epoch < mission_end_epoch:
     full_propagated_covariance_dict.update(propagated_covariance)
     full_propagated_formal_errors_dict.update(propagated_formal_errors)
 
+    print("========")
+    print(epochs[-1])
+    print(np.array(list(full_state_errors_dict.keys()))[-1])
+    print(np.array(list(propagated_covariance.keys()))[-1])
 
     # pos_uncertainties_rss_LPF = np.sqrt(np.sum(sigma_number*np.diag(final_covariance[:3,:3])))
     # pos_uncertainties_rss_LUMIO = np.sqrt(np.sum(sigma_number*np.diag(final_covariance[6:9,6:9])))
@@ -223,7 +227,7 @@ while simulation_start_epoch < mission_end_epoch:
     apriori_covariance = np.array(list(propagated_covariance.values()))[-1]
 
     # Set condition on the maximum amount of error allowed before the station-keeping should take place
-    # if int((simulation_start_epoch-mission_start_epoch)%4) == 0 and simulation_start_epoch != mission_start_epoch:
+    # if int((mission_epoch-mission_start_epoch)%4) == 0 and mission_epoch != mission_start_epoch:
 
     #     station_keeping_object = StationKeeping.StationKeeping(dynamic_model_object,
     #                                                         custom_initial_state=estimation_output.parameter_history[:,-1],
@@ -233,53 +237,55 @@ while simulation_start_epoch < mission_end_epoch:
     #                                                                 target_point_epoch=4+propagation_time,
     #                                                                 cut_off_epoch=0+propagation_time)
 
-    simulation_start_epoch += propagation_times[batch_count]
-    batch_count += 1
+    mission_epoch += propagation_times[batch_count]
+
 
 
     # Storing some plots
-    ax.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF ref", color="green")
-    ax.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8], label="LUMIO ref", color="green")
-    ax.plot(state_history_final[:,0], state_history_final[:,1], state_history_final[:,2], label="LPF estimated", )
-    ax.plot(state_history_final[:,6], state_history_final[:,7], state_history_final[:,8], label="LUMIO estimated")
-    ax.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth", color="black", ls="--")
-    ax.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth", color="black", ls="--")
+    ax.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF ref" if batch_count==0 else None, color="green")
+    ax.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8], label="LUMIO ref" if batch_count==0 else None, color="green")
+    ax.plot(state_history_final[:,0], state_history_final[:,1], state_history_final[:,2], label="LPF estimated" if batch_count==0 else None)
+    ax.plot(state_history_final[:,6], state_history_final[:,7], state_history_final[:,8], label="LUMIO estimated" if batch_count==0 else None)
+    ax.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth" if batch_count==0 else None, color="black", ls="--")
+    ax.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth" if batch_count==0 else None, color="black", ls="--")
 
+    batch_count += 1
 
-
-
-print("Done with the estimation process")
-
-dynamic_model_objects = utils.get_dynamic_model_objects(mission_start_epoch,
-                                                        mission_time,
-                                                        package_dict=package_dict,
-                                                        get_only_first=True,
-                                                        custom_initial_state=custom_initial_state)
-
-dynamic_model_object = dynamic_model_objects[model_type][model_name][model_number]
-
-truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(mission_start_epoch,
-                                                                                        mission_time,
-                                                                                        custom_initial_state=None)
-
-epochs, state_history_final, dependent_variables_history = \
-    Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
-                                                                                            custom_initial_state=None,
-                                                                                            solve_variational_equations=False)
-
-epochs, state_history_truth, dependent_variables_history = \
-    Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(truth_model,
-                                                                                            custom_initial_state=None,
-                                                                                            solve_variational_equations=False)
-
-ax.plot(state_history_final[:,0], state_history_final[:,1], state_history_final[:,2], label="LPF estimated", color="red", ls="-.")
-ax.plot(state_history_final[:,6], state_history_final[:,7], state_history_final[:,8], label="LUMIO estimated", color="red", ls="-.")
-ax.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth", color="yellow", ls="--")
-ax.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth", color="yellow", ls="--")
-
-# plt.legend()
-plt.title(f"propagation_time: {propagation_time}, {mission_time} [days], obs. period {estimation_model_objects[model_type][model_name][model_number].observation_step_size_range} [s]")
+ax.set_xlabel('X [m]')
+ax.set_ylabel('Y [m]')
+ax.set_zlabel('Z [m]')
+plt.legend()
+plt.title(f"Time per batch: {propagation_time}, total of {mission_time} [days] \n obs. every {estimation_model_objects[model_type][model_name][model_number].observation_step_size_range} [s]")
 # plt.show()
+
+# dynamic_model_objects = utils.get_dynamic_model_objects(mission_start_epoch,
+#                                                         mission_time,
+#                                                         package_dict=package_dict,
+#                                                         get_only_first=True,
+#                                                         custom_initial_state=custom_initial_state)
+
+# dynamic_model_object = dynamic_model_objects[model_type][model_name][model_number]
+
+# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(mission_start_epoch,
+#                                                                                         mission_time,
+#                                                                                         custom_initial_state=None)
+
+# epochs, state_history_final, dependent_variables_history = \
+#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
+#                                                                                             custom_initial_state=None,
+#                                                                                             solve_variational_equations=False)
+
+# epochs, state_history_truth, dependent_variables_history = \
+#     Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(truth_model,
+#                                                                                             custom_initial_state=None,
+#                                                                                             solve_variational_equations=False)
+
+# ax.plot(state_history_final[:,0], state_history_final[:,1], state_history_final[:,2], label="LPF estimated", color="red", ls="-.")
+# ax.plot(state_history_final[:,6], state_history_final[:,7], state_history_final[:,8], label="LUMIO estimated", color="red", ls="-.")
+# ax.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth", color="yellow", ls="--")
+# ax.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth", color="yellow", ls="--")
+
+
 
 propagated_covariance_epochs = np.stack(list(full_propagated_covariance_dict.keys()))
 propagated_covariance_history = np.stack(list(full_propagated_covariance_dict.values()))
@@ -330,19 +336,19 @@ for j in range(2):
             color="gray",
             alpha=0.1,
             label="Observation window" if i == 0 else None)
-        ax[j].set_ylabel(r"$\mathbf{x_{initial}}-\mathbf{x_{final}}$ [m]")
+        ax[j].set_ylabel(r"$\mathbf{x}_{initial}-\mathbf{x}_{final}$ [m]")
         ax[j].grid(alpha=0.5, linestyle='--')
 ax[-1].set_xlabel(f"Time since MJD {mission_start_epoch} [days]")
 ax[0].set_title("LPF")
 ax[1].set_title("LUMIO")
-fig.suptitle("State errors")
+fig.suptitle("State perturbations")
 plt.legend()
 # plt.show()
 
-fig, ax = plt.subplots(2, 1, figsize=(9, 5))
+fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
 reference_epoch_array = mission_start_epoch*np.ones(np.shape(full_propagated_formal_errors_epochs))
-ax[0].plot(utils.convert_epochs_to_MJD(full_propagated_formal_errors_epochs)-reference_epoch_array, np.linalg.norm(3*full_propagated_formal_errors_history[:, 0:3], axis=1))
-ax[1].plot(utils.convert_epochs_to_MJD(full_propagated_formal_errors_epochs)-reference_epoch_array, np.linalg.norm(3*full_propagated_formal_errors_history[:, 6:9], axis=1))
+ax[0].plot(utils.convert_epochs_to_MJD(full_propagated_formal_errors_epochs)-reference_epoch_array, sigma_number*np.linalg.norm(full_propagated_formal_errors_history[:, 0:3], axis=1))
+ax[1].plot(utils.convert_epochs_to_MJD(full_propagated_formal_errors_epochs)-reference_epoch_array, sigma_number*np.linalg.norm(full_propagated_formal_errors_history[:, 6:9], axis=1))
 for j in range(2):
     for i, gap in enumerate(observation_windows):
         ax[j].axvspan(
@@ -362,7 +368,7 @@ plt.legend()
 # plt.show()
 
 
-fig, ax = plt.subplots(2, 1, figsize=(9, 5))
+fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
 reference_epoch_array = mission_start_epoch*np.ones(np.shape(full_reference_state_deviation_epochs))
 for j in range(2):
     labels = ["x", "y", "z"]
@@ -375,7 +381,7 @@ for j in range(2):
             color="gray",
             alpha=0.1,
             label="Observation window" if i == 0 else None)
-    ax[j].set_ylabel(r"Deviation [m]")
+    ax[j].set_ylabel(r"$\mathbf{r}-\hat{\mathbf{r}}_{ref}$ [m]")
     ax[j].grid(alpha=0.5, linestyle='--')
 ax[-1].set_xlabel(f"Time since MJD {mission_start_epoch} [days]")
 ax[0].set_title("LPF")
@@ -384,7 +390,7 @@ fig.suptitle("Deviation from reference orbit")
 plt.legend()
 # plt.show()
 
-fig, ax = plt.subplots(2, 1, figsize=(9, 5))
+fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
 reference_epoch_array = mission_start_epoch*np.ones(np.shape(propagated_covariance_epochs))
 for j in range(2):
     colors = ["red", "green", "blue"]
@@ -394,7 +400,7 @@ for j in range(2):
         ax[j].plot(utils.convert_epochs_to_MJD(propagated_covariance_epochs)-reference_epoch_array, sigma, color=colors[i], ls="--", label=f"$3\sigma_{symbols[i]}$", alpha=0.3)
         ax[j].plot(utils.convert_epochs_to_MJD(propagated_covariance_epochs)-reference_epoch_array, -sigma, color=colors[i], ls="-.", alpha=0.3)
         ax[j].plot(utils.convert_epochs_to_MJD(propagated_covariance_epochs)-reference_epoch_array, full_estimation_error_history[:,6*j+i], color=colors[i], label=f"${symbols[i]}-\hat{{{symbols[i]}}}$")
-    ax[j].set_ylabel(r"Deviation [m]")
+    ax[j].set_ylabel(r"$\mathbf{r}-\hat{\mathbf{r}}$ [m]")
     ax[j].grid(alpha=0.5, linestyle='--')
     for i, gap in enumerate(observation_windows):
         ax[j].axvspan(
@@ -406,7 +412,7 @@ for j in range(2):
 ax[-1].set_xlabel(f"Time since MJD {mission_start_epoch} [days]")
 ax[0].set_title("LPF")
 ax[1].set_title("LUMIO")
-fig.suptitle("Estimation error")
+fig.suptitle("Position estimation error")
 ax[0].legend(bbox_to_anchor=(1.03, 1), loc='upper left')
 plt.tight_layout()
 plt.show()
