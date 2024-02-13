@@ -420,7 +420,7 @@ class TestOutputsDynamicModels:
         time_dict = {}
         package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
         dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
-        print(dynamic_model_objects)
+
         for model_type, model_names in dynamic_model_objects.items():
             for model_name, dynamic_models in model_names.items():
                 time_list = []
