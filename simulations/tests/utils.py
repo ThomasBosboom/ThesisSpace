@@ -17,10 +17,10 @@ from src.estimation_models import estimation_model
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None):
+def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None, custom_propagation_time=None):
 
     if package_dict is None:
-        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
     else:
         package_dict = package_dict
 
@@ -41,9 +41,9 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, pack
                     module = __import__(module_path, fromlist=[file_name])
 
                     if package_type == "low_fidelity":
-                        DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
+                        DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
                     else:
-                        DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)
+                        DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
 
                     sub_dict[package_name_list[package_name_counter]].extend([DynamicModel])
                     dynamic_model_objects[package_type] = sub_dict
@@ -125,13 +125,16 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                               custom_initial_state=None,
                               step_size=0.01,
                               epoch_in_MJD=True,
-                              entry_list=None):
+                              entry_list=None,
+                              solve_variational_equations=True,
+                              custom_propagation_time=None):
 
     dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD,
                                                       propagation_time,
                                                       package_dict=package_dict,
                                                       get_only_first=get_only_first,
-                                                      custom_initial_state=custom_initial_state)
+                                                      custom_initial_state=custom_initial_state,
+                                                      custom_propagation_time=custom_propagation_time)
 
     dynamic_model_objects_results = dynamic_model_objects.copy()
     for model_type, model_names in dynamic_model_objects.items():
@@ -139,7 +142,10 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
             for i, dynamic_model in enumerate(dynamic_models):
 
                 start_time = time.time()
-                results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model))
+                results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model,
+                                                                                                                solve_variational_equations=solve_variational_equations,
+                                                                                                                custom_initial_state=custom_initial_state,
+                                                                                                                custom_propagation_time=custom_propagation_time))
                 results_list.append(time.time()-start_time)
                 dynamic_model_objects_results[model_type][model_name][i] = results_list
 
