@@ -44,12 +44,12 @@ class EstimationModel:
         self.initial_state_error = initial_state_error
 
         # Defining basis for observations
-        self.bias_range = 0
+        self.bias_range = 10
         self.bias_doppler = 0
         self.noise_range = 102.44
         self.noise_doppler = 0.00097
-        self.observation_step_size_range = 1000
-        self.observation_step_size_doppler = 1000
+        self.observation_step_size_range = 600
+        self.observation_step_size_doppler = 600
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-8
@@ -229,8 +229,8 @@ class EstimationModel:
 
         # print("deviation final from initial estimate", self.parameters_to_estimate.parameter_vector-self.perturbed_parameters)
 
-        # # Propagate formal errors and covariance over the course of estimation window
-        # output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch, 100)
+        # Propagate formal errors and covariance over the course of estimation window
+        # output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch+1*constants.JULIAN_DAY, 100)
         # # output_times = self.observation_times_range
 
         # propagated_formal_errors_dict = dict()
@@ -244,6 +244,10 @@ class EstimationModel:
         #     initial_covariance=estimation_output.covariance,
         #     state_transition_interface=self.estimator.state_transition_interface,
         #     output_times=output_times)))
+
+        # state_transition_interface = self.estimator.state_transition_interface
+        # print("Initial STM: ", state_transition_interface.full_state_transition_sensitivity_at_epoch(output_times[0]))
+        # print("Difference output and initial covariance: ", estimation_output.covariance-np.stack(list(propagated_covariance_dict.values()))[0])
 
         # plt.plot(np.stack(list(propagated_formal_errors_dict.values()))[:,6:9])
         # plt.show()
@@ -316,27 +320,31 @@ class EstimationModel:
                self.sorted_observation_sets, self.estimator
 
 
-# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-#                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-# dynamic_model = low_fidelity.LowFidelityDynamicModel(60400, 1, custom_initial_state=None, use_synodic_state=False)
-# truth_model = low_fidelity.LowFidelityDynamicModel(60400, 1, custom_initial_state=None, use_synodic_state=False)
-# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60400, 5)
-# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60400, 5)
-# apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-# initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-# estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
+custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+                                1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
+truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
+# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 5)
+# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 5)
+apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
 
+# [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
+#  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08
+#   1.08399977e+08 -6.68962205e+02 -8.73864980e+02 -7.14321553e+02]
+results = estimation_model.get_estimation_results()
+estimation_output = results[0]
+parameter_history = estimation_output.parameter_history
+residual_history = estimation_output.residual_history
+covariance = estimation_output.covariance
+formal_errors = estimation_output.formal_errors
+weighted_design_matrix = estimation_output.weighted_design_matrix
+residual_history = estimation_output.residual_history
 
-# results = estimation_model.get_estimation_results()
-# estimation_output = results[0]
-# parameter_history = estimation_output.parameter_history
-# residual_history = estimation_output.residual_history
-# covariance = estimation_output.covariance
-# formal_errors = estimation_output.formal_errors
-# weighted_design_matrix = estimation_output.weighted_design_matrix
-# residual_history = estimation_output.residual_history
-
-# print(parameter_history[:,-1]-parameter_history[:,0])
+# print("First: ", parameter_history[:,0])
+# print("Last: ", parameter_history[:,-1])
+# print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
 # for i, (observable_type, information_sets) in enumerate(results[-2].items()):
 #     for j, observation_set in enumerate(information_sets.values()):
 #         for k, single_observation_set in enumerate(observation_set):
