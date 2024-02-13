@@ -127,7 +127,9 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                               epoch_in_MJD=True,
                               entry_list=None,
                               solve_variational_equations=True,
-                              custom_propagation_time=None):
+                              custom_propagation_time=None,
+                              specific_model_list=None,
+                              return_dynamic_model_objects=False):
 
     dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD,
                                                       propagation_time,
@@ -136,18 +138,43 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                                                       custom_initial_state=custom_initial_state,
                                                       custom_propagation_time=custom_propagation_time)
 
+
     dynamic_model_objects_results = dynamic_model_objects.copy()
     for model_type, model_names in dynamic_model_objects.items():
         for model_name, dynamic_models in model_names.items():
             for i, dynamic_model in enumerate(dynamic_models):
 
-                start_time = time.time()
-                results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model,
-                                                                                                                solve_variational_equations=solve_variational_equations,
-                                                                                                                custom_initial_state=custom_initial_state,
-                                                                                                                custom_propagation_time=custom_propagation_time))
-                results_list.append(time.time()-start_time)
-                dynamic_model_objects_results[model_type][model_name][i] = results_list
+                dynamic_model_objects_results[model_type][model_name][i] = None
+
+                if specific_model_list is None:
+
+                    print(dynamic_model)
+
+                    start_time = time.time()
+                    results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model,
+                                                                                                                    solve_variational_equations=solve_variational_equations,
+                                                                                                                    custom_initial_state=custom_initial_state,
+                                                                                                                    custom_propagation_time=custom_propagation_time))
+                    results_list.append(time.time()-start_time)
+                    dynamic_model_objects_results[model_type][model_name][i] = results_list
+
+                if specific_model_list is not None:
+                    if i in specific_model_list:
+
+                        print(dynamic_model)
+
+                        start_time = time.time()
+                        results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model,
+                                                                                                                        solve_variational_equations=solve_variational_equations,
+                                                                                                                        custom_initial_state=custom_initial_state,
+                                                                                                                        custom_propagation_time=custom_propagation_time))
+                        results_list.append(time.time()-start_time)
+                        dynamic_model_objects_results[model_type][model_name][i] = results_list
+
+
+                # if return_dynamic_model_objects:
+                #     dynamic_model_objects_results[model_type][model_name][i].append(dynamic_model_objects[model_type][model_name][i])
+
 
     if entry_list is not None:
         for model_type, model_names in dynamic_model_objects_results.items():

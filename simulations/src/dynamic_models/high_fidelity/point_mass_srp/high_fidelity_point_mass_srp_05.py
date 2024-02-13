@@ -119,11 +119,10 @@ class HighFidelityDynamicModel(DynamicModelBase):
             propagation_setup.dependent_variable.relative_position(self.name_secondary, self.name_primary),
             propagation_setup.dependent_variable.relative_velocity(self.name_secondary, self.name_primary),
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
-            propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO),
-            propagation_setup.dependent_variable.total_acceleration(self.name_ELO),
-            propagation_setup.dependent_variable.total_acceleration(self.name_LPO),
-            propagation_setup.dependent_variable.keplerian_state(self.name_secondary, self.name_primary),
-            propagation_setup.dependent_variable.keplerian_state(self.name_ELO, self.name_secondary)]
+            propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO)]
+
+        self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.total_acceleration_norm(self.name_ELO),
+                                                 propagation_setup.dependent_variable.total_acceleration_norm(self.name_LPO)])
 
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
@@ -134,9 +133,6 @@ class HighFidelityDynamicModel(DynamicModelBase):
             propagation_setup.dependent_variable.single_acceleration_norm(
                     propagation_setup.acceleration.radiation_pressure_type, body_to_propagate, "Sun") \
                         for body_to_propagate in self.bodies_to_propagate])
-
-        self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.body_mass(self.name_primary),
-                                                 propagation_setup.dependent_variable.body_mass(self.name_secondary)])
 
 
     def set_termination_settings(self):
