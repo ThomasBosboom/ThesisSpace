@@ -96,9 +96,6 @@ while mission_epoch < mission_end_epoch:
                                                             custom_initial_state=custom_initial_state)
 
     dynamic_model_object = dynamic_model_objects[model_type][model_name][model_number]
-    # print("------------")
-    # print("Dynamic model: ", dynamic_model_object)
-    # print("Value dynamic model: ", dynamic_model_object.simulation_start_epoch_MJD, dynamic_model_object.propagation_time)
 
     if batch_count == 0:
         epochs, state_history_test, dependent_variables_history_test = \
@@ -109,15 +106,8 @@ while mission_epoch < mission_end_epoch:
 
         custom_initial_state = state_history_test[0,:] + initial_state_error
 
-    # print("custom_initial_state dyn model: ", custom_initial_state)
-
-
     truth_model = copy.copy(dynamic_model_objects[model_type_truth][model_name_truth][model_number_truth])
     truth_model.custom_initial_state = custom_initial_state_truth
-    # print("------------")
-    # print("Truth model: ", dynamic_model_object)
-    # print("Value truth model: ", truth_model.simulation_start_epoch_MJD, truth_model.propagation_time)
-
 
     epochs, state_history_test, dependent_variables_history_test= \
         Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(truth_model,
@@ -125,11 +115,6 @@ while mission_epoch < mission_end_epoch:
                                                                                                 custom_propagation_time=propagation_times[batch_count],
                                                                                                 solve_variational_equations=False)
 
-    # print("initial state truth model: ", state_history_test[0,:])
-
-    # print('current value of truth initial state:', truth_model.custom_initial_state)
-    # if batch_count > 0:
-    #     print("Difference initial states: ", truth_model.custom_initial_state-dynamic_model_object.custom_initial_state)
 
     dynamic_model_objects = {model_type: {model_name: [dynamic_model_object]}}
 
@@ -140,11 +125,6 @@ while mission_epoch < mission_end_epoch:
                                                                           apriori_covariance=apriori_covariance,
                                                                           initial_state_error=initial_state_error)
 
-    # print('current value of dyn. initial statea after estimation:', dynamic_model_object.custom_initial_state)
-    # print('current value of truth initial statea after estimation:', truth_model.custom_initial_state)
-
-    # print("diff in initla states: ", dynamic_model_object.)
-
 
     # Extract all the results
     estimation_model_objects_result = estimation_model_objects_results[model_type][model_name][0]
@@ -154,12 +134,8 @@ while mission_epoch < mission_end_epoch:
     formal_errors = estimation_output.formal_errors
     estimator = estimation_model_objects_result[-2]
 
-    # output_times = np.arange(utils.convert_MJD_to_epoch(batch_start_times[batch_count], full_array=False),
-    #                          utils.convert_MJD_to_epoch(batch_start_times[batch_count]+propagation_times[batch_count]+step_size, full_array=False),
-    #                          step_size*constants.JULIAN_DAY)
-
     output_times = np.arange(utils.convert_MJD_to_epoch(batch_start_times[batch_count], full_array=False),
-                             utils.convert_MJD_to_epoch(batch_end_times[batch_count]+step_size, full_array=False),
+                             utils.convert_MJD_to_epoch(batch_start_times[batch_count]+propagation_times[batch_count]+step_size, full_array=False),
                              step_size*constants.JULIAN_DAY)
 
     propagated_formal_errors_initial = dict()
@@ -186,6 +162,9 @@ while mission_epoch < mission_end_epoch:
         initial_covariance=estimation_output.covariance,
         state_transition_interface=estimator.state_transition_interface,
         output_times=output_times)))
+
+    # end_of_batch = utils.convert_MJD_to_epoch(batch_end_times[batch_count], full_array=False)
+    # clostest_key = min(propagated_covariance_final, key=lambda x: abs(propagated_covariance_final[x] - end_of_batch))
 
     if batch_count == 0:
         state_transition_interface = estimator.state_transition_interface
@@ -227,15 +206,6 @@ while mission_epoch < mission_end_epoch:
                                                                                               custom_propagation_time=propagation_times[batch_count],
                                                                                               solve_variational_equations=False)
 
-
-
-
-
-    # print("diff ", state_history_initial[0,:]-state_history_truth[0,:])
-
-    # if batch_count > 0:
-    #     print("diff ", parameter_history[:,0]-custom_initial_state_truth)
-    #     print("diff param_history and custom_initial state: ", state_history_final[0,:]-state_history_truth[0,:])
 
     full_estimation_error_dict.update(dict(zip(epochs, state_history_initial-state_history_truth)))
     full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_initial-reference_state_history)))
