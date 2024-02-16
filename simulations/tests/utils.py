@@ -144,7 +144,7 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
         for model_name, dynamic_models in model_names.items():
             for i, dynamic_model in enumerate(dynamic_models):
 
-                dynamic_model_objects_results[model_type][model_name][i] = None
+                dynamic_model_objects_results[model_type][model_name][i] = [None]
 
                 if specific_model_list is None:
 
@@ -172,8 +172,8 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                         dynamic_model_objects_results[model_type][model_name][i] = results_list
 
 
-                # if return_dynamic_model_objects:
-                #     dynamic_model_objects_results[model_type][model_name][i].append(dynamic_model_objects[model_type][model_name][i])
+                if return_dynamic_model_objects:
+                    dynamic_model_objects_results[model_type][model_name][i].append(dynamic_model_objects[model_type][model_name][i])
 
 
     if entry_list is not None:
@@ -185,8 +185,13 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                         model_result_list.append(model_result[entry])
                     dynamic_model_objects_results[model_type][model_name][i] = model_result_list
 
-    return dynamic_model_objects_results
+    # if return_dynamic_model_objects:
+    #     return dynamic_model_objects_results, return_dynamic_model_objects
 
+    # else:
+    #
+
+    return dynamic_model_objects_results
 
 def get_estimation_model_results(dynamic_model_objects,
                                  custom_estimation_model_objects=None,

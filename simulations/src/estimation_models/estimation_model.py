@@ -27,7 +27,6 @@ from dynamic_models.high_fidelity.spherical_harmonics import *
 from dynamic_models.high_fidelity.spherical_harmonics_srp import *
 
 
-
 class EstimationModel:
 
     def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_state_error=None, include_consider_parameters=False):
@@ -189,13 +188,14 @@ class EstimationModel:
         self.truth_parameters = self.parameters_to_estimate.parameter_vector
 
         # Perturb the initial state estimate from the truth (500 m in position, 0.001 m/s in velocity)
-        self.perturbed_parameters = self.truth_parameters[:12].copy()
+        import copy
+        self.perturbed_parameters = self.truth_parameters[:12]
         if self.initial_state_error is not None:
             for i in range(3):
                 for j in range(2):
                     self.perturbed_parameters[i+6*j] += self.initial_state_error[i+6*j]
                     self.perturbed_parameters[i+6*j+3] += self.initial_state_error[i+6*j+3]
-            self.parameters_to_estimate.parameter_vector[:12] = self.perturbed_parameters
+        self.parameters_to_estimate.parameter_vector[:12] = self.perturbed_parameters
 
         # Create input object for the estimation
         convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=maximum_iterations)
@@ -220,54 +220,9 @@ class EstimationModel:
 
         self.set_estimator_settings()
 
-        # print("deviation true and perturbed: ", self.perturbed_parameters-self.truth_parameters)
-        # print("initial_state_error: ", self.initial_state_error)
         # Run the estimation
         with util.redirect_std(redirect_out=redirect_out):
             estimation_output = self.estimator.perform_estimation(self.estimation_input)
-
-
-        # print("deviation final from initial estimate", self.parameters_to_estimate.parameter_vector-self.perturbed_parameters)
-
-        # Propagate formal errors and covariance over the course of estimation window
-        # output_times = np.arange(self.dynamic_model.simulation_start_epoch, self.dynamic_model.simulation_end_epoch+1*constants.JULIAN_DAY, 100)
-        # # output_times = self.observation_times_range
-
-        # propagated_formal_errors_dict = dict()
-        # propagated_formal_errors_dict.update(zip(*estimation.propagate_formal_errors_split_output(
-        #     initial_covariance=estimation_output.covariance,
-        #     state_transition_interface=self.estimator.state_transition_interface,
-        #     output_times=output_times)))
-
-        # propagated_covariance_dict = dict()
-        # propagated_covariance_dict.update(zip(*estimation.propagate_covariance_split_output(
-        #     initial_covariance=estimation_output.covariance,
-        #     state_transition_interface=self.estimator.state_transition_interface,
-        #     output_times=output_times)))
-
-        # state_transition_interface = self.estimator.state_transition_interface
-        # print("Initial STM: ", state_transition_interface.full_state_transition_sensitivity_at_epoch(output_times[0]))
-        # print("Difference output and initial covariance: ", estimation_output.covariance-np.stack(list(propagated_covariance_dict.values()))[0])
-
-        # plt.plot(np.stack(list(propagated_formal_errors_dict.values()))[:,6:9])
-        # plt.show()
-
-        # print("estimated formal errors: ")
-        # print(estimation_output.formal_errors)
-        # print("final vector: ")
-        # print(self.parameters_to_estimate.parameter_vector)
-
-        # print('True-to-formal-error ratio:')
-        # print(((self.parameters_to_estimate.parameter_vector-self.truth_parameters) / estimation_output.formal_errors)[6:])
-
-        # retrieve the estimated initial state.
-        # print("state update")
-        # vector_error_initial = (np.array(self.perturbed_parameters) - self.truth_parameters)[6:9]
-        # error_magnitude_initial = np.sqrt(np.square(vector_error_initial).sum()) / 1000
-        # vector_error_final = (np.array(estimation_output.parameter_history[:, -1]) - estimation_output.parameter_history[:, 0])[6:9]
-        # error_magnitude_final = np.sqrt(np.square(vector_error_final).sum()) / 1000
-
-        # print(error_magnitude_initial, error_magnitude_final)
 
         # Generate information and covariance histories based on all the combinations of observables and link definitions
         total_information_dict = dict()
@@ -320,27 +275,27 @@ class EstimationModel:
                self.sorted_observation_sets, self.estimator
 
 
-custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-                                1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
-truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
-# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 5)
-# truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 5)
-apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
+# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+#                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+# dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
+# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
+# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 1)
+# truth_model = high_fidelity_spherical_harmonics_04_2_2_20_20.HighFidelityDynamicModel(60390, 1)
+# apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+# initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+# estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
 
-# [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
-#  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08
-#   1.08399977e+08 -6.68962205e+02 -8.73864980e+02 -7.14321553e+02]
-results = estimation_model.get_estimation_results()
-estimation_output = results[0]
-parameter_history = estimation_output.parameter_history
-residual_history = estimation_output.residual_history
-covariance = estimation_output.covariance
-formal_errors = estimation_output.formal_errors
-weighted_design_matrix = estimation_output.weighted_design_matrix
-residual_history = estimation_output.residual_history
+# # [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
+# #  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08
+# #   1.08399977e+08 -6.68962205e+02 -8.73864980e+02 -7.14321553e+02]
+# results = estimation_model.get_estimation_results(redirect_out=False)
+# estimation_output = results[0]
+# parameter_history = estimation_output.parameter_history
+# residual_history = estimation_output.residual_history
+# covariance = estimation_output.covariance
+# formal_errors = estimation_output.formal_errors
+# weighted_design_matrix = estimation_output.weighted_design_matrix
+# residual_history = estimation_output.residual_history
 
 # print("First: ", parameter_history[:,0])
 # print("Last: ", parameter_history[:,-1])

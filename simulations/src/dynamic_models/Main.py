@@ -33,26 +33,22 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 # Mission time settings
-mission_time = 14
+mission_time = 19
 mission_start_epoch = 60390
 mission_end_epoch = mission_start_epoch + mission_time
-
-# Initial estimation setup
 mission_epoch = mission_start_epoch
+
+# Initial batch timing settings
 propagation_time = 1
 batch_start_times = np.arange(mission_start_epoch, mission_end_epoch, propagation_time)
 batch_end_times = np.arange(propagation_time+mission_start_epoch, propagation_time+mission_end_epoch, propagation_time)
-# batch_start_times = np.array([60390, 60391, 60392, 60393, 60394, 60395, 60396, 60397, 60398, 60399])
-# batch_end_times = np.array([60390.5, 60391.5, 60392.5, 60393.5, 60394.5, 60395.5, 60396.5, 60397.5, 60398.5, 60399.5])
 # batch_start_times = np.array([60390, 60394.7, 60401.5, 60406.5])
 # batch_end_times = np.array([60392.5, 60397.2, 60404, 60409])
-# batch_start_times = np.array([60390, 60391, 60392, 60393])
-# batch_end_times = np.array([60391, 60392, 60393, 60394])
 batch_times = np.round(batch_end_times - batch_start_times, 2)
 propagation_times = np.round(np.concatenate((np.diff(batch_start_times), [2*batch_times[-1]])), 2)
 observation_windows = list(zip(batch_start_times, batch_end_times))
-print(batch_times)
-print(propagation_times)
+
+# Initial simulation settings
 custom_initial_state = None
 custom_initial_state_truth = None
 initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
@@ -61,12 +57,11 @@ step_size = 0.01
 sigma_number = 3
 batch_count = 0
 
-# Specify a test case
+# Settings of the dynamic model and truth model
 model_type = "low_fidelity"
 model_name = "three_body_problem"
 model_number = 0
 
-# Specify a truth model
 model_type_truth = "low_fidelity"
 model_name_truth = "three_body_problem"
 model_number_truth = 0
@@ -75,15 +70,10 @@ model_number_truth = 0
 fig1_3d = plt.figure()
 ax = fig1_3d.add_subplot(111, projection='3d')
 
-# batch_estimation_error_dict = dict()
-# batch_formal_error_dict = dict()
 full_estimation_error_dict = dict()
 full_reference_state_deviation_dict = dict()
-full_state_errors_dict = dict()
 full_propagated_covariance_dict = dict()
 full_propagated_formal_errors_dict = dict()
-
-
 while mission_epoch < mission_end_epoch:
 
     print(f"Estimation of batch {batch_count}, duration {batch_times[batch_count]} days: {batch_start_times[batch_count]} until {batch_end_times[batch_count]}")
@@ -95,11 +85,11 @@ while mission_epoch < mission_end_epoch:
                                                             get_only_first=False,
                                                             custom_initial_state=custom_initial_state)
 
-    dynamic_model_object = dynamic_model_objects[model_type][model_name][model_number]
+    dynamic_model = dynamic_model_objects[model_type][model_name][model_number]
 
     if batch_count == 0:
         epochs, state_history_test, dependent_variables_history_test = \
-            Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
+            Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model,
                                                                                                     custom_initial_state=custom_initial_state,
                                                                                                     custom_propagation_time=propagation_times[batch_count],
                                                                                                     solve_variational_equations=False)
@@ -116,7 +106,7 @@ while mission_epoch < mission_end_epoch:
                                                                                                 solve_variational_equations=False)
 
 
-    dynamic_model_objects = {model_type: {model_name: [dynamic_model_object]}}
+    dynamic_model_objects = {model_type: {model_name: [dynamic_model]}}
 
     # Obtain estimation results for given batch
     estimation_model_objects_results = utils.get_estimation_model_results(dynamic_model_objects,
@@ -132,52 +122,13 @@ while mission_epoch < mission_end_epoch:
     parameter_history = estimation_output.parameter_history
     final_covariance = estimation_output.covariance
     formal_errors = estimation_output.formal_errors
-    estimator = estimation_model_objects_result[-2]
 
-    output_times = np.arange(utils.convert_MJD_to_epoch(batch_start_times[batch_count], full_array=False),
-                             utils.convert_MJD_to_epoch(batch_start_times[batch_count]+propagation_times[batch_count]+step_size, full_array=False),
-                             step_size*constants.JULIAN_DAY)
-
-    propagated_formal_errors_initial = dict()
-    propagated_formal_errors_initial.update(zip(*estimation.propagate_formal_errors_split_output(
-        initial_covariance=apriori_covariance,
-        state_transition_interface=estimator.state_transition_interface,
-        output_times=output_times)))
-
-    propagated_covariance_initial = dict()
-    propagated_covariance_initial.update(zip(*estimation.propagate_covariance_split_output(
-        initial_covariance=apriori_covariance,
-        state_transition_interface=estimator.state_transition_interface,
-        output_times=output_times)))
-
-
-    propagated_formal_errors_final = dict()
-    propagated_formal_errors_final.update(zip(*estimation.propagate_formal_errors_split_output(
-        initial_covariance=estimation_output.covariance,
-        state_transition_interface=estimator.state_transition_interface,
-        output_times=output_times)))
-
-    propagated_covariance_final = dict()
-    propagated_covariance_final.update(zip(*estimation.propagate_covariance_split_output(
-        initial_covariance=estimation_output.covariance,
-        state_transition_interface=estimator.state_transition_interface,
-        output_times=output_times)))
-
-    # end_of_batch = utils.convert_MJD_to_epoch(batch_end_times[batch_count], full_array=False)
-    # clostest_key = min(propagated_covariance_final, key=lambda x: abs(propagated_covariance_final[x] - end_of_batch))
-
-    if batch_count == 0:
-        state_transition_interface = estimator.state_transition_interface
-
-        time_end = utils.convert_MJD_to_epoch(batch_end_times[batch_count], full_array=False)
-        print(f"STM at {output_times[0]}: ", state_transition_interface.full_state_transition_sensitivity_at_epoch(output_times[0]))
-        print(f"STM at {time_end}: ", state_transition_interface.full_state_transition_sensitivity_at_epoch(time_end))
-        print(f"STM at {output_times[-1]}: ", state_transition_interface.full_state_transition_sensitivity_at_epoch(output_times[0]))
-        print("Difference output and initial covariance: ", estimation_output.covariance-np.stack(list(propagated_covariance_initial.values()))[0])
+    # Define the times
+    end_of_batch = utils.convert_MJD_to_epoch(batch_end_times[batch_count], full_array=False)
 
     # Update the reference orbit that the estimated orbit should follow
     reference_state_history = list()
-    for body in dynamic_model_object.bodies_to_propagate:
+    for body in dynamic_model.bodies_to_propagate:
         reference_state_history.append(validation.get_reference_state_history(batch_start_times[batch_count],
                                                                               propagation_times[batch_count],
                                                                                 satellite=body,
@@ -186,35 +137,60 @@ while mission_epoch < mission_end_epoch:
 
     reference_state_history = np.concatenate(reference_state_history, axis=1)
 
-
-    # Update the estimator with the final parameter values to generate dynamics simulation with final dynamics for next batch
+    # Obtain the state histories of the truth, current and the newly estimated trajectories
     epochs, state_history_truth, dependent_variables_history_truth = \
         Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(truth_model,
                                                                                                 custom_initial_state=custom_initial_state_truth,
                                                                                                 custom_propagation_time=propagation_times[batch_count],
                                                                                                 solve_variational_equations=False)
 
-    epochs, state_history_initial, dependent_variables_history_initial = \
-        Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
+    epochs, state_history_initial, dependent_variables_history_initial, state_transition_history_initial = \
+        Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model,
                                                                                               custom_initial_state=custom_initial_state,
                                                                                               custom_propagation_time=propagation_times[batch_count],
-                                                                                              solve_variational_equations=False)
+                                                                                              solve_variational_equations=True)
 
-    epochs, state_history_final, dependent_variables_history_final = \
-        Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
+    epochs, state_history_final, dependent_variables_history_final, state_transition_history_final = \
+        Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model,
                                                                                               custom_initial_state=parameter_history[:,-1],
                                                                                               custom_propagation_time=propagation_times[batch_count],
-                                                                                              solve_variational_equations=False)
+                                                                                              solve_variational_equations=True)
+
+
+    # Save the propagated histories of the uncertainties
+    propagated_covariance_initial = dict()
+    propagated_formal_errors_initial = dict()
+    for i in range(len(epochs)):
+        propagated_covariance = state_transition_history_initial[i] @ apriori_covariance @ state_transition_history_initial[i].T
+        propagated_covariance_initial.update({epochs[i]: propagated_covariance})
+        propagated_formal_errors_initial.update({epochs[i]: np.sqrt(np.diagonal(propagated_covariance))})
+
+    propagated_covariance_final= dict()
+    propagated_formal_errors_final = dict()
+    for i in range(len(epochs)):
+        propagated_covariance = state_transition_history_final[i] @ estimation_output.covariance @ state_transition_history_final[i].T
+        propagated_covariance_final.update({epochs[i]: propagated_covariance})
+        propagated_formal_errors_final.update({epochs[i]: np.sqrt(np.diagonal(propagated_covariance))})
+
+    for key, value in propagated_covariance_final.items():
+        if key > end_of_batch:
+            propagated_covariance_initial[key] = value
+
+    for key, value in propagated_formal_errors_final.items():
+        if key > end_of_batch:
+            propagated_formal_errors_initial[key] = value
+
+    for i, epoch in enumerate(epochs):
+        if epoch > end_of_batch:
+            state_history_initial[i] = state_history_final[i]
 
 
     full_estimation_error_dict.update(dict(zip(epochs, state_history_initial-state_history_truth)))
     full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_initial-reference_state_history)))
-    full_state_errors_dict.update(dict(zip(epochs, state_history_initial-state_history_truth)))
     full_propagated_covariance_dict.update(propagated_covariance_initial)
     full_propagated_formal_errors_dict.update(propagated_formal_errors_initial)
 
     initial_state_error = state_history_final[-1,:]-state_history_truth[-1,:]
-    # print("INITIAL STATE ERROR AT THE END", initial_state_error)
     custom_initial_state = state_history_final[-1,:]
     custom_initial_state_truth = state_history_truth[-1,:]
     apriori_covariance = np.stack(list(propagated_covariance_final.values()))[-1]
@@ -222,18 +198,13 @@ while mission_epoch < mission_end_epoch:
     # Set condition on the maximum amount of error allowed before the station-keeping should take place
     # if int((mission_epoch-mission_start_epoch)%4) == 0 and mission_epoch != mission_start_epoch:
 
-    #     station_keeping_object = StationKeeping.StationKeeping(dynamic_model_object,
+    #     station_keeping_object = StationKeeping.StationKeeping(dynamic_model,
     #                                                         custom_initial_state=estimation_output.parameter_history[:,-1],
     #                                                         custom_propagation_time=6)
 
     #     custom_initial_state = station_keeping_object.get_corrected_state_vector(correction_epoch=0+propagation_time,
     #                                                                 target_point_epoch=4+propagation_time,
     #                                                                 cut_off_epoch=0+propagation_time)
-
-
-
-    mission_epoch += propagation_times[batch_count]
-
 
 
     # Storing some plots
@@ -246,39 +217,9 @@ while mission_epoch < mission_end_epoch:
     ax.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth" if batch_count==0 else None, color="black", ls="--")
     ax.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth" if batch_count==0 else None, color="black", ls="--")
 
-
-
-
-
-    # print("Calculating separate cases", batch_start_times[batch_count], batch_times[batch_count])
-    # dynamic_model_objects = utils.get_dynamic_model_objects(batch_start_times[batch_count],
-    #                                                         batch_times[batch_count],
-    #                                                         package_dict=None,
-    #                                                         get_only_first=True,
-    #                                                         custom_initial_state=None)
-
-    # dynamic_model_object = dynamic_model_objects[model_type][model_name][model_number]
-
-    # truth_model = copy.deepcopy(dynamic_model_objects[model_type_truth][model_name_truth][model_number_truth])
-
-    # epochs, state_history_test, dependent_variables_history = \
-    #     Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
-    #                                                                                             custom_initial_state=None,
-    #                                                                                             solve_variational_equations=False)
-
-    # epochs, state_history_truth_test, dependent_variables_history = \
-    #     Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(truth_model,
-    #                                                                                             custom_initial_state=None,
-    #                                                                                             solve_variational_equations=False)
-
-    # print("Difference batch estimated and actual: ", state_history_final[-1,:]-state_history_test[0,:])
-    # print("Difference batch estimated and actual truth: ", state_history_truth[-1,:]-state_history_truth_test[0,:])
-    # ax.plot(state_history_test[:,0], state_history_test[:,1], state_history_test[:,2], label="LPF standard" if batch_count==0 else None, color="gray")
-    # ax.plot(state_history_test[:,6], state_history_test[:,7], state_history_test[:,8], label="LUMIO standard" if batch_count==0 else None, color="gray")
-    # ax.plot(state_history_truth_test[:,0], state_history_truth_test[:,1], state_history_truth_test[:,2], label="LPF truth standard" if batch_count==0 else None, color="cyan", ls="--")
-    # ax.plot(state_history_truth_test[:,6], state_history_truth_test[:,7], state_history_truth_test[:,8], label="LUMIO truth standard" if batch_count==0 else None, color="cyan", ls="--")
-
+    mission_epoch += propagation_times[batch_count]
     batch_count += 1
+
 
 
 ax.set_xlabel('X [m]')
@@ -286,34 +227,7 @@ ax.set_ylabel('Y [m]')
 ax.set_zlabel('Z [m]')
 
 plt.title(f"Time per batch: {propagation_time}, total of {mission_time} [days]")
-# plt.show()
 
-dynamic_model_objects = utils.get_dynamic_model_objects(mission_start_epoch,
-                                                        mission_time,
-                                                        package_dict=None,
-                                                        get_only_first=True,
-                                                        custom_initial_state=custom_initial_state)
-
-dynamic_model_object = dynamic_model_objects[model_type][model_name][model_number]
-
-truth_model = low_fidelity.LowFidelityDynamicModel(mission_start_epoch,
-                                                    mission_time,
-                                                    custom_initial_state=None)
-
-epochs, state_history_final, dependent_variables_history = \
-    Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(dynamic_model_object,
-                                                                                            custom_initial_state=None,
-                                                                                            solve_variational_equations=False)
-
-epochs, state_history_truth, dependent_variables_history = \
-    Interpolator.Interpolator(epoch_in_MJD=False, step_size=step_size).get_propagation_results(truth_model,
-                                                                                            custom_initial_state=None,
-                                                                                            solve_variational_equations=False)
-
-# ax.plot(state_history_final[:,0], state_history_final[:,1], state_history_final[:,2], label="LPF estimated", color="red", ls="-.")
-# ax.plot(state_history_final[:,6], state_history_final[:,7], state_history_final[:,8], label="LUMIO estimated", color="red", ls="-.")
-# ax.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth", color="yellow", ls="--")
-# ax.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth", color="yellow", ls="--")
 plt.legend()
 
 
@@ -323,8 +237,6 @@ full_estimation_error_epochs = np.stack(list(full_estimation_error_dict.keys()))
 full_estimation_error_history = np.stack(list(full_estimation_error_dict.values()))
 full_reference_state_deviation_epochs = np.stack(list(full_reference_state_deviation_dict.keys()))
 full_reference_state_deviation_history = np.stack(list(full_reference_state_deviation_dict.values()))
-full_state_errors_epochs = np.stack(list(full_state_errors_dict.keys()))
-full_state_errors_history = np.stack(list(full_state_errors_dict.values()))
 full_propagated_formal_errors_epochs = np.stack(list(full_propagated_formal_errors_dict.keys()))
 full_propagated_formal_errors_history = np.stack(list(full_propagated_formal_errors_dict.values()))
 
@@ -353,27 +265,27 @@ fig.suptitle("Propagated formal errors")
 plt.legend()
 # plt.show()
 
-fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
-reference_epoch_array = mission_start_epoch*np.ones(np.shape(full_state_errors_epochs))
-for j in range(2):
-    labels = ["x", "y", "z"]
-    for i in range(3):
-        ax[j].plot(utils.convert_epochs_to_MJD(full_state_errors_epochs)-reference_epoch_array, sigma_number*full_state_errors_history[:,6*j+i], label=labels[i])
-    for i, gap in enumerate(observation_windows):
-        ax[j].axvspan(
-            xmin=gap[0]-mission_start_epoch,
-            xmax=gap[1]-mission_start_epoch,
-            color="gray",
-            alpha=0.1,
-            label="Observation window" if i == 0 else None)
-        ax[j].set_ylabel(r"$\mathbf{x}_{initial}-\mathbf{x}_{final}$ [m]")
-        ax[j].grid(alpha=0.5, linestyle='--')
-ax[-1].set_xlabel(f"Time since MJD {mission_start_epoch} [days]")
-ax[0].set_title("LPF")
-ax[1].set_title("LUMIO")
-fig.suptitle("State perturbations")
-plt.legend()
-# plt.show()
+# fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
+# reference_epoch_array = mission_start_epoch*np.ones(np.shape(full_state_errors_epochs))
+# for j in range(2):
+#     labels = ["x", "y", "z"]
+#     for i in range(3):
+#         ax[j].plot(utils.convert_epochs_to_MJD(full_state_errors_epochs)-reference_epoch_array, full_state_errors_history[:,6*j+i], label=labels[i])
+#     for i, gap in enumerate(observation_windows):
+#         ax[j].axvspan(
+#             xmin=gap[0]-mission_start_epoch,
+#             xmax=gap[1]-mission_start_epoch,
+#             color="gray",
+#             alpha=0.1,
+#             label="Observation window" if i == 0 else None)
+#         ax[j].set_ylabel(r"$\mathbf{x}_{initial}-\mathbf{x}_{final}$ [m]")
+#         ax[j].grid(alpha=0.5, linestyle='--')
+# ax[-1].set_xlabel(f"Time since MJD {mission_start_epoch} [days]")
+# ax[0].set_title("LPF")
+# ax[1].set_title("LUMIO")
+# fig.suptitle("State perturbations")
+# plt.legend()
+# # plt.show()
 
 fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
 reference_epoch_array = mission_start_epoch*np.ones(np.shape(full_propagated_formal_errors_epochs))
