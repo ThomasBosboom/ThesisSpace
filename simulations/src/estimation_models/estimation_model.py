@@ -272,7 +272,7 @@ class EstimationModel:
 
         return estimation_output, total_single_information_dict, \
                total_covariance_dict, total_information_dict, \
-               self.sorted_observation_sets, self.estimator
+               self.sorted_observation_sets
 
 
 # custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
