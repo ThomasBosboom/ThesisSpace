@@ -1,6 +1,7 @@
 # Standard
 import os
 import sys
+import copy
 import pytest_html
 import numpy as np
 import time
@@ -139,7 +140,7 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                                                       custom_propagation_time=custom_propagation_time)
 
 
-    dynamic_model_objects_results = dynamic_model_objects.copy()
+    dynamic_model_objects_results = copy.deepcopy(dynamic_model_objects)
     for model_type, model_names in dynamic_model_objects.items():
         for model_name, dynamic_models in model_names.items():
             for i, dynamic_model in enumerate(dynamic_models):
@@ -147,8 +148,6 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                 dynamic_model_objects_results[model_type][model_name][i] = [None]
 
                 if specific_model_list is None:
-
-                    print(dynamic_model)
 
                     start_time = time.time()
                     results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model,
@@ -161,8 +160,6 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                 if specific_model_list is not None:
                     if i in specific_model_list:
 
-                        print(dynamic_model)
-
                         start_time = time.time()
                         results_list = list(Interpolator.Interpolator(step_size=step_size, epoch_in_MJD=epoch_in_MJD).get_propagation_results(dynamic_model,
                                                                                                                         solve_variational_equations=solve_variational_equations,
@@ -171,10 +168,9 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                         results_list.append(time.time()-start_time)
                         dynamic_model_objects_results[model_type][model_name][i] = results_list
 
-
                 if return_dynamic_model_objects:
-                    dynamic_model_objects_results[model_type][model_name][i].append(dynamic_model_objects[model_type][model_name][i])
 
+                    dynamic_model_objects_results[model_type][model_name][i].append(dynamic_model_objects[model_type][model_name][i])
 
     if entry_list is not None:
         for model_type, model_names in dynamic_model_objects_results.items():
@@ -185,13 +181,8 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
                         model_result_list.append(model_result[entry])
                     dynamic_model_objects_results[model_type][model_name][i] = model_result_list
 
-    # if return_dynamic_model_objects:
-    #     return dynamic_model_objects_results, return_dynamic_model_objects
-
-    # else:
-    #
-
     return dynamic_model_objects_results
+
 
 def get_estimation_model_results(dynamic_model_objects,
                                  custom_estimation_model_objects=None,
@@ -279,19 +270,6 @@ def convert_model_objects_to_list(model_objects, specific_model_type=None):
     return model_objects_list
 
 
-# def get_model_result_for_given_entry(dynamic_model_objects_results, entry_list):
-
-#     for model_type, model_names in dynamic_model_objects_results.items():
-#         for model_name, model_results in model_names.items():
-#             result_list_model_name = []
-#             for model_result in model_results:
-#                 for entry in entry_list:
-#                     result_list_model_name.append(model_result[entry])
-#             dynamic_model_objects_results[model_type][model_name] = result_list_model_name
-
-#     return dynamic_model_objects_results
-
-
 def convert_dictionary_to_array(dictionary):
 
     keys = np.stack(list(dictionary.keys()), axis=0)
@@ -327,14 +305,6 @@ def convert_MJD_to_epoch(epochs, full_array=True):
         return time_conversion.julian_day_to_seconds_since_epoch(\
                     time_conversion.modified_julian_day_to_julian_day(epochs))
 
-# def get_first_of_model_types(dynamic_model_objects):
-
-#     dynamic_models = []
-#     for model_type, model_names in dynamic_model_objects.items():
-#         for model_name, models in model_names.items():
-#             dynamic_models.append(models[0])
-
-#     return dynamic_models
 
 
 # Commonly used parameters
