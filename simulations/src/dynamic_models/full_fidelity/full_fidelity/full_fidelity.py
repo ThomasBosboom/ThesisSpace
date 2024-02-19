@@ -196,30 +196,35 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_integration_settings()
 
-        # Define required outputs
+        # 0-11
         self.dependent_variables_to_save = [
             propagation_setup.dependent_variable.relative_position(self.name_secondary, self.name_primary),
             propagation_setup.dependent_variable.relative_velocity(self.name_secondary, self.name_primary),
             propagation_setup.dependent_variable.relative_position(self.name_ELO, self.name_LPO),
             propagation_setup.dependent_variable.relative_velocity(self.name_ELO, self.name_LPO)]
 
+        # 12-13
         self.dependent_variables_to_save.extend([propagation_setup.dependent_variable.total_acceleration_norm(self.name_ELO),
                                                  propagation_setup.dependent_variable.total_acceleration_norm(self.name_LPO)])
 
+        # 14-29
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
                     propagation_setup.acceleration.point_mass_gravity_type, body_to_propagate, new_body_to_create) \
                         for body_to_propagate in self.bodies_to_propagate for new_body_to_create in self.new_bodies_to_create])
 
+        # 30-37
         self.dependent_variables_to_save.extend([
-            propagation_setup.dependent_variable.spherical_harmonic_terms_acceleration_norm(body_to_propagate, body_to_create, [(2,0), (2,1), (2,2)]) \
-                        for body_to_propagate in self.bodies_to_propagate for body_to_create in [self.name_primary, self.name_secondary] ])
+            propagation_setup.dependent_variable.spherical_harmonic_terms_acceleration_norm(body_to_propagate, body_to_create, [(2,0), (2,2)]) \
+                        for body_to_propagate in self.bodies_to_propagate for body_to_create in [self.name_primary, self.name_secondary]])
 
+        # 38-43
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
                     propagation_setup.acceleration.radiation_pressure_type, body_to_propagate, body) \
                         for body_to_propagate in self.bodies_to_propagate for body in [self.name_primary, self.name_secondary, "Sun"]])
 
+        # 44-67
         self.dependent_variables_to_save.extend([
             propagation_setup.dependent_variable.single_acceleration_norm(
                     propagation_setup.acceleration.relativistic_correction_acceleration_type, body_to_propagate, body_to_create) \
