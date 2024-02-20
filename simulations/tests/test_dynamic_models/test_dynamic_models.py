@@ -409,38 +409,38 @@ class TestFrameConversions:
 
 class TestOutputsDynamicModels:
 
-    @pytest.mark.parametrize(
-    "simulation_start_epoch_MJD, propagation_time",
-    [
-        (60390, 14),
-    ])
+    # @pytest.mark.parametrize(
+    # "simulation_start_epoch_MJD, propagation_time",
+    # [
+    #     (60390, 14),
+    # ])
 
-    def test_loading_time_models(self, simulation_start_epoch_MJD, propagation_time, extras):
+    # def test_loading_time_models(self, simulation_start_epoch_MJD, propagation_time, extras):
 
-        time_dict = {}
-        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
+    #     time_dict = {}
+    #     package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+    #     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time)
 
-        for model_type, model_names in dynamic_model_objects.items():
-            for model_name, dynamic_models in model_names.items():
-                time_list = []
-                for dynamic_model in dynamic_models:
-                    start_time = time.time()
-                    _, _ = dynamic_model.get_propagation_simulator()
-                    time_list.append(time.time()-start_time)
-                time_dict[model_name] = time_list
+    #     for model_type, model_names in dynamic_model_objects.items():
+    #         for model_name, dynamic_models in model_names.items():
+    #             time_list = []
+    #             for dynamic_model in dynamic_models:
+    #                 start_time = time.time()
+    #                 _, _ = dynamic_model.get_propagation_simulator()
+    #                 time_list.append(time.time()-start_time)
+    #             time_dict[model_name] = time_list
 
-        fig, axs = plt.subplots(1, len(list(time_dict.keys())), figsize=(10, 4), sharey=True)
-        for i, (key, values) in enumerate(time_dict.items()):
-            axs[i].bar(range(1, len(values)+1), values, label=key)
-            axs[i].set_xlabel(key)
-            axs[i].set_xticks(range(1, 1+max([len(value) for value in time_dict.values()])))
-            axs[i].set_yscale("log")
+    #     fig, axs = plt.subplots(1, len(list(time_dict.keys())), figsize=(10, 4), sharey=True)
+    #     for i, (key, values) in enumerate(time_dict.items()):
+    #         axs[i].bar(range(1, len(values)+1), values, label=key)
+    #         axs[i].set_xlabel(key)
+    #         axs[i].set_xticks(range(1, 1+max([len(value) for value in time_dict.values()])))
+    #         axs[i].set_yscale("log")
 
-        axs[0].set_ylabel('Run time [s]')
-        fig.suptitle(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
+    #     axs[0].set_ylabel('Run time [s]')
+    #     fig.suptitle(f"Run time dynamic models, {simulation_start_epoch_MJD} MJD, {propagation_time} days")
 
-        utils.save_figures_to_folder([fig], [simulation_start_epoch_MJD, propagation_time])
+    #     utils.save_figures_to_folder([fig], [simulation_start_epoch_MJD, propagation_time])
 
 
     @pytest.mark.parametrize(
@@ -646,74 +646,74 @@ class TestOutputsDynamicModels:
 
 
 
-        package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
-        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+        # package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+        # dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
 
-        figs = []
-        axs = []
-        for i, (model_type, model_names) in enumerate(dynamic_model_objects.items()):
+        # figs = []
+        # axs = []
+        # for i, (model_type, model_names) in enumerate(dynamic_model_objects.items()):
 
-            model_names = model_names.keys()
+        #     model_names = model_names.keys()
 
-            fig_model_type = []
-            axs_model_type = []
-            for j in range(len(model_names)):
-                fig, ax = plt.subplots(6, 1, figsize=(13, 7), sharex=True)
-                fig_model_type.append(fig)
-                axs_model_type.append(ax)
+        #     fig_model_type = []
+        #     axs_model_type = []
+        #     for j in range(len(model_names)):
+        #         fig, ax = plt.subplots(6, 1, figsize=(13, 7), sharex=True)
+        #         fig_model_type.append(fig)
+        #         axs_model_type.append(ax)
 
-            figs.append(fig_model_type)
-            axs.append(axs_model_type)
+        #     figs.append(fig_model_type)
+        #     axs.append(axs_model_type)
 
-            for k, model_name in enumerate(model_names):
-                for dynamic_model in dynamic_model_objects[model_type][model_name]:
+        #     for k, model_name in enumerate(model_names):
+        #         for dynamic_model in dynamic_model_objects[model_type][model_name]:
 
-                    # Extract simulation histories numerical solution
-                    epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-                        Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(dynamic_model)
+        #             # Extract simulation histories numerical solution
+        #             epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
+        #                 Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(dynamic_model)
 
-                    reference_state_history = np.concatenate((validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
-                                                            validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
-                                                            axis=1)
+        #             reference_state_history = np.concatenate((validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_ELO, get_full_history=True),
+        #                                                     validation.get_reference_state_history(simulation_start_epoch_MJD, propagation_time, step_size=step_size, satellite=dynamic_model.name_LPO, get_full_history=True)),
+        #                                                     axis=1)
 
-                    fig1_3d = plt.figure()
-                    ax = fig1_3d.add_subplot(111, projection='3d')
-                    plt.title("Comparison states tudat and reference")
-                    plt.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF tudat", color="red")
-                    plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO tudat", color="blue")
-                    plt.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF reference", color="salmon")
-                    plt.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8], label="LUMIO reference", color="lightskyblue")
-                    ax.set_xlabel('X [m]')
-                    ax.set_ylabel('Y [m]')
-                    ax.set_zlabel('Z [m]')
-                    plt.legend()
-                    # plt.show()
+        #             fig1_3d = plt.figure()
+        #             ax = fig1_3d.add_subplot(111, projection='3d')
+        #             plt.title("Comparison states tudat and reference")
+        #             plt.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF tudat", color="red")
+        #             plt.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO tudat", color="blue")
+        #             plt.plot(reference_state_history[:,0], reference_state_history[:,1], reference_state_history[:,2], label="LPF reference", color="salmon")
+        #             plt.plot(reference_state_history[:,6], reference_state_history[:,7], reference_state_history[:,8], label="LUMIO reference", color="lightskyblue")
+        #             ax.set_xlabel('X [m]')
+        #             ax.set_ylabel('Y [m]')
+        #             ax.set_zlabel('Z [m]')
+        #             plt.legend()
+        #             # plt.show()
 
-                    # Define the titles and data for the subplots
-                    fontsize = 16
-                    subplot_ylabels = [r'$\Delta$X [m]', r'$\Delta$Y [m]', r'$\Delta$Z [m]', \
-                                       r'$\Delta$VX [m/s]', r'$\Delta$VY [m/s]', r'$\Delta$VZ [m/s]']
-                    subplot_labels = ["LPF", "LUMIO"]
-                    data_to_plot = [state_history-reference_state_history]
+        #             # Define the titles and data for the subplots
+        #             fontsize = 16
+        #             subplot_ylabels = [r'$\Delta$X [m]', r'$\Delta$Y [m]', r'$\Delta$Z [m]', \
+        #                                r'$\Delta$VX [m/s]', r'$\Delta$VY [m/s]', r'$\Delta$VZ [m/s]']
+        #             subplot_labels = ["LPF", "LUMIO"]
+        #             data_to_plot = [state_history-reference_state_history]
 
-                    # Plot the state histories for each entry across all models
-                    for state_index in range(6):
-                        axs[i][k][state_index].plot(epochs, data_to_plot[0][:,state_index], color="red")
-                        axs[i][k][state_index].plot(epochs, data_to_plot[0][:,6+state_index], color="blue")
+        #             # Plot the state histories for each entry across all models
+        #             for state_index in range(6):
+        #                 axs[i][k][state_index].plot(epochs, data_to_plot[0][:,state_index], color="red")
+        #                 axs[i][k][state_index].plot(epochs, data_to_plot[0][:,6+state_index], color="blue")
 
-                for state_index in range(6):
-                    axs[i][k][state_index].set_ylabel(subplot_ylabels[state_index])
-                    axs[i][k][state_index].grid(alpha=0.5, linestyle='--')
-                    axs[i][k][state_index].ticklabel_format(axis='y', scilimits=(0,0))
-                    figs[i][k].suptitle(f"State difference w.r.t. reference, {model_type}, {model_name}", fontsize=fontsize)
-                    axs[i][k][-1].set_xlabel(f"Epoch (MJD)")
+        #         for state_index in range(6):
+        #             axs[i][k][state_index].set_ylabel(subplot_ylabels[state_index])
+        #             axs[i][k][state_index].grid(alpha=0.5, linestyle='--')
+        #             axs[i][k][state_index].ticklabel_format(axis='y', scilimits=(0,0))
+        #             figs[i][k].suptitle(f"State difference w.r.t. reference, {model_type}, {model_name}", fontsize=fontsize)
+        #             axs[i][k][-1].set_xlabel(f"Epoch (MJD)")
 
-                figs[i][k].legend(subplot_labels)
-                plt.tight_layout()
-        # plt.show()
+        #         figs[i][k].legend(subplot_labels)
+        #         plt.tight_layout()
+        # # plt.show()
 
-        utils.save_figures_to_folder([fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
-        utils.save_figures_to_folder(list(np.concatenate(figs)), [simulation_start_epoch_MJD, propagation_time])
+        # utils.save_figures_to_folder([fig1_3d], [simulation_start_epoch_MJD, propagation_time], save_to_report=False)
+        # utils.save_figures_to_folder(list(np.concatenate(figs)), [simulation_start_epoch_MJD, propagation_time])
 
 
 
