@@ -86,10 +86,12 @@ def get_estimation_model_objects(dynamic_model_objects,
             else:
                 truth_model = custom_truth_model
 
-            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error) for dynamic_model in dynamic_models]
+            submodels = [estimation_model.EstimationArc(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error) for dynamic_model in dynamic_models]
 
             submodels_dict[package_name] = submodels
         estimation_model_objects[package_type] = submodels_dict
+
+
 
     return estimation_model_objects
 
@@ -197,6 +199,7 @@ def get_estimation_model_results(dynamic_model_objects,
                                                                 custom_truth_model=custom_truth_model,
                                                                 apriori_covariance=apriori_covariance,
                                                                 initial_state_error=initial_state_error)
+
     else:
         estimation_model_objects = custom_estimation_model_objects
 
