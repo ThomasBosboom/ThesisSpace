@@ -228,8 +228,6 @@ class TestMonteCarlo:
 
 
 
-
-
 # class Test:
 
 
@@ -297,7 +295,3 @@ class TestMonteCarlo:
     #     # plt.show()
 
     #     utils.save_figures_to_folder([fig],[])
-
-
-
-

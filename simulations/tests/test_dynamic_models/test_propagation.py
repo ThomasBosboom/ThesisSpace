@@ -1,6 +1,7 @@
 # Standard
 import os
 import sys
+import time
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import ScalarFormatter
@@ -151,20 +152,19 @@ class TestPropagation:
                                                                         specific_model_list=specific_model_list,
                                                                         return_dynamic_model_objects=return_dynamic_model_objects)
 
-        legend_handles = []
-        legend_labels = []
         durations = [7, 14, 21, 28]
         satellites = ["LPF", "LUMIO"]
         plot_labels = [['X [m]', 'Y [m]', 'Z [m]'], ['X [-]', 'Y [-]', 'Z [-]']]
         legend_labels = [["CRTBP"], ["PM", "PMSRP", "SH", "SHSRP"]]
         colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
         label_colors = []
-        fig, ax = plt.subplots(len(durations), 3, figsize=(8, 2.5*(len(durations))), layout="constrained")
-        fig_2, ax_2 = plt.subplots(len(durations), 3, figsize=(8, 2.5*(len(durations))), layout="constrained")
+        fig, ax = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
+        fig_2, ax_2 = plt.subplots(len(durations), 3, figsize=(14, 3*(len(durations))), layout="constrained")
         handles, labels = [], []
         for i, (model_type, model_names) in enumerate(dynamic_model_objects_results.items()):
             for j, (model_name, models) in enumerate(model_names.items()):
                 for k, model in enumerate(models):
+
 
                     # Extract the propagation information
                     epochs, state_history, dependent_variable_history, run_time, dynamic_model_object = dynamic_model_objects_results[model_type][model_name][k]
@@ -175,49 +175,35 @@ class TestPropagation:
                         for m in range(3):
                             ax[l][0].title.set_text(str(durations[l])+ " days")
                             ax[l][m].plot(state_history[0,6+m%3], state_history[0,6+(m+1)%3], marker="o", color=colors[i])
-                            line = ax[l][m].plot(state_history[:n,6+m%3], state_history[:n,6+(m+1)%3], color=colors[i])
+                            ax[l][m].plot(state_history[:n,6+m%3], state_history[:n,6+(m+1)%3], color=colors[i])
                             ax[l][m].set_xlabel(plot_labels[0][m%3])
                             ax[l][m].set_ylabel(plot_labels[0][(m+1)%3])
                             ax[l][m].grid(alpha=0.5, linestyle='--')
+                            ax[0][-1].legend()
 
-                    ax[0][-1].legend(line, legend_labels[i][j])
-
-                        # Store handles and labels of the second plot
-                        # if l == 0:  # Only store handles and labels once
-                        #     legend_handles.append(line[0])
-                        #     legend_labels.append(legend_labels[i][j])
 
                     # Convert back to synodic
                     epochs_synodic, state_history_synodic = \
                         FrameConverter.InertialToSynodicHistoryConverter(dynamic_model_object, step_size=step_size).get_results(state_history)
 
                     # Plot the trajectories for multiple moments in time in synodic frame
-
                     for l in range(len(durations)):
                         n = int(durations[l]/(step_size))
                         for m in range(3):
                             ax_2[l][0].title.set_text(str(durations[l])+ " days")
-                            ax_2[l][m].plot(state_history_synodic[0,6+m%3], state_history_synodic[0,6+(m+1)%3], marker="o", color=colors[i], label=None)
-                            line = ax_2[l][m].plot(state_history_synodic[:n,6+m%3], state_history_synodic[:n,6+(m+1)%3], color=colors[i])
+                            plot1 = ax_2[l][m].plot(state_history_synodic[0,6+m%3], state_history_synodic[0,6+(m+1)%3], marker="o", color=colors[i], label=None)
+                            plot2 = ax_2[l][m].plot(state_history_synodic[:n,6+m%3], state_history_synodic[:n,6+(m+1)%3], color=colors[i], label=legend_labels[i][j] if (l == 0 and m == 0) else None)
                             ax_2[l][m].set_xlabel(plot_labels[1][m%3])
                             ax_2[l][m].set_ylabel(plot_labels[1][(m+1)%3])
                             ax_2[l][m].grid(alpha=0.5, linestyle='--')
+                            ax_2[0][-1].legend()
 
-                            ax_2[0][-1].legend(line)
+                            # Collect handles and labels for the legend
+                            if l == 0 and m == 0:
+                                handles.extend(plot1 + plot2)
+                                labels.extend([None, legend_labels[i][j]])
 
-                    # handle, label = ax_2[0][0].get_legend_handles_labels()
-                    # handles.extend(handle)
-                    # labels.extend(label)
-
-            # Store handles and labels of the second plot
-            # if j == 0:
-                # print(lines)
-                # print(legend_labels[i][j])
-                # legend_handles.extend(lines)
-                # legend_labels.extend(legend_labels[i][j])
-
-        # fig.legend(legend_handles, legend_labels, loc='upper right')
-        # fig_2.legend(legend_handles, legend_labels, loc='upper right')
+        fig.legend(handles, labels)
         plt.tight_layout()
 
         utils.save_figures_to_folder(figs=[fig], labels=[f"synodic_{satellites[1]}"])
@@ -228,12 +214,12 @@ class TestPropagation:
     def test_dynamic_model_run_times(self):
 
         package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
-        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]}
+        # package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
         propagation_time = 1
-        get_only_first = True
+        get_only_first = False
         start_epoch = 60390
-        end_epoch = 60418
-        n = 2
+        end_epoch = 60404
+        n = 5
         run_cases = np.linspace(start_epoch, end_epoch, n)
 
         # Initialize dictionaries to store accumulated values
@@ -244,6 +230,7 @@ class TestPropagation:
             for fidelity_key, sub_dict in utils.get_dynamic_model_objects(start_epoch, propagation_time, package_dict=package_dict, get_only_first=get_only_first).items()
         }
 
+        start_time = time.time()
         for run_case in run_cases:
             params = (run_case, propagation_time, package_dict, get_only_first)
             run_times_dict = utils.get_dynamic_model_results(*params, step_size=0.1, entry_list=[-1])
@@ -254,6 +241,8 @@ class TestPropagation:
                     for j, subvalue in enumerate(subvalue_list):
                         for k, entry in enumerate(subvalue):
                             accumulator_dict[fidelity_key][subkey][j].append(entry)
+
+        total_run_time = time.time()-start_time
 
         # Calculate averages and standard deviations
         result_dict = {
@@ -271,9 +260,9 @@ class TestPropagation:
         }
 
         ### Plot run times for each model
-        keys_list = [["CRTBP"], ["PM", "PM SRP", "SH", "SH SRP"], ["FF"]]
+        keys_list = [["CRTBP"], ["PM", "PMSRP", "SH", "SHSRP"], ["FF"]]
         key_count = sum(len(sublist) for sublist in package_dict.values()) #0.75*key_count
-        fig, axs = plt.subplots(1, key_count, figsize=(6.4, 5), sharey=True)
+        fig, axs = plt.subplots(1, key_count, figsize=(6.4, 0.75*5), sharey=True)
         index = 0
         for i, (model_types, model_names) in enumerate(result_dict.items()):
             for j, (key, values) in enumerate(model_names.items()):
@@ -290,9 +279,9 @@ class TestPropagation:
                 index += 1
 
         axs[0].set_ylabel('Run time [s]')
-        legend_handles = [plt.Line2D([0], [0], color='black', markersize=5, label=r'1$\sigma$ Std Dev')]
-        fig.legend(handles=[legend_handles[0]], loc='upper right')
-        fig.suptitle(f"Monte Carlo run time dynamic models, n={len(run_cases)*10}, varying start epoch spread over range [{start_epoch}, {end_epoch}] \nProcessor: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz, 2208 Mhz")
+        legend_handles = [plt.Line2D([0], [0], color='black', markersize=1, label=r'1$\sigma$ Std Dev')]
+        fig.legend(handles=[legend_handles[0]], loc='upper right', fontsize="x-small")
+        fig.suptitle(f"Run time dynamic models for {propagation_time} day, n={len(run_cases)*10}, start MJD [{start_epoch}, {end_epoch}] \nProcessor: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz, 2208 Mhz", fontsize=8)
 
         utils.save_figures_to_folder([fig], [run_cases[0], run_cases[-1], n*10])
 
@@ -330,8 +319,8 @@ class TestDifferences:
 
         satellites = ["LPF", "LUMIO"]
         legend_labels = [["PM", "PMSRP", "SH", "SHSRP"], ["FF"]]
-        subplot_ylabels = [r'$x-x_{ref}$ [m]', r'$\Delta$Y [m]', r'$\Delta$Z [m]', \
-                    r'$\Delta$VX [m/s]', r'$\Delta$VY [m/s]', r'$\Delta$VZ [m/s]']
+        subplot_ylabels = [r'$x-x_{ref}$ [m]', r'$y-y_{ref}$ [m]', r'$z-z_{ref}$ [m]', \
+                    r'$v_{x}-v_{x}_{ref}$ [m/s]', r'$v_{y}-v_{y}_{ref}$ [m/s]', r'$v_{z}-v_{z}_{ref}$ [m/s]']
         plot_colors = ["red", "blue"]
         plot_ls = [[(0, (1, 5)), '--', '-.', ':'], ['-']]
 
@@ -379,10 +368,10 @@ class TestDifferences:
         # fig.legend(bbox_to_anchor=(0.5, 0), loc='upper center', ncol=3)
         fig.suptitle(f"State difference w.r.t. reference for {satellites[0]}", fontsize=14)
         fig_2.suptitle(f"State difference w.r.t. reference for {satellites[1]}", fontsize=14)
-        plt.tight_layout()
+        # plt.tight_layout()
 
         plt.show()
 
 
-a = TestDifferences().test_absolute_difference_to_reference_model()
-print(a)
+# a = TestDifferences().test_absolute_difference_to_reference_model()
+# print(a)

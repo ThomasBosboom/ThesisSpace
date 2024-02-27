@@ -27,7 +27,7 @@ from dynamic_models.high_fidelity.spherical_harmonics import *
 from dynamic_models.high_fidelity.spherical_harmonics_srp import *
 
 
-class EstimationModel:
+class EstimationArc:
 
     def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_state_error=None, include_consider_parameters=False):
 
@@ -43,7 +43,7 @@ class EstimationModel:
         self.initial_state_error = initial_state_error
 
         # Defining basis for observations
-        self.bias_range = 10
+        self.bias_range = 0
         self.bias_doppler = 0
         self.noise_range = 102.44
         self.noise_doppler = 0.00097
@@ -54,9 +54,13 @@ class EstimationModel:
         self.time_drift_bias = 6.9e-8
 
         # Creating observation time vector
-        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+50, self.dynamic_model.simulation_end_epoch-50, self.observation_step_size_range)
-        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+50, self.dynamic_model.simulation_end_epoch-50, self.observation_step_size_doppler)
+        margin = 50
+        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_range)
+        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_doppler)
 
+
+        self.arc_start_epoch = self.dynamic_model.simulation_start_epoch
+        self.arc_end_epoch = self.dynamic_model.simulation_end_epoch
 
     def set_observation_model_settings(self):
 
@@ -279,11 +283,11 @@ class EstimationModel:
 #                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 # dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
 # truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
-# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 1)
-# truth_model = high_fidelity_spherical_harmonics_04_2_2_20_20.HighFidelityDynamicModel(60390, 1)
+# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 2.5)
+# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2.5)
 # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 # initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-# estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
+# estimation_model = EstimationArc(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
 
 # # [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
 # #  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08
@@ -300,7 +304,7 @@ class EstimationModel:
 # print("First: ", parameter_history[:,0])
 # print("Last: ", parameter_history[:,-1])
 # print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
-# for i, (observable_type, information_sets) in enumerate(results[-2].items()):
+# for i, (observable_type, information_sets) in enumerate(results[-1].items()):
 #     for j, observation_set in enumerate(information_sets.values()):
 #         for k, single_observation_set in enumerate(observation_set):
 
