@@ -28,7 +28,6 @@ class Interpolator:
 
     def get_propagation_results(self, dynamic_model_object, custom_initial_state=None, solve_variational_equations=True, custom_propagation_time=None):
 
-        # print("THE START EPOCH IN THE INTERPOLATOR: ", dynamic_model_object.simulation_start_epoch_MJD)
         dynamic_model_object.custom_initial_state = custom_initial_state
         dynamic_model_object.custom_propagation_time = custom_propagation_time
 
