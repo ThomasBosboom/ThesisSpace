@@ -110,7 +110,7 @@ class StationKeeping:
 
 # dynamic_model_objects = utils.get_dynamic_model_objects(60391,
 #                                                         1,
-#                                                         package_dict=None,
+#                                                         custom_model_dict=None,
 #                                                         get_only_first=False,
 #                                                         custom_initial_state=None)
 

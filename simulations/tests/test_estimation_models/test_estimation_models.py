@@ -40,11 +40,11 @@ def estimation_model_objects_results():
     # Argument settings for dynamic models to be used in estimation
     simulation_start_epoch = 60390
     propagation_time = 1
-    # package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-    package_dict = None
+    # custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+    custom_model_dict = None
     get_only_first = True
     custom_initial_state = None
-    params = (simulation_start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
+    params = (simulation_start_epoch, propagation_time, custom_model_dict, get_only_first, custom_initial_state)
 
     # Argument settings for estimation outputs
     get_only_first = False
@@ -57,7 +57,7 @@ def estimation_model_objects_results():
 
 
 ### Define adjustable fixture for custom generations
-@pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "package_dict", "get_only_fist", "custom_initial_state")],
+@pytest.fixture(params=[("simulation_start_epoch_MJD", "propagation_time", "custom_model_dict", "get_only_fist", "custom_initial_state")],
                 scope="module")
 def custom_estimation_model_objects_results(request):
     dynamic_model_objects = utils.get_dynamic_model_objects(*request.param)
@@ -67,8 +67,8 @@ def custom_estimation_model_objects_results(request):
 
 class TestObservability:
 
-    package_dict = {"low_fidelity": ["three_body_problem"]}
-    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 14, package_dict, True, None)], indirect=True)
+    custom_model_dict = {"low_fidelity": ["three_body_problem"]}
+    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 14, custom_model_dict, True, None)], indirect=True)
     def test_observability_history(self, custom_estimation_model_objects_results):
 
         model_type = "low_fidelity"
@@ -157,7 +157,7 @@ class TestMonteCarlo:
 
         simulation_start_epoch = 60390
         propagation_time = 1
-        package_dict = {"low_fidelity": ["three_body_problem"]}
+        custom_model_dict = {"low_fidelity": ["three_body_problem"]}
         get_only_first = True
         custom_initial_state = None
 
@@ -166,13 +166,13 @@ class TestMonteCarlo:
             fidelity_key: {subkey: [[] for value in values]
                 for subkey, values in sub_dict.items()
             }
-            for fidelity_key, sub_dict in utils.get_dynamic_model_objects(60390, 1, package_dict=package_dict, get_only_first=get_only_first).items()
+            for fidelity_key, sub_dict in utils.get_dynamic_model_objects(60390, 1, custom_model_dict=custom_model_dict, get_only_first=get_only_first).items()
         }
 
         # Start the monte carlo simulation with 14 1-day estimations with different starting epochs
         for start_epoch in range(60390, 60404, 1):
 
-            params = (start_epoch, propagation_time, package_dict, get_only_first, custom_initial_state)
+            params = (start_epoch, propagation_time, custom_model_dict, get_only_first, custom_initial_state)
             print(params)
             dynamic_model_objects = utils.get_dynamic_model_objects(*params)
             truth_model = full_fidelity.HighFidelityDynamicModel(*params[:2], custom_initial_state=params[-1])
@@ -202,7 +202,7 @@ class TestMonteCarlo:
 
         ### Plot run times for each model
         keys_list = [["CRTBP"], ["PM", "PM SRP", "SH", "SH SRP"]]
-        key_count = sum(len(sublist) for sublist in package_dict.values())
+        key_count = sum(len(sublist) for sublist in custom_model_dict.values())
         fig, axs = plt.subplots(1, key_count, figsize=(8, 0.75*key_count), sharey=True)
         for i, (model_types, model_names) in enumerate(result_dict.items()):
             for j, (key, values) in enumerate(model_names.items()):

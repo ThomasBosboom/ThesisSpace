@@ -18,20 +18,20 @@ from src.estimation_models import estimation_model
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=None, get_only_first=False, custom_initial_state=None, custom_propagation_time=None):
+def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_initial_state=None, custom_propagation_time=None):
 
-    if package_dict is None:
-        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
+    if custom_model_dict is None:
+        custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
     else:
-        package_dict = package_dict
+        custom_model_dict = custom_model_dict
 
     dynamic_model_objects = {}
-    for package_type, package_name_list in package_dict.items():
+    for package_type, package_name_list in custom_model_dict.items():
         sub_dict = {package_name_list[i]: [] for i in range(len(package_name_list))}
         packages_dir = os.path.join(parent_dir, 'src', 'dynamic_models', package_type)
 
         package_name_counter = 0
-        for package_name in package_dict[package_type]:
+        for package_name in custom_model_dict[package_type]:
             package_module_path = f'dynamic_models.{package_type}.{package_name}'
             package_module = __import__(package_module_path, fromlist=[package_name])
             package_files = os.listdir(os.path.join(packages_dir, package_name))
@@ -127,7 +127,7 @@ def save_figures_to_folder(figs=[], labels=[], save_to_report=True):
 
 def get_dynamic_model_results(simulation_start_epoch_MJD,
                               propagation_time,
-                              package_dict=None,
+                              custom_model_dict=None,
                               get_only_first=False,
                               custom_initial_state=None,
                               step_size=0.01,
@@ -140,7 +140,7 @@ def get_dynamic_model_results(simulation_start_epoch_MJD,
 
     dynamic_model_objects = get_dynamic_model_objects(simulation_start_epoch_MJD,
                                                       propagation_time,
-                                                      package_dict=package_dict,
+                                                      custom_model_dict=custom_model_dict,
                                                       get_only_first=get_only_first,
                                                       custom_initial_state=custom_initial_state,
                                                       custom_propagation_time=custom_propagation_time)

@@ -420,8 +420,8 @@ class TestOutputsDynamicModels:
 
     def test_difference_high_and_low_fidelity(self, simulation_start_epoch_MJD, propagation_time, durations, extras, step_size=0.001):
 
-        package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
-        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+        custom_model_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+        dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=custom_model_dict)
 
         # Pick only the first of teach model name
         dynamic_models = utils.get_first_of_model_types(dynamic_model_objects)
@@ -553,8 +553,8 @@ class TestOutputsDynamicModels:
     #     # Plot the observability history and compare them to the different models
     #     fig, axs = plt.subplots(2, 1, figsize=(10, 5))
 
-    #     package_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]}
-    #     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, package_dict=package_dict)
+    #     custom_model_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]}
+    #     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=custom_model_dict)
     #     custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
     #                                     1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
     #     dynamic_model_objects["low_fidelity"]["three_body_problem"][0] = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state)

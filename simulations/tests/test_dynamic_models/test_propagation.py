@@ -60,7 +60,7 @@ class TestPropagation:
         # Defining dynamic model setup
         simulation_start_epoch_MJD = 60390
         propagation_time = 7
-        package_dict = {model_type_PM: [model_name_PM], model_type: [model_name]}
+        custom_model_dict = {model_type_PM: [model_name_PM], model_type: [model_name]}
         step_size = 0.01
         epoch_in_MJD = True
         solve_variational_equations = False
@@ -70,7 +70,7 @@ class TestPropagation:
         # Initialize dictionaries to store accumulated values
         dynamic_model_objects_results = utils.get_dynamic_model_results(simulation_start_epoch_MJD,
                                                                         propagation_time,
-                                                                        package_dict=package_dict,
+                                                                        custom_model_dict=custom_model_dict,
                                                                         step_size=step_size,
                                                                         epoch_in_MJD=epoch_in_MJD,
                                                                         solve_variational_equations=solve_variational_equations,
@@ -142,7 +142,7 @@ class TestPropagation:
         # Defining dynamic model setup
         simulation_start_epoch_MJD = 60390
         propagation_time = 1
-        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+        custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
         get_only_first = True
         step_size = 0.01
         epoch_in_MJD = True
@@ -153,7 +153,7 @@ class TestPropagation:
         # Initialize dictionaries to store accumulated values
         dynamic_model_objects_results = utils.get_dynamic_model_results(simulation_start_epoch_MJD,
                                                                         propagation_time,
-                                                                        package_dict=package_dict,
+                                                                        custom_model_dict=custom_model_dict,
                                                                         get_only_first=get_only_first,
                                                                         step_size=step_size,
                                                                         epoch_in_MJD=epoch_in_MJD,
@@ -222,8 +222,8 @@ class TestPropagation:
 
     def test_dynamic_model_run_times(self):
 
-        package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
-        # package_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+        custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
+        # custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
         propagation_time = 1
         get_only_first = False
         start_epoch = 60390
@@ -236,12 +236,12 @@ class TestPropagation:
             fidelity_key: {subkey: [[] for value in values]
                 for subkey, values in sub_dict.items()
             }
-            for fidelity_key, sub_dict in utils.get_dynamic_model_objects(start_epoch, propagation_time, package_dict=package_dict, get_only_first=get_only_first).items()
+            for fidelity_key, sub_dict in utils.get_dynamic_model_objects(start_epoch, propagation_time, custom_model_dict=custom_model_dict, get_only_first=get_only_first).items()
         }
 
         start_time = time.time()
         for run_case in run_cases:
-            params = (run_case, propagation_time, package_dict, get_only_first)
+            params = (run_case, propagation_time, custom_model_dict, get_only_first)
             run_times_dict = utils.get_dynamic_model_results(*params, step_size=0.1, entry_list=[-1])
 
             # Accumulate values during the loop
@@ -270,7 +270,7 @@ class TestPropagation:
 
         ### Plot run times for each model
         keys_list = [["CRTBP"], ["PM", "PMSRP", "SH", "SHSRP"], ["FF"]]
-        key_count = sum(len(sublist) for sublist in package_dict.values()) #0.75*key_count
+        key_count = sum(len(sublist) for sublist in custom_model_dict.values()) #0.75*key_count
         fig, axs = plt.subplots(1, key_count, figsize=(6.4, 0.75*5), sharey=True)
         index = 0
         for i, (model_types, model_names) in enumerate(result_dict.items()):
@@ -305,8 +305,8 @@ class TestDifferences:
         simulation_start_epoch_MJD = 60390
         propagation_time = 1
         # {"low_fidelity": ["three_body_problem"]}
-        package_dict = {"high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
-        package_dict = {"high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+        custom_model_dict = {"high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
+        custom_model_dict = {"high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
         get_only_first = True
         step_size = 0.01
         epoch_in_MJD = True
@@ -317,7 +317,7 @@ class TestDifferences:
         # Initialize dictionaries to store accumulated values
         dynamic_model_objects_results = utils.get_dynamic_model_results(simulation_start_epoch_MJD,
                                                                         propagation_time,
-                                                                        package_dict=package_dict,
+                                                                        custom_model_dict=custom_model_dict,
                                                                         get_only_first=get_only_first,
                                                                         step_size=step_size,
                                                                         epoch_in_MJD=epoch_in_MJD,

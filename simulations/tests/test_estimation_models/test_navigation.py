@@ -28,7 +28,7 @@ class TestNavigation():
     # observation_windows = list(zip(batch_start_times, batch_end_times))
 
     # @pytest.mark.parametrize(
-    # "package_dict, truth_model_list, get_only_first, include_station_keeping, observation_windows",
+    # "custom_model_dict, truth_model_list, get_only_first, include_station_keeping, observation_windows",
     # [
     #     ({"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]},
     #     ["low_fidelity", "three_body_problem", 0],
@@ -38,10 +38,10 @@ class TestNavigation():
     # ])
 
 
-    def get_navigation_results(self, package_dict, truth_model_list, get_only_first, observation_windows, include_station_keeping, exclude_first_manouvre):
+    def get_navigation_results(self, custom_model_dict, truth_model_list, get_only_first, observation_windows, include_station_keeping, exclude_first_manouvre):
 
         # Start the simulation
-        dynamic_model_objects = utils.get_dynamic_model_objects(60390, 14, get_only_first=True, package_dict=package_dict)
+        dynamic_model_objects = utils.get_dynamic_model_objects(60390, 14, get_only_first=True, custom_model_dict=custom_model_dict)
 
         # Save histories of the navigation simulations
         results_dict = copy.deepcopy(dynamic_model_objects)
@@ -67,41 +67,42 @@ class TestNavigation():
 
 
 observation_windows = [(60390, 60391), (60391, 60392), (60392, 60393), (60393, 60394), (60394, 60395), (60395, 60396), (60396, 60397), (60397, 60398), (60398, 60399)]
-observation_windows = [(60390, 60398), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
+observation_windows = [(60390, 60400), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
 # observation_windows = [(60391, 60394), (60395, 60398), (60399, 60402), (60403, 60406), (60407, 60410), (60411, 60414)]
 # observation_windows = [(60392, 60394), (60396, 60398), (60400, 60402), (60404, 60406), (60408, 60410), (60412, 60414)]
 # observation_windows = [(60390, 60394), (60397, 60401), (60404, 60405), (60408, 60409), (60412, 60413)]
 # observation_windows = [(60393, 60394), (60397, 60398), (60401, 60402)]
 
-{"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-params = ({"high_fidelity": ["point_mass"]},
-            ["high_fidelity", "point_mass", 0],
-            True,
-            observation_windows,
-            True,
-            True)
+# {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
+# params = ({"high_fidelity": ["point_mass"]},
+#             ["high_fidelity", "point_mass", 0],
+#             True,
+#             observation_windows,
+#             True,
+#             True)
 
-params = ({"low_fidelity": ["three_body_problem"]},
-["low_fidelity", "three_body_problem", 0],
-True,
-observation_windows,
-True,
-True)
 
-# params = ({"high_fidelity": ["spherical_harmonics_srp"]},
-# ["high_fidelity", "spherical_harmonics_srp", 3],
-# True,
-# observation_windows,
-# True,
-# True)
 
-results_dict = TestNavigation().get_navigation_results(*params)
-print(results_dict)
 
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+for i in range(8):
+
+    observation_windows = [(60390, 60390+i), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
+
+    params = ({"low_fidelity": ["three_body_problem"]},
+                ["low_fidelity", "three_body_problem", 0],
+                True,
+                observation_windows,
+                True,
+                True)
+
+
+    results_dict = TestNavigation().get_navigation_results(*params)
+    # print(results_dict)
+
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+    PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
 
 plt.show()

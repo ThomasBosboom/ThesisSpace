@@ -173,7 +173,7 @@ class NavigationSimulator():
                 # Define dynamic models and select one to test the estimation on
                 dynamic_model_objects = utils.get_dynamic_model_objects(time,
                                                                         estimation_arc_duration,
-                                                                        package_dict=None,
+                                                                        custom_model_dict=None,
                                                                         get_only_first=False,
                                                                         custom_initial_state=self.custom_initial_state)
                 dynamic_model = dynamic_model_objects[self.model_type][self.model_name][self.model_number]
