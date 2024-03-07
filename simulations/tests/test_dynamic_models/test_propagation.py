@@ -33,6 +33,15 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 
+# import delftblue
+
+
+# if DELFTBLUE:
+#     file = "test"
+# else:
+#     file = "test2"
+
+
 
 class TestPropagation:
 

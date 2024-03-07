@@ -51,7 +51,7 @@ class EstimationArc:
         self.observation_step_size_doppler = 600
         self.retransmission_delay = 6
         self.integration_time = 0.5
-        self.time_drift_bias = 6.9e-8
+        self.time_drift_bias = 6.9e-10
 
         # Creating observation time vector
         margin = 50
@@ -177,7 +177,7 @@ class EstimationArc:
         self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.dynamic_model.bodies)
 
 
-    def set_estimator_settings(self, maximum_iterations=4):
+    def set_estimator_settings(self, maximum_iterations=6):
 
         self.set_parameters_to_estimate()
 
@@ -274,62 +274,114 @@ class EstimationArc:
                     total_covariance_dict[observable_type][j].append(covariance_dict)
                     total_single_information_dict[observable_type][j].append(single_information_dict)
 
+        plot_residuals = False
+        if plot_residuals:
+            print("ESTIMATION PROPERTIES FOR THE ESTIMATION ARC")
+            parameter_history = estimation_output.parameter_history
+            residual_history = estimation_output.residual_history
+            covariance = estimation_output.covariance
+            formal_errors = estimation_output.formal_errors
+            weighted_design_matrix = estimation_output.weighted_design_matrix
+            residual_history = estimation_output.residual_history
+
+            print("best iteration: ", estimation_output.best_iteration)
+            # print("First: ", parameter_history[:,0])
+            # print("Last: ", parameter_history[:,-1])
+            # print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
+            for i, (observable_type, information_sets) in enumerate(self.sorted_observation_sets.items()):
+                for j, observation_set in enumerate(information_sets.values()):
+                    for k, single_observation_set in enumerate(observation_set):
+
+                        residual_history = estimation_output.residual_history
+
+                        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
+                        subplots_list = [ax1, ax2, ax3, ax4]
+
+                        index = int(len(single_observation_set.observation_times))
+                        for l in range(4):
+                            subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
+                            subplots_list[l].set_ylabel("Observation Residual")
+                            subplots_list[l].set_title("Iteration "+str(l+1))
+
+                        ax3.set_xlabel("Time since J2000 [s]")
+                        ax4.set_xlabel("Time since J2000 [s]")
+
+                        # plt.figure(figsize=(9,5))
+                        # plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
+                        # plt.xlabel('Final iteration range-rate residual')
+                        # plt.ylabel('Occurences [-]')
+                        # plt.title('Histogram of residuals on final iteration')
+
+                        plt.tight_layout()
+                        # plt.show()
+
+
         return estimation_output, total_single_information_dict, \
                total_covariance_dict, total_information_dict, \
                self.sorted_observation_sets
 
+test=False
+if test:
+    # custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+    #                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+    # dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
+    # truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
 
-# custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-#                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-# dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
-# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2, custom_initial_state=None, use_synodic_state=False)
-# dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, 2.5)
-# truth_model = low_fidelity.LowFidelityDynamicModel(60390, 2.5)
-# apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-# initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-# estimation_model = EstimationArc(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
+    custom_initial_state =  np.array([-3.71540223e+08,  1.28764473e+08,  7.45403636e+07, -8.10536637e+01,
+                                      -4.46441097e+02, -5.58911322e+02, -4.29595776e+08,  1.09374240e+08,
+                                       6.28862754e+07, -4.01822951e+02, -8.28967368e+02, -6.92699430e+02])
 
-# # [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
-# #  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08
-# #   1.08399977e+08 -6.68962205e+02 -8.73864980e+02 -7.14321553e+02]
-# results = estimation_model.get_estimation_results(redirect_out=False)
-# estimation_output = results[0]
-# parameter_history = estimation_output.parameter_history
-# residual_history = estimation_output.residual_history
-# covariance = estimation_output.covariance
-# formal_errors = estimation_output.formal_errors
-# weighted_design_matrix = estimation_output.weighted_design_matrix
-# residual_history = estimation_output.residual_history
+    custom_initial_state_truth =  np.array([-3.71489884e+08,  1.28827089e+08,  7.45231487e+07, -8.51869762e+01,
+                                            -4.42230343e+02, -5.49851439e+02, -4.29596784e+08,  1.09373730e+08,
+                                            6.28861326e+07, -4.01829733e+02, -8.28967754e+02, -6.92696484e+02])
 
-# print("First: ", parameter_history[:,0])
-# print("Last: ", parameter_history[:,-1])
-# print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
-# for i, (observable_type, information_sets) in enumerate(results[-1].items()):
-#     for j, observation_set in enumerate(information_sets.values()):
-#         for k, single_observation_set in enumerate(observation_set):
+    dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state)
+    truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state_truth)
+    # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+    # initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+    estimation_model = EstimationArc(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
 
-#             residual_history = estimation_output.residual_history
+    # [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
+    #  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08
+    #   1.08399977e+08 -6.68962205e+02 -8.73864980e+02 -7.14321553e+02]
+    results = estimation_model.get_estimation_results(redirect_out=False)
+    estimation_output = results[0]
+    parameter_history = estimation_output.parameter_history
+    residual_history = estimation_output.residual_history
+    covariance = estimation_output.covariance
+    formal_errors = estimation_output.formal_errors
+    weighted_design_matrix = estimation_output.weighted_design_matrix
+    residual_history = estimation_output.residual_history
 
-#             fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
-#             subplots_list = [ax1, ax2, ax3, ax4]
+    print("First: ", parameter_history[:,0])
+    print("Last: ", parameter_history[:,-1])
+    print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
+    for i, (observable_type, information_sets) in enumerate(results[-1].items()):
+        for j, observation_set in enumerate(information_sets.values()):
+            for k, single_observation_set in enumerate(observation_set):
 
-#             index = int(len(single_observation_set.observation_times))
-#             for l in range(4):
-#                 subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
-#                 subplots_list[l].set_ylabel("Observation Residual")
-#                 subplots_list[l].set_title("Iteration "+str(l+1))
+                residual_history = estimation_output.residual_history
 
-#             ax3.set_xlabel("Time since J2000 [s]")
-#             ax4.set_xlabel("Time since J2000 [s]")
+                fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
+                subplots_list = [ax1, ax2, ax3, ax4]
 
-#             plt.figure(figsize=(9,5))
-#             plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
-#             plt.xlabel('Final iteration range-rate residual')
-#             plt.ylabel('Occurences [-]')
-#             plt.title('Histogram of residuals on final iteration')
+                index = int(len(single_observation_set.observation_times))
+                for l in range(4):
+                    subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
+                    subplots_list[l].set_ylabel("Observation Residual")
+                    subplots_list[l].set_title("Iteration "+str(l+1))
 
-#             plt.tight_layout()
-#             plt.show()
+                ax3.set_xlabel("Time since J2000 [s]")
+                ax4.set_xlabel("Time since J2000 [s]")
+
+                plt.figure(figsize=(9,5))
+                plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
+                plt.xlabel('Final iteration range-rate residual')
+                plt.ylabel('Occurences [-]')
+                plt.title('Histogram of residuals on final iteration')
+
+                plt.tight_layout()
+                plt.show()
 
 
 

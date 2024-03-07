@@ -80,11 +80,15 @@ def get_estimation_model_objects(dynamic_model_objects,
         submodels_dict = {}
         for package_name, dynamic_models in package_names.items():
 
+            # for dynamic_model in dynamic_models:
+                # print(f"VALUE IN UTILS {dynamic_model}: \n", dynamic_model.custom_initial_state)
+
             # Adjust such that full-fidelity model with the correct initial state is used
             if custom_truth_model is None:
                 truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
+                # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.custom_initial_state)
 
             submodels = [estimation_model.EstimationArc(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error) for dynamic_model in dynamic_models]
 

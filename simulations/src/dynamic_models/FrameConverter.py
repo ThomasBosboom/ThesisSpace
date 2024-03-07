@@ -204,13 +204,13 @@ class InertialToSynodicHistoryConverter:
 
     def get_results(self, inertial_state_history):
 
-        epochs, _, dependent_variables_history, _ = \
-            Interpolator.Interpolator(step_size=self.step_size).get_propagation_results(self.dynamic_model)
+        epochs, _, dependent_variables_history = \
+            Interpolator.Interpolator(step_size=self.step_size).get_propagation_results(self.dynamic_model, solve_variational_equations=False)
 
         # Split states into spacecraft states
         state_inertial_lpf, state_inertial_lumio = inertial_state_history[:,:6], inertial_state_history[:,6:]
 
-        # Looping through all epochs to convert each synodic frame element to J2000 Earth-centered
+        # Looping through all epochs to convert each inertial element to the synodic frame
         state_history_inertial_satellites = np.empty(np.shape(inertial_state_history))
         for epoch, state in enumerate(inertial_state_history):
             state_history_inertial_satellites[epoch] = self.convert_inertial_to_synodic_state(inertial_state_history[epoch], dependent_variables_history[epoch, :6])
@@ -221,6 +221,31 @@ class InertialToSynodicHistoryConverter:
         state_history_barycentric_satellites = np.concatenate((state_history_barycentric_lpf, state_history_barycentric_lumio), axis=1)
 
         return epochs, state_history_barycentric_satellites
+
+    # def get_results(self, inertial_state_history, use_dicts=False):
+
+    #     epochs, _, dependent_variables_history, _ = \
+    #         Interpolator.Interpolator(step_size=self.step_size).get_propagation_results(self.dynamic_model)
+
+    #     # Split states into spacecraft states
+    #     state_inertial_lpf, state_inertial_lumio = inertial_state_history[:,:6], inertial_state_history[:,6:]
+
+    #     # Looping through all epochs to convert each inertial element to the synodic frame
+    #     state_history_inertial_satellites = np.empty(np.shape(inertial_state_history))
+    #     for epoch, state in enumerate(inertial_state_history):
+    #         state_history_inertial_satellites[epoch] = self.convert_inertial_to_synodic_state(inertial_state_history[epoch], dependent_variables_history[epoch, :6])
+
+    #     # Convert satellite states to barycentric frame
+    #     state_history_barycentric_lpf = self.convert_state_body_to_barycentric(state_history_inertial_satellites[:,:6], "secondary", state_type="rotating")
+    #     state_history_barycentric_lumio = self.convert_state_body_to_barycentric(state_history_inertial_satellites[:,6:], "secondary", state_type="rotating")
+    #     state_history_barycentric_satellites = np.concatenate((state_history_barycentric_lpf, state_history_barycentric_lumio), axis=1)
+
+    #     # if use_dicts:
+    #     #     for epoch, state in inertial_state_history.items():
+
+
+
+    #     return epochs, state_history_barycentric_satellites
 
 
 

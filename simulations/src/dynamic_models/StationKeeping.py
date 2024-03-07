@@ -29,7 +29,9 @@ class StationKeeping:
     def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch=0):
 
         # Propagate the results of the dynamic model to generate target points
-        print("custom_initial_state at the start:", self.dynamic_model_object.custom_initial_state)
+        # print("custom_initial_state at the start:", self.dynamic_model_object.custom_initial_state)
+
+        # print("INITIAL TIME IN STATTION KEEPING: ", self.dynamic_model_object.simulation_start_epoch_MJD)
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
             Interpolator.Interpolator(epoch_in_MJD=False, step_size=self.step_size).get_propagation_results(self.dynamic_model_object,
                                                                                                             custom_initial_state=self.dynamic_model_object.custom_initial_state,
@@ -93,7 +95,7 @@ class StationKeeping:
 
         delta_v = A @ final_sum
 
-        print("delta_v:", delta_v)
+        # print(r"delta_v: ", delta_v, "Norm: ", np.linalg.norm(delta_v))
 
         # delta_v = -np.linalg.inv(Phi_tvti_rv) @ Phi_tvti_rr @ dr_tc - dv_tc
 
