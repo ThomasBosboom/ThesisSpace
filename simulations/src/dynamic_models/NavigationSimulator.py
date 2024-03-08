@@ -30,7 +30,7 @@ from src.estimation_models import estimation_model
 
 class NavigationSimulator():
 
-    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=0.01, station_keeping_epoch=4, target_point_epochs=[3], include_station_keeping=True, exclude_first_manouvre=False):
+    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=0.01, custom_station_keeping_epochs=None, target_point_epochs=[3], include_station_keeping=True, exclude_first_manouvre=False):
 
         # Miscellaneous
         self.step_size = step_size
@@ -41,7 +41,7 @@ class NavigationSimulator():
 
         # Station keeping parameters
         self.include_station_keeping = include_station_keeping
-        self.station_keeping_epoch = station_keeping_epoch
+        self.custom_station_keeping_epochs = custom_station_keeping_epochs
         self.target_point_epochs = target_point_epochs
         self.exclude_first_manouvre = exclude_first_manouvre
 
@@ -62,17 +62,20 @@ class NavigationSimulator():
         self.times = list(set([self.mission_start_time] + [item for sublist in self.observation_windows for item in sublist] + [self.mission_end_time]))
 
         self.station_keeping_epochs = []
-        if self.include_station_keeping:
-            for station_keeping_epoch in range(self.mission_start_time, self.mission_end_time, 4):
-                if station_keeping_epoch != self.mission_start_time:
-                    self.station_keeping_epochs.append(station_keeping_epoch)
-            if self.exclude_first_manouvre:
-                self.station_keeping_epochs.remove(60394)
+        if custom_station_keeping_epochs is None:
+            if self.include_station_keeping:
+                for station_keeping_epoch in range(self.mission_start_time, self.mission_end_time, 4):
+                    if station_keeping_epoch != self.mission_start_time:
+                        self.station_keeping_epochs.append(station_keeping_epoch)
+                if self.exclude_first_manouvre:
+                    self.station_keeping_epochs.remove(60394)
+        else:
+            self.station_keeping_epochs = custom_station_keeping_epochs
 
-        print(self.station_keeping_epochs)
+        # print(self.station_keeping_epochs)
         self.times.extend(self.station_keeping_epochs)
         self.times = np.round(sorted(list(set(self.times))), 2)
-        print(self.times)
+        # print(self.times)
 
 
     def perform_navigation(self):
@@ -88,12 +91,14 @@ class NavigationSimulator():
         full_state_history_initial_dict = dict()
         full_state_history_final_dict = dict()
         delta_v_dict = dict()
+        full_dependent_variables_history_initial = dict()
+        full_state_transition_matrix_history_initial = dict()
         print("Starting navigation simulation. \n ======================")
         for t, time in enumerate(self.times):
 
             navigation_arc_duration = np.round(np.diff(self.times)[navigation_arc], 2)
 
-            print(f"Start of navigation arc {navigation_arc} at {time} for {navigation_arc_duration} days")
+            # print(f"Start of navigation arc {navigation_arc} at {time} for {navigation_arc_duration} days")
 
             # print(f"EPOCH AND VALUE OF FIRST CUSTOM STATE OF ARC {navigation_arc}: ", self.custom_initial_state)
 
@@ -165,7 +170,7 @@ class NavigationSimulator():
                 observation_window = self.observation_windows[estimation_arc]
                 estimation_arc_duration = np.around(observation_window[1]-observation_window[0], 2)
 
-                print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc},  at {time} for {estimation_arc_duration} days")
+                # print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc},  at {time} for {estimation_arc_duration} days")
 
                 # Define dynamic models and select one to test the estimation on
                 dynamic_model_objects = utils.get_dynamic_model_objects(time,
@@ -200,16 +205,20 @@ class NavigationSimulator():
 
                 # print(f"Diff initial/final parameter arc {estimation_arc}: \n", parameter_history[:,best_iteration]-parameter_history[:,0])
 
-                epochs, state_history_final, dependent_variables_history_final, state_transition_history_final = \
+                epochs, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
                     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model,
                                                                                                     custom_initial_state=parameter_history[:,best_iteration],
                                                                                                     custom_propagation_time=estimation_arc_duration,
                                                                                                     solve_variational_equations=True)
 
+                # print("difference updated trajectory and truth:")
+                # print("Start: ", state_history_final[0,:]-state_history_truth[0,:])
+                # print("Final: ", state_history_final[-1,:]-state_history_truth[-1,:])
+
                 propagated_covariance_final = dict()
                 propagated_formal_errors_final = dict()
                 for i in range(len(epochs)):
-                    propagated_covariance = state_transition_history_final[i] @ estimation_output.covariance @ state_transition_history_final[i].T
+                    propagated_covariance = state_transition_history_matrix_final[i] @ estimation_output.covariance @ state_transition_history_matrix_final[i].T
                     propagated_covariance_final.update({epochs[i]: propagated_covariance})
                     propagated_formal_errors_final.update({epochs[i]: np.sqrt(np.diagonal(propagated_covariance))})
 
@@ -230,7 +239,7 @@ class NavigationSimulator():
                 self.custom_initial_state = state_history_initial[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_initial.values()))[-1]
 
-            process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])/10
+            process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e-2
             process_noise = np.random.normal(scale=process_noise_sigmas, size=len(process_noise_sigmas))
             # process_noise = process_noise_sigmas
             # print(process_noise)
@@ -248,16 +257,22 @@ class NavigationSimulator():
             full_state_history_truth_dict.update(dict(zip(epochs, state_history_truth)))
             full_state_history_initial_dict.update(dict(zip(epochs, state_history_initial)))
 
+            full_dependent_variables_history_initial.update(dict(zip(epochs, dependent_variables_history_initial)))
+            full_state_transition_matrix_history_initial.update(dict(zip(epochs, state_transition_history_initial)))
+
+
             # print("Dict of estimation error: ", full_estimation_error_dict)
 
-            print(f"end of navigation arc {navigation_arc}")
+            # print(f"end of navigation arc {navigation_arc}")
 
             ##############################################################
             #### STATION KEEPING #########################################
             ##############################################################
 
             if self.include_station_keeping:
-                if self.times[navigation_arc+1] in self.station_keeping_epochs:
+                print("self.times: ", self.times[navigation_arc+1])
+                print("Station keeping epochs: ", self.custom_station_keeping_epochs)
+                if self.times[navigation_arc+1] in np.round(self.station_keeping_epochs, 2):
 
                     lists = [[0, self.target_point_epochs]]
                     for i, list1 in enumerate(lists):
@@ -266,11 +281,11 @@ class NavigationSimulator():
                         delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=list1[0], correction_epoch=list1[0], target_point_epochs=list1[1])
 
                     # Generate random noise to simulate station-keeping errors
-                    delta_v_noise = np.random.normal(loc=0, scale=0.00000000002*np.abs(delta_v), size=delta_v.shape)
+                    delta_v_noise = np.random.normal(loc=0, scale=2e-10*np.abs(delta_v), size=delta_v.shape)
                     self.custom_initial_state[9:12] += delta_v
                     self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
 
-                    print(f"Correction at {self.times[navigation_arc+1]}: ", delta_v)
+                    print(f"Correction at {self.times[navigation_arc+1]}: \n", np.linalg.norm(delta_v))
 
                     delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
 
@@ -286,11 +301,12 @@ class NavigationSimulator():
                 break
 
         return full_estimation_error_dict, full_reference_state_deviation_dict, full_propagated_covariance_dict, full_propagated_formal_errors_dict,\
-               full_state_history_reference_dict, full_state_history_truth_dict, full_state_history_initial_dict, full_state_history_final_dict, delta_v_dict
+               full_state_history_reference_dict, full_state_history_truth_dict, full_state_history_initial_dict, full_state_history_final_dict, delta_v_dict,\
+               full_dependent_variables_history_initial, full_state_transition_matrix_history_initial
 
 
 
-# List of tuples representing regions
+# # List of tuples representing regions
 # observation_windows = [(60390, 60391), (60391, 60392), (60392, 60393), (60393, 60394), (60394, 60395), (60395, 60396), (60396, 60397), (60397, 60398), (60398, 60399)]
 # observation_windows = [(60392, 60394), (60396, 60398), (60400, 60402), (60404, 60406), (60408, 60410), (60412, 60414)]
 # observation_windows = [(60393, 60394), (60397, 60398), (60401, 60402), (60405, 60406), (60409, 60410), (60413, 60414)]
@@ -302,6 +318,7 @@ class NavigationSimulator():
 # observation_windows = [(60391, 60393), (60395, 60397), (60399, 60400), (60403, 60405), (60407, 60409), (60411, 60413)]
 # observation_windows = [(60391, 60394), (60395, 60398), (60399, 60402), (60403, 60406), (60407, 60410), (60411, 60414)]
 # observation_windows = [(60391, 60392), (60393, 60394), (60395, 60396), (60397, 60398)]
+# observation_windows = [(60390, 60391), (60392, 60393), (60394, 60395), (60396, 60397)]
 
 
 # dynamic_model_list = ["low_fidelity", "three_body_problem", 0]
@@ -331,7 +348,7 @@ class NavigationSimulator():
 # full_state_history_initial_history = np.stack(list(full_state_history_initial_dict.values()))
 # full_state_history_initial_epochs = np.stack(list(full_state_history_initial_dict.keys()))
 # full_state_history_final_history = np.stack(list(full_state_history_final_dict.values()))
-# full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
+# full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='cubic', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
 
 
 # print("================")

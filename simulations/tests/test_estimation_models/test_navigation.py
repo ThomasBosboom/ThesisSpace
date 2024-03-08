@@ -18,7 +18,7 @@ sys.path.append(parent_dir)
 
 # Own
 from tests import utils
-from src.dynamic_models import Interpolator, NavigationSimulator2, PlotNavigationResults
+from src.dynamic_models import Interpolator, NavigationSimulator, PlotNavigationResults
 
 class TestNavigation():
 
@@ -49,7 +49,7 @@ class TestNavigation():
             for j, (model_name, models) in enumerate(model_names.items()):
                 for k, model in enumerate(models):
 
-                    navigation_simulator = NavigationSimulator2.NavigationSimulator(observation_windows, [model_type, model_name, k], truth_model_list,
+                    navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows, [model_type, model_name, k], truth_model_list,
                                                                                     include_station_keeping=include_station_keeping, exclude_first_manouvre=exclude_first_manouvre,
                                                                                     # custom_station_keeping_epochs=[60394, 60398]
                                                                                     )
@@ -68,8 +68,8 @@ class TestNavigation():
 
 observation_windows = [(60390, 60391), (60391, 60392), (60392, 60393), (60393, 60394), (60394, 60395), (60395, 60396), (60396, 60397), (60397, 60398), (60398, 60399)]
 observation_windows = [(60390, 60400), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
-# observation_windows = [(60391, 60394), (60395, 60398), (60399, 60402), (60403, 60406), (60407, 60410), (60411, 60414)]
-# observation_windows = [(60392, 60394), (60396, 60398), (60400, 60402), (60404, 60406), (60408, 60410), (60412, 60414)]
+observation_windows = [(60391, 60394), (60395, 60398), (60399, 60402)]
+# observation_windows = [(60392, 60394), (60396, 60398), (60400, 60402)]
 # observation_windows = [(60390, 60394), (60397, 60401), (60404, 60405), (60408, 60409), (60412, 60413)]
 # observation_windows = [(60393, 60394), (60397, 60398), (60401, 60402)]
 
@@ -81,28 +81,45 @@ observation_windows = [(60390, 60400), (60401, 60402), (60402, 60406), (60406, 6
 #             True,
 #             True)
 
+i = 7
+observation_windows = [(60390, 60390+i), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
+params = ({"low_fidelity": ["three_body_problem"]},
+            ["low_fidelity", "three_body_problem", 0],
+            True,
+            observation_windows,
+            True,
+            True)
 
+results_dict = TestNavigation().get_navigation_results(*params)
+# print(results_dict)
 
-
-for i in range(8):
-
-    observation_windows = [(60390, 60390+i), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
-
-    params = ({"low_fidelity": ["three_body_problem"]},
-                ["low_fidelity", "three_body_problem", 0],
-                True,
-                observation_windows,
-                True,
-                True)
-
-
-    results_dict = TestNavigation().get_navigation_results(*params)
-    # print(results_dict)
-
-    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-    PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
-
+PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
 plt.show()
+
+
+# for i in range(1, 8, 1):
+
+#     observation_windows = [(60390, 60390+i), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
+
+#     params = ({"low_fidelity": ["three_body_problem"]},
+#                 ["low_fidelity", "three_body_problem", 0],
+#                 True,
+#                 observation_windows,
+#                 True,
+#                 True)
+
+
+#     results_dict = TestNavigation().get_navigation_results(*params)
+#     # print(results_dict)
+
+#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+#     PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+
+# plt.show()

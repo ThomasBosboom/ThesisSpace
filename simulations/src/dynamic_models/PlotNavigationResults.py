@@ -52,7 +52,7 @@ class PlotNavigationResults():
                     state_history_truth = results[5][1]
                     state_history_initial = results[6][1]
                     state_history_final = results[7][1]
-                    dynamic_model = results[9]
+                    dynamic_model = results[-2]
 
                     # Storing some plots
                     ax_3d.plot(state_history_reference[:,0], state_history_reference[:,1], state_history_reference[:,2], label="LPF ref", color="green")

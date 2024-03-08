@@ -10,7 +10,7 @@ import scipy as sp
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Own
-from dynamic_models import NavigationSimulator2, PlotNavigationResults
+from dynamic_models import NavigationSimulator, PlotNavigationResults
 from tests import utils
 
 
@@ -64,7 +64,7 @@ class WindowOptimizer():
         print("observation windows: \n", observation_windows)
         # print("custom station keeping windows: \n", custom_station_keeping_epochs)
 
-        navigation_simulator = NavigationSimulator2.NavigationSimulator(observation_windows,
+        navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
                                                                        [self.model_type, self.model_name, self.model_number],
                                                                        [self.model_type_truth, self.model_name_truth, self.model_number_truth],
                                                                        exclude_first_manouvre=False,
@@ -106,15 +106,22 @@ class WindowOptimizer():
     def optimize(self):
 
         # Design vector
-        # x = [t_1, t_2, t_3, t_4, t_skm1, t_skm2, t_skm3, t_skm4]
-        mission_duration = 4
+        mission_duration = 14
         mission_start_time = 60390
+        set_up_phase_time = mission_start_time + 4
         skm_obs = 4
-        t_od_array = np.arange(3, mission_duration+1, skm_obs)
-        t_skm_array = np.arange(4, mission_duration+1, skm_obs)
-        len_od_array = len(t_od_array)
-        len_skm_array = len(t_skm_array)
-        x0 = np.concatenate((t_od_array, t_skm_array)) + mission_start_time
+
+
+        t_od_array = np.arange(3, mission_duration+1, skm_obs)  + mission_start_time
+        for i, t in enumerate(t_od_array):
+            if t < set_up_phase_time:
+                t_od_array = np.delete(t_od_array, i)
+        print(t_od_array)
+        # t_skm_array = np.arange(4, mission_duration+1, skm_obs)
+        # len_od_array = len(t_od_array)
+        # len_skm_array = len(t_skm_array)
+        # x0 = np.concatenate((t_od_array, t_skm_array)) + mission_start_time
+        x0 = t_od_array
         print("Initial state: \n", x0)
 
 
@@ -126,8 +133,10 @@ class WindowOptimizer():
         # Define boundaries for the design vector entries
         # xl = np.array([60390, 60394, 60398, 60402, 60393, 60397, 60401, 60405])
         # xu = np.array([60396, 60400, 60404, 60408, 60395, 60399, 60403, 60407])
-        xl = x0 + np.concatenate((-0.5*np.ones(len_od_array),-1*np.ones(len_skm_array)))
-        xu = x0 + np.concatenate((0.5*np.ones(len_od_array),1*np.ones(len_skm_array)))
+        # xl = x0 + np.concatenate((-0.5*np.ones(len_od_array),-1*np.ones(len_skm_array)))
+        # xu = x0 + np.concatenate((0.5*np.ones(len_od_array),1*np.ones(len_skm_array)))
+        xl = x0 - 0.5*np.ones(len(t_od_array))
+        xu = x0 + 0.5*np.ones(len(t_od_array))
         print("Lower bound: \n", xl)
         print("Upper bound: \n", xu)
         # xl = np.array([0, 4, 8, 12, -1, -1, -1, -1])
@@ -176,9 +185,9 @@ class WindowOptimizer():
 
 dynamic_model_list = ["low_fidelity", "three_body_problem", 0]
 truth_model_list = ["low_fidelity", "three_body_problem", 0]
-dynamic_model_list = ["high_fidelity", "point_mass", 0]
-truth_model_list = ["high_fidelity", "point_mass", 0]
-observation_windows = [(60393, 60394), (60397, 60398), (60401, 60402)]
+# dynamic_model_list = ["high_fidelity", "point_mass", 0]
+# truth_model_list = ["high_fidelity", "point_mass", 0]
+# observation_windows = [(60393, 60394), (60397, 60398), (60401, 60402)]
 # observation_windows = [(60398, 60400), (60402, 60406)]
 
 
