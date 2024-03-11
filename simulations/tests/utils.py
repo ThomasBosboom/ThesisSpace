@@ -90,7 +90,7 @@ def get_estimation_model_objects(dynamic_model_objects,
                 truth_model = custom_truth_model
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.custom_initial_state)
 
-            submodels = [estimation_model.EstimationArc(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error) for dynamic_model in dynamic_models]
+            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error) for dynamic_model in dynamic_models]
 
             submodels_dict[package_name] = submodels
         estimation_model_objects[package_type] = submodels_dict

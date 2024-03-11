@@ -1,13 +1,7 @@
 # Standard
 import os
 import sys
-import copy
 import numpy as np
-import time
-import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
-from scipy.interpolate import interp1d
-
 
 # Define path to import src files
 script_directory = os.path.dirname(os.path.realpath(__file__))
@@ -19,18 +13,14 @@ sys.path.append(parent_dir)
 from tests import utils
 from src.dynamic_models import validation
 from src.dynamic_models import Interpolator, StationKeeping
-from src.dynamic_models.full_fidelity.full_fidelity import *
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 
+np.random.seed(0)
+
 class NavigationSimulator():
 
-    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=0.01, custom_station_keeping_epochs=None, target_point_epochs=[3], include_station_keeping=True, exclude_first_manouvre=False):
+    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=1e-2, custom_station_keeping_epochs=None, target_point_epochs=[3], include_station_keeping=True, exclude_first_manouvre=False):
 
         # Miscellaneous
         self.step_size = step_size
@@ -45,10 +35,16 @@ class NavigationSimulator():
         self.target_point_epochs = target_point_epochs
         self.exclude_first_manouvre = exclude_first_manouvre
 
+        # Initial state and uncertainty parameters
         self.custom_initial_state = None
         self.custom_initial_state_truth = None
-        self.initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/10
+        self.initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
         self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+
+        # Adjusting decimals based on the step size used
+        num_str = "{:.15f}".format(step_size).rstrip('0')
+        self.decimal_places = len(num_str) - num_str.index('.') - 1
+        # print("DECIMAL PLACES: ", self.decimal_places)
 
         # Managing the timing aspect of the navigation arcs
         self.observation_windows = observation_windows
@@ -59,23 +55,29 @@ class NavigationSimulator():
         self.batch_start_times = np.array([t[0] for t in self.observation_windows])
         self.batch_end_times = np.array([t[1] for t in self.observation_windows])
 
+        # print(self.observation_windows)
+
         self.times = list(set([self.mission_start_time] + [item for sublist in self.observation_windows for item in sublist] + [self.mission_end_time]))
 
         self.station_keeping_epochs = []
         if custom_station_keeping_epochs is None:
             if self.include_station_keeping:
-                for station_keeping_epoch in range(self.mission_start_time, self.mission_end_time, 4):
+                for station_keeping_epoch in range(int(self.mission_start_time), int(self.mission_end_time)+4, 4):
                     if station_keeping_epoch != self.mission_start_time:
                         self.station_keeping_epochs.append(station_keeping_epoch)
+                    # print(self.station_keeping_epochs)
                 if self.exclude_first_manouvre:
-                    self.station_keeping_epochs.remove(60394)
+                    if 60394 in self.station_keeping_epochs:
+                        self.station_keeping_epochs.remove(60394)
         else:
             self.station_keeping_epochs = custom_station_keeping_epochs
 
-        # print(self.station_keeping_epochs)
+
         self.times.extend(self.station_keeping_epochs)
-        self.times = np.round(sorted(list(set(self.times))), 2)
-        # print(self.times)
+        self.times = np.round(sorted(list(set(self.times))), self.decimal_places)
+        print("times: ", self.times)
+        print("station keeping epochs: ", self.station_keeping_epochs)
+
 
 
     def perform_navigation(self):
@@ -93,10 +95,10 @@ class NavigationSimulator():
         delta_v_dict = dict()
         full_dependent_variables_history_initial = dict()
         full_state_transition_matrix_history_initial = dict()
-        print("Starting navigation simulation. \n ======================")
+        print("Start navigation simulation ======================")
         for t, time in enumerate(self.times):
 
-            navigation_arc_duration = np.round(np.diff(self.times)[navigation_arc], 2)
+            navigation_arc_duration = np.round(np.diff(self.times)[navigation_arc], self.decimal_places)
 
             # print(f"Start of navigation arc {navigation_arc} at {time} for {navigation_arc_duration} days")
 
@@ -168,7 +170,7 @@ class NavigationSimulator():
                 estimation_arc_activated = True
 
                 observation_window = self.observation_windows[estimation_arc]
-                estimation_arc_duration = np.around(observation_window[1]-observation_window[0], 2)
+                estimation_arc_duration = np.around(observation_window[1]-observation_window[0], self.decimal_places)
 
                 # print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc},  at {time} for {estimation_arc_duration} days")
 
@@ -192,7 +194,7 @@ class NavigationSimulator():
                                                                                     apriori_covariance=self.apriori_covariance,
                                                                                     initial_state_error=self.initial_state_error)
                 # print("START THE LATTER ESTIMATOR")
-                # test = estimation_model.EstimationArc(dynamic_model, truth_model, apriori_covariance=self.apriori_covariance, initial_state_error=self.initial_state_error).get_estimation_results()
+                # test = estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=self.apriori_covariance, initial_state_error=self.initial_state_error).get_estimation_results()
                 # print(test)
                 # plt.show()
 
@@ -248,9 +250,10 @@ class NavigationSimulator():
                 # self.custom_initial_state += process_noise
                 self.apriori_covariance += np.outer(process_noise, process_noise)
 
+
+
             # Save histories for reading out later
             full_estimation_error_dict.update(dict(zip(epochs, state_history_initial-state_history_truth)))
-            full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_initial-state_history_reference)))
             full_propagated_covariance_dict.update(propagated_covariance_initial)
             full_propagated_formal_errors_dict.update(propagated_formal_errors_initial)
             full_state_history_reference_dict.update(dict(zip(epochs, state_history_reference)))
@@ -259,6 +262,10 @@ class NavigationSimulator():
 
             full_dependent_variables_history_initial.update(dict(zip(epochs, dependent_variables_history_initial)))
             full_state_transition_matrix_history_initial.update(dict(zip(epochs, state_transition_history_initial)))
+
+            if len(state_history_reference) != len(state_history_initial):
+                state_history_initial = state_history_initial[:-1,:]
+            full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_initial-state_history_reference)))
 
 
             # print("Dict of estimation error: ", full_estimation_error_dict)
@@ -270,9 +277,9 @@ class NavigationSimulator():
             ##############################################################
 
             if self.include_station_keeping:
-                print("self.times: ", self.times[navigation_arc+1])
-                print("Station keeping epochs: ", self.custom_station_keeping_epochs)
-                if self.times[navigation_arc+1] in np.round(self.station_keeping_epochs, 2):
+                # print("self.times: ", self.times[navigation_arc+1])
+                # print("Station keeping epochs: ", self.custom_station_keeping_epochs)
+                if self.times[navigation_arc+1] in np.round(self.station_keeping_epochs, self.decimal_places):
 
                     lists = [[0, self.target_point_epochs]]
                     for i, list1 in enumerate(lists):
@@ -297,196 +304,9 @@ class NavigationSimulator():
             if navigation_arc<len(self.times)-2:
                 navigation_arc += 1
             else:
-                print("Navigation simulation has ended.")
+                print("End navigation simulation ======================")
                 break
 
         return full_estimation_error_dict, full_reference_state_deviation_dict, full_propagated_covariance_dict, full_propagated_formal_errors_dict,\
                full_state_history_reference_dict, full_state_history_truth_dict, full_state_history_initial_dict, full_state_history_final_dict, delta_v_dict,\
                full_dependent_variables_history_initial, full_state_transition_matrix_history_initial
-
-
-
-# # List of tuples representing regions
-# observation_windows = [(60390, 60391), (60391, 60392), (60392, 60393), (60393, 60394), (60394, 60395), (60395, 60396), (60396, 60397), (60397, 60398), (60398, 60399)]
-# observation_windows = [(60392, 60394), (60396, 60398), (60400, 60402), (60404, 60406), (60408, 60410), (60412, 60414)]
-# observation_windows = [(60393, 60394), (60397, 60398), (60401, 60402), (60405, 60406), (60409, 60410), (60413, 60414)]
-# observation_windows = [(60390, 60391), (60392, 60393), (60394, 60395), (60396, 60397), (60398, 60399), (60400, 60401)]
-# observation_windows = [(60391, 60392), (60393, 60394), (60395, 60396), (60397, 60398), (60399, 60400), (60401, 60402),
-#                         (60401, 60402), (60403, 60404), (60405, 60406), (60407, 60408),(60409, 60410), (60411, 60412)
-#                       ]
-# observation_windows = [(60392, 60394), (60396, 60398), (60400, 60402), (60404, 60406), (60408, 60410), (60412, 60414)]
-# observation_windows = [(60391, 60393), (60395, 60397), (60399, 60400), (60403, 60405), (60407, 60409), (60411, 60413)]
-# observation_windows = [(60391, 60394), (60395, 60398), (60399, 60402), (60403, 60406), (60407, 60410), (60411, 60414)]
-# observation_windows = [(60391, 60392), (60393, 60394), (60395, 60396), (60397, 60398)]
-# observation_windows = [(60390, 60391), (60392, 60393), (60394, 60395), (60396, 60397)]
-
-
-# dynamic_model_list = ["low_fidelity", "three_body_problem", 0]
-# truth_model_list = ["low_fidelity", "three_body_problem", 0]
-# # dynamic_model_list = ["high_fidelity", "point_mass", 0]
-# # truth_model_list = ["high_fidelity", "point_mass", 0]
-# # dynamic_model_list = ["high_fidelity", "spherical_harmonics_srp", 3]
-# # truth_model_list = ["high_fidelity", "spherical_harmonics_srp", 3]
-# mission_start_time = 60390
-
-
-# navigation_simulator = NavigationSimulator(observation_windows, dynamic_model_list, truth_model_list, include_station_keeping=True, exclude_first_manouvre=True)
-# full_estimation_error_dict, full_reference_state_deviation_dict, full_propagated_covariance_dict, full_propagated_formal_errors_dict,\
-#                full_state_history_reference_dict, full_state_history_truth_dict, full_state_history_initial_dict, full_state_history_final_dict, delta_v_dict = navigation_simulator.perform_navigation()
-
-# propagated_covariance_epochs = np.stack(list(full_propagated_covariance_dict.keys()))
-# propagated_covariance_history = np.stack(list(full_propagated_covariance_dict.values()))
-# full_estimation_error_epochs = np.stack(list(full_estimation_error_dict.keys()))
-# full_estimation_error_history = np.stack(list(full_estimation_error_dict.values()))
-# full_reference_state_deviation_epochs = np.stack(list(full_reference_state_deviation_dict.keys()))
-# full_reference_state_deviation_history = np.stack(list(full_reference_state_deviation_dict.values()))
-# full_propagated_formal_errors_epochs = np.stack(list(full_propagated_formal_errors_dict.keys()))
-# full_propagated_formal_errors_history = np.stack(list(full_propagated_formal_errors_dict.values()))
-
-# full_state_history_reference_history = np.stack(list(full_state_history_reference_dict.values()))
-# full_state_history_truth_history = np.stack(list(full_state_history_truth_dict.values()))
-# full_state_history_initial_history = np.stack(list(full_state_history_initial_dict.values()))
-# full_state_history_initial_epochs = np.stack(list(full_state_history_initial_dict.keys()))
-# full_state_history_final_history = np.stack(list(full_state_history_final_dict.values()))
-# full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='cubic', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
-
-
-# print("================")
-
-# print("total delta_v: ", delta_v_dict)
-
-
-# # print("keys estimation error: ", [key for key in full_estimation_error_dict.keys()])
-# # print("keys truth history error: ", [key for key in full_state_history_truth_dict.keys()])
-# # print("keys truth initial error: ", [key for key in full_state_history_initial_dict.keys()])
-
-# # print("diff estimation and truth: ", np.array([key for key in full_estimation_error_dict.keys()])-np.array([key for key in full_state_history_truth_dict.keys()]))
-# # print("diff estimation and initial: ", np.array([key for key in full_estimation_error_dict.keys()])-np.array([key for key in full_state_history_initial_dict.keys()]))
-# # print("diff truth and initial: ", np.array([key for key in full_state_history_truth_dict.keys()])-np.array([key for key in full_state_history_initial_dict.keys()]))
-# # print("length of the estimation dict: ", np.shape(np.array([key for key in full_estimation_error_dict.keys()])))
-# # print("length of the initial dict: ", np.shape(np.array([key for key in full_state_history_initial_dict.keys()])))
-# # print("length of the truth dict: ", np.shape(np.array([key for key in full_state_history_truth_dict.keys()])))
-
-# fig, ax = plt.subplots(3, 1, figsize=(9, 5), sharex=True)
-# plt.title("position")
-# ax[0].plot(full_state_history_initial_epochs, full_state_history_initial_history[:,8]-full_state_history_truth_history[:,8], label="error", color="blue", marker="+")
-# ax[1].plot(full_state_history_initial_epochs, full_state_history_initial_history[:,8], label="estimated", color="red", marker="+")
-# ax[2].plot(full_state_history_initial_epochs, full_state_history_truth_history[:,8], label="truth", color="green", marker="+")
-# # ax[0].set_xlim(198, 202)
-# # plt.show()
-
-# fig, ax = plt.subplots(3, 1, figsize=(9, 5), sharex=True)
-# plt.title("velocity")
-# ax[0].plot(full_state_history_initial_epochs, full_state_history_initial_history[:,11]-full_state_history_truth_history[:,11], label="error", color="blue", marker="+")
-# ax[1].plot(full_state_history_initial_epochs, full_state_history_initial_history[:,11], label="estimated", color="red", marker="+")
-# ax[2].plot(full_state_history_initial_epochs, full_state_history_truth_history[:,11], label="truth", color="green", marker="+")
-# # ax[0].set_xlim(198, 202)
-# # plt.show()
-
-
-
-# fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
-# # reference_epoch_array = mission_start_time*np.ones(np.shape(full_reference_state_deviation_epochs))
-# for j in range(2):
-#     labels = ["x", "y", "z"]
-#     start_epoch = full_reference_state_deviation_epochs[0]
-#     relative_epoch = full_reference_state_deviation_epochs-full_reference_state_deviation_epochs[0]
-#     for i in range(3):
-#         ax[j].plot(relative_epoch, full_reference_state_deviation_history[:,6*j+i], label=labels[i])
-#     for i, gap in enumerate(observation_windows):
-#         ax[j].axvspan(
-#             xmin=gap[0]-start_epoch,
-#             xmax=gap[1]-start_epoch,
-#             color="gray",
-#             alpha=0.1,
-#             label="Observation window" if i == 0 else None)
-#     ax[j].set_ylabel(r"$\mathbf{r}-\hat{\mathbf{r}}_{ref}$ [m]")
-#     ax[j].grid(alpha=0.5, linestyle='--')
-# ax[-1].set_xlabel(f"Time since MJD {mission_start_time} [days]")
-# ax[0].set_title("LPF")
-# ax[1].set_title("LUMIO")
-# fig.suptitle("Deviation from reference orbit")
-# plt.legend()
-# # plt.show()
-
-# fig1_3d = plt.figure()
-# ax = fig1_3d.add_subplot(111, projection='3d')
-# ax.plot(full_state_history_reference_history[:,0], full_state_history_reference_history[:,1], full_state_history_reference_history[:,2], label="LPF ref", color="green")
-# ax.plot(full_state_history_reference_history[:,6], full_state_history_reference_history[:,7], full_state_history_reference_history[:,8], label="LUMIO ref", color="green")
-# ax.plot(full_state_history_initial_history[:,0], full_state_history_initial_history[:,1], full_state_history_initial_history[:,2], label="LPF estimated")
-# ax.plot(full_state_history_initial_history[:,6], full_state_history_initial_history[:,7], full_state_history_initial_history[:,8], label="LUMIO estimated")
-# # ax.plot(full_state_history_final_history[:,0], full_state_history_final_history[:,1], full_state_history_final_history[:,2], label="LPF estimated")
-# # ax.plot(full_state_history_final_history[:,6], full_state_history_final_history[:,7], full_state_history_final_history[:,8], label="LUMIO estimated")
-# ax.plot(full_state_history_truth_history[:,0], full_state_history_truth_history[:,1], full_state_history_truth_history[:,2], label="LPF truth", color="black", ls="--")
-# ax.plot(full_state_history_truth_history[:,6], full_state_history_truth_history[:,7], full_state_history_truth_history[:,8], label="LUMIO truth", color="black", ls="--")
-# ax.set_xlabel('X [m]')
-# ax.set_ylabel('Y [m]')
-# ax.set_zlabel('Z [m]')
-# plt.legend()
-
-
-
-
-# # show areas where there are no observations:
-# fig, ax = plt.subplots(2, 1, figsize=(9, 5), sharex=True)
-# start_epoch = full_propagated_formal_errors_epochs[0]
-# relative_epochs = full_propagated_formal_errors_epochs-start_epoch
-# ax[0].plot(relative_epochs, 3*full_propagated_formal_errors_history[:,0:3], label=[r"$3\sigma_{x}$", r"$3\sigma_{y}$", r"$3\sigma_{z}$"])
-# ax[1].plot(relative_epochs, 3*full_propagated_formal_errors_history[:,6:9], label=[r"$3\sigma_{x}$", r"$3\sigma_{y}$", r"$3\sigma_{z}$"])
-# for j in range(2):
-#     for i, gap in enumerate(observation_windows):
-#         ax[j].axvspan(
-#             xmin=gap[0]-start_epoch,
-#             xmax=gap[1]-start_epoch,
-#             color="gray",
-#             alpha=0.1,
-#             label="Observation window" if i == 0 else None)
-#         ax[j].set_ylabel(r"$\sigma$ [m]")
-#         ax[j].grid(alpha=0.5, linestyle='--')
-#         ax[j].set_yscale("log")
-# ax[-1].set_xlabel(f"Time since MJD {mission_start_time} [days]")
-# ax[0].set_title("LPF")
-# ax[1].set_title("LUMIO")
-# fig.suptitle("Propagated formal errors")
-# plt.legend()
-
-# fig, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
-# for k in range(2):
-#     for j in range(2):
-#         colors = ["red", "green", "blue"]
-#         symbols = [[r"x", r"y", r"z"], [r"v_{x}", r"v_{y}", r"v_{z}"]]
-#         ylabels = [r"$\mathbf{r}-\hat{\mathbf{r}}$ [m]", r"$\mathbf{v}-\hat{\mathbf{v}}$ [m]"]
-#         for i in range(3):
-#             sigma = 3*full_propagated_formal_errors_history[:, 3*k+6*j+i]
-#             start_epoch = propagated_covariance_epochs[0]
-#             relative_epochs = propagated_covariance_epochs-start_epoch
-#             ax[k][j].plot(relative_epochs, sigma, color=colors[i], ls="--", label=f"$3\sigma_{{{symbols[k][i]}}}$", alpha=0.3)
-#             ax[k][j].plot(relative_epochs, -sigma, color=colors[i], ls="-.", alpha=0.3)
-#             ax[k][j].plot(relative_epochs, full_estimation_error_history[:,3*k+6*j+i], color=colors[i], label=f"${symbols[k][i]}-\hat{{{symbols[k][i]}}}$")
-#         ax[k][0].set_ylabel(ylabels[k])
-#         ax[k][j].grid(alpha=0.5, linestyle='--')
-#         for i, gap in enumerate(observation_windows):
-#             ax[k][j].axvspan(
-#                 xmin=gap[0]-start_epoch,
-#                 xmax=gap[1]-start_epoch,
-#                 color="gray",
-#                 alpha=0.1,
-#                 label="Observation window" if i == 0 else None)
-
-#         # ax[0][0].set_ylim(-1000, 1000)
-#         # ax[1][0].set_ylim(-0.3, 0.3)
-
-#         ax[-1][j].set_xlabel(f"Time since MJD {mission_start_time} [days]")
-
-#         # Set y-axis tick label format to scientific notation with one decimal place
-#         ax[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-#         ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-
-#     ax[k][0].set_title("LPF")
-#     ax[k][1].set_title("LUMIO")
-#     ax[k][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
-
-# fig.suptitle("Estimation errors")
-# plt.tight_layout()
-
-# plt.show()

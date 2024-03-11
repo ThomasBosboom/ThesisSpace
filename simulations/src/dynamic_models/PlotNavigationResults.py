@@ -20,14 +20,10 @@ from src.dynamic_models import FrameConverter
 
 class PlotNavigationResults():
 
-    def __init__(self, results_dict, step_size=0.01):
+    def __init__(self, results_dict, sigma_number=3):
 
         self.results_dict = results_dict
-        # self.observation_windows = observation_windows
-
-        self.sigma_number = 3
-        # self.mission_start_epoch = 60390
-        self.step_size = step_size
+        self.sigma_number = sigma_number
 
         for i, (model_type, model_names) in enumerate(self.results_dict.items()):
             for j, (model_name, models) in enumerate(model_names.items()):
@@ -35,6 +31,7 @@ class PlotNavigationResults():
                     self.mission_start_epoch = results[-1].mission_start_time
                     self.observation_windows = results[-1].observation_windows
                     self.station_keeping_epochs = results[-1].station_keeping_epochs
+                    self.step_size = results[-1].step_size
 
 
     def plot_full_state_history(self):

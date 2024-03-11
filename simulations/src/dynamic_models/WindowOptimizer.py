@@ -30,7 +30,7 @@ from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
 from src.estimation_models import estimation_model
 
 
-class WindowOptimizer():
+class OptimizationModel():
 
     def __init__(self, dynamic_model, angle_treshold=30, step_size=0.001):
 
@@ -83,7 +83,7 @@ class WindowOptimizer():
 
 
 
-    def get_observation_windows(self):
+    def get_initial_observation_windows(self):
 
 
         epochs, state_history, dependent_variables_history, state_transition_history = \
@@ -251,15 +251,15 @@ model_number = 0
 dynamic_model_objects = utils.get_dynamic_model_objects(60390, 28)
 dynamic_model = dynamic_model_objects[model_type][model_name][model_number]
 
-window_optimizer = WindowOptimizer(dynamic_model, angle_treshold=40, step_size=0.01)
-observation_windows = window_optimizer.get_observation_windows()
+optimization_model = OptimizationModel(dynamic_model, angle_treshold=40, step_size=0.01)
+observation_windows = optimization_model.get_initial_observation_windows()
 
 print(observation_windows)
 
 
 
 # # Example usage
-# optimized_start_times, optimized_end_times, iteration_history = window_optimizer.optimize_intervals()
+# optimized_start_times, optimized_end_times, iteration_history = optimization_model.optimize_intervals()
 # print("Optimized start times:", optimized_start_times)
 # print("Corresponding end times:", optimized_end_times)
 

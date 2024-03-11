@@ -38,7 +38,7 @@ class TestNavigation():
     # ])
 
 
-    def get_navigation_results(self, custom_model_dict, truth_model_list, get_only_first, observation_windows, include_station_keeping, exclude_first_manouvre):
+    def get_navigation_results(self, custom_model_dict, truth_model_list, get_only_first, observation_windows, include_station_keeping, exclude_first_manouvre, custom_station_keeping_epochs):
 
         # Start the simulation
         dynamic_model_objects = utils.get_dynamic_model_objects(60390, 14, get_only_first=True, custom_model_dict=custom_model_dict)
@@ -51,7 +51,7 @@ class TestNavigation():
 
                     navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows, [model_type, model_name, k], truth_model_list,
                                                                                     include_station_keeping=include_station_keeping, exclude_first_manouvre=exclude_first_manouvre,
-                                                                                    # custom_station_keeping_epochs=[60394, 60398]
+                                                                                    custom_station_keeping_epochs=custom_station_keeping_epochs
                                                                                     )
 
                     results_dict[model_type][model_name][k] = []
@@ -66,60 +66,74 @@ class TestNavigation():
 
 
 
-observation_windows = [(60390, 60391), (60391, 60392), (60392, 60393), (60393, 60394), (60394, 60395), (60395, 60396), (60396, 60397), (60397, 60398), (60398, 60399)]
-observation_windows = [(60390, 60400), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
-observation_windows = [(60391, 60394), (60395, 60398), (60399, 60402)]
-# observation_windows = [(60392, 60394), (60396, 60398), (60400, 60402)]
-# observation_windows = [(60390, 60394), (60397, 60401), (60404, 60405), (60408, 60409), (60412, 60413)]
-# observation_windows = [(60393, 60394), (60397, 60398), (60401, 60402)]
+dictionary = dict()
+for i in np.arange(-2.0, 2.0, 0.4):
+    for j in np.arange(-2.0, 2.0, 0.4):
 
-# {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-# params = ({"high_fidelity": ["point_mass"]},
-#             ["high_fidelity", "point_mass", 0],
-#             True,
-#             observation_windows,
-#             True,
-#             True)
+        observation_windows =   [(60390, 60394), (60396+i, 60400+j)]
 
-i = 7
-observation_windows = [(60390, 60390+i), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
-params = ({"low_fidelity": ["three_body_problem"]},
-            ["low_fidelity", "three_body_problem", 0],
-            True,
-            observation_windows,
-            True,
-            True)
+        model_type = "low_fidelity"
+        model_name = "three_body_problem"
+        model_type = "high_fidelity"
+        model_name = "point_mass"
+        params = ({model_type: [model_name]},
+                    [model_type, model_name, 0],
+                    True,
+                    observation_windows,
+                    True,
+                    True,
+                    [60400+j])
 
-results_dict = TestNavigation().get_navigation_results(*params)
-# print(results_dict)
+        results_dict = TestNavigation().get_navigation_results(*params)
+        delta_v = results_dict[model_type][model_name][0][8][1]
+        objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
+        print("Window: ", observation_windows)
+        print("Objective: ", objective_value)
 
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+        dictionary[str([(60396+i), (60400+j)])] = [objective_value]
+
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+
+print(dictionary)
+
 plt.show()
 
 
-# for i in range(1, 8, 1):
+dictionary = dict()
+for i in np.arange(-2.0, 2.0, 0.4):
 
-#     observation_windows = [(60390, 60390+i), (60401, 60402), (60402, 60406), (60406, 60410), (60410, 60414)]
+    observation_windows =   [(60390, 60394), (60397+i, 60399)]
 
-#     params = ({"low_fidelity": ["three_body_problem"]},
-#                 ["low_fidelity", "three_body_problem", 0],
-#                 True,
-#                 observation_windows,
-#                 True,
-#                 True)
+    model_type = "low_fidelity"
+    model_name = "three_body_problem"
+    model_type = "high_fidelity"
+    model_name = "point_mass"
+    params = ({model_type: [model_name]},
+                [model_type, model_name, 0],
+                True,
+                observation_windows,
+                True,
+                True,
+                [60399])
 
+    results_dict = TestNavigation().get_navigation_results(*params)
+    delta_v = results_dict[model_type][model_name][0][8][1]
+    objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
+    print("Window: ", observation_windows)
+    print("Objective: ", objective_value)
 
-#     results_dict = TestNavigation().get_navigation_results(*params)
-#     # print(results_dict)
+    dictionary[str(60397+i)] = [objective_value]
 
-#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-#     PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-#     # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+    PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+    PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
 
-# plt.show()
+print(dictionary)
+
+plt.show()

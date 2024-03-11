@@ -5,20 +5,14 @@ import os
 import sys
 
 # Tudatpy imports
-import tudatpy
 from tudatpy import util
-from tudatpy.kernel.interface import spice
-from tudatpy.kernel import constants, numerical_simulation
-from tudatpy.kernel.numerical_simulation import estimation
-from tudatpy.kernel.numerical_simulation import propagation_setup, environment_setup, estimation_setup
-from tudatpy.kernel.astro import time_conversion, element_conversion, frame_conversion
+from tudatpy.kernel import numerical_simulation
+from tudatpy.kernel.numerical_simulation import estimation, estimation_setup
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Own
-from dynamic_models import Interpolator
-from dynamic_models import validation
 from dynamic_models.full_fidelity import *
 from dynamic_models.low_fidelity.three_body_problem import *
 from dynamic_models.high_fidelity.point_mass import *
@@ -27,7 +21,9 @@ from dynamic_models.high_fidelity.spherical_harmonics import *
 from dynamic_models.high_fidelity.spherical_harmonics_srp import *
 
 
-class EstimationArc:
+np.random.seed(0)
+
+class EstimationModel:
 
     def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_state_error=None, include_consider_parameters=False):
 
@@ -54,7 +50,7 @@ class EstimationArc:
         self.time_drift_bias = 6.9e-10
 
         # Creating observation time vector
-        margin = 50
+        margin = 60
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_range)
         self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_doppler)
 
@@ -337,9 +333,9 @@ if test:
 
     dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state)
     truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state_truth)
-    # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-    # initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-    estimation_model = EstimationArc(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
+    apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+    initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+    estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
 
     # [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
     #  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08
