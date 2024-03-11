@@ -2035,3 +2035,22 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url      = {https://repository.tudelft.nl/islandora/object/uuid%3A8a82400a-2233-4a84-98be-ed37f7eeb620},
   urldate  = {2023-11-30},
 }
+
+ 
+@Article{Floberghagen1999,
+  author    = {Floberghagen, Rune and Pieter Visser, Pieter and Weischede, Frank},
+  journal   = {Advances in Space Research},
+  title     = {Lunar albedo force modeling and its effect on low lunar orbit and gravity field determination},
+  year      = {1999},
+  issn      = {0273-1177},
+  month     = jan,
+  number    = {4},
+  pages     = {733--738},
+  volume    = {23},
+  abstract  = {A force model for the lunar albedo effect on low lunar orbiters is developed on the basis of Clementine imagery and absolute albedo measurements. The …},
+  doi       = {10.1016/S0273-1177(99)00155-6},
+  language  = {en-US},
+  publisher = {Pergamon},
+  url       = {https://www.sciencedirect.com/science/article/abs/pii/S0273117799001556},
+  urldate   = {2023-12-11},
+}
