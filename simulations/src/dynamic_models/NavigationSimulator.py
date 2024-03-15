@@ -38,8 +38,9 @@ class NavigationSimulator():
         # Initial state and uncertainty parameters
         self.custom_initial_state = None
         self.custom_initial_state_truth = None
-        self.initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+        self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1e-1
         self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+        self.initial_reference_error = np.array([1e1, 1e1, 1e1, 1e-4, 1e-4, 1e-4, 1e1, 1e1, 1e1, 1e-4, 1e-4, 1e-4])*1e0
 
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(step_size).rstrip('0')
@@ -72,11 +73,11 @@ class NavigationSimulator():
         else:
             self.station_keeping_epochs = custom_station_keeping_epochs
 
-
+        # print("times: ", self.times)
         self.times.extend(self.station_keeping_epochs)
         self.times = np.round(sorted(list(set(self.times))), self.decimal_places)
-        print("times: ", self.times)
-        print("station keeping epochs: ", self.station_keeping_epochs)
+
+        # print("station keeping epochs: ", self.station_keeping_epochs)
 
 
 
@@ -97,6 +98,8 @@ class NavigationSimulator():
         full_state_transition_matrix_history_initial = dict()
         print("Start navigation simulation ======================")
         for t, time in enumerate(self.times):
+
+            # print("time: ", time, self.observation_windows, self.station_keeping_epochs)
 
             navigation_arc_duration = np.round(np.diff(self.times)[navigation_arc], self.decimal_places)
 
@@ -125,7 +128,7 @@ class NavigationSimulator():
                     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model, solve_variational_equations=False)
 
                 self.custom_initial_state_truth = state_history_initialize[0,:]
-                self.custom_initial_state = self.custom_initial_state_truth + self.initial_state_error
+                self.custom_initial_state = self.custom_initial_state_truth + self.initial_estimation_error + self.initial_reference_error
 
             dynamic_model.custom_initial_state = self.custom_initial_state
             truth_model.custom_initial_state = self.custom_initial_state_truth
@@ -172,6 +175,10 @@ class NavigationSimulator():
                 observation_window = self.observation_windows[estimation_arc]
                 estimation_arc_duration = np.around(observation_window[1]-observation_window[0], self.decimal_places)
 
+                # print("ESTIMATION ARC OBS WINDOW: ", observation_window)
+                # print("ESTIMATION ARC DURATION: ", estimation_arc_duration)
+
+
                 # print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc},  at {time} for {estimation_arc_duration} days")
 
                 # Define dynamic models and select one to test the estimation on
@@ -192,9 +199,9 @@ class NavigationSimulator():
                                                                                     get_only_first=False,
                                                                                     custom_truth_model=truth_model,
                                                                                     apriori_covariance=self.apriori_covariance,
-                                                                                    initial_state_error=self.initial_state_error)
+                                                                                    initial_estimation_error=self.initial_estimation_error)
                 # print("START THE LATTER ESTIMATOR")
-                # test = estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=self.apriori_covariance, initial_state_error=self.initial_state_error).get_estimation_results()
+                # test = estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=self.apriori_covariance, initial_estimation_error=self.initial_estimation_error).get_estimation_results()
                 # print(test)
                 # plt.show()
 
@@ -234,7 +241,7 @@ class NavigationSimulator():
 
             if estimation_arc_activated:
                 self.custom_initial_state = state_history_final[-1,:]
-                self.initial_state_error = state_history_final[-1,:]-state_history_truth[-1,:]
+                self.initial_estimation_error = state_history_final[-1,:]-state_history_truth[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_final.values()))[-1]
             else:
                 # print("state history inital final entry: ", state_history_initial[-1,:])
@@ -281,18 +288,19 @@ class NavigationSimulator():
                 # print("Station keeping epochs: ", self.custom_station_keeping_epochs)
                 if self.times[navigation_arc+1] in np.round(self.station_keeping_epochs, self.decimal_places):
 
-                    lists = [[0, self.target_point_epochs]]
-                    for i, list1 in enumerate(lists):
-                        dynamic_model.simulation_start_epoch_MJD = self.times[navigation_arc+1]
-                        station_keeping = StationKeeping.StationKeeping(dynamic_model, custom_initial_state=self.custom_initial_state, custom_propagation_time=max(list1[1]), step_size=self.step_size)
-                        delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=list1[0], correction_epoch=list1[0], target_point_epochs=list1[1])
+
+                    params = [0, self.target_point_epochs]
+                    dynamic_model.simulation_start_epoch_MJD = self.times[navigation_arc+1]
+                    # print("In simulator: ", dynamic_model.simulation_start_epoch_MJD)
+                    station_keeping = StationKeeping.StationKeeping(dynamic_model, custom_initial_state=self.custom_initial_state, custom_propagation_time=max(params[1]), step_size=self.step_size)
+                    delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=params[0], correction_epoch=params[0], target_point_epochs=params[1])
 
                     # Generate random noise to simulate station-keeping errors
                     delta_v_noise = np.random.normal(loc=0, scale=2e-10*np.abs(delta_v), size=delta_v.shape)
                     self.custom_initial_state[9:12] += delta_v
                     self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
 
-                    print(f"Correction at {self.times[navigation_arc+1]}: \n", np.linalg.norm(delta_v))
+                    print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
 
                     delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
 

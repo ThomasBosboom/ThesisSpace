@@ -25,7 +25,7 @@ np.random.seed(0)
 
 class EstimationModel:
 
-    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_state_error=None, include_consider_parameters=False):
+    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_estimation_error=None, include_consider_parameters=False):
 
         # Loading dynamic model
         self.dynamic_model = dynamic_model
@@ -36,7 +36,7 @@ class EstimationModel:
         self.include_consider_parameters = include_consider_parameters
 
         # Setting up initial state error
-        self.initial_state_error = initial_state_error
+        self.initial_estimation_error = initial_estimation_error
 
         # Defining basis for observations
         self.bias_range = 0
@@ -53,7 +53,6 @@ class EstimationModel:
         margin = 60
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_range)
         self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_doppler)
-
 
         self.arc_start_epoch = self.dynamic_model.simulation_start_epoch
         self.arc_end_epoch = self.dynamic_model.simulation_end_epoch
@@ -190,11 +189,11 @@ class EstimationModel:
         # Perturb the initial state estimate from the truth (500 m in position, 0.001 m/s in velocity)
         import copy
         self.perturbed_parameters = self.truth_parameters[:12]
-        if self.initial_state_error is not None:
+        if self.initial_estimation_error is not None:
             for i in range(3):
                 for j in range(2):
-                    self.perturbed_parameters[i+6*j] += self.initial_state_error[i+6*j]
-                    self.perturbed_parameters[i+6*j+3] += self.initial_state_error[i+6*j+3]
+                    self.perturbed_parameters[i+6*j] += self.initial_estimation_error[i+6*j]
+                    self.perturbed_parameters[i+6*j+3] += self.initial_estimation_error[i+6*j+3]
         self.parameters_to_estimate.parameter_vector[:12] = self.perturbed_parameters
 
         # Create input object for the estimation
@@ -334,8 +333,8 @@ if test:
     dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state)
     truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state_truth)
     apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-    initial_state_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-    estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_state_error=initial_state_error)
+    initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+    estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_estimation_error=initial_estimation_error)
 
     # [-3.19221439e+08  1.79045089e+08  1.01064488e+08 -2.03558866e+02
     #  -2.78869032e+02 -8.54302136e+02 -3.67010775e+08  1.58923594e+08

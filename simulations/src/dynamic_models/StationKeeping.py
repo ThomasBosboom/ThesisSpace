@@ -25,6 +25,8 @@ class StationKeeping:
         self.dynamic_model_object.custom_propagation_time = custom_propagation_time
         self.step_size = step_size
 
+        # print("START EPOCH IN STATIONKEEPING: ", self.dynamic_model_object.simulation_start_epoch_MJD)
+
 
     def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch=0):
 
@@ -103,7 +105,6 @@ class StationKeeping:
 
         state_history[i_tv, 9:12] += delta_v
 
-        # return state_history[i_tv]
         return delta_v
 
 
@@ -115,7 +116,7 @@ class StationKeeping:
 #                                                         custom_initial_state=None)
 
 # dynamic_model_object = dynamic_model_objects["high_fidelity"]["point_mass"][0]
-# # dynamic_model_object = dynamic_model_objects["low_fidelity"]["three_body_problem"][0]
+# dynamic_model_object = dynamic_model_objects["low_fidelity"]["three_body_problem"][0]
 
 # custom_initial_state = np.array([-3.34034638e+08,  1.91822560e+08,  1.11600187e+08, -1.22100520e+02,
 #                                  -7.02130739e+02, -9.74257591e+02, -3.83004013e+08,  1.80617292e+08,
@@ -124,11 +125,11 @@ class StationKeeping:
 # import time
 
 # # lists = [[7, [21]], [7, [21, 28]]]
-# lists = [[0, [21]], [0, [21, 28]]]
+# lists = [[0, [3]], [0, [4]], [0, [5]], [0, [3, 4, 5]]]
 # for i, list1 in enumerate(lists):
 #     print(list1)
 #     start_time = time.time()
-#     station_keeping = StationKeeping(dynamic_model_object, custom_initial_state=custom_initial_state, custom_propagation_time=max(list1[1]), step_size=0.01)
+#     station_keeping = StationKeeping(dynamic_model_object, custom_initial_state=None, custom_propagation_time=max(list1[1]), step_size=0.01)
 #     delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=list1[0], correction_epoch=list1[0], target_point_epochs=list1[1])
 #     # print("delta_v:", delta_v)
 #     lists[i].append(time.time()-start_time)

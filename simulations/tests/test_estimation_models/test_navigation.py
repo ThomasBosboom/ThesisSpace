@@ -74,8 +74,8 @@ for i in np.arange(-2.0, 2.0, 0.4):
 
         model_type = "low_fidelity"
         model_name = "three_body_problem"
-        model_type = "high_fidelity"
-        model_name = "point_mass"
+        # model_type = "high_fidelity"
+        # model_name = "point_mass"
         params = ({model_type: [model_name]},
                     [model_type, model_name, 0],
                     True,
