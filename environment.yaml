@@ -3,11 +3,10 @@ channels:
   - conda-forge
   - tudat-team
 dependencies:
-  - tudat=2.12.1.dev25
-  - tudat-resources=2.1
-  - tudatpy=0.7.3.dev34
+  - tudatpy
+  - pandas
   - matplotlib
   - scipy
-  - pandas
-  - pytest
   - pytest-html
+  - pytest-mpl
+  - mpi4py
