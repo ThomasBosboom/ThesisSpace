@@ -67,44 +67,7 @@ class TestNavigation():
 
 
 dictionary = dict()
-for i in np.arange(-2.0, 2.0, 0.4):
-    for j in np.arange(-2.0, 2.0, 0.4):
-
-        observation_windows =   [(60390, 60394), (60396+i, 60400+j)]
-
-        model_type = "low_fidelity"
-        model_name = "three_body_problem"
-        # model_type = "high_fidelity"
-        # model_name = "point_mass"
-        params = ({model_type: [model_name]},
-                    [model_type, model_name, 0],
-                    True,
-                    observation_windows,
-                    True,
-                    True,
-                    [60400+j])
-
-        results_dict = TestNavigation().get_navigation_results(*params)
-        delta_v = results_dict[model_type][model_name][0][8][1]
-        objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print("Window: ", observation_windows)
-        print("Objective: ", objective_value)
-
-        dictionary[str([(60396+i), (60400+j)])] = [objective_value]
-
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
-
-print(dictionary)
-
-plt.show()
-
-
-dictionary = dict()
-for i in np.arange(-2.0, 2.0, 0.4):
+for i in [1]:
 
     observation_windows =   [(60390, 60394), (60397+i, 60399)]
 
@@ -130,9 +93,9 @@ for i in np.arange(-2.0, 2.0, 0.4):
 
     PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
     PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+    PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+    PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+    PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
 
 print(dictionary)
 

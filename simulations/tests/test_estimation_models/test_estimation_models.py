@@ -68,7 +68,7 @@ def custom_estimation_model_objects_results(request):
 class TestObservability:
 
     custom_model_dict = {"low_fidelity": ["three_body_problem"]}
-    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60400, 14, custom_model_dict, True, None)], indirect=True)
+    @pytest.mark.parametrize("custom_estimation_model_objects_results", [(60390, 14, custom_model_dict, True, None)], indirect=True)
     def test_observability_history(self, custom_estimation_model_objects_results):
 
         model_type = "low_fidelity"

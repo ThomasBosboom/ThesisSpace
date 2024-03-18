@@ -20,7 +20,7 @@ np.random.seed(0)
 
 class NavigationSimulator():
 
-    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=1e-2, custom_station_keeping_epochs=None, target_point_epochs=[3], include_station_keeping=True, exclude_first_manouvre=False):
+    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=1e-3, custom_station_keeping_epochs=None, target_point_epochs=[3], include_station_keeping=True, exclude_first_manouvre=False):
 
         # Miscellaneous
         self.step_size = step_size
@@ -40,7 +40,7 @@ class NavigationSimulator():
         self.custom_initial_state_truth = None
         self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1e-1
         self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-        self.initial_reference_error = np.array([1e1, 1e1, 1e1, 1e-4, 1e-4, 1e-4, 1e1, 1e1, 1e1, 1e-4, 1e-4, 1e-4])*1e0
+        self.orbit_insertion_error = np.array([1e1, 1e1, 1e1, 1e-2, 1e-2, 1e-2, 1e1, 1e1, 1e1, 1e-2, 1e-2, 1e-2])*1e-10
 
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(step_size).rstrip('0')
@@ -128,7 +128,7 @@ class NavigationSimulator():
                     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model, solve_variational_equations=False)
 
                 self.custom_initial_state_truth = state_history_initialize[0,:]
-                self.custom_initial_state = self.custom_initial_state_truth + self.initial_estimation_error + self.initial_reference_error
+                self.custom_initial_state = self.custom_initial_state_truth + self.initial_estimation_error + self.orbit_insertion_error
 
             dynamic_model.custom_initial_state = self.custom_initial_state
             truth_model.custom_initial_state = self.custom_initial_state_truth
@@ -292,6 +292,7 @@ class NavigationSimulator():
                     params = [0, self.target_point_epochs]
                     dynamic_model.simulation_start_epoch_MJD = self.times[navigation_arc+1]
                     # print("In simulator: ", dynamic_model.simulation_start_epoch_MJD)
+                    # print("In simulator: ", self.custom_initial_state)
                     station_keeping = StationKeeping.StationKeeping(dynamic_model, custom_initial_state=self.custom_initial_state, custom_propagation_time=max(params[1]), step_size=self.step_size)
                     delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=params[0], correction_epoch=params[0], target_point_epochs=params[1])
 
@@ -300,7 +301,7 @@ class NavigationSimulator():
                     self.custom_initial_state[9:12] += delta_v
                     self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
 
-                    print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
+                    # print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
 
                     delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
 

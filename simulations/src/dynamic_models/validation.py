@@ -50,6 +50,26 @@ def read_textfiles(data_type, satellite="LUMIO"):
 
 
 
+# states_LUMIO = read_textfiles("state", satellite="LUMIO")
+
+# pos = states_LUMIO[0, :, 2:5]
+# vel = states_LUMIO[0, :, 5:8]
+# # print(states_LUMIO[0, :, 2:], np.shape(states_LUMIO[0, :, 2:]))
+
+# import matplotlib.pyplot as plt
+
+# # fig1_3d = plt.figure()
+# # ax_3d = fig1_3d.add_subplot(111, projection='3d')
+# # ax_3d.plot(pos[:,0], pos[:,1], pos[:,2], linewidth=0.4)
+# # # ax_3d.plot(vel[:,0], vel[:,1], vel[:,2], linewidth=0.4)
+# # ax_3d.set_box_aspect([1,1,1])
+# # # plt.show()
+
+# # plt.plot(pos)
+# plt.plot(np.diff(vel[:,:]))
+
+# plt.show()
+
 
 def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, custom_dynamic_model=None, step_size=0.001, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
 
