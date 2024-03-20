@@ -7,8 +7,6 @@ import os
 # Tudatpy imports
 from tudatpy.kernel import constants, numerical_simulation
 from tudatpy.kernel.numerical_simulation import propagation_setup, environment_setup, estimation_setup
-from tudatpy.kernel.astro import element_conversion
-from tudatpy.kernel.interface import spice
 
 # Define path to import src files
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))

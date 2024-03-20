@@ -1,13 +1,10 @@
-# Tudatpy imports
 from tudatpy.kernel.numerical_simulation import propagation_setup
 from tudatpy.kernel.astro import time_conversion
 from tudatpy.kernel.interface import spice
 from tudatpy.kernel import constants
 
-
 # Load spice kernels.
 spice.load_standard_kernels()
-
 
 class DynamicModelBase:
 
