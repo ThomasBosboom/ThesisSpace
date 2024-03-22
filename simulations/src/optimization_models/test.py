@@ -302,37 +302,73 @@ data = {
     }
 }
 
-# data = {0.5: {0.2: [3945336380419.047, 664.6482803821564], 0.5: [22.710728196314253, 675.102591753006], 1: [1.5772205937489592, 449.49119448661804], 2: [1.7653161131384711, 336.17911171913147], 3: [1.199609151105061, 263.2221620082855], 4: [29.551190473681075, 239.7759416103363]}, 1: {0.2: [2449274123492.4346, 387.1106626987457], 0.5: [17249.055701412683, 515.1067683696747], 1: [6.041599345281135, 429.7336423397064], 2: [0.9226599653070082, 315.504399061203], 3: [2.6112344860097654, 301.9241056442261], 4: [9.961542572806165, 267.47242879867554]}}
-# Save the dictionary to a JSON file
-import json
+
+
+import numpy as np
+
+# # Given dictionary
+# data = {
+#     "point_mass": {
+#         "1": [6.099493670342755, 418.9031059741974],
+#         "1.5": [1.8747696316995026, 364.94822931289673],
+#         "2": [0.9230654815090421, 304.23648405075073],
+#         "2.5": [0.7487391188757612, 275.8014669418335],
+#         "3": [2.5160195255201163, 284.1703951358795],
+#         "3.5": [4.308090074065645, 262.5213887691498],
+#         "4": [9.780675917340947, 281.28582978248596],
+#         "4.5": [10.366853504258435, 231.98801612854004],
+#         "5": [24.627594089690696, 239.09923887252808]
+#     },
+#     # Remaining keys...
+# }
+
+# Initialize dictionary to store mean and standard deviation for each value
+stats = {}
+
+# Iterate through the dictionary and calculate mean and standard deviation for each value
+for key, sub_dict in data.items():
+    stats[key] = {}
+    for sub_key, value_list in sub_dict.items():
+        mean_value = np.mean(value_list)
+        std_dev_value = np.std(value_list)
+        stats[key][sub_key] = {'mean': mean_value, 'std_dev': std_dev_value}
+
+# Print the statistics dictionary
+print(stats)
 import os
+import json
+# data = {'point_mass': {0.2: [0.530908778438087, 155.03871512413025], 0.5: [0.38867258665653, 128.8769063949585], 0.8: [0.3538945426975028, 128.62496399879456], 1: [0.3915342384758657, 128.74781894683838], 1.2: [0.4140709980184972, 146.72685384750366]}, 'point_mass_srp': {0.2: [0.04183617217700521, 166.90307211875916], 0.5: [0.032455954078276436, 142.97971439361572], 0.8: [0.029061034544354807, 132.5707700252533], 1: [0.028960489163399213, 132.97550344467163], 1.2: [0.04001460917776998, 135.95449376106262]}, 'spherical_harmonics': {0.2: [0.5213456156903742, 443.2585029602051], 0.5: [0.3901441403368683, 398.5587854385376], 0.8: [0.35669061454693046, 410.7251400947571], 1: [0.3872732675548973, 415.48724579811096], 1.2: [0.4218262636491343, 423.679625749588]}, 'spherical_harmonics_srp': {0.2: [0.04330157607104699, 459.18675899505615], 0.5: [0.033292318178613604, 410.80441427230835], 0.8: [0.029833771274202787, 440.08425283432007], 1: [0.036616285639865465, 464.6441898345947], 1.2: [0.037211159779183656, 477.1388876438141]}}
+
+# # Save the dictionary to a JSON file
+# import json
+# import os
 # file_path =+".\simulations\src\optimization_models\data.json"
-file_path = os.path.join( os.path.dirname(__file__), "data.json")
+file_path = os.path.join( os.path.dirname(__file__), "TESTS.json")
 with open(file_path, 'w') as json_file:
-    json.dump(data, json_file, indent=4)
+    json.dump(stats, json_file, indent=4)
 
-groups = list(data.keys())
-inner_keys = list(data[groups[0]].keys())
-num_groups = len(groups)
+# groups = list(data.keys())
+# inner_keys = list(data[groups[0]].keys())
+# num_groups = len(groups)
 
-fig, ax = plt.subplots(figsize=(8, 3))
-index = np.arange(len(inner_keys))
-bar_width = 0.2  # Adjust the width as needed
+# fig, ax = plt.subplots(figsize=(8, 3))
+# index = np.arange(len(inner_keys))
+# bar_width = 0.2  # Adjust the width as needed
 
-# Center the bars around each xtick
-bar_offsets = np.arange(-(num_groups-1)/2, (num_groups-1)/2 + 1, 1) * bar_width
+# # Center the bars around each xtick
+# bar_offsets = np.arange(-(num_groups-1)/2, (num_groups-1)/2 + 1, 1) * bar_width
 
-for i in range(num_groups):
-    values = [data[groups[i]][inner_key][0] for inner_key in inner_keys]
-    ax.bar(index + bar_offsets[i], values, bar_width, label=str(groups[i]))
+# for i in range(num_groups):
+#     values = [data[groups[i]][inner_key][0] for inner_key in inner_keys]
+#     ax.bar(index + bar_offsets[i], values, bar_width, label=str(groups[i]))
 
-ax.set_xlabel('Inner Keys')
-ax.set_ylabel('Values')
-ax.set_title('Bar Chart')
-ax.set_xticks(index)
-ax.set_xticklabels(inner_keys)
-ax.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
-ax.set_yscale("log")
-plt.tight_layout()
+# ax.set_xlabel('Inner Keys')
+# ax.set_ylabel('Values')
+# ax.set_title('Bar Chart')
+# ax.set_xticks(index)
+# ax.set_xticklabels(inner_keys)
+# ax.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+# ax.set_yscale("log")
+# plt.tight_layout()
 
-plt.show()
+# plt.show()

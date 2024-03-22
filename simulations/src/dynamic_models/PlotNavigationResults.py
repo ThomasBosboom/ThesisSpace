@@ -99,7 +99,7 @@ class PlotNavigationResults():
                     full_propagated_formal_errors_epochs = results[3][0]
                     full_propagated_formal_errors_history = results[3][1]
                     relative_epochs = full_propagated_formal_errors_epochs - full_propagated_formal_errors_epochs[0]
-                    delta_v = results[8][1]
+                    # delta_v = results[8][1]
 
                     linestyles = ["solid", "dotted", "dashed"]
                     labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
@@ -290,8 +290,8 @@ class PlotNavigationResults():
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', label="SKM" if i==0 else None)
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
-                ax[0][0].set_ylim(-1000, 1000)
-                ax[1][0].set_ylim(-1, 1)
+                # ax[0][0].set_ylim(-1000, 1000)
+                # ax[1][0].set_ylim(-1, 1)
                 ax[k][0].set_title("LPF")
                 ax[k][1].set_title("LUMIO")
 

@@ -47,9 +47,6 @@ class OptimizationModel():
 
         self.design_vector_bounds = list(zip(bounds[0]*np.ones(self.vec_len), bounds[-1]*np.ones(self.vec_len)))
 
-        # if od_duration > skm_to_od_duration:
-        #     print("Warning: OD duration is larger than time between SKMs")
-
 
     def get_updated_skm_epochs(self, x):
 
@@ -72,41 +69,27 @@ class OptimizationModel():
 
     def objective_function(self, x):
 
-        station_keeping_epochs = self.get_updated_skm_epochs(x)
         observation_windows = self.get_updated_observation_windows(x)
+        station_keeping_epochs = self.get_updated_skm_epochs(x)
         target_point_epochs = [self.skm_to_od_duration]
-        # target_point_epochs = [7, 14]
 
-        print("design vector in objective: \n", x)
-        print("observation windows in objective: \n", observation_windows)
-        print("station keeping windows in objective: \n", station_keeping_epochs)
-        print("target_point_epochs in objective: \n", target_point_epochs)
+        print("Objective, design vector: \n", x)
+        print("Objective, observation windows: \n", observation_windows)
+        # print("Objective, station keeping windows: \n", station_keeping_epochs)
+        # print("Objective, target_point_epochs: \n", target_point_epochs)
 
         navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
-                                                                    [self.model_type, self.model_name, self.model_number],
-                                                                    [self.model_type_truth, self.model_name_truth, self.model_number_truth],
-                                                                    custom_station_keeping_epochs=station_keeping_epochs,
-                                                                    target_point_epochs=target_point_epochs)
+                                                                       [self.model_type, self.model_name, self.model_number],
+                                                                       [self.model_type_truth, self.model_name_truth, self.model_number_truth],
+                                                                       custom_station_keeping_epochs=station_keeping_epochs,
+                                                                       target_point_epochs=target_point_epochs,
+                                                                       step_size=1e-2)
 
-        results = []
-        for result_dict in navigation_simulator.perform_navigation():
-            if result_dict:
-                results.append(utils.convert_dictionary_to_array(result_dict))
-            else: # if there is no station keeping, so empty delta_v_dict (last entry)
-                results.append(([],[]))
-        results.append((navigation_simulator))
+        navigation_results = navigation_simulator.get_navigation_results()
 
-        results_dict = {self.model_type: {self.model_name: [results]}}
-        # print("RESULTS_DICT: ", results_dict)
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+        navigation_simulator.plot_navigation_results(navigation_results, show_directly=False)
 
-        # plt.show()
-
-        delta_v = results[8][1]
+        delta_v = navigation_results[8][1]
         objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
         print(f"objective value at {x}: \n", delta_v, objective_value)
 
@@ -122,7 +105,6 @@ class OptimizationModel():
         # Define a callback function to record iteration history
         iteration_history = []
         design_vectors = []
-
         def callback(xk):
             callback.iteration += 1
             print("Iteration:", callback.iteration, xk, self.objective_function(xk))
@@ -131,11 +113,13 @@ class OptimizationModel():
 
         callback.iteration = 0
 
+        print("Design vector bounds: ", self.design_vector_bounds)
+
         # Minimize the objective function subject to constraints
         result = sp.optimize.minimize(self.objective_function, x0,
                                         bounds=self.design_vector_bounds,
                                         method='Nelder-Mead',
-                                        options={'maxiter': 8, "return_all": True, 'disp': True},
+                                        options={'maxiter': 25, "return_all": True, 'disp': True},
                                         callback=callback)
 
         # Extract optimized start times
@@ -156,41 +140,45 @@ class OptimizationModel():
 
 
 
-dynamic_model_list = ["low_fidelity", "three_body_problem", 0]
-truth_model_list = ["low_fidelity", "three_body_problem", 0]
-dynamic_model_list = ["high_fidelity", "point_mass", 0]
-truth_model_list = ["high_fidelity", "point_mass", 0]
-# dynamic_model_list = ["high_fidelity", "point_mass_srp", 0]
-# truth_model_list = ["high_fidelity", "point_mass_srp", 0]
-# dynamic_model_list = ["high_fidelity", "spherical_harmonics_srp", 1]
-# truth_model_list = ["high_fidelity", "spherical_harmonics_srp", 1]
 
 
-model = "point_mass"
-threshold = 7
-skm_to_od_duration = 3
-duration = 28
-od_duration = 1
+# dynamic_model_list = ["low_fidelity", "three_body_problem", 0]
+# truth_model_list = ["low_fidelity", "three_body_problem", 0]
+# dynamic_model_list = ["high_fidelity", "point_mass", 0]
+# truth_model_list = ["high_fidelity", "point_mass", 0]
+# # dynamic_model_list = ["high_fidelity", "point_mass_srp", 0]
+# # truth_model_list = ["high_fidelity", "point_mass_srp", 0]
+# # dynamic_model_list = ["high_fidelity", "spherical_harmonics_srp", 1]
+# # truth_model_list = ["high_fidelity", "spherical_harmonics_srp", 1]
 
-optimization_model = OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", model, 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
 
-result_dict = optimization_model.optimize()
+# model = "point_mass"
+# threshold = 7
+# skm_to_od_duration = 3
+# duration = 28
+# od_duration = 1
 
-print(result_dict)
+# optimization_model = OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", model, 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
+# result_dict = optimization_model.optimize()
+# print(result_dict)
+
+
 
 
 
 # threshold = 7
-# duration = 28
-# od_duration = 1
+# duration = 14
+# # od_duration = 1
+# skm_to_od_duration = 3
 # delta_v_per_model_dict = dict()
 # for model in ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]:
-# # for model in ["point_mass", "point_mass_srp"]:
+# # for model in ["point_mass"]:
 #     delta_v_dict = dict()
-#     for i in [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]:
-#     # for i in [3, 5]:
+#     # for i in [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]:
+#     for i in [0.2, 0.5, 0.8, 1, 1.2]:
+#     # for i in [1]:
 
-#         optimization_model = OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", model, 0], threshold=threshold, skm_to_od_duration=i, duration=duration, od_duration=od_duration)
+#         optimization_model = OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", model, 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=i)
 #         x = optimization_model.initial_design_vector
 
 #         start_time = time.time()
@@ -203,42 +191,45 @@ print(result_dict)
 
 #     delta_v_per_model_dict[model] = delta_v_dict
 
+# print("varying OD duration")
 # print(delta_v_per_model_dict)
 
-# data = delta_v_per_model_dict
-
-# # Save the dictionary to a JSON file
-# import json
-# file_path = os.path.join(os.path.dirname(__file__), "delta_v_per_model_dict.json")
-# with open(file_path, 'w') as json_file:
-#     json.dump(data, json_file, indent=4)
-
-# # Plot bar chart of delta v per model per skm frequency
-# groups = list(data.keys())
-# inner_keys = list(data[groups[0]].keys())
-# num_groups = len(groups)
-
-# fig, ax = plt.subplots(figsize=(8, 3))
-# index = np.arange(len(inner_keys))
-# bar_width = 0.2
-
-
-
-# ax.set_xlabel('SKM interval [days]')
-# ax.set_ylabel(r'$\Delta V$ [m/s]')
-# ax.set_title(f'Station keeping costs, OD of {od_duration} [day], simulation of {duration} [days]')
-
-# # Center the bars around each xtick
-# bar_offsets = np.arange(-(num_groups-1)/2, (num_groups-1)/2 + 1, 1) * bar_width
-# for i in range(num_groups):
-#     values = [data[groups[i]][inner_key][0] for inner_key in inner_keys]
-#     ax.bar(index + bar_offsets[i], values, bar_width, label=str(groups[i]))
-
-# ax.set_yscale("log")
-# ax.set_axisbelow(True)
-# ax.grid(alpha=0.3)
-# ax.set_xticks(index)
-# ax.set_xticklabels([key + od_duration for key in inner_keys])
-# ax.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
-# plt.tight_layout()
 # plt.show()
+
+# # data = delta_v_per_model_dict
+
+# # # Save the dictionary to a JSON file
+# # import json
+# # file_path = os.path.join(os.path.dirname(__file__), "delta_v_per_model_dict.json")
+# # with open(file_path, 'w') as json_file:
+# #     json.dump(data, json_file, indent=4)
+
+# # # Plot bar chart of delta v per model per skm frequency
+# # groups = list(data.keys())
+# # inner_keys = list(data[groups[0]].keys())
+# # num_groups = len(groups)
+
+# # fig, ax = plt.subplots(figsize=(8, 3))
+# # index = np.arange(len(inner_keys))
+# # bar_width = 0.2
+
+
+
+# # ax.set_xlabel('SKM interval [days]')
+# # ax.set_ylabel(r'$\Delta V$ [m/s]')
+# # ax.set_title(f'Station keeping costs, OD of {od_duration} [day], simulation of {duration} [days]')
+
+# # # Center the bars around each xtick
+# # bar_offsets = np.arange(-(num_groups-1)/2, (num_groups-1)/2 + 1, 1) * bar_width
+# # for i in range(num_groups):
+# #     values = [data[groups[i]][inner_key][0] for inner_key in inner_keys]
+# #     ax.bar(index + bar_offsets[i], values, bar_width, label=str(groups[i]))
+
+# # ax.set_yscale("log")
+# # ax.set_axisbelow(True)
+# # ax.grid(alpha=0.3)
+# # ax.set_xticks(index)
+# # ax.set_xticklabels([key + od_duration for key in inner_keys])
+# # ax.legend(loc='upper left', bbox_to_anchor=(1, 1.02), fontsize="small")
+# # plt.tight_layout()
+# # plt.show()

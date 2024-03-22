@@ -91,11 +91,11 @@ for i in [1]:
 
     dictionary[str(60397+i)] = [objective_value]
 
-    PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-    PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-    PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-    PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-    PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+    # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
 
 print(dictionary)
 

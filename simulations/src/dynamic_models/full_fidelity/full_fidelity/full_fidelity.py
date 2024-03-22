@@ -119,10 +119,10 @@ class HighFidelityDynamicModel(DynamicModelBase):
         self.acceleration_settings_on_spacecrafts = dict()
         for index, spacecraft in enumerate([self.name_ELO, self.name_LPO]):
             acceleration_settings_on_spacecraft = {
-                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(10,10), #10,10
+                    self.name_primary: [propagation_setup.acceleration.spherical_harmonic_gravity(5,5), #10,10
                                         propagation_setup.acceleration.relativistic_correction(),
                                         propagation_setup.acceleration.radiation_pressure()],
-                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(50,50), #50,50
+                    self.name_secondary: [propagation_setup.acceleration.spherical_harmonic_gravity(5,5), #50,50
                                           propagation_setup.acceleration.relativistic_correction(),
                                           propagation_setup.acceleration.radiation_pressure()]}
             for body in self.new_bodies_to_create:
@@ -266,10 +266,14 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_propagator_settings()
 
+        print("been here")
         # Create simulation object and propagate dynamics.
         dynamics_simulator = numerical_simulation.create_dynamics_simulator(
             self.bodies,
             self.propagator_settings)
+
+
+        print("been here")
 
         # Setup parameters settings to propagate the state transition matrix
         if solve_variational_equations:
@@ -287,8 +291,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
             return dynamics_simulator
 
-# test = HighFidelityDynamicModel(60390, 365)
-# dynamics_simulator = test.get_propagation_simulator()
+# test = HighFidelityDynamicModel(60390, 1)
+# dynamics_simulator = test.get_propagation_simulator(solve_variational_equations=False)
 
 # state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.state_history.items()], dtype=object)
 # moon_state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.dependent_variable_history.items()], dtype=object)

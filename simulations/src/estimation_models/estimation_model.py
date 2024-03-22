@@ -3,6 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 import os
 import sys
+import copy
 
 # Tudatpy imports
 from tudatpy import util
@@ -11,6 +12,11 @@ from tudatpy.kernel.numerical_simulation import estimation, estimation_setup
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+script_directory = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(script_directory)
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(parent_dir)
 
 # Own
 from dynamic_models.full_fidelity import *
@@ -56,6 +62,21 @@ class EstimationModel:
 
         self.arc_start_epoch = self.dynamic_model.simulation_start_epoch
         self.arc_end_epoch = self.dynamic_model.simulation_end_epoch
+
+        self.arc_start_epoch_truth = self.truth_model.simulation_start_epoch
+        self.arc_end_epoch_truth = self.truth_model.simulation_end_epoch
+
+        # from tests import utils
+        # print("start: ", utils.convert_epochs_to_MJD(self.observation_times_range[0], full_array=False), utils.convert_epochs_to_MJD(self.observation_times_range[-1], full_array=False))
+        # print("object: ",utils.convert_epochs_to_MJD(self.arc_start_epoch, full_array=False), utils.convert_epochs_to_MJD(self.arc_end_epoch, full_array=False))
+
+        # print("start: ", self.observation_times_range[0], self.observation_times_range[-1])
+        # print("object dynamic: ", self.arc_start_epoch, self.arc_end_epoch)
+
+        # # print("start: ", self.observation_times_range[0], self.observation_times_range[-1])
+        # print("object truth: ", self.arc_start_epoch_truth, self.arc_end_epoch_truth)
+
+
 
     def set_observation_model_settings(self):
 
@@ -164,15 +185,11 @@ class EstimationModel:
             self.parameter_settings.append(estimation_setup.parameter.gravitational_parameter(self.dynamic_model.name_primary))
             self.parameter_settings.append(estimation_setup.parameter.gravitational_parameter(self.dynamic_model.name_secondary))
 
-            # Depending on the dynamic model
-            # self.parameter_settings.append(estimation_setup.parameter.radiation_pressure_coefficient(self.dynamic_model.name_ELO))
-            # self.parameter_settings.append(estimation_setup.parameter.radiation_pressure_coefficient(self.dynamic_model.name_LPO))
-
         # Create the parameters that will be estimated
         self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.dynamic_model.bodies)
 
 
-    def set_estimator_settings(self, maximum_iterations=6):
+    def set_estimator_settings(self, maximum_iterations=4):
 
         self.set_parameters_to_estimate()
 
@@ -186,8 +203,7 @@ class EstimationModel:
         # Save the true parameters to later analyse the error
         self.truth_parameters = self.parameters_to_estimate.parameter_vector
 
-        # Perturb the initial state estimate from the truth (500 m in position, 0.001 m/s in velocity)
-        import copy
+        # Perturb the initial state estimate from the truth
         self.perturbed_parameters = self.truth_parameters[:12]
         if self.initial_estimation_error is not None:
             for i in range(3):
@@ -208,7 +224,7 @@ class EstimationModel:
 
         # Set methodological options
         self.estimation_input.define_estimation_settings(reintegrate_variational_equations=False,
-                                                         save_state_history_per_iteration=True)
+                                                         save_state_history_per_iteration=False)
 
         # Define weighting of the observations in the inversion
         weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise_range**-2}
@@ -282,7 +298,7 @@ class EstimationModel:
             print("best iteration: ", estimation_output.best_iteration)
             # print("First: ", parameter_history[:,0])
             # print("Last: ", parameter_history[:,-1])
-            # print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
+            print("Diff: ", parameter_history[:,estimation_output.best_iteration]-parameter_history[:,0])
             for i, (observable_type, information_sets) in enumerate(self.sorted_observation_sets.items()):
                 for j, observation_set in enumerate(information_sets.values()):
                     for k, single_observation_set in enumerate(observation_set):
@@ -301,14 +317,14 @@ class EstimationModel:
                         ax3.set_xlabel("Time since J2000 [s]")
                         ax4.set_xlabel("Time since J2000 [s]")
 
-                        # plt.figure(figsize=(9,5))
-                        # plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
-                        # plt.xlabel('Final iteration range-rate residual')
-                        # plt.ylabel('Occurences [-]')
-                        # plt.title('Histogram of residuals on final iteration')
+                        plt.figure(figsize=(9,5))
+                        plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
+                        plt.xlabel('Final iteration range residual')
+                        plt.ylabel('Occurences [-]')
+                        plt.title('Histogram of residuals on final iteration')
 
                         plt.tight_layout()
-                        # plt.show()
+                        plt.show()
 
 
         return estimation_output, total_single_information_dict, \
@@ -330,8 +346,8 @@ if test:
                                             -4.42230343e+02, -5.49851439e+02, -4.29596784e+08,  1.09373730e+08,
                                             6.28861326e+07, -4.01829733e+02, -8.28967754e+02, -6.92696484e+02])
 
-    dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state)
-    truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60392, 2, custom_initial_state=custom_initial_state_truth)
+    dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60397, 2, custom_initial_state=custom_initial_state)
+    truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60397, 2, custom_initial_state=custom_initial_state)
     apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
     initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
     estimation_model = EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_estimation_error=initial_estimation_error)
@@ -348,35 +364,90 @@ if test:
     weighted_design_matrix = estimation_output.weighted_design_matrix
     residual_history = estimation_output.residual_history
 
-    print("First: ", parameter_history[:,0])
-    print("Last: ", parameter_history[:,-1])
-    print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
-    for i, (observable_type, information_sets) in enumerate(results[-1].items()):
-        for j, observation_set in enumerate(information_sets.values()):
-            for k, single_observation_set in enumerate(observation_set):
+    # print("First: ", parameter_history[:,0])
+    # print("Last: ", parameter_history[:,-1])
+    # print("Diff: ", parameter_history[:,-1]-parameter_history[:,0])
+    # for i, (observable_type, information_sets) in enumerate(results[-1].items()):
+    #     for j, observation_set in enumerate(information_sets.values()):
+    #         for k, single_observation_set in enumerate(observation_set):
 
-                residual_history = estimation_output.residual_history
+    #             residual_history = estimation_output.residual_history
 
-                fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
-                subplots_list = [ax1, ax2, ax3, ax4]
+    #             fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
+    #             subplots_list = [ax1, ax2, ax3, ax4]
 
-                index = int(len(single_observation_set.observation_times))
-                for l in range(4):
-                    subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
-                    subplots_list[l].set_ylabel("Observation Residual")
-                    subplots_list[l].set_title("Iteration "+str(l+1))
+    #             index = int(len(single_observation_set.observation_times))
+    #             for l in range(4):
+    #                 subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
+    #                 subplots_list[l].set_ylabel("Observation Residual")
+    #                 subplots_list[l].set_title("Iteration "+str(l+1))
 
-                ax3.set_xlabel("Time since J2000 [s]")
-                ax4.set_xlabel("Time since J2000 [s]")
+    #             ax3.set_xlabel("Time since J2000 [s]")
+    #             ax4.set_xlabel("Time since J2000 [s]")
 
-                plt.figure(figsize=(9,5))
-                plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
-                plt.xlabel('Final iteration range-rate residual')
-                plt.ylabel('Occurences [-]')
-                plt.title('Histogram of residuals on final iteration')
+    #             plt.figure(figsize=(9,5))
+    #             plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
+    #             plt.xlabel('Final iteration range-rate residual')
+    #             plt.ylabel('Occurences [-]')
+    #             plt.title('Histogram of residuals on final iteration')
 
-                plt.tight_layout()
-                plt.show()
+    #             plt.tight_layout()
+    #             plt.show()
+
+
+    # Define path to import src files
+    # script_directory = os.path.dirname(os.path.realpath(__file__))
+    # sys.path.append(script_directory)
+    # parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+    # sys.path.append(parent_dir)
+
+    # # Own
+    # from tests import utils
+    # single_information_dict = results[1]
+
+    # fig, axs = plt.subplots(2, 1, figsize=(8.3, 5.7), sharex=True)
+    # for i, (observable_type, information_sets) in enumerate(single_information_dict.items()):
+
+    #     for j, information_set in enumerate(information_sets.values()):
+    #         for k, single_information_set in enumerate(information_set):
+    #             information_dict = single_information_dict[observable_type][j][k]
+    #             epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
+    #             information_matrix_history = np.array(list(information_dict.values()))
+
+    #             for m in range(2):
+    #                 observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
+    #                 observability_lumio = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]]))
+    #                 observability_lpf_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1, keepdims=True))
+    #                 observability_lumio_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1, keepdims=True))
+
+    #                 axs[2*i+m].plot(epochs, observability_lpf_total, label="total", color="darkred")
+    #                 axs[2*i+m].plot(epochs, observability_lumio_total, label="total", color="darkblue")
+
+    #                 ls = ["dashdot", "dashed", "dotted"]
+    #                 label = [[r"$\mathbf{x}$", r"$\mathbf{y}$", r"$\mathbf{z}$"],[r"$\mathbf{\dot{x}}$", r"$\mathbf{\dot{y}}$", r"$\mathbf{\dot{z}}$"]]
+    #                 ylabels = [r"$\sqrt{\mathbf{\Lambda_{r}}}$ [-]", r"$\sqrt{\mathbf{\Lambda_{v}}}$ [-]"]
+    #                 observable_types = ["two-way range", "two-way doppler"]
+    #                 for l in range(3):
+    #                     alpha=0.3
+    #                     axs[2*i+m].plot(epochs, observability_lpf[:,l], label=label[m][l], color="red", ls=ls[l], alpha=alpha)
+    #                     axs[2*i+m].plot(epochs, observability_lumio[:,l], label=label[m][l], color="blue", ls=ls[l], alpha=alpha)
+
+    #                 axs[2*i+m].set_ylabel(ylabels[m])
+    #                 axs[2*i+m].set_yscale("log")
+    #                 axs[2*i+m].grid(alpha=0.5, linestyle='--')
+
+    #                 if i == 0:
+    #                     axs[2*i+m].legend()
+
+    #             axs[2*i].set_title(observable_types[i])
+    #             axs[-1].set_xlabel(r"Time since start propagation")
+
+    #     # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+
+    # fig.suptitle("Observability effectiveness ")
+
+    # plt.show()
+
 
 
 

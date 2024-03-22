@@ -5,6 +5,7 @@ import copy
 import pytest_html
 import numpy as np
 import time
+import json
 import inspect
 
 # tudatpy
@@ -88,7 +89,8 @@ def get_estimation_model_objects(dynamic_model_objects,
                 truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
-                # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.custom_initial_state)
+                # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.propagation_time)
+                # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.custom_propagation_time)
 
             submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_estimation_error=initial_estimation_error) for dynamic_model in dynamic_models]
 
@@ -225,6 +227,7 @@ def get_estimation_model_results(dynamic_model_objects,
         for model_name, estimation_models in model_names.items():
             for i, estimation_model in enumerate(estimation_models):
 
+
                 start_time = time.time()
                 results_list = list(estimation_model.get_estimation_results())
                 results_list.append(time.time()-start_time)
@@ -285,12 +288,12 @@ def convert_dictionary_to_array(dictionary):
     return keys, values
 
 
-def convert_epochs_to_MJD(epochs):
+# def convert_epochs_to_MJD(epochs):
 
-    epochs_MJD = np.array([time_conversion.julian_day_to_modified_julian_day(\
-        time_conversion.seconds_since_epoch_to_julian_day(epoch)) for epoch in epochs])
+#     epochs_MJD = np.array([time_conversion.julian_day_to_modified_julian_day(\
+#         time_conversion.seconds_since_epoch_to_julian_day(epoch)) for epoch in epochs])
 
-    return epochs_MJD
+#     return epochs_MJD
 
 
 def convert_epochs_to_MJD(epochs, full_array=True):
@@ -311,6 +314,52 @@ def convert_MJD_to_epoch(epochs, full_array=True):
     else:
         return time_conversion.julian_day_to_seconds_since_epoch(\
                     time_conversion.modified_julian_day_to_julian_day(epochs))
+
+
+
+
+def get_max_depth(dictionary):
+    if isinstance(dictionary, dict):
+        return 1 + max((get_max_depth(value) for value in dictionary.values()), default=0)
+    else:
+        return 0
+
+def save_nested_dict_to_json(nested_dict, file_name, folder_name='data'):
+
+    # Get the frame of the caller
+    caller_frame = inspect.stack()[1]
+    file_path = caller_frame.filename
+    file_path = os.path.dirname(file_path)
+
+    # if not os.path.exists(folder_name):
+    #     os.makedirs(folder_name, exist_ok=True)
+
+    figure_folder = os.path.join(file_path, folder_name)
+    if not os.path.exists(figure_folder):
+        os.makedirs(figure_folder, exist_ok=True)
+
+    figure_path = os.path.join(figure_folder, file_name)
+
+    with open(figure_path, 'w') as json_file:
+        json.dump(nested_dict, json_file, indent=get_max_depth(nested_dict))
+
+
+def get_monte_carlo_statistics(data_dict):
+
+    # Initialize dictionary to store mean and standard deviation for each value
+    stats = {}
+
+    for key, value in data_dict.items():
+        if isinstance(value, dict):
+            stats[key] = get_monte_carlo_statistics(value)
+        elif isinstance(value, list):
+            mean_value = np.mean(value)
+            std_dev_value = np.std(value)
+            stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
+        else:
+            stats[key] = value
+
+    return stats
 
 
 
