@@ -3,11 +3,14 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import ScalarFormatter
 
 # Define path to import src files
 script_directory = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(script_directory)
 parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(parent_dir)
+parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 sys.path.append(parent_dir)
 
 # Own
@@ -19,14 +22,16 @@ from src.dynamic_models.high_fidelity.point_mass import *
 from src.dynamic_models.high_fidelity.point_mass_srp import *
 from src.dynamic_models.high_fidelity.spherical_harmonics import *
 from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
+from src.dynamic_models.full_fidelity.full_fidelity import *
 from src.estimation_models import estimation_model
+
 
 
 ###############################
 #### Acceleration terms #######
 ###############################
 
-def test_plot_acceleration_norms():
+def acceleration_norms():
 
     # Use the full_fidelity dynamic model to generate most sophisticated acceleration terms
     model_type = "full_fidelity"
@@ -40,7 +45,7 @@ def test_plot_acceleration_norms():
 
     # Defining dynamic model setup
     simulation_start_epoch_MJD = 60390
-    propagation_time = 7
+    propagation_time = 14
     custom_model_dict = {model_type_PM: [model_name_PM], model_type: [model_name]}
     step_size = 0.01
     epoch_in_MJD = True
@@ -112,103 +117,12 @@ def test_plot_acceleration_norms():
 
         plt.tight_layout()
 
-        utils.save_figures_to_folder(figs=[fig], labels=[satellites[l]])
+        utils.save_figure_to_folder(figs=[fig], labels=[satellites[l]])
 
-    plt.show()
-
-
-
-#################################
-#### Dynamic model run times ####
-#################################
-
-def test_dynamic_model_run_times(self):
-
-    custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
-    # custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp"]}
-    propagation_time = 1
-    get_only_first = False
-    start_epoch = 60390
-    end_epoch = 60404
-    n = 5
-    run_cases = np.linspace(start_epoch, end_epoch, n)
-
-    # Initialize dictionaries to store accumulated values
-    accumulator_dict = {
-        fidelity_key: {subkey: [[] for value in values]
-            for subkey, values in sub_dict.items()
-        }
-        for fidelity_key, sub_dict in utils.get_dynamic_model_objects(start_epoch, propagation_time, custom_model_dict=custom_model_dict, get_only_first=get_only_first).items()
-    }
-
-    start_time = time.time()
-    for run_case in run_cases:
-        params = (run_case, propagation_time, custom_model_dict, get_only_first)
-        run_times_dict = utils.get_dynamic_model_results(*params, step_size=0.1, entry_list=[-1])
-
-        # Accumulate values during the loop
-        for fidelity_key, sub_dict in run_times_dict.items():
-            for i, (subkey, subvalue_list) in enumerate(sub_dict.items()):
-                for j, subvalue in enumerate(subvalue_list):
-                    for k, entry in enumerate(subvalue):
-                        accumulator_dict[fidelity_key][subkey][j].append(entry)
-
-    total_run_time = time.time()-start_time
-
-    # Calculate averages and standard deviations
-    result_dict = {
-        fidelity_key: {
-            subkey: [
-                {
-                    "average": statistics.mean(sublist),
-                    "std_dev": statistics.stdev(sublist)
-                }
-                for sublist in sublists
-            ]
-            for subkey, sublists in sub_dict.items()
-        }
-        for fidelity_key, sub_dict in accumulator_dict.items()
-    }
-
-    ### Plot run times for each model
-    keys_list = [["CRTBP"], ["PM", "PMSRP", "SH", "SHSRP"], ["FF"]]
-    key_count = sum(len(sublist) for sublist in custom_model_dict.values()) #0.75*key_count
-    fig, axs = plt.subplots(1, key_count, figsize=(6.4, 0.75*5), sharey=True)
-    index = 0
-    for i, (model_types, model_names) in enumerate(result_dict.items()):
-        for j, (key, values) in enumerate(model_names.items()):
-            averages = []
-            std_devs = []
-            for subvalue in values:
-                averages.append(subvalue["average"])
-                std_devs.append(subvalue["std_dev"])
-            axs[index].grid(alpha=0.5, linestyle='--')
-            axs[index].bar(range(1, len(values)+1), averages, yerr=std_devs, ecolor="black", capsize=4, label=key)
-            axs[index].set_xlabel(keys_list[i][j])
-            axs[index].set_xticks(range(1, 1+max([len(value) for value in model_names.values()])))
-            axs[index].set_yscale("log")
-            index += 1
-
-    axs[0].set_ylabel('Run time [s]')
-    legend_handles = [plt.Line2D([0], [0], color='black', markersize=1, label=r'1$\sigma$ Std Dev')]
-    fig.legend(handles=[legend_handles[0]], loc='upper right', fontsize="x-small")
-    fig.suptitle(f"Run time dynamic models for {propagation_time} day, n={len(run_cases)*10}, start MJD [{start_epoch}, {end_epoch}] \nProcessor: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz, 2208 Mhz", fontsize=8)
-
-    utils.save_figures_to_folder([fig], [run_cases[0], run_cases[-1], n*10])
-
-    plt.show()
+    # plt.show()
 
 
-
-
-
-
-
-
-
-
-
-
+acceleration_norms()
 
 
 

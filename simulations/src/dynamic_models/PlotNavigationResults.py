@@ -302,3 +302,250 @@ class PlotNavigationResults():
 
         fig4.suptitle(r"Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
         plt.tight_layout()
+
+
+
+    def plot_correlation_history(self):
+
+        # Plot the estimation error history
+        # fig4, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
+        for i, (model_type, model_names) in enumerate(self.results_dict.items()):
+            for j, (model_name, models) in enumerate(model_names.items()):
+                    for k, results in enumerate(models):
+
+                        break
+                        arc_nums = len(results[-2].keys())
+                        arc_nums = 1
+
+                        print(results[-2])
+
+                        from matplotlib.lines import Line2D
+                        import matplotlib.cm as cm
+
+                        fig, ax = plt.subplots(1, arc_nums, figsize=(9, 4), sharey=True)
+
+                        for arc_num in range(arc_nums):
+
+                            estimation_output = results[-2][arc_num][0]
+                            # total_single_information_dict = results[-2][1]
+                            # total_covariance_dict = results[-2][2]
+                            # total_information_dict = results[-2][3]
+                            # self.sorted_observation_sets = results[-2][4]
+
+
+                            print(estimation_output)
+                            # print(estimation_output.correlations)
+
+                            covariance_output = estimation_output.covariance
+
+                            correlations = estimation_output.correlations
+                            estimated_param_names = [r"$x_{1}$", r"$y_{1}$", r"$z_{1}$", r"$\dot{x}_{1}$", r"$\dot{y}_{1}$", r"$\dot{z}_{1}$",
+                                                    r"$x_{2}$", r"$y_{2}$", r"$z_{2}$", r"$\dot{x}_{2}$", r"$\dot{y}_{2}$", r"$\dot{z}_{2}$"]
+
+                            im = ax[arc_num].imshow(correlations, cmap=cm.RdYlBu_r, vmin=-1, vmax=1)
+
+                            ax[arc_num].set_xticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
+                            ax[arc_num].set_yticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
+
+                            # add numbers to each of the boxes
+                            for i in range(len(estimated_param_names)):
+                                for j in range(len(estimated_param_names)):
+                                    text = ax[arc_num].text(
+                                        j, i, round(correlations[i, j], 2), ha="center", va="center", color="black"
+                                    )
+
+                            # cb = plt.colorbar(im)
+
+                            ax[arc_num].set_xlabel("Estimated Parameter")
+                            ax[0].set_ylabel("Estimated Parameter")
+
+                        cb = plt.colorbar(im)
+
+                        fig.suptitle(f"Correlations for estimated parameters for LPF and LUMIO")
+                        fig.tight_layout()
+                        plt.show()
+
+
+
+    def plot_observations(self):
+
+        from matplotlib.lines import Line2D
+        import matplotlib.cm as cm
+
+        fig, ax = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
+        for i, (model_type, model_names) in enumerate(self.results_dict.items()):
+            for j, (model_name, models) in enumerate(model_names.items()):
+                    for k, results in enumerate(models):
+
+                        arc_nums = len(results[-2].keys())
+
+                        for arc_num in range(arc_nums):
+
+                            estimation_output = results[-2][arc_num][0]
+                            # total_single_information_dict = results[-2][1]
+                            # total_covariance_dict = results[-2][2]
+                            # total_information_dict = results[-2][3]
+                            sorted_observation_sets = results[-2][arc_num][4]
+
+                            print(sorted_observation_sets)
+
+                            for i, (observable_type, information_sets) in enumerate(sorted_observation_sets.items()):
+                                for j, observation_set in enumerate(information_sets.values()):
+                                    for k, single_observation_set in enumerate(observation_set):
+
+                                        # print(i, j, k, single_observation_set)
+                                        # print(single_observation_set.concatenated_observations)
+                                        # print(single_observation_set.observation_times)
+                                        # print(single_observation_set.observations_history)
+
+                                        observation_times = utils.convert_epochs_to_MJD(single_observation_set.observation_times)
+                                        observation_times = observation_times - self.mission_start_epoch
+                                        ax[0].scatter(observation_times, single_observation_set.concatenated_observations, color='blue')
+
+                                        residual_history = estimation_output.residual_history
+                                        best_iteration = estimation_output.best_iteration
+                                        index = int(len(observation_times))
+                                        ax[1].scatter(observation_times, residual_history[i*index:(i+1)*index, best_iteration], color='blue')
+
+
+                        for j in range(len(ax)):
+                            for i, gap in enumerate(self.observation_windows):
+                                ax[j].axvspan(
+                                    xmin=gap[0]-self.mission_start_epoch,
+                                    xmax=gap[1]-self.mission_start_epoch,
+                                    color="gray",
+                                    alpha=0.1,
+                                    label="Observation window" if i == 0 else None)
+                            for i, epoch in enumerate(self.station_keeping_epochs):
+                                station_keeping_epoch = epoch - self.mission_start_epoch
+                                ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', label="SKM" if i==0 else None)
+
+                            ax[j].grid(alpha=0.5, linestyle='--')
+
+                            # Set y-axis tick label format to scientific notation with one decimal place
+                            ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+                            ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
+                        ax[0].set_ylabel("Range [m]")
+                        ax[1].set_ylabel("Observation Residual [m]")
+                        ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
+                        ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
+
+                        fig.suptitle(r"Intersatellite range observations")
+                        plt.tight_layout()
+                        # plt.show()
+
+
+                        # fig, ax = plt.subplots(1, arc_nums, figsize=(9, 4), sharey=True)
+
+                        # for arc_num in range(arc_nums):
+
+                        #     estimation_output = results[-2][arc_num][0]
+                        #     # total_single_information_dict = results[-2][1]
+                        #     # total_covariance_dict = results[-2][2]
+                        #     # total_information_dict = results[-2][3]
+                        #     sorted_observation_sets = results[-2][arc_num][4]
+
+
+                        #     print(estimation_output)
+
+                        #     for i, (observable_type, information_sets) in enumerate(sorted_observation_sets.items()):
+                        #         for j, observation_set in enumerate(information_sets.values()):
+                        #             for k, single_observation_set in enumerate(observation_set):
+
+                        #                 residual_history = estimation_output.residual_history
+
+                        #                 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
+                        #                 subplots_list = [ax1, ax2, ax3, ax4]
+
+                        #                 index = int(len(single_observation_set.observation_times))
+                        #                 for l in range(4):
+                        #                     subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
+                        #                     subplots_list[l].set_ylabel("Observation Residual")
+                        #                     subplots_list[l].set_title("Iteration "+str(l+1))
+
+                        #                 ax3.set_xlabel("Time since J2000 [s]")
+                        #                 ax4.set_xlabel("Time since J2000 [s]")
+
+                        #                 plt.figure(figsize=(9,5))
+                        #                 plt.hist(residual_history[i*index:(i+1)*index, -1], 25)
+                        #                 plt.xlabel('Final iteration range residual')
+                        #                 plt.ylabel('Occurences [-]')
+                        #                 plt.title('Histogram of residuals on final iteration')
+
+                        #                 plt.tight_layout()
+                        #                 plt.show()
+
+
+
+
+    def plot_observability(self):
+
+        fig, ax = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
+        for i, (model_type, model_names) in enumerate(self.results_dict.items()):
+            for j, (model_name, models) in enumerate(model_names.items()):
+                    for k, results in enumerate(models):
+
+                        arc_nums = len(results[-2].keys())
+
+                        for arc_num in range(arc_nums):
+
+                            estimation_output = results[-2][arc_num][0]
+                            total_single_information_dict = results[-2][arc_num][1]
+                            # total_covariance_dict = results[-2][2]
+                            # total_information_dict = results[-2][3]
+                            # sorted_observation_sets = results[-2][arc_num][4]
+
+                            # print(total_single_information_dict)
+
+                            for i, (observable_type, information_sets) in enumerate(total_single_information_dict.items()):
+                                for j, information_set in enumerate(information_sets.values()):
+                                    for k, single_information_set in enumerate(information_set):
+
+                                        # print(i, j, k, single_observation_set)
+                                        # print(single_observation_set.concatenated_observations)
+                                        # print(single_observation_set.observation_times)
+                                        # print(single_observation_set.observations_history)
+
+
+                                        information_dict = total_single_information_dict[observable_type][j][k]
+                                        epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
+                                        epochs = epochs - self.mission_start_epoch
+                                        information_matrix_history = np.array(list(information_dict.values()))
+
+                                        for m in range(2):
+                                            observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
+                                            observability_lumio = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]]))
+                                            observability_lpf_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1, keepdims=True))
+                                            observability_lumio_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1, keepdims=True))
+
+                                            ax[m].plot(epochs, observability_lpf_total, label="Total LPF" if m == 0 and arc_num == 0 else None, color="darkred")
+                                            ax[m].plot(epochs, observability_lumio_total, label="Total LUMIO" if m == 0 and arc_num == 0 else None, color="darkblue")
+
+                        for j in range(len(ax)):
+                            for i, gap in enumerate(self.observation_windows):
+                                ax[j].axvspan(
+                                    xmin=gap[0]-self.mission_start_epoch,
+                                    xmax=gap[1]-self.mission_start_epoch,
+                                    color="gray",
+                                    alpha=0.1,
+                                    label="Observation window" if i == 0 else None)
+                            for i, epoch in enumerate(self.station_keeping_epochs):
+                                station_keeping_epoch = epoch - self.mission_start_epoch
+                                ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', label="SKM" if i==0 else None)
+
+                            ax[j].grid(alpha=0.5, linestyle='--')
+                            ax[j].set_yscale("log")
+
+                            # Set y-axis tick label format to scientific notation with one decimal place
+                            ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+                            ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+
+                        ax[0].set_ylabel("Range [m]")
+                        ax[1].set_ylabel("Observation Residual [m]")
+                        ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
+                        ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
+
+                        fig.suptitle(r"Intersatellite range observations")
+                        plt.tight_layout()
+                        plt.show()

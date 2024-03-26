@@ -17,7 +17,7 @@ from src.estimation_models import estimation_model
 from tudatpy.kernel import constants
 
 
-np.random.seed(0)
+# np.random.seed(0)
 
 class NavigationSimulator():
 
@@ -30,6 +30,10 @@ class NavigationSimulator():
         self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
         self.model_type_truth, self.model_name_truth, self.model_number_truth = truth_model_list[0], truth_model_list[1], truth_model_list[2]
 
+        # Customability of estimation arc attributes
+        self.custom_range_noise = None
+        self.custom_observation_step_size_range = None
+
         # Station keeping parameters
         self.include_station_keeping = include_station_keeping
         self.custom_station_keeping_epochs = custom_station_keeping_epochs
@@ -41,8 +45,7 @@ class NavigationSimulator():
         self.custom_initial_state_truth = None
         self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1e-1
         self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-        # self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e4, 1e4, 1e4, 1e-2, 1e-2, 1e-2])**2*1e1
-        self.orbit_insertion_error = np.array([1e1, 1e1, 1e1, 1e-1, 1e-1, 1e-1, 1e1, 1e1, 1e1, 1e-1, 1e-1, 1e-1])*1e-10
+        self.orbit_insertion_error = np.array([1e1, 1e1, 1e1, 1e-1, 1e-1, 1e-1, 1e1, 1e1, 1e1, 1e-1, 1e-1, 1e-1])*1e-5
 
         # self.initial_estimation_error = np.random.normal(loc=0, scale=np.abs(self.initial_estimation_error), size=self.initial_estimation_error.shape)
         # self.orbit_insertion_error = np.random.normal(loc=0, scale=np.abs(self.orbit_insertion_error), size=self.orbit_insertion_error.shape)
@@ -50,18 +53,14 @@ class NavigationSimulator():
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(step_size).rstrip('0')
         self.decimal_places = len(num_str) - num_str.index('.') - 1
-        # print("DECIMAL PLACES: ", self.decimal_places)
 
         # Managing the timing aspect of the navigation arcs
         self.observation_windows = observation_windows
         self.mission_start_time = 60390
         self.mission_time = self.observation_windows[-1][-1]-self.mission_start_time
         self.mission_end_time = self.mission_start_time + self.mission_time
-
         self.batch_start_times = np.array([t[0] for t in self.observation_windows])
         self.batch_end_times = np.array([t[1] for t in self.observation_windows])
-
-        # print(self.observation_windows)
 
         self.times = list(set([self.mission_start_time] + [item for sublist in self.observation_windows for item in sublist] + [self.mission_end_time]))
 
@@ -83,7 +82,6 @@ class NavigationSimulator():
         self.times = np.round(sorted(list(set(self.times))), self.decimal_places)
         print("Sorted and rounded times: ", self.times)
 
-        # print("station keeping epochs: ", self.station_keeping_epochs)
 
 
     def get_Gamma(self, delta_t):
@@ -226,7 +224,9 @@ class NavigationSimulator():
                                                                                     get_only_first=False,
                                                                                     custom_truth_model=truth_model,
                                                                                     apriori_covariance=self.apriori_covariance,
-                                                                                    initial_estimation_error=self.initial_estimation_error)
+                                                                                    initial_estimation_error=self.initial_estimation_error,
+                                                                                    custom_range_noise=self.custom_range_noise,
+                                                                                    custom_observation_step_size_range=self.custom_observation_step_size_range)
 
                 estimation_model_result = estimation_model_results[self.model_type][self.model_name][0]
                 estimation_output = estimation_model_result[0]
@@ -263,25 +263,23 @@ class NavigationSimulator():
                 self.custom_initial_state = state_history_final[-1,:]
                 self.initial_estimation_error = state_history_final[-1,:]-state_history_truth[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_final.values()))[-1]
-                print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[0,:]-state_history_initial[0,:])
-                print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[-1,:]-state_history_initial[-1,:])
+                # print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[0,:]-state_history_initial[0,:])
+                # print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[-1,:]-state_history_initial[-1,:])
             else:
                 self.custom_initial_state = state_history_initial[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_initial.values()))[-1]
 
             # Include artificial process noise in case truth is not equal to the dynamic model
-            process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e-2
-            process_noise = np.random.normal(scale=process_noise_sigmas, size=len(process_noise_sigmas))
+            # process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e-2
+            # process_noise = np.random.normal(scale=process_noise_sigmas, size=len(process_noise_sigmas))
 
             if estimation_arc_activated:
                 delta_t = navigation_arc_duration*constants.JULIAN_DAY
-                if "spherical_harmonics" in self.model_name_truth:
-                    print("been here")
-                    sigma_i = 1e-15
-                else:
-                    sigma_i = 1e-20
+                if self.model_name != self.model_name_truth:
+                    # if np.all(["srp" in s1 and "srp" in s2])
+                    self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
 
-                self.apriori_covariance += np.outer(process_noise, process_noise)
+                # self.apriori_covariance += np.outer(process_noise, process_noise)
                 # print(self.get_process_noise_matrix(delta_t, sigma_i))
                 # self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
                 # self.apriori_covariance += np.diag([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])**2
@@ -322,7 +320,7 @@ class NavigationSimulator():
                         self.custom_initial_state[9:12] += delta_v
                         self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
 
-                    print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
+                    # print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
 
                     delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
 
@@ -359,11 +357,14 @@ class NavigationSimulator():
     def plot_navigation_results(self, navigation_results, show_directly=False):
 
         results_dict = {self.model_type: {self.model_name: [navigation_results]}}
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_correlation_history()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_observations()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_observability()
 
         if show_directly:
             plt.show()

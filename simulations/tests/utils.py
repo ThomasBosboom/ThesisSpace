@@ -84,9 +84,14 @@ def get_estimation_model_objects(dynamic_model_objects,
             # for dynamic_model in dynamic_models:
             #     print(f"VALUE IN UTILS {dynamic_model}: \n", dynamic_model.simulation_start_epoch_MJD, dynamic_model.propagation_time)
 
+            # print("dynamic models", dynamic_models)
+
             # Adjust such that full-fidelity model with the correct initial state is used
             if custom_truth_model is None:
-                truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch, dynamic_models[0].propagation_time)
+                # for dynamic_model in dynamic_models:
+                #     simuat
+                # print("been here", dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
+                truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.propagation_time)
@@ -102,7 +107,7 @@ def get_estimation_model_objects(dynamic_model_objects,
     return estimation_model_objects
 
 
-def save_figures_to_folder(figs=[], labels=[], save_to_report=True):
+def save_figures_to_folder(figs=[], labels=[], save_to_report=True, use_with_pytest=True):
 
     extras = []
     folder_name = inspect.currentframe().f_back.f_code.co_name
@@ -124,7 +129,8 @@ def save_figures_to_folder(figs=[], labels=[], save_to_report=True):
         figure_path = os.path.join(figure_folder, file_name)
         fig.savefig(figure_path)
         if save_to_report:
-            extras.append(pytest_html.extras.png(figure_path))
+            if use_with_pytest:
+                extras.append(pytest_html.extras.png(figure_path))
 
 
 def get_dynamic_model_results(simulation_start_epoch_MJD,
@@ -198,7 +204,9 @@ def get_estimation_model_results(dynamic_model_objects,
                                  get_only_first=False,
                                  entry_list=None,
                                  apriori_covariance=None,
-                                 initial_estimation_error=None):
+                                 initial_estimation_error=None,
+                                 custom_range_noise=None,
+                                 custom_observation_step_size_range=None):
 
     if custom_estimation_model_objects is None:
         estimation_model_objects = get_estimation_model_objects(dynamic_model_objects,
@@ -209,6 +217,7 @@ def get_estimation_model_results(dynamic_model_objects,
     else:
         estimation_model_objects = custom_estimation_model_objects
 
+    # Create dictiontary to save results to of first estimation result per dynamic model type
     if get_only_first:
         result_dict = {}
         for key, inner_dict in estimation_model_objects.items():
@@ -222,17 +231,25 @@ def get_estimation_model_results(dynamic_model_objects,
                 result_dict[key] = updated_inner_dict
         estimation_model_objects = result_dict
 
+    # Assign estimation results to a nested dictionary
     estimation_model_objects_results = estimation_model_objects.copy()
     for model_type, model_names in estimation_model_objects.items():
         for model_name, estimation_models in model_names.items():
             for i, estimation_model in enumerate(estimation_models):
 
+                # Adjust the attributes if wanted
+                if custom_range_noise is not None:
+                    estimation_model.noise_range = custom_range_noise
+                if custom_observation_step_size_range is not None:
+                    estimation_model.observation_step_size_range = custom_observation_step_size_range
 
+                # Solve the results of the estimation arc and save to dictionary
                 start_time = time.time()
                 results_list = list(estimation_model.get_estimation_results())
                 results_list.append(time.time()-start_time)
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 
+    # Selectic only specific estimation model outputs to save to the dictionary
     if entry_list is not None:
         for model_type, model_names in estimation_model_objects_results.items():
             for model_name, model_results in model_names.items():
@@ -288,14 +305,6 @@ def convert_dictionary_to_array(dictionary):
     return keys, values
 
 
-# def convert_epochs_to_MJD(epochs):
-
-#     epochs_MJD = np.array([time_conversion.julian_day_to_modified_julian_day(\
-#         time_conversion.seconds_since_epoch_to_julian_day(epoch)) for epoch in epochs])
-
-#     return epochs_MJD
-
-
 def convert_epochs_to_MJD(epochs, full_array=True):
 
     if full_array:
@@ -316,51 +325,84 @@ def convert_MJD_to_epoch(epochs, full_array=True):
                     time_conversion.modified_julian_day_to_julian_day(epochs))
 
 
-
-
 def get_max_depth(dictionary):
     if isinstance(dictionary, dict):
         return 1 + max((get_max_depth(value) for value in dictionary.values()), default=0)
     else:
         return 0
 
-def save_nested_dict_to_json(nested_dict, file_name, folder_name='data'):
+
+def save_dicts_to_folder(dicts=[], labels=[], folder_name='data'):
 
     # Get the frame of the caller
     caller_frame = inspect.stack()[1]
     file_path = caller_frame.filename
     file_path = os.path.dirname(file_path)
 
-    # if not os.path.exists(folder_name):
-    #     os.makedirs(folder_name, exist_ok=True)
+    figure_folder = os.path.join(file_path, folder_name)
+    if not os.path.exists(figure_folder):
+        os.makedirs(figure_folder, exist_ok=True)
+
+    sub_figure_folder_name = inspect.currentframe().f_back.f_code.co_name
+    sub_figure_folder = os.path.join(figure_folder, sub_figure_folder_name)
+    if not os.path.exists(sub_figure_folder):
+        os.makedirs(sub_figure_folder, exist_ok=True)
+
+    for i, dict in enumerate(dicts):
+        if len(dicts) != len(labels):
+            file_name = f"dict_{i}.json"
+        else:
+            file_name = f"{labels[i]}.json"
+        path = os.path.join(sub_figure_folder, file_name)
+
+        with open(path, 'w') as json_file:
+            json.dump(dict, json_file, indent=get_max_depth(dict))
+
+
+def save_figure_to_folder(figs=[], labels=[], folder_name='figures'):
+
+    # Get the frame of the caller
+    caller_frame = inspect.stack()[1]
+    file_path = caller_frame.filename
+    file_path = os.path.dirname(file_path)
 
     figure_folder = os.path.join(file_path, folder_name)
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder, exist_ok=True)
 
-    figure_path = os.path.join(figure_folder, file_name)
+    sub_figure_folder_name = inspect.currentframe().f_back.f_code.co_name
+    sub_figure_folder = os.path.join(figure_folder, sub_figure_folder_name)
+    if not os.path.exists(sub_figure_folder):
+        os.makedirs(sub_figure_folder, exist_ok=True)
 
-    with open(figure_path, 'w') as json_file:
-        json.dump(nested_dict, json_file, indent=get_max_depth(nested_dict))
+    for i, fig in enumerate(figs):
+        if len(figs) != len(labels):
+            file_name = f"fig_{i}.png"
+        else:
+            file_name = f"{labels[i]}.png"
+        figure_path = os.path.join(sub_figure_folder, file_name)
+        fig.savefig(figure_path)
 
 
 def get_monte_carlo_statistics(data_dict):
 
     # Initialize dictionary to store mean and standard deviation for each value
     stats = {}
-
     for key, value in data_dict.items():
         if isinstance(value, dict):
             stats[key] = get_monte_carlo_statistics(value)
         elif isinstance(value, list):
-            mean_value = np.mean(value)
-            std_dev_value = np.std(value)
+            mean_value = np.mean(value, axis=0)
+            std_dev_value = np.std(value, axis=0)
+            if isinstance(mean_value, np.ndarray):
+                mean_value = list(mean_value)
+            if isinstance(std_dev_value, np.ndarray):
+                std_dev_value = list(std_dev_value)
             stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
         else:
             stats[key] = value
 
     return stats
-
 
 
 # Commonly used parameters

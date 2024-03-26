@@ -1,0 +1,34 @@
+{
+   "0": {
+      "design_vector": {
+         "mean": [
+            2.0,
+            3.0
+         ],
+         "std_dev": [
+            1.0,
+            1.0
+         ]
+      },
+      "objective_function": {
+         "mean": 0.5406444920935692,
+         "std_dev": 0.45
+      }
+   },
+   "1": {
+      "design_vector": {
+         "mean": [
+            6.0,
+            7.0
+         ],
+         "std_dev": [
+            1.0,
+            1.0
+         ]
+      },
+      "objective_function": {
+         "mean": 0.0971609593404387,
+         "std_dev": 0.0005164672468694967
+      }
+   }
+}

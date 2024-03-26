@@ -1,0 +1,44 @@
+{
+   "threshold": 60391,
+   "skm_to_od_duration": 3,
+   "duration": 6,
+   "model": {
+      "dynamic": {
+         "model_type": "high_fidelity",
+         "model_name": "point_mass",
+         "model_number": 0
+      },
+      "truth": {
+         "model_type": "high_fidelity",
+         "model_name": "point_mass",
+         "model_number": 0
+      }
+   },
+   "history": {
+      "0": {
+         "design_vector": [
+            0.8499999999999996
+         ],
+         "objective_function": 0.09041573087871693
+      }
+   },
+   "optim": {
+      "x_optim": [
+         0.8499999999999996
+      ],
+      "x_observation_windows": [
+         [
+            60390,
+            60391
+         ],
+         [
+            60394.0,
+            60394.85
+         ]
+      ],
+      "x_skm_epochs": [
+         60391,
+         60394.85
+      ]
+   }
+}
