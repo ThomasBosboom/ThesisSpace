@@ -7,18 +7,15 @@ import time
 import scipy as sp
 
 # Define path to import src files
-script_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_directory)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(parent_dir)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-sys.path.append(parent_dir)
+file_directory = os.path.realpath(__file__)
+for _ in range(4):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
 
 from tests import utils
 
 # Own
 from src.optimization_models import OptimizationModel
-from src.dynamic_models import PlotNavigationResults, NavigationSimulator
 
 
 #################################################################################
@@ -33,7 +30,7 @@ def monte_carlo_skm_interval():
     duration = 28
     od_duration = 1
     # skm_to_od_duration = 3
-    num_runs = 2
+    numruns = 2
     delta_v_per_skm_interval_dict = dict()
     for model in ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]:
     # for model in ["point_mass"]:
@@ -41,12 +38,10 @@ def monte_carlo_skm_interval():
         for skm_to_od_duration in np.arange(1, 4.5, 0.5):
 
             delta_v_list = []
-            for run in range(num_runs):
+            for run in range(numruns):
 
                 optimization_model = OptimizationModel.OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", model, 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
-                # start_time = time.time()
                 delta_v = optimization_model.objective_function(optimization_model.initial_design_vector, show_directly=False)
-                # run_time = time.time() - start_time
                 delta_v_list.append(delta_v)
                 print(delta_v)
 
@@ -56,7 +51,7 @@ def monte_carlo_skm_interval():
 
 
 
-    stats = utils.get_monte_carlo_statistics(delta_v_per_skm_interval_dict)
+    stats = utils.get_monte_carlo_stats_dict(delta_v_per_skm_interval_dict)
 
     print(delta_v_per_skm_interval_dict)
     print(stats)
@@ -108,7 +103,7 @@ def monte_carlo_skm_interval_truth():
     duration = 28
     od_duration = 1
     # skm_to_od_duration = 3
-    num_runs = 2
+    numruns = 2
     delta_v_per_skm_interval_dict = dict()
     for model in ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]:
     # for model in ["point_mass"]:
@@ -116,7 +111,7 @@ def monte_carlo_skm_interval_truth():
         for skm_to_od_duration in np.arange(1, 4.5, 0.5):
 
             delta_v_list = []
-            for run in range(num_runs):
+            for run in range(numruns):
 
                 optimization_model = OptimizationModel.OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", "spherical_harmonics_srp", 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
                 delta_v = optimization_model.objective_function(optimization_model.initial_design_vector)
@@ -129,7 +124,7 @@ def monte_carlo_skm_interval_truth():
 
 
 
-    stats = utils.get_monte_carlo_statistics(delta_v_per_skm_interval_dict)
+    stats = utils.get_monte_carlo_stats_dict(delta_v_per_skm_interval_dict)
 
     print(delta_v_per_skm_interval_dict)
     print(stats)

@@ -35,6 +35,7 @@ class NavigationSimulator():
         self.custom_observation_step_size_range = None
 
         # Station keeping parameters
+        self.station_keeping_error = 1e-2
         self.include_station_keeping = include_station_keeping
         self.custom_station_keeping_epochs = custom_station_keeping_epochs
         self.target_point_epochs = target_point_epochs
@@ -316,7 +317,7 @@ class NavigationSimulator():
 
                     # Generate random noise to simulate station-keeping errors
                     if self.model_type == "high_fidelity":
-                        delta_v_noise = np.random.normal(loc=0, scale=1e-2*np.abs(delta_v), size=delta_v.shape)
+                        delta_v_noise = np.random.normal(loc=0, scale=self.station_keeping_error*np.abs(delta_v), size=delta_v.shape)
                         self.custom_initial_state[9:12] += delta_v
                         self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
 
@@ -357,12 +358,12 @@ class NavigationSimulator():
     def plot_navigation_results(self, navigation_results, show_directly=False):
 
         results_dict = {self.model_type: {self.model_name: [navigation_results]}}
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-        # PlotNavigationResults.PlotNavigationResults(results_dict).plot_correlation_history()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
+        PlotNavigationResults.PlotNavigationResults(results_dict).plot_correlation_history()
         PlotNavigationResults.PlotNavigationResults(results_dict).plot_observations()
         PlotNavigationResults.PlotNavigationResults(results_dict).plot_observability()
 

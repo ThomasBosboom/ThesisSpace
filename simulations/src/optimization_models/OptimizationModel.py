@@ -51,7 +51,7 @@ class OptimizationModel():
 
         # optimization parmameters
         self.factor = 2
-        self.maxiter = 2
+        self.maxiter = 10
 
 
     def get_updated_skm_epochs(self, x):
@@ -79,6 +79,8 @@ class OptimizationModel():
         x_old = self.xk
         diff = np.array(x) - np.array(x_old)
         x = x + diff*(self.factor-1)
+        print("x_old: ", x_old)
+        print("diff: ", diff)
         observation_windows = self.get_updated_observation_windows(x)
         station_keeping_epochs = self.get_updated_skm_epochs(x)
         target_point_epochs = [self.skm_to_od_duration]

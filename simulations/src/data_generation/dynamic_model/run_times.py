@@ -7,12 +7,10 @@ from matplotlib.ticker import ScalarFormatter
 import time
 
 # Define path to import src files
-script_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_directory)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(parent_dir)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-sys.path.append(parent_dir)
+file_directory = os.path.realpath(__file__)
+for _ in range(4):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
 
 # Own
 from tests import utils
@@ -63,7 +61,7 @@ def run_times():
                     for k, entry in enumerate(subvalue):
                         accumulator_dict[fidelity_key][subkey][j].append(entry)
 
-    result_dict = utils.get_monte_carlo_statistics(accumulator_dict)
+    result_dict = utils.get_monte_carlo_stats_dict(accumulator_dict)
 
     ### Plot run times for each model
     keys_list = [["CRTBP"], ["PM", "PMSRP", "SH", "SHSRP"], ["FF"]]
