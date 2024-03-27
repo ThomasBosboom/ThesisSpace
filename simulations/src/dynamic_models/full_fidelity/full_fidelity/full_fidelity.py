@@ -16,7 +16,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(parent_dir))
 
 # Own
-from dynamic_models import validation
+import reference_data
 from DynamicModelBase import DynamicModelBase
 
 def read_coeffs(scaled=True):
@@ -170,7 +170,7 @@ class HighFidelityDynamicModel(DynamicModelBase):
             initial_state_LPF = np.add(initial_state_lpf_moon, moon_initial_state)
 
             # Define the initial state of LUMIO
-            initial_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+            initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
 
             # Combine the initial states
             self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))

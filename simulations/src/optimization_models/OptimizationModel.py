@@ -9,7 +9,7 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Own
-from dynamic_models import NavigationSimulator, PlotNavigationResults
+import NavigationSimulator, PlotNavigationResults
 from tests import utils
 
 class OptimizationModel():
@@ -86,14 +86,14 @@ class OptimizationModel():
         target_point_epochs = [self.skm_to_od_duration]
 
         print("Objective, design vector: \n", x)
-        print("Objective, observation windows: \n", observation_windows)
+        # print("Objective, observation windows: \n", observation_windows)
         # print("Objective, station keeping windows: \n", station_keeping_epochs)
         # print("Objective, target_point_epochs: \n", target_point_epochs)
 
         navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
                                                                        [self.model_type, self.model_name, self.model_number],
                                                                        [self.model_type_truth, self.model_name_truth, self.model_number_truth],
-                                                                       custom_station_keeping_epochs=station_keeping_epochs,
+                                                                       station_keeping_epochs=station_keeping_epochs,
                                                                        target_point_epochs=target_point_epochs,
                                                                        step_size=1e-2)
 
@@ -103,7 +103,7 @@ class OptimizationModel():
 
         delta_v = navigation_results[8][1]
         objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print(f"objective value at {x}: \n", delta_v, objective_value)
+        print(f"objective value at \n", delta_v, objective_value)
 
         return objective_value
 

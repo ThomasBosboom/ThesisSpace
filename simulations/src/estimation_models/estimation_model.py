@@ -49,8 +49,8 @@ class EstimationModel:
         self.bias_doppler = 0
         self.noise_range = 2.98 #102.44/50
         self.noise_doppler = 0.00097
-        self.observation_step_size_range = 600/5
-        self.observation_step_size_doppler = 600/5
+        self.observation_step_size_range = 600/2
+        self.observation_step_size_doppler = 600/2
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-10

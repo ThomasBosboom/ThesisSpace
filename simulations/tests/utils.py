@@ -12,7 +12,7 @@ import inspect
 from tudatpy.kernel.astro import time_conversion
 
 # Own
-from src.dynamic_models import Interpolator
+from src import Interpolator
 from src.dynamic_models.full_fidelity.full_fidelity import *
 from src.estimation_models import estimation_model
 
@@ -107,30 +107,30 @@ def get_estimation_model_objects(dynamic_model_objects,
     return estimation_model_objects
 
 
-def save_figures_to_folder(figs=[], labels=[], save_to_report=True, use_with_pytest=True):
+# def save_figures_to_folder(figs=[], labels=[], save_to_report=True, use_with_pytest=True):
 
-    extras = []
-    folder_name = inspect.currentframe().f_back.f_code.co_name
+#     extras = []
+#     folder_name = inspect.currentframe().f_back.f_code.co_name
 
-    base_folder = "figures"
-    if not os.path.exists(base_folder):
-        os.makedirs(base_folder, exist_ok=True)
+#     base_folder = "figures"
+#     if not os.path.exists(base_folder):
+#         os.makedirs(base_folder, exist_ok=True)
 
-    figure_folder = os.path.join(base_folder, folder_name)
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder, exist_ok=True)
+#     figure_folder = os.path.join(base_folder, folder_name)
+#     if not os.path.exists(figure_folder):
+#         os.makedirs(figure_folder, exist_ok=True)
 
-    for i, fig in enumerate(figs):
-        base_string = "_".join([str(label) for label in labels])
-        if save_to_report:
-            file_name = f"fig{i+1}_{base_string}.png"
-        else:
-            file_name = f"fig_3d{i+1}_{base_string}.png"
-        figure_path = os.path.join(figure_folder, file_name)
-        fig.savefig(figure_path)
-        if save_to_report:
-            if use_with_pytest:
-                extras.append(pytest_html.extras.png(figure_path))
+#     for i, fig in enumerate(figs):
+#         base_string = "_".join([str(label) for label in labels])
+#         if save_to_report:
+#             file_name = f"fig{i+1}_{base_string}.png"
+#         else:
+#             file_name = f"fig_3d{i+1}_{base_string}.png"
+#         figure_path = os.path.join(figure_folder, file_name)
+#         fig.savefig(figure_path)
+#         if save_to_report:
+#             if use_with_pytest:
+#                 extras.append(pytest_html.extras.png(figure_path))
 
 
 def get_dynamic_model_results(simulation_start_epoch_MJD,
@@ -405,6 +405,6 @@ def get_monte_carlo_stats_dict(data_dict):
     return stats
 
 
-# Commonly used parameters
-synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-                                  1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+# # Commonly used parameters
+# synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+#                                   1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])

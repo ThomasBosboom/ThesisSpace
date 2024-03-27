@@ -15,7 +15,7 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(parent_dir))
 
 # Own
-from dynamic_models import validation
+import reference_data
 from DynamicModelBase import DynamicModelBase
 
 
@@ -101,13 +101,13 @@ class LowFidelityDynamicModel(DynamicModelBase):
 
         self.set_initial_cartesian_moon_state()
 
-        _, state_history_synodic = validation.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
+        _, state_history_synodic = reference_data.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
                                                                             self.bodies.get("Earth").mass,
                                                                             self.bodies.get("Moon").mass,
                                                                             self.distance_between_primaries,
                                                                             14, # max 14 days, to save run time, full period halo orbit approximate
                                                                             step_size)
-        reference_state_LUMIO = validation.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, step_size=step_size, satellite=self.name_LPO, get_full_history=True, get_dict=False)
+        reference_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, step_size=step_size, satellite=self.name_LPO, get_full_history=True, get_dict=False)
         distance_array = np.empty((0, 1))
         initial_state_history = np.empty((0, 12))
         for initial_state_barycenter_fixed in state_history_synodic:
