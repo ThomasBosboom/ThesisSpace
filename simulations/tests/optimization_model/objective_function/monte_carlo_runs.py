@@ -13,8 +13,6 @@ for _ in range(4):
     sys.path.append(file_directory)
 
 from tests import utils
-
-# Own
 from src.optimization_models import OptimizationModel
 
 

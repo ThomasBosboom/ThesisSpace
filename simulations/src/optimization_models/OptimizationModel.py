@@ -42,15 +42,12 @@ class OptimizationModel():
             self.observation_windows.append(window)
 
         self.vec_len = len(self.skm_epochs)-1
-
         self.initial_design_vector = self.od_duration*np.ones(self.vec_len)
-
         self.design_vector_bounds = list(zip(bounds[0]*np.ones(self.vec_len), bounds[-1]*np.ones(self.vec_len)))
-
         self.xk = self.initial_design_vector
 
         # optimization parmameters
-        self.factor = 2
+        self.factor = 1
         self.maxiter = 10
 
 
@@ -73,14 +70,22 @@ class OptimizationModel():
         return new_observation_windows
 
 
-    def objective_function(self, x, show_directly=False):
+    def get_adjusted_design_vector(self, x):
 
-        print("before adjustment: ", x)
-        x_old = self.xk
-        diff = np.array(x) - np.array(x_old)
+        # print("before adjustment: ", x)
+        diff = np.array(x) - np.array(self.xk)
         x = x + diff*(self.factor-1)
-        print("x_old: ", x_old)
-        print("diff: ", diff)
+        # print("self.xk: ", self.xk)
+        # print("diff: ", diff)
+
+        return x
+
+
+    def objective_function(self, x, plot_results=False, show_directly=False):
+
+        print("Start of objective calculation ===============")
+
+        x = self.get_adjusted_design_vector(x)
         observation_windows = self.get_updated_observation_windows(x)
         station_keeping_epochs = self.get_updated_skm_epochs(x)
         target_point_epochs = [self.skm_to_od_duration]
@@ -99,11 +104,15 @@ class OptimizationModel():
 
         navigation_results = navigation_simulator.get_navigation_results()
 
-        # navigation_simulator.plot_navigation_results(navigation_results, show_directly=show_directly)
+        if plot_results:
+            navigation_simulator.plot_navigation_results(navigation_results, show_directly=show_directly)
 
         delta_v = navigation_results[8][1]
         objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print(f"objective value at \n", delta_v, objective_value)
+        print(f"Objective: \n", delta_v, objective_value)
+        print("End of objective calculation ===============")
+        if objective_value > 9:
+            print("OUTLIER: ", x)
 
         return objective_value
 
@@ -120,14 +129,14 @@ class OptimizationModel():
         objective_values = []
         def callback(xk):
             self.xk = xk
-            print("Iteration:", callback.iteration, xk, self.objective_function(xk))
+            print("Iteration:", callback.iteration, xk, self.get_adjusted_design_vector(xk), self.objective_function(xk))
             iterations.append(callback.iteration)
             design_vectors.append(xk)
             objective_values.append(self.objective_function(xk))
             callback.iteration += 1
 
         callback.iteration = 0
-        initial_simplex = x0
+        callback(x0)
 
         print("Design vector bounds: ", self.design_vector_bounds)
 
@@ -140,7 +149,7 @@ class OptimizationModel():
                                                  "return_all": True,
                                                  'disp': True,
                                                 #  "initial_simplex": initial_simplex,
-                                                 "xatol": 0.01,
+                                                #  "xatol": 0.01,
                                                  "adaptive": True
                                                  },
                                         callback=callback)
@@ -157,6 +166,9 @@ class OptimizationModel():
         result_dict =  {"threshold": self.threshold,
                         "skm_to_od_duration": self.skm_to_od_duration,
                         "duration": self.duration-self.mission_start_time,
+                        "factor": self.factor,
+                        "maxiter": self.maxiter,
+                        "initial_design_vector": list(self.initial_design_vector),
                         "model":
                         {"dynamic":
                             {"model_type": self.model_type,

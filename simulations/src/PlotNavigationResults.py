@@ -9,10 +9,10 @@ from scipy.interpolate import interp1d
 from matplotlib.ticker import ScalarFormatter
 
 # Define path to import src files
-script_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_directory)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(parent_dir)
+file_directory = os.path.realpath(__file__)
+for _ in range(2):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
 
 # Own
 from tests import utils
@@ -317,7 +317,7 @@ class PlotNavigationResults():
                         arc_nums = len(results[-2].keys())
                         arc_nums = 1
 
-                        print(results[-2])
+                        # print(results[-2])
 
                         from matplotlib.lines import Line2D
                         import matplotlib.cm as cm
@@ -333,7 +333,7 @@ class PlotNavigationResults():
                             # self.sorted_observation_sets = results[-2][4]
 
 
-                            print(estimation_output)
+                            # print(estimation_output)
                             # print(estimation_output.correlations)
 
                             covariance_output = estimation_output.covariance
@@ -387,7 +387,7 @@ class PlotNavigationResults():
                             # total_information_dict = results[-2][3]
                             sorted_observation_sets = results[-2][arc_num][4]
 
-                            print(sorted_observation_sets)
+                            # print(sorted_observation_sets)
 
                             for i, (observable_type, information_sets) in enumerate(sorted_observation_sets.items()):
                                 for j, observation_set in enumerate(information_sets.values()):
@@ -397,15 +397,17 @@ class PlotNavigationResults():
                                         # print(single_observation_set.concatenated_observations)
                                         # print(single_observation_set.observation_times)
                                         # print(single_observation_set.observations_history)
+                                        color = "blue"
+                                        s = 0.5
 
                                         observation_times = utils.convert_epochs_to_MJD(single_observation_set.observation_times)
                                         observation_times = observation_times - self.mission_start_epoch
-                                        ax[0].scatter(observation_times, single_observation_set.concatenated_observations, color='blue')
+                                        ax[0].scatter(observation_times, single_observation_set.concatenated_observations, color=color, s=s)
 
                                         residual_history = estimation_output.residual_history
                                         best_iteration = estimation_output.best_iteration
                                         index = int(len(observation_times))
-                                        ax[1].scatter(observation_times, residual_history[i*index:(i+1)*index, best_iteration], color='blue')
+                                        ax[1].scatter(observation_times, residual_history[i*index:(i+1)*index, best_iteration], color=color, s=s)
 
 
                         for j in range(len(ax)):
@@ -541,11 +543,11 @@ class PlotNavigationResults():
                             ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
                             ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
-                        ax[0].set_ylabel("Range [m]")
-                        ax[1].set_ylabel("Observation Residual [m]")
+                        ax[0].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \Lambda_{\mathbf{r}, j})}$ [m]')
+                        ax[1].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \Lambda_{\mathbf{v}, j})}$ [m]')
                         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
                         ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-                        fig.suptitle(r"Intersatellite range observations")
+                        fig.suptitle(r"Intersatellite range observability")
                         plt.tight_layout()
                         plt.show()

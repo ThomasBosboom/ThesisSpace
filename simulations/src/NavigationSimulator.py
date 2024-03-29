@@ -5,13 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define path to import src files
-script_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_directory)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(parent_dir)
+file_directory = os.path.realpath(__file__)
+for _ in range(2):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
 
 # Own
 from tests import utils
+import NoiseDataClass
 import reference_data, Interpolator, StationKeeping, PlotNavigationResults
 from src.estimation_models import estimation_model
 from tudatpy.kernel import constants
@@ -33,22 +34,25 @@ class NavigationSimulator():
         # Customability of estimation arc attributes
         self.custom_range_noise = None
         self.custom_observation_step_size_range = None
+        self.custom_initial_state = None
+        self.custom_initial_state_truth = None
 
-        # Station keeping parameters
-        self.station_keeping_error = 1e-2
+        # Station keeping epochs
         self.station_keeping_epochs = station_keeping_epochs
         self.target_point_epochs = target_point_epochs
 
-        print("STATION KEEPING: ", self.station_keeping_epochs)
+        # print("STATION KEEPING: ", self.station_keeping_epochs)
 
         # Initial state and uncertainty parameters
-        self.custom_initial_state = None
-        self.custom_initial_state_truth = None
-        self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1e-1
-        self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-        self.orbit_insertion_error = np.array([1e1, 1e1, 1e1, 1e-1, 1e-1, 1e-1, 1e1, 1e1, 1e1, 1e-1, 1e-1, 1e-1])*1e-5
-        # self.initial_estimation_error = np.random.normal(loc=0, scale=np.abs(self.initial_estimation_error), size=self.initial_estimation_error.shape)
-        # self.orbit_insertion_error = np.random.normal(loc=0, scale=np.abs(self.orbit_insertion_error), size=self.orbit_insertion_error.shape)
+        noise_data = NoiseDataClass.NoiseDataClass()
+        self.station_keeping_error = noise_data.relative_station_keeping_error
+        self.initial_estimation_error = noise_data.initial_estimation_error
+        self.apriori_covariance = noise_data.apriori_covariance
+        self.orbit_insertion_error = noise_data.orbit_insertion_error
+
+        # print("ORBIT INSERTION ERROR: ", self.orbit_insertion_error)
+        # print("ORBIT ESTIMATION ERROR: ", self.initial_estimation_error)
+
 
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(step_size).rstrip('0')
@@ -65,7 +69,7 @@ class NavigationSimulator():
         # Managing the time vector to define all arcs
         self.times.extend(self.station_keeping_epochs)
         self.times = np.round(sorted(list(set(self.times))), self.decimal_places)
-        print("Sorted and rounded times: ", self.times)
+        # print("Sorted and rounded times: ", self.times)
 
 
 
@@ -118,7 +122,7 @@ class NavigationSimulator():
         full_dependent_variables_history_initial = dict()
         full_state_transition_matrix_history_initial = dict()
         estimation_arc_results_dict = dict()
-        print("Start navigation simulation ======================")
+        print("Start navigation simulation")
         for t, time in enumerate(self.times):
 
             navigation_arc_duration = np.round(np.diff(self.times)[navigation_arc], self.decimal_places)
@@ -220,6 +224,11 @@ class NavigationSimulator():
                 formal_errors = estimation_output.formal_errors
                 best_iteration = estimation_output.best_iteration
 
+                # print("NAVIGATIONSIMULATOR")
+                # print("Difference in states BEFORE AFTER: \n ", parameter_history[:,best_iteration]-parameter_history[:,0], "\n")
+                # print("old parameter: \n", parameter_history[:,0], "\n")
+                # print("Updated parameter: \n", parameter_history[:,best_iteration], "\n")
+
                 epochs, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
                     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model,
                                                                                                     custom_initial_state=parameter_history[:,best_iteration],
@@ -311,7 +320,7 @@ class NavigationSimulator():
             if navigation_arc<len(self.times)-2:
                 navigation_arc += 1
             else:
-                print("End navigation simulation ======================")
+                print("End navigation simulation")
                 break
 
         return full_estimation_error_dict, full_reference_state_deviation_dict, full_propagated_covariance_dict, full_propagated_formal_errors_dict,\

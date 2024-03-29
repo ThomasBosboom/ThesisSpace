@@ -13,12 +13,13 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-script_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_directory)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(parent_dir)
+file_directory = os.path.realpath(__file__)
+for _ in range(2):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
 
 # Own
+import NoiseDataClass
 from dynamic_models.full_fidelity import *
 from dynamic_models.low_fidelity.three_body_problem import *
 from dynamic_models.high_fidelity.point_mass import *
@@ -46,19 +47,19 @@ class EstimationModel:
 
         # Defining basis for observations
         self.bias_range = 0
-        self.bias_doppler = 0
-        self.noise_range = 2.98 #102.44/50
-        self.noise_doppler = 0.00097
+        # self.noise_range = 2.98 #102.44/50
         self.observation_step_size_range = 600/2
-        self.observation_step_size_doppler = 600/2
         self.retransmission_delay = 6
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-10
 
+        noise_data = NoiseDataClass.NoiseDataClass()
+        self.noise_range = noise_data.noise_range
+
+
         # Creating observation time vector
         margin = 120
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_range)
-        self.observation_times_doppler = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_doppler)
 
         self.arc_start_epoch = self.dynamic_model.simulation_start_epoch
         self.arc_end_epoch = self.dynamic_model.simulation_end_epoch

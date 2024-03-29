@@ -1,0 +1,226 @@
+{
+    "0": {
+        "threshold": 60397,
+        "skm_to_od_duration": 3,
+        "duration": 28,
+        "model": {
+            "dynamic": {
+                "model_type": "high_fidelity",
+                "model_name": "point_mass",
+                "model_number": 0
+            },
+            "truth": {
+                "model_type": "high_fidelity",
+                "model_name": "point_mass",
+                "model_number": 0
+            }
+        },
+        "history": {
+            "0": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05,
+                    1.0
+                ],
+                "objective_function": 2.777506078331983
+            },
+            "1": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05,
+                    1.0
+                ],
+                "objective_function": 2.5585026597041516
+            },
+            "2": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05,
+                    1.0
+                ],
+                "objective_function": 2.227164016916117
+            },
+            "3": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05,
+                    1.0
+                ],
+                "objective_function": 3.4332514990063494
+            },
+            "4": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05,
+                    1.0
+                ],
+                "objective_function": 1.962426342790788
+            }
+        },
+        "optim": {
+            "x_optim": [
+                1.0,
+                1.0,
+                1.0,
+                1.05,
+                1.0
+            ],
+            "x_observation_windows": [
+                [
+                    60390,
+                    60397
+                ],
+                [
+                    60400.0,
+                    60401.0
+                ],
+                [
+                    60404.0,
+                    60405.0
+                ],
+                [
+                    60408.0,
+                    60409.0
+                ],
+                [
+                    60412.0,
+                    60413.05
+                ],
+                [
+                    60416.05,
+                    60417.05
+                ]
+            ],
+            "x_skm_epochs": [
+                60397,
+                60401.0,
+                60405.0,
+                60409.0,
+                60413.05,
+                60417.05
+            ]
+        }
+    },
+    "1": {
+        "threshold": 60397,
+        "skm_to_od_duration": 3,
+        "duration": 28,
+        "model": {
+            "dynamic": {
+                "model_type": "high_fidelity",
+                "model_name": "point_mass",
+                "model_number": 0
+            },
+            "truth": {
+                "model_type": "high_fidelity",
+                "model_name": "point_mass",
+                "model_number": 0
+            }
+        },
+        "history": {
+            "0": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05
+                ],
+                "objective_function": 2.9259387444537714
+            },
+            "1": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05
+                ],
+                "objective_function": 3.1401649808592444
+            },
+            "2": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.05
+                ],
+                "objective_function": 2.8428506132683404
+            },
+            "3": {
+                "design_vector": [
+                    1.003136,
+                    1.003136,
+                    1.0216960000000002,
+                    1.003136,
+                    1.021136
+                ],
+                "objective_function": 2.6440271790945915
+            },
+            "4": {
+                "design_vector": [
+                    1.003136,
+                    1.003136,
+                    1.0216960000000002,
+                    1.003136,
+                    1.021136
+                ],
+                "objective_function": 3.1106456716851056
+            }
+        },
+        "optim": {
+            "x_optim": [
+                1.003136,
+                1.003136,
+                1.0216960000000002,
+                1.003136,
+                1.021136
+            ],
+            "x_observation_windows": [
+                [
+                    60390,
+                    60397
+                ],
+                [
+                    60400.0,
+                    60401.003136
+                ],
+                [
+                    60404.003136,
+                    60405.006272
+                ],
+                [
+                    60408.006272,
+                    60409.027968
+                ],
+                [
+                    60412.027968,
+                    60413.031104
+                ],
+                [
+                    60416.031104,
+                    60417.052240000005
+                ]
+            ],
+            "x_skm_epochs": [
+                60397,
+                60401.003136,
+                60405.006272,
+                60409.027968,
+                60413.031104,
+                60417.052240000005
+            ]
+        }
+    }
+}

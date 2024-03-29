@@ -14,7 +14,6 @@ from tests import utils
 import helper_functions
 
 
-
 #################################################################
 ###### Monte Carlo test case ####################################
 #################################################################
@@ -23,18 +22,19 @@ dynamic_model_list = ["high_fidelity", "point_mass",0]
 truth_model_list = ["high_fidelity", "point_mass",0]
 threshold = 3
 skm_to_od_duration = 3
-duration = 28
+duration = 9
 od_duration = 1
-numruns = 4
-maxiter = 4
-factor = 3
+numruns = 2
+maxiter = 1
+factor = 1
+bounds = (0.5, 1.5)
 helper_functions.run_monte_carlo_optimization_model(dynamic_model_list,
                                                     truth_model_list,
                                                     threshold,
                                                     skm_to_od_duration,
                                                     duration,
                                                     od_duration,
-                                                    bounds=(0.5, 1.5),
+                                                    bounds=bounds,
                                                     numruns=numruns,
                                                     maxiter=maxiter,
                                                     factor=factor,

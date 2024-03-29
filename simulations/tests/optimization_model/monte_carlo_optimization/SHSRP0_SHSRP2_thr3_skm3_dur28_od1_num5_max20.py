@@ -14,30 +14,28 @@ from tests import utils
 import helper_functions
 
 
-
 #################################################################
 ###### Monte Carlo test case ####################################
 #################################################################
 
-dynamic_model_list = ["high_fidelity", "point_mass",0]
-truth_model_list = ["high_fidelity", "point_mass",0]
-threshold = 7
+dynamic_model_list = ["high_fidelity", "spherical_harmonics_srp",0]
+truth_model_list = ["high_fidelity", "spherical_harmonics_srp",2]
+threshold = 3
 skm_to_od_duration = 3
-duration = 16
+duration = 28
 od_duration = 1
-numruns = 1
-maxiter = 10
+numruns = 5
+maxiter = 20
 factor = 1
-custom_initial_design_vector = None
+bounds = (0.5, 1.5)
 helper_functions.run_monte_carlo_optimization_model(dynamic_model_list,
                                                     truth_model_list,
                                                     threshold,
                                                     skm_to_od_duration,
                                                     duration,
                                                     od_duration,
-                                                    bounds=(0.5, 1.5),
+                                                    bounds=bounds,
                                                     numruns=numruns,
                                                     maxiter=maxiter,
                                                     factor=factor,
-                                                    custom_initial_design_vector=custom_initial_design_vector,
                                                     label=file_name)

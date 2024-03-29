@@ -13,8 +13,6 @@ for _ in range(4):
     sys.path.append(file_directory)
 
 from tests import utils
-
-# Own
 from src.optimization_models import OptimizationModel
 
 
@@ -88,7 +86,7 @@ def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, thr
     # label = str(dynamic_model_list[1])+"_"+str(truth_model_list[1])+"_numruns"+str(numruns)+"_maxiter"+str(maxiter)+"_threshold"+str(threshold)+"_duration"+str(duration)+"_od_duration"+str(od_duration)
 
     monte_carlo_simulation_results = dict()
-    for run in range(numruns):
+    for run in range(numruns+1):
 
         optimization_result = get_optimization_result(dynamic_model_list,
                                                       truth_model_list,
@@ -104,13 +102,15 @@ def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, thr
         print(f"Optimization result of run {run}: ", optimization_result)
         monte_carlo_simulation_results[run] = optimization_result
 
+        # Save individual run dictionary
+        utils.save_dicts_to_folder(dicts=[optimization_result], custom_sub_folder_name=label, labels=["run_"+str(run)+"_"+label])
+
     # Transform dictionaries and get statistics
     combined_history_dict = get_combined_history_dict(monte_carlo_simulation_results)
-    monte_carlo_stats_dict = utils.get_monte_carlo_stats_dict(data_dict=combined_history_dict)
+    monte_carlo_stats_dict = utils.get_monte_carlo_stats_dict(combined_history_dict)
 
-    # Save relevant dictionaries
-    utils.save_dicts_to_folder(dicts=[monte_carlo_simulation_results], labels=[label])
-    utils.save_dicts_to_folder(dicts=[monte_carlo_stats_dict], labels=["stats_"+label])
+    # Save total statistics dictionary
+    utils.save_dicts_to_folder(dicts=[monte_carlo_stats_dict], custom_sub_folder_name=label, labels=["stats_"+label])
 
     print("Monte Carlo results: ", monte_carlo_simulation_results)
     print("Monte Carlo statistics: ", monte_carlo_stats_dict)

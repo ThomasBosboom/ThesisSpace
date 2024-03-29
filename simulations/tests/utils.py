@@ -332,34 +332,38 @@ def get_max_depth(dictionary):
         return 0
 
 
-def save_dicts_to_folder(dicts=[], labels=[], folder_name='data'):
+def save_dicts_to_folder(dicts=[], labels=[], custom_sub_folder_name=None, folder_name='data'):
 
     # Get the frame of the caller
     caller_frame = inspect.stack()[1]
     file_path = caller_frame.filename
     file_path = os.path.dirname(file_path)
 
-    figure_folder = os.path.join(file_path, folder_name)
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder, exist_ok=True)
+    dict_folder = os.path.join(file_path, folder_name)
+    if not os.path.exists(dict_folder):
+        os.makedirs(dict_folder, exist_ok=True)
 
-    sub_figure_folder_name = inspect.currentframe().f_back.f_code.co_name
-    sub_figure_folder = os.path.join(figure_folder, sub_figure_folder_name)
-    if not os.path.exists(sub_figure_folder):
-        os.makedirs(sub_figure_folder, exist_ok=True)
+    if custom_sub_folder_name is None:
+        sub_folder_name = inspect.currentframe().f_back.f_code.co_name
+    else:
+        sub_folder_name = custom_sub_folder_name
+
+    sub_folder = os.path.join(dict_folder, sub_folder_name)
+    if not os.path.exists(sub_folder):
+        os.makedirs(sub_folder, exist_ok=True)
 
     for i, dict in enumerate(dicts):
         if len(dicts) != len(labels):
             file_name = f"dict_{i}.json"
         else:
             file_name = f"{labels[i]}.json"
-        path = os.path.join(sub_figure_folder, file_name)
+        path = os.path.join(sub_folder, file_name)
 
         with open(path, 'w') as json_file:
             json.dump(dict, json_file, indent=get_max_depth(dict))
 
 
-def save_figure_to_folder(figs=[], labels=[], folder_name='figures'):
+def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folder_name='figures'):
 
     # Get the frame of the caller
     caller_frame = inspect.stack()[1]
@@ -370,8 +374,12 @@ def save_figure_to_folder(figs=[], labels=[], folder_name='figures'):
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder, exist_ok=True)
 
-    sub_figure_folder_name = inspect.currentframe().f_back.f_code.co_name
-    sub_figure_folder = os.path.join(figure_folder, sub_figure_folder_name)
+    if custom_sub_folder_name is None:
+        sub_folder_name = inspect.currentframe().f_back.f_code.co_name
+    else:
+        sub_folder_name = custom_sub_folder_name
+
+    sub_figure_folder = os.path.join(figure_folder, sub_folder_name)
     if not os.path.exists(sub_figure_folder):
         os.makedirs(sub_figure_folder, exist_ok=True)
 

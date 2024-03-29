@@ -66,6 +66,11 @@ class Interpolator:
             interp_epochs = np.array([time_conversion.julian_day_to_modified_julian_day(\
                 time_conversion.seconds_since_epoch_to_julian_day(interp_epoch)) for interp_epoch in interp_epochs])
 
+        # print("INTERPOLATOR")
+        # print(dynamic_model_object)
+        # print("state_history start: \n ", interp_epochs[0], interp_state_history[0, :], "\n")
+        # print("state_history end: \n ", interp_epochs[-1], interp_state_history[-1, :], "\n")
+
         if solve_variational_equations:
             return interp_epochs, interp_state_history, interp_dependent_variables_history, interp_state_transition_matrix_history
         else:

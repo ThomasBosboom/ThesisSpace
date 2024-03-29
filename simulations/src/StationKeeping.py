@@ -5,10 +5,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define path to import src files
-script_directory = os.path.dirname(os.path.realpath(__file__))
-sys.path.append(script_directory)
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-sys.path.append(parent_dir)
+file_directory = os.path.realpath(__file__)
+for _ in range(2):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
 
 # Own
 from tests import utils
