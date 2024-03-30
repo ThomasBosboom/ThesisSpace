@@ -20,7 +20,6 @@ from src.optimization_models import OptimizationModel
 ###### Test runs of the navigation simulator ####################################
 #################################################################################
 
-
 def get_optimization_result(dynamic_model_list, truth_model_list, threshold, skm_to_od_duration, duration, od_duration, bounds=(0.5, 1.5), maxiter=5, factor=2, custom_initial_design_vector=None):
 
     # Create OptimizationModel instance based on timing characteristics
@@ -47,25 +46,58 @@ def get_optimization_result(dynamic_model_list, truth_model_list, threshold, skm
 
 def get_combined_history_dict(dict):
 
+    stripped_dict = {key: value["history"] for key, value in dict.items()}
+
+    # Extract the design_vector subkey for each main key
+    names = ["design_vector", "objective_value"]
+    results = []
+    for name in names:
+        results.append({key: value[name] for key, value in stripped_dict.items()})
+
     combined_history_dict = {}
+    for i, data in enumerate(results):
+        transformed_data = {}
 
-    for key, value in dict.items():
-        design_vector = []
-        objective_function = []
+        for key in data[str(0)]:
+            values = []
+            for subkey in data:
+                values.append(data[subkey][key])
 
-        # Extract design vector and objective function from each dictionary
-        for history_key, history_value in value["history"].items():
-            design_vector.append(history_value["design_vector"])
-            objective_function.append(history_value["objective_function"])
-
-        # Add combined data to the new dictionary
-        combined_history_dict[key] = {
-            "design_vector": design_vector,
-            "objective_function": objective_function
-        }
+            transformed_data[key] = values
+        combined_history_dict[names[i]] = transformed_data
 
     return combined_history_dict
 
+
+def get_monte_carlo_stats_dict(dict):
+
+    stats = {}
+    mean_values = {}
+    std_dev_values = {}
+    for key, value in dict.items():
+
+        mean_list = []
+        std_dev_list = []
+        for subkey, subvalue in value.items():
+
+            subvalue_array = np.array(subvalue)
+            mean_value = np.mean(subvalue_array, axis=0)
+            std_dev_value = np.std(subvalue_array, axis=0)
+            if isinstance(mean_value, np.ndarray):
+                mean_value = list(mean_value)
+            if isinstance(std_dev_value, np.ndarray):
+                std_dev_value = list(std_dev_value)
+
+            mean_list.append(mean_value)
+            std_dev_list.append(std_dev_value)
+
+        mean_values[key] = {i: mean for i, mean in enumerate(mean_list)}
+        std_dev_values[key] = {i: std_dev for i, std_dev in enumerate(std_dev_list)}
+
+    stats["mean"] = mean_values
+    stats["std_dev"] = std_dev_values
+
+    return stats
 
 
 def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, threshold, skm_to_od_duration, duration, od_duration, bounds=(0.5, 1.5), numruns=1, maxiter=5, factor=2, custom_initial_design_vector=None, label=None):
@@ -83,10 +115,8 @@ def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, thr
     print(f"custom_initial_design_vector: {custom_initial_design_vector}")
     print(f"factor: {factor}")
 
-    # label = str(dynamic_model_list[1])+"_"+str(truth_model_list[1])+"_numruns"+str(numruns)+"_maxiter"+str(maxiter)+"_threshold"+str(threshold)+"_duration"+str(duration)+"_od_duration"+str(od_duration)
-
-    monte_carlo_simulation_results = dict()
-    for run in range(numruns+1):
+    monte_carlo_results_dict = dict()
+    for run in range(numruns):
 
         optimization_result = get_optimization_result(dynamic_model_list,
                                                       truth_model_list,
@@ -100,17 +130,18 @@ def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, thr
                                                       factor=factor)
 
         print(f"Optimization result of run {run}: ", optimization_result)
-        monte_carlo_simulation_results[run] = optimization_result
+        monte_carlo_results_dict[str(run)] = optimization_result
 
         # Save individual run dictionary
         utils.save_dicts_to_folder(dicts=[optimization_result], custom_sub_folder_name=label, labels=["run_"+str(run)+"_"+label])
 
     # Transform dictionaries and get statistics
-    combined_history_dict = get_combined_history_dict(monte_carlo_simulation_results)
-    monte_carlo_stats_dict = utils.get_monte_carlo_stats_dict(combined_history_dict)
+    combined_history_dict = get_combined_history_dict(monte_carlo_results_dict)
+    monte_carlo_stats_dict = get_monte_carlo_stats_dict(combined_history_dict)
 
     # Save total statistics dictionary
+    utils.save_dicts_to_folder(dicts=[monte_carlo_results_dict], custom_sub_folder_name=label, labels=["combined_"+label])
     utils.save_dicts_to_folder(dicts=[monte_carlo_stats_dict], custom_sub_folder_name=label, labels=["stats_"+label])
 
-    print("Monte Carlo results: ", monte_carlo_simulation_results)
-    print("Monte Carlo statistics: ", monte_carlo_stats_dict)
+    # print("Monte Carlo results: ", monte_carlo_results_dict)
+    # print("Monte Carlo statistics: ", monte_carlo_stats_dict)

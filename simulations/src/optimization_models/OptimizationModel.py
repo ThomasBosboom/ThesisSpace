@@ -1,6 +1,5 @@
 # General imports
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 import sys
 import scipy as sp
@@ -9,7 +8,7 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Own
-import NavigationSimulator, PlotNavigationResults
+import NavigationSimulator
 from tests import utils
 
 class OptimizationModel():
@@ -109,7 +108,7 @@ class OptimizationModel():
 
         delta_v = navigation_results[8][1]
         objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print(f"Objective: \n", delta_v, objective_value)
+        print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0])
         print("End of objective calculation ===============")
         if objective_value > 9:
             print("OUTLIER: ", x)
@@ -141,6 +140,7 @@ class OptimizationModel():
         print("Design vector bounds: ", self.design_vector_bounds)
 
         # Minimize the objective function subject to constraints
+        start_time = time.time()
         result = sp.optimize.minimize(self.objective_function, x0,
                                         bounds=[(1-0.5/self.factor, 1+0.5/self.factor) for i, bound in enumerate(self.design_vector_bounds)],
                                         method='Nelder-Mead',
@@ -153,15 +153,10 @@ class OptimizationModel():
                                                  "adaptive": True
                                                  },
                                         callback=callback)
+        run_time = time.time()-start_time
 
         # Extract optimized start times
         x_optim = result.x
-        print("x_optim:", x_optim)
-
-        # plt.plot(objective_values)
-        # plt.show()
-
-        print(iterations, design_vectors, objective_values)
 
         result_dict =  {"threshold": self.threshold,
                         "skm_to_od_duration": self.skm_to_od_duration,
@@ -179,13 +174,14 @@ class OptimizationModel():
                              "model_name": self.model_name_truth,
                              "model_number": self.model_number_truth}
                         },
-                        "history": {iteration:
-                                        {"design_vector": list(design_vectors[iteration]),
-                                         "objective_function": objective_values[iteration]}
-                                    for iteration in iterations},
-                        "optim": {"x_optim": list(x_optim),
-                                  "x_observation_windows": self.get_updated_observation_windows(x_optim),
-                                  "x_skm_epochs": self.get_updated_skm_epochs(x_optim)}
+                        "history": {"design_vector": {iteration: list(design_vectors[iteration]) for iteration in iterations},
+                                    "objective_value": {iteration: objective_values[iteration] for iteration in iterations}},
+                        "final_result": {"x_optim": list(x_optim),
+                                        "observation_windows": self.get_updated_observation_windows(x_optim),
+                                        "skm_epochs": self.get_updated_skm_epochs(x_optim),
+                                        "approx_annual_deltav": objective_values[-1]*365/(self.duration-self.mission_start_time),
+                                        "reduction_percentage": (objective_values[-1]-objective_values[0])/objective_values[0]*100,
+                                        "run_time": run_time}
                         }
 
         return result_dict

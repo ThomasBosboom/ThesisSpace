@@ -12,7 +12,7 @@
             0.03218489376978555
          ]
       },
-      "objective_function": {
+      "objective_value": {
          "mean": 0.6164146100161713,
          "std_dev": 0.014533937694722896
       }
@@ -30,7 +30,7 @@
             0.04602938640117291
          ]
       },
-      "objective_function": {
+      "objective_value": {
          "mean": 0.61103836396662,
          "std_dev": 0.021504170298445584
       }
@@ -48,7 +48,7 @@
             0.001980997776365335
          ]
       },
-      "objective_function": {
+      "objective_value": {
          "mean": 0.6387109392314274,
          "std_dev": 0.01990182763716072
       }

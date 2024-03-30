@@ -1,0 +1,66 @@
+{
+   "threshold": 60393,
+   "skm_to_od_duration": 3,
+   "duration": 14,
+   "factor": 1,
+   "maxiter": 2,
+   "initial_design_vector": [
+      1.0,
+      1.0
+   ],
+   "model": {
+      "dynamic": {
+         "model_type": "high_fidelity",
+         "model_name": "point_mass",
+         "model_number": 0
+      },
+      "truth": {
+         "model_type": "high_fidelity",
+         "model_name": "point_mass",
+         "model_number": 0
+      }
+   },
+   "history": {
+      "design_vector": {
+         "0": [
+            1.0,
+            1.0
+         ],
+         "1": [
+            1.0499999999999998,
+            0.95
+         ]
+      },
+      "objective_value": {
+         "0": 0.2083236133623919,
+         "1": 0.20451850359220472
+      }
+   },
+   "final_result": {
+      "x_optim": [
+         1.0499999999999998,
+         0.95
+      ],
+      "observation_windows": [
+         [
+            60390,
+            60393
+         ],
+         [
+            60396.0,
+            60397.05
+         ],
+         [
+            60400.05,
+            60401.0
+         ]
+      ],
+      "skm_epochs": [
+         60393,
+         60397.05,
+         60401.0
+      ],
+      "approx_annual_deltav": 5.332089557939623,
+      "reduction_percentage": -1.8265379083877387
+   }
+}

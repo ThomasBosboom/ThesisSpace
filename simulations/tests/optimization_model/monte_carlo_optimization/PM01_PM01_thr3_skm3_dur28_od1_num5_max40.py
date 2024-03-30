@@ -22,10 +22,10 @@ dynamic_model_list = ["high_fidelity", "point_mass",0]
 truth_model_list = ["high_fidelity", "point_mass",0]
 threshold = 3
 skm_to_od_duration = 3
-duration = 9
+duration = 28
 od_duration = 1
-numruns = 2
-maxiter = 1
+numruns = 5
+maxiter = 40
 factor = 1
 bounds = (0.5, 1.5)
 helper_functions.run_monte_carlo_optimization_model(dynamic_model_list,

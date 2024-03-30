@@ -8,7 +8,7 @@
             0.0
          ]
       },
-      "objective_function": {
+      "objective_value": {
          "mean": 0.1320727346835261,
          "std_dev": 0.0
       }
@@ -22,7 +22,7 @@
             0.0
          ]
       },
-      "objective_function": {
+      "objective_value": {
          "mean": 0.13320974581113887,
          "std_dev": 0.0
       }

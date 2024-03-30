@@ -48,10 +48,10 @@ class EstimationModel:
         # Defining basis for observations
         self.bias_range = 0
         # self.noise_range = 2.98 #102.44/50
-        self.observation_step_size_range = 600/2
-        self.retransmission_delay = 6
+        self.observation_step_size_range = 600/1
+        self.retransmission_delay = 0.5
         self.integration_time = 0.5
-        self.time_drift_bias = 6.9e-10
+        self.time_drift_bias = 6.9e-20
 
         noise_data = NoiseDataClass.NoiseDataClass()
         self.noise_range = noise_data.noise_range

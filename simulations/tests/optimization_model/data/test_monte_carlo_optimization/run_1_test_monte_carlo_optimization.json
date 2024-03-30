@@ -24,7 +24,7 @@
          "design_vector": [
             1.0
          ],
-         "objective_function": 0.13320974581113887
+         "objective_value": 0.13320974581113887
       }
    },
    "optim": {
