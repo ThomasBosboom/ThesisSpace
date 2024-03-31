@@ -64,26 +64,6 @@ class PlotNavigationResults():
                     ax_3d.set_ylabel('Y [m]')
                     ax_3d.set_zlabel('Z [m]')
 
-
-                    # print("DYBNAMIC MODEL USED", dynamic_model)
-                    # print("start epoch", dynamic_model.simulation_start_epoch_MJD)
-                    # print("propation_times", dynamic_model.propagation_time)
-                    # # Convert state histories to synodic frame
-                    # epochs_synodic_reference, state_history_synodic_reference = \
-                    #     FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=self.step_size).get_results(state_history_reference)
-                    # epochs_synodic_initial, state_history_synodic_initial = \
-                    #     FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=self.step_size).get_results(state_history_initial)
-                    # epochs_synodic_truth, state_history_synodic_truth = \
-                    #     FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=self.step_size).get_results(state_history_truth)
-
-                    # for m in range(3):
-                    #     ax[m].plot(state_history_synodic_reference[:,6+m%3], state_history_synodic_reference[:,6+(m+1)%3])
-                    #     ax[m].plot(state_history_synodic_initial[:,6+m%3], state_history_synodic_initial[:,6+(m+1)%3])
-                    #     ax[m].plot(state_history_synodic_truth[:,6+m%3], state_history_synodic_truth[:,6+(m+1)%3])
-
-                    # ax1.plot(epochs_synodic_reference, state_history_synodic_reference[:,6:9])
-                    # ax1.plot(epochs_synodic_initial, state_history_synodic_initial[:,6:9])
-                    # ax1.plot(epochs_synodic_truth, state_history_synodic_truth[:,6:9])
         plt.tight_layout()
         plt.legend()
 
@@ -99,7 +79,7 @@ class PlotNavigationResults():
                     full_propagated_formal_errors_epochs = results[3][0]
                     full_propagated_formal_errors_history = results[3][1]
                     relative_epochs = full_propagated_formal_errors_epochs - full_propagated_formal_errors_epochs[0]
-                    # delta_v = results[8][1]
+                    navigation_simulator = results[-1]
 
                     linestyles = ["solid", "dotted", "dashed"]
                     labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
@@ -135,11 +115,8 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig1.suptitle(r"Formal error history")
+        fig1.suptitle(f"Formal error history | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
         plt.tight_layout()
-
-        # utils.save_figure_to_folder(figs=[fig1], labels=[])
-        # plt.show()
 
 
     def plot_uncertainty_history(self):
@@ -153,6 +130,7 @@ class PlotNavigationResults():
                     full_propagated_formal_errors_epochs = results[3][0]
                     full_propagated_formal_errors_history = results[3][1]
                     propagated_covariance_epochs = results[2][0]
+                    navigation_simulator = results[-1]
 
                     # Plot the estimation error history
                     relative_epochs = full_propagated_formal_errors_epochs - full_propagated_formal_errors_epochs[0]
@@ -188,9 +166,8 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig2.suptitle(r"Total 3D RSS 3$\sigma$ uncertainty")
+        fig2.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
         plt.tight_layout()
-        # plt.show()
 
 
     def plot_reference_deviation_history(self):
@@ -203,6 +180,7 @@ class PlotNavigationResults():
 
                     full_reference_state_deviation_epochs = results[1][0]
                     full_reference_state_deviation_history = results[1][1]
+                    navigation_simulator = results[-1]
 
                     relative_epochs = full_reference_state_deviation_epochs - full_reference_state_deviation_epochs[0]
 
@@ -238,11 +216,8 @@ class PlotNavigationResults():
 
             ax[k][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
-
-
-        fig3.suptitle("Deviation from reference orbit")
+        fig3.suptitle(f"Deviation from reference orbit | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
         plt.legend()
-        # plt.show()
 
 
     def plot_estimation_error_history(self):
@@ -258,6 +233,7 @@ class PlotNavigationResults():
                         full_estimation_error_history = results[0][1]
                         propagated_covariance_epochs = results[2][0]
                         full_propagated_formal_errors_history = results[3][1]
+                        navigation_simulator = results[-1]
 
                         full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
 
@@ -300,7 +276,8 @@ class PlotNavigationResults():
                 ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
                 ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
 
-        fig4.suptitle(r"Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
+        fig4.suptitle(f"Estimaton error history | range-only | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
+        # fig4.suptitle("Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
         plt.tight_layout()
 
 
@@ -317,8 +294,6 @@ class PlotNavigationResults():
                         arc_nums = len(results[-2].keys())
                         arc_nums = 1
 
-                        # print(results[-2])
-
                         from matplotlib.lines import Line2D
                         import matplotlib.cm as cm
 
@@ -327,14 +302,7 @@ class PlotNavigationResults():
                         for arc_num in range(arc_nums):
 
                             estimation_output = results[-2][arc_num][0]
-                            # total_single_information_dict = results[-2][1]
-                            # total_covariance_dict = results[-2][2]
-                            # total_information_dict = results[-2][3]
-                            # self.sorted_observation_sets = results[-2][4]
-
-
-                            # print(estimation_output)
-                            # print(estimation_output.correlations)
+                            navigation_simulator = results[-1]
 
                             covariance_output = estimation_output.covariance
 
@@ -353,8 +321,6 @@ class PlotNavigationResults():
                                     text = ax[arc_num].text(
                                         j, i, round(correlations[i, j], 2), ha="center", va="center", color="black"
                                     )
-
-                            # cb = plt.colorbar(im)
 
                             ax[arc_num].set_xlabel("Estimated Parameter")
                             ax[0].set_ylabel("Estimated Parameter")
@@ -382,21 +348,14 @@ class PlotNavigationResults():
                         for arc_num in range(arc_nums):
 
                             estimation_output = results[-2][arc_num][0]
-                            # total_single_information_dict = results[-2][1]
-                            # total_covariance_dict = results[-2][2]
-                            # total_information_dict = results[-2][3]
                             sorted_observation_sets = results[-2][arc_num][4]
+                            navigation_simulator = results[-1]
 
-                            # print(sorted_observation_sets)
 
                             for i, (observable_type, information_sets) in enumerate(sorted_observation_sets.items()):
                                 for j, observation_set in enumerate(information_sets.values()):
                                     for k, single_observation_set in enumerate(observation_set):
 
-                                        # print(i, j, k, single_observation_set)
-                                        # print(single_observation_set.concatenated_observations)
-                                        # print(single_observation_set.observation_times)
-                                        # print(single_observation_set.observations_history)
                                         color = "blue"
                                         s = 0.5
 
@@ -433,7 +392,7 @@ class PlotNavigationResults():
                         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
                         ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-                        fig.suptitle(r"Intersatellite range observations")
+                        fig.suptitle(f"Intersatellite range observations | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
                         plt.tight_layout()
                         # plt.show()
 
@@ -494,21 +453,11 @@ class PlotNavigationResults():
 
                             estimation_output = results[-2][arc_num][0]
                             total_single_information_dict = results[-2][arc_num][1]
-                            # total_covariance_dict = results[-2][2]
-                            # total_information_dict = results[-2][3]
-                            # sorted_observation_sets = results[-2][arc_num][4]
-
-                            # print(total_single_information_dict)
+                            navigation_simulator = results[-1]
 
                             for i, (observable_type, information_sets) in enumerate(total_single_information_dict.items()):
                                 for j, information_set in enumerate(information_sets.values()):
                                     for k, single_information_set in enumerate(information_set):
-
-                                        # print(i, j, k, single_observation_set)
-                                        # print(single_observation_set.concatenated_observations)
-                                        # print(single_observation_set.observation_times)
-                                        # print(single_observation_set.observations_history)
-
 
                                         information_dict = total_single_information_dict[observable_type][j][k]
                                         epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
@@ -521,8 +470,8 @@ class PlotNavigationResults():
                                             observability_lpf_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1, keepdims=True))
                                             observability_lumio_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1, keepdims=True))
 
-                                            ax[m].plot(epochs, observability_lpf_total, label="Total LPF" if m == 0 and arc_num == 0 else None, color="darkred")
-                                            ax[m].plot(epochs, observability_lumio_total, label="Total LUMIO" if m == 0 and arc_num == 0 else None, color="darkblue")
+                                            ax[m].plot(epochs, observability_lpf_total, label="LPF" if m == 0 and arc_num == 0 else None, color="darkred")
+                                            ax[m].plot(epochs, observability_lumio_total, label="LUMIO" if m == 0 and arc_num == 0 else None, color="darkblue")
 
                         for j in range(len(ax)):
                             for i, gap in enumerate(self.observation_windows):
@@ -543,11 +492,11 @@ class PlotNavigationResults():
                             ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
                             ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
-                        ax[0].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \Lambda_{\mathbf{r}, j})}$ [m]')
-                        ax[1].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \Lambda_{\mathbf{v}, j})}$ [m]')
+                        ax[0].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{r}, j})}$ [m]')
+                        ax[1].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{v}, j})}$ [m]')
                         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
                         ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-                        fig.suptitle(r"Intersatellite range observability")
+                        fig.suptitle(f"Intersatellite range observability | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
                         plt.tight_layout()
                         plt.show()

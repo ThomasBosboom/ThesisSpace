@@ -23,7 +23,7 @@ dynamic_model_list = ["high_fidelity", "point_mass",0]
 truth_model_list = ["high_fidelity", "point_mass",0]
 threshold = 3
 skm_to_od_duration = 3
-duration = 14
+duration = 8
 od_duration = 1
 bounds = (0.5, 1.5)
 
@@ -36,8 +36,8 @@ optimization_model = OptimizationModel.OptimizationModel(dynamic_model_list,
                                                         od_duration=od_duration,
                                                         bounds=bounds)
 
-optimization_model.xk = [0.975, 0.925]
-x = [0.975, 0.925]
-optimization_model.objective_function([0.975, 0.925], plot_results=True)
+# optimization_model.xk = [0.975, 0.925]
+x = optimization_model.initial_design_vector
+optimization_model.objective_function(x, plot_results=True)
 
 plt.show()

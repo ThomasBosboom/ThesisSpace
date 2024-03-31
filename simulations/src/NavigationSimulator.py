@@ -273,6 +273,8 @@ class NavigationSimulator():
                     # if np.all(["srp" in s1 and "srp" in s2])
                     self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
 
+                else:
+                    self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
                 # self.apriori_covariance += np.outer(process_noise, process_noise)
                 # print(self.get_process_noise_matrix(delta_t, sigma_i))
                 # self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)

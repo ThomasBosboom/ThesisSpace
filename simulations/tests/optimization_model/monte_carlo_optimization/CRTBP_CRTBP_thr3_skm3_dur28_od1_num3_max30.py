@@ -18,8 +18,8 @@ import helper_functions
 ###### Monte Carlo test case ####################################
 #################################################################
 
-dynamic_model_list = ["high_fidelity", "point_mass",0]
-truth_model_list = ["high_fidelity", "point_mass",0]
+dynamic_model_list = ["low_fidelity", "three_body_problem",0]
+truth_model_list = ["low_fidelity", "three_body_problem",0]
 threshold = 3
 skm_to_od_duration = 3
 duration = 28

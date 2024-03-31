@@ -20,11 +20,11 @@ import helper_functions
 
 dynamic_model_list = ["high_fidelity", "point_mass",0]
 truth_model_list = ["high_fidelity", "point_mass",0]
-threshold = 3
+threshold = 7
 skm_to_od_duration = 3
 duration = 28
 od_duration = 1
-numruns = 3
+numruns = 1
 maxiter = 30
 factor = 1
 bounds = (0.5, 1.5)

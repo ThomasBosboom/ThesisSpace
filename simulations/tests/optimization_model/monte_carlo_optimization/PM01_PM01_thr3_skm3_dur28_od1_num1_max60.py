@@ -24,8 +24,8 @@ threshold = 3
 skm_to_od_duration = 3
 duration = 28
 od_duration = 1
-numruns = 3
-maxiter = 30
+numruns = 1
+maxiter = 60
 factor = 1
 bounds = (0.5, 1.5)
 helper_functions.run_monte_carlo_optimization_model(dynamic_model_list,

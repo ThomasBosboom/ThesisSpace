@@ -56,16 +56,16 @@ class EstimationModel:
         noise_data = NoiseDataClass.NoiseDataClass()
         self.noise_range = noise_data.noise_range
 
-
+        self.maximum_iterations = 4
         # Creating observation time vector
         margin = 120
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_range)
 
-        self.arc_start_epoch = self.dynamic_model.simulation_start_epoch
-        self.arc_end_epoch = self.dynamic_model.simulation_end_epoch
+        # self.arc_start_epoch = self.dynamic_model.simulation_start_epoch
+        # self.arc_end_epoch = self.dynamic_model.simulation_end_epoch
 
-        self.arc_start_epoch_truth = self.truth_model.simulation_start_epoch
-        self.arc_end_epoch_truth = self.truth_model.simulation_end_epoch
+        # self.arc_start_epoch_truth = self.truth_model.simulation_start_epoch
+        # self.arc_end_epoch_truth = self.truth_model.simulation_end_epoch
 
         # from tests import utils
         # print("start: ", utils.convert_epochs_to_MJD(self.observation_times_range[0], full_array=False), utils.convert_epochs_to_MJD(self.observation_times_range[-1], full_array=False))
@@ -190,7 +190,7 @@ class EstimationModel:
         self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.dynamic_model.bodies)
 
 
-    def set_estimator_settings(self, maximum_iterations=4):
+    def set_estimator_settings(self):
 
         self.set_parameters_to_estimate()
 
@@ -214,7 +214,7 @@ class EstimationModel:
         self.parameters_to_estimate.parameter_vector[:12] = self.perturbed_parameters
 
         # Create input object for the estimation
-        convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=maximum_iterations)
+        convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=self.maximum_iterations)
         if self.apriori_covariance is None:
             self.estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
                                                                convergence_checker=convergence_checker)
@@ -286,48 +286,46 @@ class EstimationModel:
                     total_covariance_dict[observable_type][j].append(covariance_dict)
                     total_single_information_dict[observable_type][j].append(single_information_dict)
 
-        plot_residuals = False
-        if plot_residuals:
-            print("ESTIMATION PROPERTIES FOR THE ESTIMATION ARC")
-            parameter_history = estimation_output.parameter_history
-            residual_history = estimation_output.residual_history
-            covariance = estimation_output.covariance
-            formal_errors = estimation_output.formal_errors
-            weighted_design_matrix = estimation_output.weighted_design_matrix
-            residual_history = estimation_output.residual_history
+        # plot_residuals = False
+        # if plot_residuals:
+        #     print("ESTIMATION PROPERTIES FOR THE ESTIMATION ARC")
+        #     parameter_history = estimation_output.parameter_history
+        #     residual_history = estimation_output.residual_history
+        #     covariance = estimation_output.covariance
+        #     formal_errors = estimation_output.formal_errors
+        #     weighted_design_matrix = estimation_output.weighted_design_matrix
+        #     residual_history = estimation_output.residual_history
 
-            print("best iteration: ", estimation_output.best_iteration)
-            # print("First: ", parameter_history[:,0])
-            # print("Last: ", parameter_history[:,-1])
-            print("Diff: ", parameter_history[:,estimation_output.best_iteration]-parameter_history[:,0])
-            for i, (observable_type, information_sets) in enumerate(self.sorted_observation_sets.items()):
-                for j, observation_set in enumerate(information_sets.values()):
-                    for k, single_observation_set in enumerate(observation_set):
+        #     print("best iteration: ", estimation_output.best_iteration)
+        #     # print("First: ", parameter_history[:,0])
+        #     # print("Last: ", parameter_history[:,-1])
+        #     print("Diff: ", parameter_history[:,estimation_output.best_iteration]-parameter_history[:,0])
+        #     for i, (observable_type, information_sets) in enumerate(self.sorted_observation_sets.items()):
+        #         for j, observation_set in enumerate(information_sets.values()):
+        #             for k, single_observation_set in enumerate(observation_set):
 
-                        residual_history = estimation_output.residual_history
+        #                 residual_history = estimation_output.residual_history
 
-                        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
-                        subplots_list = [ax1, ax2, ax3, ax4]
+        #                 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
+        #                 subplots_list = [ax1, ax2, ax3, ax4]
 
-                        index = int(len(single_observation_set.observation_times))
-                        for l in range(4):
-                            subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
-                            subplots_list[l].set_ylabel("Observation Residual")
-                            subplots_list[l].set_title("Iteration "+str(l+1))
+        #                 index = int(len(single_observation_set.observation_times))
+        #                 for l in range(4):
+        #                     subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
+        #                     subplots_list[l].set_ylabel("Observation Residual")
+        #                     subplots_list[l].set_title("Iteration "+str(l+1))
 
-                        ax3.set_xlabel("Time since J2000 [s]")
-                        ax4.set_xlabel("Time since J2000 [s]")
+        #                 ax3.set_xlabel("Time since J2000 [s]")
+        #                 ax4.set_xlabel("Time since J2000 [s]")
 
-                        plt.figure(figsize=(9,5))
-                        plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
-                        plt.xlabel('Final iteration range residual')
-                        plt.ylabel('Occurences [-]')
-                        plt.title('Histogram of residuals on final iteration')
+        #                 plt.figure(figsize=(9,5))
+        #                 plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
+        #                 plt.xlabel('Final iteration range residual')
+        #                 plt.ylabel('Occurences [-]')
+        #                 plt.title('Histogram of residuals on final iteration')
 
-                        plt.tight_layout()
-                        plt.show()
-
-
+        #                 plt.tight_layout()
+        #                 plt.show()
 
 
         return estimation_output, total_single_information_dict, \
