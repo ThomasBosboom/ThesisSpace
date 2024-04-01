@@ -23,18 +23,18 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 # Own
 from tests import utils
 import reference_data, Interpolator, FrameConverter
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
 from src.estimation_models import estimation_model
 
 
 
-def comparison_high_and_low_fidelity(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
+def comparison_high_and_LF(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
 
-    custom_model_dict={"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+    custom_model_dict={"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"]}
     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=custom_model_dict)
 
     # Pick only the first of teach model name
@@ -44,7 +44,7 @@ def comparison_high_and_low_fidelity(simulation_start_epoch_MJD, propagation_tim
     synodic_state_history_erdem = reference_data.get_synodic_state_history_erdem()[:int(propagation_time/0.001),1:]
 
     epochs_classic_erdem, state_history_classic_erdem, dependent_variables_history_classic_erdem = \
-        FrameConverter.SynodicToInertialHistoryConverter(dynamic_models["low_fidelity"]["three_body_problem"][0], step_size=step_size).get_results(synodic_state_history_erdem)
+        FrameConverter.SynodicToInertialHistoryConverter(dynamic_models["LF"]["CRTBP"][0], step_size=step_size).get_results(synodic_state_history_erdem)
 
     # Generate figures
     y_scale = 3
@@ -70,7 +70,7 @@ def comparison_high_and_low_fidelity(simulation_start_epoch_MJD, propagation_tim
     ax_3d.set_title(f"Tudat high versus low models, {propagation_time} days")
 
 
-    for m, dynamic_model in enumerate([dynamic_models["low_fidelity"]["three_body_problem"][0], dynamic_models["high_fidelity"]["point_mass"][0]]):
+    for m, dynamic_model in enumerate([dynamic_models["LF"]["CRTBP"][0], dynamic_models["HF"]["PM"][0]]):
 
         # Extra simulation histories of tudat models
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
@@ -80,10 +80,10 @@ def comparison_high_and_low_fidelity(simulation_start_epoch_MJD, propagation_tim
             FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
 
 
-        ax_3d.plot(state_history_classic_erdem[:,0], state_history_classic_erdem[:,1], state_history_classic_erdem[:,2], label="LPF low_fidelity", color="red", ls="--")
-        ax_3d.plot(state_history_classic_erdem[:,6], state_history_classic_erdem[:,7], state_history_classic_erdem[:,8], label="LUMIO low_fidelity", color="blue", ls="--")
-        ax_3d.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF high_fidelity", color="red")
-        ax_3d.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO high_fidelity", color="blue")
+        ax_3d.plot(state_history_classic_erdem[:,0], state_history_classic_erdem[:,1], state_history_classic_erdem[:,2], label="LPF LF", color="red", ls="--")
+        ax_3d.plot(state_history_classic_erdem[:,6], state_history_classic_erdem[:,7], state_history_classic_erdem[:,8], label="LUMIO LF", color="blue", ls="--")
+        ax_3d.plot(state_history[:,0], state_history[:,1], state_history[:,2], label="LPF HF", color="red")
+        ax_3d.plot(state_history[:,6], state_history[:,7], state_history[:,8], label="LUMIO HF", color="blue")
 
         # Plot the plane time evolutions in synodic and inertial frame
         for index, figs in enumerate(figs_list):
@@ -152,4 +152,4 @@ def comparison_high_and_low_fidelity(simulation_start_epoch_MJD, propagation_tim
     utils.save_figure_to_folder([fig1, fig2, fig3, fig4], [])
 
 
-comparison_high_and_low_fidelity(60390, 28, [7, 14, 21, 28])
+comparison_high_and_LF(60390, 28, [7, 14, 21, 28])

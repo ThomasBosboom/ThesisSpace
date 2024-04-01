@@ -14,14 +14,13 @@ for _ in range(4):
 # Own
 from tests import utils
 import reference_data, Interpolator, FrameConverter
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
-from src.dynamic_models.full_fidelity.full_fidelity import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
+from src.dynamic_models.FF.TRUTH import *
 from src.estimation_models import estimation_model
-
 
 
 ###############################
@@ -30,14 +29,14 @@ from src.estimation_models import estimation_model
 
 def acceleration_norms():
 
-    # Use the full_fidelity dynamic model to generate most sophisticated acceleration terms
-    model_type = "full_fidelity"
-    model_name = "full_fidelity"
+    # Use the FF dynamic model to generate most sophisticated acceleration terms
+    model_type = "FF"
+    model_name = "TRUTH"
     model_number = 0
 
     # Use point_mass model to generate the point_mass terms of the Earth and Moon also
-    model_type_PM = "high_fidelity"
-    model_name_PM = "point_mass"
+    model_type_PM = "HF"
+    model_name_PM = "PM"
     model_number_PM = 7
 
     # Defining dynamic model setup
@@ -153,18 +152,18 @@ acceleration_norms()
 
 # for days in range(1, 8, 1):
 
-#     point_mass_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60390, days)
-#     point_mass_srp_model = high_fidelity_point_mass_srp_01.HighFidelityDynamicModel(60390, days)
-#     spherical_harmonics_srp_model = high_fidelity_spherical_harmonics_srp_01_2_2_2_2.HighFidelityDynamicModel(60390, days)
+#     point_mass_model = HF_point_mass_01.HighFidelityDynamicModel(60390, days)
+#     PMSRP_model = HF_PMSRP01.HighFidelityDynamicModel(60390, days)
+#     SHSRP_model = HF_SHSRP01.HighFidelityDynamicModel(60390, days)
 
 
 #     epochs_1, state_history_1, dependent_variables_history_1 = \
-#         Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(point_mass_srp_model, solve_variational_equations=False)
+#         Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(PMSRP_model, solve_variational_equations=False)
 
 #     # plt.plot(epochs, state_history[:, :3])
 
 #     epochs_2, state_history_2, dependent_variables_history_2 = \
-#         Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(spherical_harmonics_srp_model, solve_variational_equations=False)
+#         Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(SHSRP_model, solve_variational_equations=False)
 
 
 

@@ -15,7 +15,6 @@ for _ in range(4):
 from tests import utils
 from src.optimization_models import OptimizationModel
 
-
 #################################################################################
 ###### Test runs of the navigation simulator ####################################
 #################################################################################

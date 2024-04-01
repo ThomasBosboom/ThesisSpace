@@ -114,8 +114,8 @@ class StationKeeping:
 #                                                         get_only_first=False,
 #                                                         custom_initial_state=None)
 
-# dynamic_model_object = dynamic_model_objects["high_fidelity"]["point_mass"][0]
-# dynamic_model_object = dynamic_model_objects["low_fidelity"]["three_body_problem"][0]
+# dynamic_model_object = dynamic_model_objects["HF"]["PM"][0]
+# dynamic_model_object = dynamic_model_objects["LF"]["CRTBP"][0]
 
 # custom_initial_state = np.array([-3.34034638e+08,  1.91822560e+08,  1.11600187e+08, -1.22100520e+02,
 #                                  -7.02130739e+02, -9.74257591e+02, -3.83004013e+08,  1.80617292e+08,

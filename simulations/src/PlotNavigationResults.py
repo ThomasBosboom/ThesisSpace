@@ -115,7 +115,7 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig1.suptitle(f"Formal error history | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
+        fig1.suptitle(f"Formal error history \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
         plt.tight_layout()
 
 
@@ -166,7 +166,7 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig2.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
+        fig2.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
         plt.tight_layout()
 
 
@@ -216,7 +216,7 @@ class PlotNavigationResults():
 
             ax[k][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
-        fig3.suptitle(f"Deviation from reference orbit | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
+        fig3.suptitle(f"Deviation from reference orbit \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
         plt.legend()
 
 
@@ -276,7 +276,7 @@ class PlotNavigationResults():
                 ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
                 ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
 
-        fig4.suptitle(f"Estimaton error history | range-only | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
+        fig4.suptitle(f"Estimaton error history | range-only \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
         # fig4.suptitle("Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
         plt.tight_layout()
 
@@ -392,7 +392,7 @@ class PlotNavigationResults():
                         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
                         ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-                        fig.suptitle(f"Intersatellite range observations | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
+                        fig.suptitle(f"Intersatellite range observations \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
                         plt.tight_layout()
                         # plt.show()
 
@@ -497,6 +497,6 @@ class PlotNavigationResults():
                         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
                         ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-                        fig.suptitle(f"Intersatellite range observability | on-board: {navigation_simulator.model_name}, truth: {navigation_simulator.model_name_truth}")
+                        fig.suptitle(f"Intersatellite range observability \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
                         plt.tight_layout()
                         plt.show()

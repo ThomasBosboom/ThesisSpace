@@ -18,8 +18,8 @@ import helper_functions
 ###### Monte Carlo test case ####################################
 #################################################################
 
-dynamic_model_list = ["high_fidelity", "spherical_harmonics_srp",0]
-truth_model_list = ["high_fidelity", "spherical_harmonics_srp",2]
+dynamic_model_list = ["HF", "SHSRP",0]
+truth_model_list = ["HF", "SHSRP",2]
 threshold = 3
 skm_to_od_duration = 3
 duration = 28

@@ -24,11 +24,11 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 from tests import utils
 import reference_data, Interpolator, FrameConverter
 from src.dynamic_models import TraditionalLowFidelity
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
 from src.estimation_models import estimation_model
 
 
@@ -50,7 +50,7 @@ fig, ax = plt.subplots(1, 1)
 state_histories = []
 for custom_initial_state in custom_initial_states:
 
-    dynamic_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(60393, 3.95, custom_initial_state=custom_initial_state)
+    dynamic_model = HF_point_mass_01.HighFidelityDynamicModel(60393, 3.95, custom_initial_state=custom_initial_state)
 
     # Extract simulation histories tudatpy solution
     epochs, state_history, dependent_variables_history, state_transition_matrix_history = \

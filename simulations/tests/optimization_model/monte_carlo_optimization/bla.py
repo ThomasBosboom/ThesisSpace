@@ -19,8 +19,8 @@ import helper_functions
 ###### Monte Carlo test case ####################################
 #################################################################
 
-dynamic_model_list = ["high_fidelity", "point_mass",0]
-truth_model_list = ["high_fidelity", "point_mass",0]
+dynamic_model_list = ["HF", "PM",0]
+truth_model_list = ["HF", "PM",0]
 
 
 dict = {
@@ -30,13 +30,13 @@ dict = {
         "duration": 28,
         "model": {
             "dynamic": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             },
             "truth": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             }
         },
@@ -142,13 +142,13 @@ dict = {
         "duration": 28,
         "model": {
             "dynamic": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             },
             "truth": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             }
         },
@@ -321,7 +321,7 @@ plt.grid(True)
 # utils.save_dicts_to_folder(dicts=[dict], custom_sub_folder_name=str(file_name), labels=["test_dict"])
 # utils.save_figure_to_folder(figs=[fig], custom_sub_folder_name=str(file_name), labels=["test_figure"])
 
-# new_dict = {'threshold': 60393, 'skm_to_od_duration': 3, 'duration': 9, 'factor': 1, 'initial_design_vector': list(np.array([1.])), 'model': {'dynamic': {'model_type': 'high_fidelity', 'model_name': 'point_mass', 'model_number': 0}, 'truth': {'model_type': 'high_fidelity', 'model_name': 'point_mass', 'model_number': 0}}, 'history': {0: {'design_vector': [1.0], 'objective_function': 0.1320727346835261}}, 'optim': {'x_optim': [1.0], 'x_observation_windows': [(60390, 60393), (60396.0, 60397.0)], 'x_skm_epochs': [60393, 60397.0]}}
+# new_dict = {'threshold': 60393, 'skm_to_od_duration': 3, 'duration': 9, 'factor': 1, 'initial_design_vector': list(np.array([1.])), 'model': {'dynamic': {'model_type': 'HF', 'model_name': 'PM', 'model_number': 0}, 'truth': {'model_type': 'HF', 'model_name': 'PM', 'model_number': 0}}, 'history': {0: {'design_vector': [1.0], 'objective_function': 0.1320727346835261}}, 'optim': {'x_optim': [1.0], 'x_observation_windows': [(60390, 60393), (60396.0, 60397.0)], 'x_skm_epochs': [60393, 60397.0]}}
 
 # utils.save_dicts_to_folder(dicts=[new_dict], custom_sub_folder_name=str(file_name), labels=["newtest_dict"])
 
@@ -368,13 +368,13 @@ data = {
         ],
         "model": {
             "dynamic": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             },
             "truth": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             }
         },
@@ -440,13 +440,13 @@ data = {
         ],
         "model": {
             "dynamic": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             },
             "truth": {
-                "model_type": "high_fidelity",
-                "model_name": "point_mass",
+                "model_type": "HF",
+                "model_name": "PM",
                 "model_number": 0
             }
         },
@@ -503,8 +503,8 @@ data = {
 }
 # data = {key: value["history"] for key, value in data.items()}
 # print(data)
-# data = {'threshold': 60393, 'skm_to_od_duration': 3, 'duration': 14, 'factor': 1, 'maxiter': 2, 'initial_design_vector': [1.0, 1.0], 'model': {'dynamic': {'model_type': 'high_fidelity', 'model_name': 'point_mass', 'model_number': 0},
-# 'truth': {'model_type': 'high_fidelity', 'model_name': 'point_mass', 'model_number': 0}}, 'history': {'design_vector': {0: [1.0,
+# data = {'threshold': 60393, 'skm_to_od_duration': 3, 'duration': 14, 'factor': 1, 'maxiter': 2, 'initial_design_vector': [1.0, 1.0], 'model': {'dynamic': {'model_type': 'HF', 'model_name': 'PM', 'model_number': 0},
+# 'truth': {'model_type': 'HF', 'model_name': 'PM', 'model_number': 0}}, 'history': {'design_vector': {0: [1.0,
 # 1.0], 1: [1.0499999999999998, 0.95]}, 'objective_value': {0: [1.0, 1.0], 1: [1.0499999999999998, 0.95]}}, 'final_result': {'x_optim': [1.0499999999999998, 0.95], 'x_observation_windows': [(60390, 60393), (60396.0, 60397.05), (60400.05, 60401.0)], 'x_skm_epochs': [60393, 60397.05, 60401.0], 'approx_annual_deltav': 5.303798236051521, 'reduction_percentage': -2.42935004949849}}
 
 

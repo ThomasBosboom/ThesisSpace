@@ -24,11 +24,11 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 from tests import utils
 import reference_data, Interpolator, FrameConverter
 from src.dynamic_models import TraditionalLowFidelity
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
 from src.estimation_models import estimation_model
 
 
@@ -41,7 +41,7 @@ def comparison_crtbp(simulation_start_epoch_MJD, propagation_time, durations, st
                                     1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 
     # Generate LowFidelityDynamicModel object only
-    dynamic_model = low_fidelity.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, use_synodic_state=True)
+    dynamic_model = LF_CRTBP.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, use_synodic_state=True)
 
     # Extract simulation histories tudatpy solution
     epochs, state_history, dependent_variables_history, state_transition_matrix_history = \

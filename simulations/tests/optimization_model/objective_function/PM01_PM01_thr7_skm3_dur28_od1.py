@@ -19,8 +19,8 @@ from src.optimization_models import OptimizationModel
 ###### Monte Carlo test case ####################################
 #################################################################
 
-dynamic_model_list = ["high_fidelity", "point_mass",0]
-truth_model_list = ["high_fidelity", "point_mass",0]
+dynamic_model_list = ["HF", "PM",0]
+truth_model_list = ["HF", "PM",0]
 threshold = 7
 skm_to_od_duration = 3
 duration = 28

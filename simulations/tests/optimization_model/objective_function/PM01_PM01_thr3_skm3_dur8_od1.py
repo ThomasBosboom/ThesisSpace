@@ -19,12 +19,12 @@ from src.optimization_models import OptimizationModel
 ###### Monte Carlo test case ####################################
 #################################################################
 
-dynamic_model_list = ["high_fidelity", "point_mass",0]
-truth_model_list = ["high_fidelity", "point_mass",0]
-threshold = 3
+dynamic_model_list = ["HF", "PM",0]
+truth_model_list = ["HF", "PM",0]
+threshold = 1
 skm_to_od_duration = 3
-duration = 8
-od_duration = 1
+duration = 16
+od_duration = 0.5
 bounds = (0.5, 1.5)
 
 # Create OptimizationModel instance based on timing characteristics

@@ -14,13 +14,13 @@
    ],
    "model": {
       "dynamic": {
-         "model_type": "low_fidelity",
-         "model_name": "three_body_problem",
+         "model_type": "LF",
+         "model_name": "CRTBP",
          "model_number": 0
       },
       "truth": {
-         "model_type": "low_fidelity",
-         "model_name": "three_body_problem",
+         "model_type": "LF",
+         "model_name": "CRTBP",
          "model_number": 0
       }
    },

@@ -20,12 +20,12 @@ for _ in range(2):
 
 # Own
 import NoiseDataClass
-from dynamic_models.full_fidelity import *
-from dynamic_models.low_fidelity.three_body_problem import *
-from dynamic_models.high_fidelity.point_mass import *
-from dynamic_models.high_fidelity.point_mass_srp import *
-from dynamic_models.high_fidelity.spherical_harmonics import *
-from dynamic_models.high_fidelity.spherical_harmonics_srp import *
+# from dynamic_models.FF import *
+# from dynamic_models.LF.CRTBP import *
+# from dynamic_models.HF.PM import *
+# from dynamic_models.HF.PMSRP import *
+# from dynamic_models.HF.SH import *
+# from dynamic_models.HF.SHSRP import *
 
 
 # np.random.seed(0)
@@ -60,23 +60,6 @@ class EstimationModel:
         # Creating observation time vector
         margin = 120
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+margin, self.dynamic_model.simulation_end_epoch-margin, self.observation_step_size_range)
-
-        # self.arc_start_epoch = self.dynamic_model.simulation_start_epoch
-        # self.arc_end_epoch = self.dynamic_model.simulation_end_epoch
-
-        # self.arc_start_epoch_truth = self.truth_model.simulation_start_epoch
-        # self.arc_end_epoch_truth = self.truth_model.simulation_end_epoch
-
-        # from tests import utils
-        # print("start: ", utils.convert_epochs_to_MJD(self.observation_times_range[0], full_array=False), utils.convert_epochs_to_MJD(self.observation_times_range[-1], full_array=False))
-        # print("object: ",utils.convert_epochs_to_MJD(self.arc_start_epoch, full_array=False), utils.convert_epochs_to_MJD(self.arc_end_epoch, full_array=False))
-
-        # print("start: ", self.observation_times_range[0], self.observation_times_range[-1])
-        # print("object dynamic: ", self.arc_start_epoch, self.arc_end_epoch)
-
-        # # print("start: ", self.observation_times_range[0], self.observation_times_range[-1])
-        # print("object truth: ", self.arc_start_epoch_truth, self.arc_end_epoch_truth)
-
 
 
     def set_observation_model_settings(self):

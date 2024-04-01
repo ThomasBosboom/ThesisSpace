@@ -20,12 +20,12 @@ for _ in range(2):
 # Own
 from tests import utils
 import reference_data, Interpolator, StationKeeping, NavigationSimulator
-from src.dynamic_models.full_fidelity.full_fidelity import *
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
+from src.dynamic_models.FF.TRUTH import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
 from src.estimation_models import estimation_model
 
 
@@ -235,15 +235,15 @@ class OptimizationModel():
 
 custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-dynamic_model = low_fidelity.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state, use_synodic_state=True)
+dynamic_model = LF.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state, use_synodic_state=True)
 
 
-model_type = "high_fidelity"
-model_name = "spherical_harmonics_srp"
+model_type = "HF"
+model_name = "SHSRP"
 model_number = 4
 
-model_type = "low_fidelity"
-model_name = "three_body_problem"
+model_type = "LF"
+model_name = "CRTBP"
 model_number = 0
 
 # Define dynamic models and select one to test the estimation on

@@ -23,12 +23,12 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 # Own
 from tests import utils
 import reference_data, Interpolator, FrameConverter
-from src.dynamic_models.full_fidelity.full_fidelity import *
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
+from src.dynamic_models.FF.TRUTH import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
 from src.estimation_models import estimation_model
 
 
@@ -39,7 +39,7 @@ from src.estimation_models import estimation_model
 def run_times():
 
     # Set up of parameters
-    custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
+    custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["FF"]}
     simulation_start_epoch_MJD = 60390
     propagation_time = 1
     get_only_first = False
@@ -66,7 +66,7 @@ def run_times():
         params = (run_case, propagation_time, custom_model_dict, get_only_first, custom_initial_state)
 
         dynamic_model_objects = utils.get_dynamic_model_objects(*params)
-        # truth_model = high_fidelity_point_mass_01.HighFidelityDynamicModel(*params[:2])
+        # truth_model = HF_point_mass_01.HighFidelityDynamicModel(*params[:2])
         # print("dynmiac modelsdict: ", dynamic_model_objects)
         run_times_dict = utils.get_estimation_model_results(dynamic_model_objects, custom_truth_model=None, entry_list=[-1])
 

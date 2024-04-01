@@ -23,21 +23,21 @@ from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 # Own
 from tests import utils
 import reference_data, Interpolator, FrameConverter
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
 from src.estimation_models import estimation_model
 
 
 
 
-def comparison_high_fidelity(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
+def comparison_HF(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
 
 
-    custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
-    custom_model_dict = {"high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]}
+    custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["FF"]}
+    custom_model_dict = {"HF": ["PM", "PMSRP", "SH", "SHSRP"]}
 
     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD,
                                                             propagation_time,
@@ -86,5 +86,5 @@ def comparison_high_fidelity(simulation_start_epoch_MJD, propagation_time, durat
 
     # plt.show()
 
-comparison_high_fidelity(60390, 28, [7, 14, 21, 28])
-comparison_high_fidelity(60390, 7, [4, 6])
+comparison_HF(60390, 28, [7, 14, 21, 28])
+comparison_HF(60390, 7, [4, 6])

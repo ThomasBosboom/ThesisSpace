@@ -72,6 +72,7 @@ def read_textfiles(data_type, satellite="LUMIO"):
 def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, custom_dynamic_model=None, step_size=0.001, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
 
     state_history = read_textfiles("state", satellite=satellite)
+
     if body == "satellite":
         state_history = state_history[0]
     elif body == "moon":
@@ -182,8 +183,11 @@ def get_state_history_richardson(dc_corrected=False):
 def get_synodic_state_history_erdem():
 
     # Specify the file path
-    root_dir = Path(__file__).resolve().parent.parent.parent
-    file_path = root_dir / "reference" / "Halo_orbit_files" / "Erdem.txt"
+    # root_dir = Path(__file__).resolve().parent.parent
+    # file_path = root_dir / "reference" / "Erdem.txt"
+
+    orbit_files = reference_folder_path / "Halo_orbit_files"
+    file_path = orbit_files / "Erdem.txt"
 
     # Open the file for reading
     states_erdem = np.empty((1, 13))

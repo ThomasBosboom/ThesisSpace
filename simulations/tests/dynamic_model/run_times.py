@@ -15,12 +15,12 @@ for _ in range(4):
 # Own
 from tests import utils
 import reference_data, Interpolator, FrameConverter
-from src.dynamic_models.low_fidelity.three_body_problem import *
-from src.dynamic_models.high_fidelity.point_mass import *
-from src.dynamic_models.high_fidelity.point_mass_srp import *
-from src.dynamic_models.high_fidelity.spherical_harmonics import *
-from src.dynamic_models.high_fidelity.spherical_harmonics_srp import *
-from src.dynamic_models.full_fidelity.full_fidelity import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
+from src.dynamic_models.FF.TRUTH import *
 
 
 
@@ -30,8 +30,8 @@ from src.dynamic_models.full_fidelity.full_fidelity import *
 
 def run_times():
 
-    custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
-    # custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass"]}
+    custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["FF"]}
+    # custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM"]}
     propagation_time = 1
     get_only_first = False
     start_epoch = 60390

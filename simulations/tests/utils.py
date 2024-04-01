@@ -13,7 +13,7 @@ from tudatpy.kernel.astro import time_conversion
 
 # Own
 from src import Interpolator
-from src.dynamic_models.full_fidelity.full_fidelity import *
+# from src.dynamic_models.FF.TRUTH import *
 from src.estimation_models import estimation_model
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
@@ -22,7 +22,7 @@ parent_dir = os.path.dirname(os.path.dirname(__file__))
 def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_initial_state=None, custom_propagation_time=None):
 
     if custom_model_dict is None:
-        custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
+        custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["TRUTH"]}
     else:
         custom_model_dict = custom_model_dict
 
@@ -42,7 +42,7 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
                     module_path = f'{package_module_path}.{os.path.splitext(file_name)[0]}'
                     module = __import__(module_path, fromlist=[file_name])
 
-                    if package_type == "low_fidelity":
+                    if package_type == "LF":
                         DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
                     else:
                         DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
@@ -91,7 +91,7 @@ def get_estimation_model_objects(dynamic_model_objects,
                 # for dynamic_model in dynamic_models:
                 #     simuat
                 # print("been here", dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
-                truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
+                truth_model = FF.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.propagation_time)
@@ -416,3 +416,4 @@ def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folde
 # # Commonly used parameters
 # synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
 #                                   1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+

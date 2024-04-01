@@ -30,15 +30,15 @@ def monte_carlo_skm_interval():
     # skm_to_od_duration = 3
     numruns = 2
     delta_v_per_skm_interval_dict = dict()
-    for model in ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]:
-    # for model in ["point_mass"]:
+    for model in ["PM", "PMSRP", "SH", "SHSRP"]:
+    # for model in ["PM"]:
         delta_v_dict = dict()
         for skm_to_od_duration in np.arange(1, 4.5, 0.5):
 
             delta_v_list = []
             for run in range(numruns):
 
-                optimization_model = OptimizationModel.OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", model, 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
+                optimization_model = OptimizationModel.OptimizationModel(["HF", model, 0], ["HF", model, 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
                 delta_v = optimization_model.objective_function(optimization_model.initial_design_vector, show_directly=False)
                 delta_v_list.append(delta_v)
                 print(delta_v)
@@ -103,15 +103,15 @@ def monte_carlo_skm_interval_truth():
     # skm_to_od_duration = 3
     numruns = 2
     delta_v_per_skm_interval_dict = dict()
-    for model in ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"]:
-    # for model in ["point_mass"]:
+    for model in ["PM", "PMSRP", "SH", "SHSRP"]:
+    # for model in ["PM"]:
         delta_v_dict = dict()
         for skm_to_od_duration in np.arange(1, 4.5, 0.5):
 
             delta_v_list = []
             for run in range(numruns):
 
-                optimization_model = OptimizationModel.OptimizationModel(["high_fidelity", model, 0], ["high_fidelity", "spherical_harmonics_srp", 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
+                optimization_model = OptimizationModel.OptimizationModel(["HF", model, 0], ["HF", "SHSRP", 0], threshold=threshold, skm_to_od_duration=skm_to_od_duration, duration=duration, od_duration=od_duration)
                 delta_v = optimization_model.objective_function(optimization_model.initial_design_vector)
                 delta_v_list.append(delta_v)
                 print(delta_v)

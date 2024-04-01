@@ -231,7 +231,7 @@ class NavigationSimulator():
 
                 epochs, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
                     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model,
-                                                                                                    custom_initial_state=parameter_history[:,best_iteration],
+                                                                                                    custom_initial_state=parameter_history[:, best_iteration],
                                                                                                     custom_propagation_time=estimation_arc_duration,
                                                                                                     solve_variational_equations=True)
 
@@ -264,8 +264,8 @@ class NavigationSimulator():
                 self.apriori_covariance = np.stack(list(propagated_covariance_initial.values()))[-1]
 
             # Include artificial process noise in case truth is not equal to the dynamic model
-            # process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e-2
-            # process_noise = np.random.normal(scale=process_noise_sigmas, size=len(process_noise_sigmas))
+            process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e-2
+            process_noise = np.random.normal(scale=process_noise_sigmas, size=len(process_noise_sigmas))
 
             if estimation_arc_activated:
                 delta_t = navigation_arc_duration*constants.JULIAN_DAY
@@ -273,8 +273,8 @@ class NavigationSimulator():
                     # if np.all(["srp" in s1 and "srp" in s2])
                     self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
 
-                else:
-                    self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
+                # else:
+                #     self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
                 # self.apriori_covariance += np.outer(process_noise, process_noise)
                 # print(self.get_process_noise_matrix(delta_t, sigma_i))
                 # self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
@@ -310,7 +310,7 @@ class NavigationSimulator():
                 delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=params[0], correction_epoch=params[0], target_point_epochs=params[1])
 
                 # Generate random noise to simulate station-keeping errors
-                if self.model_type == "high_fidelity":
+                if self.model_type == "HF":
                     delta_v_noise = np.random.normal(loc=0, scale=self.station_keeping_error*np.abs(delta_v), size=delta_v.shape)
                     self.custom_initial_state[9:12] += delta_v
                     self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise

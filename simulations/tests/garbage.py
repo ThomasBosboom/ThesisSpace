@@ -174,13 +174,13 @@ data = {
    ],
    "model": {
       "dynamic": {
-         "model_type": "high_fidelity",
-         "model_name": "point_mass",
+         "model_type": "HF",
+         "model_name": "PM",
          "model_number": 0
       },
       "truth": {
-         "model_type": "high_fidelity",
-         "model_name": "point_mass",
+         "model_type": "HF",
+         "model_name": "PM",
          "model_number": 0
       }
    },
