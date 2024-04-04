@@ -14,7 +14,7 @@ from tudatpy.kernel.astro import time_conversion
 # Own
 from src import Interpolator
 # from src.dynamic_models.FF.TRUTH import *
-from src.estimation_models import estimation_model
+from src.estimation_models import EstimationModel
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -91,13 +91,13 @@ def get_estimation_model_objects(dynamic_model_objects,
                 # for dynamic_model in dynamic_models:
                 #     simuat
                 # print("been here", dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
-                truth_model = FF.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
+                truth_model = FF_TRUTH.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.propagation_time)
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.custom_propagation_time)
 
-            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_estimation_error=initial_estimation_error) for dynamic_model in dynamic_models]
+            submodels = [EstimationModel.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_estimation_error=initial_estimation_error) for dynamic_model in dynamic_models]
 
             submodels_dict[package_name] = submodels
         estimation_model_objects[package_type] = submodels_dict
@@ -243,10 +243,17 @@ def get_estimation_model_results(dynamic_model_objects,
                 if custom_observation_step_size_range is not None:
                     estimation_model.observation_step_size_range = custom_observation_step_size_range
 
+                # print("esimationmode", estimation_model)
                 # Solve the results of the estimation arc and save to dictionary
+                # start_time = time.time()
+                # results_list = list(estimation_model.get_estimation_results())
+                # results_list.append(time.time()-start_time)
+                # estimation_model_objects_results[model_type][model_name][i] = results_list
+
+                print("start estimation")
                 start_time = time.time()
-                results_list = list(estimation_model.get_estimation_results())
-                results_list.append(time.time()-start_time)
+                results_list = estimation_model.get_estimation_results()
+                print("estimation time: ", time.time()-start_time)
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 
     # Selectic only specific estimation model outputs to save to the dictionary

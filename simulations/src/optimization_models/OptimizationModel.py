@@ -101,15 +101,18 @@ class OptimizationModel():
                                                                        target_point_epochs=target_point_epochs,
                                                                        step_size=1e-2)
 
+        start_time = time.time()
         navigation_results = navigation_simulator.get_navigation_results()
+        run_time = time.time()-start_time
 
         if plot_results:
             navigation_simulator.plot_navigation_results(navigation_results, show_directly=show_directly)
 
         delta_v = navigation_results[8][1]
         objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0])
+        print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0], run_time)
         print("End of objective calculation ===============")
+
         if objective_value > 9:
             print("OUTLIER: ", x)
 
@@ -128,7 +131,7 @@ class OptimizationModel():
         objective_values = []
         def callback(xk):
             self.xk = xk
-            print("Iteration:", callback.iteration, xk, self.get_adjusted_design_vector(xk), self.objective_function(xk))
+            print("Iteration:", callback.iteration, xk, self.objective_function(xk))
             iterations.append(callback.iteration)
             design_vectors.append(xk)
             objective_values.append(self.objective_function(xk))
@@ -148,8 +151,6 @@ class OptimizationModel():
                                                  'maxiter': self.maxiter,
                                                  "return_all": True,
                                                  'disp': True,
-                                                #  "initial_simplex": initial_simplex,
-                                                #  "xatol": 0.01,
                                                  "adaptive": True
                                                  },
                                         callback=callback)

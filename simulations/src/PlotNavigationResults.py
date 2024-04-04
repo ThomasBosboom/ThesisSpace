@@ -39,8 +39,6 @@ class PlotNavigationResults():
         # Plot the trajectory over time
         fig1_3d = plt.figure()
         ax_3d = fig1_3d.add_subplot(111, projection='3d')
-        # fig1, ax = plt.subplots(1, 3, figsize=(12, 5), sharex=True)
-        # fig2, ax1= plt.subplots(1, 1, figsize=(12, 5), sharex=True)
         for i, (model_type, model_names) in enumerate(self.results_dict.items()):
             for j, (model_name, models) in enumerate(model_names.items()):
                 for k, results in enumerate(models):
@@ -48,8 +46,9 @@ class PlotNavigationResults():
                     state_history_reference = results[4][1]
                     state_history_truth = results[5][1]
                     state_history_initial = results[6][1]
-                    state_history_final = results[7][1]
-                    dynamic_model = results[-2]
+                    epochs = results[9][0]
+                    dependent_variables_history = results[9][1]
+                    navigation_simulator = results[-1]
 
                     # Storing some plots
                     ax_3d.plot(state_history_reference[:,0], state_history_reference[:,1], state_history_reference[:,2], label="LPF ref", color="green")
@@ -63,6 +62,102 @@ class PlotNavigationResults():
                     ax_3d.set_xlabel('X [m]')
                     ax_3d.set_ylabel('Y [m]')
                     ax_3d.set_zlabel('Z [m]')
+
+
+                    moon_data_dict = {epoch: state for epoch, state in zip(epochs, dependent_variables_history[:, :6])}
+                    satellite_data_dict = {epoch: state for epoch, state in zip(epochs, state_history_initial[:, 6:])}
+                    # m1 = dynamic_model.bodies.get("Earth").mass
+                    # m2 = dynamic_model.bodies.get("Moon").mass
+                    # mu = m1/(m1+m2)
+                    mu = 7.34767309e22/(7.34767309e22 + 5.972e24)
+
+                    # Create the Direct Cosine Matrix based on rotation axis of Moon around Earth
+                    # def create_transformation_matrix():
+
+                    transformation_matrix_dict = {}
+                    for epoch, moon_state in moon_data_dict.items():
+
+                        moon_position, moon_velocity = moon_state[:3], moon_state[3:]
+
+                        # Define the complementary axes of the rotating frame
+                        rotation_axis = np.cross(moon_position, moon_velocity)
+                        second_axis = np.cross(moon_position, rotation_axis)
+
+                        # Define the rotation matrix (DCM) using the rotating frame axes
+                        first_axis = moon_position/np.linalg.norm(moon_position)
+                        second_axis = second_axis/np.linalg.norm(second_axis)
+                        third_axis = rotation_axis/np.linalg.norm(rotation_axis)
+                        transformation_matrix = np.array([first_axis, second_axis, third_axis])
+
+                        transformation_matrix_dict.update({epoch: transformation_matrix})
+
+
+                    rotating_states_dict = {}
+                    for epoch, state in satellite_data_dict.items():
+
+                        transformation_matrix = transformation_matrix_dict[epoch]
+                        rotating_state = np.dot(transformation_matrix, state[:3])
+                        rotating_state = rotating_state/np.linalg.norm((moon_data_dict[epoch][:3]))
+                        rotating_state = (1-mu)*rotating_state
+
+                        rotating_states_dict.update({epoch: rotating_state})
+
+                    rotating_moon_states_dict = {}
+                    for epoch, state in moon_data_dict.items():
+
+                        transformation_matrix = transformation_matrix_dict[epoch]
+                        rotating_state = np.dot(transformation_matrix, state[:3])
+                        rotating_state = rotating_state/np.linalg.norm(state[:3])
+                        rotating_state = (1-mu)*rotating_state
+
+                        rotating_moon_states_dict.update({epoch: rotating_state})
+
+                    rotating_states = np.stack(list(rotating_states_dict.values()))
+                    rotating_moon_states = np.stack(list(rotating_moon_states_dict.values()))
+
+
+                    fig, ax = plt.subplots(1, 3, figsize=(12, 3))
+                    fig1_3d = plt.figure()
+                    ax_3d = fig1_3d.add_subplot(111, projection='3d')
+                    ax[0].scatter(rotating_moon_states[:, 0], rotating_moon_states[:, 2], s=50, color="gray")
+                    ax[1].scatter(rotating_moon_states[:, 1], rotating_moon_states[:, 2], s=50, color="gray")
+                    ax[2].scatter(rotating_moon_states[:, 0], rotating_moon_states[:, 1], s=50, color="gray", label="Moon")
+                    ax[0].plot(rotating_states[:, 0], rotating_states[:, 2], lw=1)
+                    ax[1].plot(rotating_states[:, 1], rotating_states[:, 2], lw=1)
+                    ax[2].plot(rotating_states[:, 0], rotating_states[:, 1], lw=1)
+                    ax_3d.plot(rotating_states[:, 0], rotating_states[:, 1], rotating_states[:, 2])
+                    ax_3d.scatter(rotating_moon_states[:, 0], rotating_moon_states[:, 1], rotating_moon_states[:, 2], s=50, color="gray", label="Moon")
+
+                    for num, (start, end) in enumerate(navigation_simulator.observation_windows):
+                        rotating_states_window_dict = {key: value for key, value in rotating_states_dict.items() if key >= start and key <= end}
+                        rotating_states_window = np.stack(list(rotating_states_window_dict.values()))
+                        linewidth = 3
+                        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+                        ax[0].plot(rotating_states_window[:, 0], rotating_states_window[:, 2], linewidth=linewidth, color=color_cycle[num])
+                        ax[1].plot(rotating_states_window[:, 1], rotating_states_window[:, 2], linewidth=linewidth, color=color_cycle[num])
+                        ax[2].plot(rotating_states_window[:, 0], rotating_states_window[:, 1], linewidth=linewidth, color=color_cycle[num], label=f"Arc {num+1}")
+                        ax_3d.plot(rotating_states_window[:, 0], rotating_states_window[:, 1], rotating_states_window[:, 2], linewidth=linewidth, color=color_cycle[num], label=f"Arc {num+1}")
+
+                    axes_labels = ['X [-]', 'Y [-]', 'Z [-]']
+                    for i in range(3):
+                        ax[i].grid(alpha=0.3)
+                    ax[0].set_xlabel(axes_labels[0])
+                    ax[0].set_ylabel(axes_labels[2])
+                    ax[1].set_xlabel(axes_labels[1])
+                    ax[1].set_ylabel(axes_labels[2])
+                    ax[2].set_xlabel(axes_labels[0])
+                    ax[2].set_ylabel(axes_labels[1])
+
+                    ax[2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+                    ax_3d.legend()
+                    plt.tight_layout()
+
+                    plt.show()
+
+
+
+
+
 
         plt.tight_layout()
         plt.legend()
@@ -294,14 +389,11 @@ class PlotNavigationResults():
                         arc_nums = len(results[-2].keys())
                         arc_nums = 1
 
-                        from matplotlib.lines import Line2D
-                        import matplotlib.cm as cm
-
                         fig, ax = plt.subplots(1, arc_nums, figsize=(9, 4), sharey=True)
 
                         for arc_num in range(arc_nums):
 
-                            estimation_output = results[-2][arc_num][0]
+                            estimation_output = results[-2][arc_num]
                             navigation_simulator = results[-1]
 
                             covariance_output = estimation_output.covariance
@@ -335,24 +427,20 @@ class PlotNavigationResults():
 
     def plot_observations(self):
 
-        from matplotlib.lines import Line2D
-        import matplotlib.cm as cm
-
-        fig, ax = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
+        fig, ax = plt.subplots(3, 1, figsize=(12, 5), sharex=True)
         for i, (model_type, model_names) in enumerate(self.results_dict.items()):
             for j, (model_name, models) in enumerate(model_names.items()):
                     for k, results in enumerate(models):
 
                         arc_nums = len(results[-2].keys())
 
+                        # For each arc, plot the observations and its residuals
                         for arc_num in range(arc_nums):
 
-                            estimation_output = results[-2][arc_num][0]
-                            sorted_observation_sets = results[-2][arc_num][4]
-                            navigation_simulator = results[-1]
+                            estimation_model = results[-2][arc_num]
+                            estimation_output = estimation_model.estimation_output
 
-
-                            for i, (observable_type, information_sets) in enumerate(sorted_observation_sets.items()):
+                            for i, (observable_type, information_sets) in enumerate(estimation_model.sorted_observation_sets.items()):
                                 for j, observation_set in enumerate(information_sets.values()):
                                     for k, single_observation_set in enumerate(observation_set):
 
@@ -365,8 +453,52 @@ class PlotNavigationResults():
 
                                         residual_history = estimation_output.residual_history
                                         best_iteration = estimation_output.best_iteration
+
                                         index = int(len(observation_times))
                                         ax[1].scatter(observation_times, residual_history[i*index:(i+1)*index, best_iteration], color=color, s=s)
+
+
+                        # Plot the history of observation angle with respect to the large covariance axis
+                        navigation_simulator = results[-1]
+                        epochs = results[9][0]
+                        dependent_variables_history = results[9][1]
+                        relative_state_history = dependent_variables_history[:,6:12]
+                        full_propagated_covariance_epochs = results[2][0]
+                        full_propagated_covariance_history = results[2][1]
+
+                        # Generate history of eigenvectors
+                        eigenvectors_dict = dict()
+                        for key, matrix in enumerate(full_propagated_covariance_history):
+                            eigenvalues, eigenvectors = np.linalg.eigh(matrix[6:9, 6:9])
+                            max_eigenvalue_index = np.argmax(eigenvalues)
+                            eigenvector_largest = eigenvectors[:, max_eigenvalue_index]
+                            eigenvectors_dict.update({full_propagated_covariance_epochs[key]: eigenvector_largest})
+
+                        # Store the angles
+                        angles_dict = dict()
+                        for i, (key, value) in enumerate(eigenvectors_dict.items()):
+                            vec1 = relative_state_history[i,:3]
+                            vec2 = value
+                            cosine_angle = np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+                            angle_radians = np.arccos(cosine_angle)
+                            angle_degrees = np.degrees(angle_radians)
+                            angles_dict.update({key: np.abs(angle_degrees) if np.abs(angle_degrees)<90 else (180-angle_degrees)})
+
+                        print(angles_dict)
+
+                        # # Generate boolans for when treshold condition holds to generate estimation window
+                        # filtered_dict = dict()
+                        # relative_state_history_dict = dict(zip(epochs, relative_state_history))
+                        # for key, value in angles_dict.items():
+
+                        #     # Check if any element of the value vector is below the angle_treshold
+                        #     below_angle_treshold = value < self.angle_treshold
+                        #     below_distance_treshold = np.linalg.norm(relative_state_history_dict[key][0:3]) < 9e7
+                        #     filtered_dict[key] = below_angle_treshold and below_distance_treshold
+
+                        # fig = plt.figure()
+                        ax[2].plot(np.stack(list(angles_dict.keys()))-self.mission_start_epoch, np.stack(list(angles_dict.values())), label="angles in degrees", color=color)
+                        # plt.show()
 
 
                         for j in range(len(ax)):
@@ -401,7 +533,7 @@ class PlotNavigationResults():
 
                         # for arc_num in range(arc_nums):
 
-                        #     estimation_output = results[-2][arc_num][0]
+                        #     estimation_output = results[-2][arc_num]
                         #     # total_single_information_dict = results[-2][1]
                         #     # total_covariance_dict = results[-2][2]
                         #     # total_information_dict = results[-2][3]
@@ -451,9 +583,56 @@ class PlotNavigationResults():
 
                         for arc_num in range(arc_nums):
 
-                            estimation_output = results[-2][arc_num][0]
-                            total_single_information_dict = results[-2][arc_num][1]
+                            estimation_model = results[-2][arc_num]
+                            estimation_output = estimation_model.estimation_output
                             navigation_simulator = results[-1]
+
+                            # Generate information and covariance histories based on all the combinations of observables and link definitions
+                            total_information_dict = dict()
+                            total_covariance_dict = dict()
+                            total_single_information_dict = dict()
+                            len_obs_list = []
+                            for i, (observable_type, observation_sets) in enumerate(estimation_model.sorted_observation_sets.items()):
+                                total_information_dict[observable_type] = dict()
+                                total_covariance_dict[observable_type] = dict()
+                                total_single_information_dict[observable_type] = dict()
+                                for j, observation_set in enumerate(observation_sets.values()):
+                                    total_information_dict[observable_type][j] = list()
+                                    total_covariance_dict[observable_type][j] = list()
+                                    total_single_information_dict[observable_type][j] = list()
+                                    for k, single_observation_set in enumerate(observation_set):
+
+                                        epochs = single_observation_set.observation_times
+                                        len_obs_list.append(len(epochs))
+
+                                        weighted_design_matrix_history = np.stack([estimation_model.estimation_output.weighted_design_matrix[sum(len_obs_list[:-1]):sum(len_obs_list), :]], axis=1)
+
+                                        information_dict = dict()
+                                        single_information_dict = dict()
+                                        information_vector_dict = dict()
+                                        total_information = 0
+                                        total_information_vector = 0
+                                        for index, weighted_design_matrix in enumerate(weighted_design_matrix_history):
+
+                                            epoch = epochs[index]
+                                            weighted_design_matrix_product = np.dot(weighted_design_matrix.T, weighted_design_matrix)
+
+                                            # Calculate the information matrix
+                                            current_information = total_information + weighted_design_matrix_product
+                                            single_information_dict[epoch] = weighted_design_matrix_product
+                                            information_dict[epoch] = current_information
+                                            total_information = current_information
+
+                                        covariance_dict = dict()
+                                        for key in information_dict:
+                                            if estimation_model.apriori_covariance is not None:
+                                                information_dict[key] = information_dict[key] + np.linalg.inv(estimation_model.apriori_covariance)
+                                            covariance_dict[key] = np.linalg.inv(information_dict[key])
+
+                                        total_information_dict[observable_type][j].append(information_dict)
+                                        total_covariance_dict[observable_type][j].append(covariance_dict)
+                                        total_single_information_dict[observable_type][j].append(single_information_dict)
+
 
                             for i, (observable_type, information_sets) in enumerate(total_single_information_dict.items()):
                                 for j, information_set in enumerate(information_sets.values()):

@@ -3,6 +3,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
@@ -14,7 +15,7 @@ for _ in range(2):
 from tests import utils
 import NoiseDataClass
 import reference_data, Interpolator, StationKeeping, PlotNavigationResults
-from src.estimation_models import estimation_model
+from src.estimation_models import EstimationModel
 from tudatpy.kernel import constants
 
 
@@ -41,18 +42,12 @@ class NavigationSimulator():
         self.station_keeping_epochs = station_keeping_epochs
         self.target_point_epochs = target_point_epochs
 
-        # print("STATION KEEPING: ", self.station_keeping_epochs)
-
         # Initial state and uncertainty parameters
         noise_data = NoiseDataClass.NoiseDataClass()
         self.station_keeping_error = noise_data.relative_station_keeping_error
         self.initial_estimation_error = noise_data.initial_estimation_error
         self.apriori_covariance = noise_data.apriori_covariance
         self.orbit_insertion_error = noise_data.orbit_insertion_error
-
-        # print("ORBIT INSERTION ERROR: ", self.orbit_insertion_error)
-        # print("ORBIT ESTIMATION ERROR: ", self.initial_estimation_error)
-
 
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(step_size).rstrip('0')
@@ -63,14 +58,12 @@ class NavigationSimulator():
         self.mission_start_time = self.observation_windows[0][0]
         self.mission_end_time = self.observation_windows[-1][-1]
         self.batch_start_times = np.array([t[0] for t in self.observation_windows])
-        self.batch_end_times = np.array([t[1] for t in self.observation_windows])
+        # self.batch_end_times = np.array([t[1] for t in self.observation_windows])
         self.times = list(set([self.mission_start_time] + [item for sublist in self.observation_windows for item in sublist] + [self.mission_end_time]))
 
         # Managing the time vector to define all arcs
         self.times.extend(self.station_keeping_epochs)
         self.times = np.round(sorted(list(set(self.times))), self.decimal_places)
-        # print("Sorted and rounded times: ", self.times)
-
 
 
     def get_Gamma(self, delta_t):
@@ -218,22 +211,34 @@ class NavigationSimulator():
                                                                                     custom_observation_step_size_range=self.custom_observation_step_size_range)
 
                 estimation_model_result = estimation_model_results[self.model_type][self.model_name][0]
-                estimation_output = estimation_model_result[0]
+                estimation_output = estimation_model_result.estimation_output
                 parameter_history = estimation_output.parameter_history
                 final_covariance = estimation_output.covariance
                 formal_errors = estimation_output.formal_errors
                 best_iteration = estimation_output.best_iteration
 
-                # print("NAVIGATIONSIMULATOR")
-                # print("Difference in states BEFORE AFTER: \n ", parameter_history[:,best_iteration]-parameter_history[:,0], "\n")
-                # print("old parameter: \n", parameter_history[:,0], "\n")
-                # print("Updated parameter: \n", parameter_history[:,best_iteration], "\n")
+                # print(estimation_output.final_residuals)
 
+                # print("NAVIGATIONSIMULATOR")
+                # print("Estimation model start and end: ", estimation_model_result.observation_times_range[0], estimation_model_result.observation_times_range[-1])
+                # print(dynamic_model.simulation_start_epoch_MJD)
+
+
+                # start = time.time()
                 epochs, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
                     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model,
                                                                                                     custom_initial_state=parameter_history[:, best_iteration],
                                                                                                     custom_propagation_time=estimation_arc_duration,
                                                                                                     solve_variational_equations=True)
+
+                # print("DEZE: ", time.time()-start)
+
+                # measurement_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e0
+                # measurement_noise = np.random.normal(scale=measurement_noise_sigmas, size=len(measurement_noise_sigmas))
+                # measurement_noise_matrix = np.outer(measurement_noise, measurement_noise)
+
+                # print(np.sqrt(np.diag(estimation_output.covariance)))
+                # print(np.sqrt(np.diag(self.apriori_covariance)))
 
                 propagated_covariance_final = dict()
                 propagated_formal_errors_final = dict()
@@ -264,7 +269,7 @@ class NavigationSimulator():
                 self.apriori_covariance = np.stack(list(propagated_covariance_initial.values()))[-1]
 
             # Include artificial process noise in case truth is not equal to the dynamic model
-            process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e-2
+            process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e0
             process_noise = np.random.normal(scale=process_noise_sigmas, size=len(process_noise_sigmas))
 
             if estimation_arc_activated:
@@ -273,8 +278,8 @@ class NavigationSimulator():
                     # if np.all(["srp" in s1 and "srp" in s2])
                     self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
 
-                # else:
-                #     self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
+                else:
+                    self.apriori_covariance += np.outer(process_noise, process_noise)
                 # self.apriori_covariance += np.outer(process_noise, process_noise)
                 # print(self.get_process_noise_matrix(delta_t, sigma_i))
                 # self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)

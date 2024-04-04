@@ -15,7 +15,10 @@ def read_textfiles(data_type, satellite="LUMIO"):
     if satellite == "LUMIO":
 
         folder_path = reference_folder_path / "DataLUMIO" / "TextFiles"
-        file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
+        # file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
+        # print(file_paths)
+        # # file_paths_state = [file_paths for file_path in file_paths if "states" in file_path]
+        file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if file.endswith('.txt')]
 
         if data_type == "state":
 
@@ -37,7 +40,8 @@ def read_textfiles(data_type, satellite="LUMIO"):
     if satellite == "LPF":
 
         folder_path = reference_folder_path / "DataLPF" / "TextFiles"
-        file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
+        # file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
+        file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if file.endswith('.txt')]
 
         if data_type == "state":
 

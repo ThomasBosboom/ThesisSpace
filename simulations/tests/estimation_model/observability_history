@@ -29,7 +29,7 @@ from src.dynamic_models.HF.PM import *
 from src.dynamic_models.HF.PMSRP import *
 from src.dynamic_models.HF.SH import *
 from src.dynamic_models.HF.SHSRP import *
-from src.estimation_models import estimation_model
+from src.estimation_models import EstimationModel
 
 
 
@@ -44,13 +44,13 @@ def observability_history():
     params = (simulation_start_epoch_MJD, propagation_time, custom_model_dict, get_only_fist, custom_initial_state)
 
     dynamic_model_objects = utils.get_dynamic_model_objects(*params)
-    truth_model = HF_point_mass_01.HighFidelityDynamicModel(*params[:2])
+    truth_model = HF_PM01.HighFidelityDynamicModel(*params[:2])
     custom_estimation_model_objects_results = utils.get_estimation_model_results(dynamic_model_objects, custom_truth_model=truth_model, get_only_first=get_only_fist, entry_list=None)
 
     model_type = "HF"
     model_name = "PM"
     model_entry = 0
-    single_information_dict = custom_estimation_model_objects_results[model_type][model_name][model_entry][1]
+    single_information_dict = custom_estimation_model_objects_results[model_type][model_name][model_entry].estimation_output.single_information_dict
 
     fig, axs = plt.subplots(2, 1, figsize=(8.3, 5.7), sharex=True)
     for i, (observable_type, information_sets) in enumerate(single_information_dict.items()):

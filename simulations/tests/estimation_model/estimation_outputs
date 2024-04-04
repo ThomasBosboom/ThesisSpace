@@ -29,7 +29,7 @@ from src.dynamic_models.HF.PM import *
 from src.dynamic_models.HF.PMSRP import *
 from src.dynamic_models.HF.SH import *
 from src.dynamic_models.HF.SHSRP import *
-from src.estimation_models import estimation_model
+from src.estimation_models import EstimationModel
 
 
 ####################################
@@ -44,11 +44,11 @@ def iteration_history():
     # dynamic_model = LF.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state, use_synodic_state=True)
     # truth_model = LF.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state, use_synodic_state=True)
 
-    dynamic_model = HF_spherical_harmonics_01_2_2_2_2.HighFidelityDynamicModel(60390, 14, custom_initial_state=None)
-    truth_model = HF_spherical_harmonics_01_2_2_2_2.HighFidelityDynamicModel(60390, 14, custom_initial_state=None)
+    dynamic_model = HF_SHSRP01.HighFidelityDynamicModel(60390, 14, custom_initial_state=None)
+    truth_model = HF_SHSRP01.HighFidelityDynamicModel(60390, 14, custom_initial_state=None)
     # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
     # initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-    estimation_models = estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=None, initial_estimation_error=None)
+    estimation_models = EstimationModel.EstimationModel(dynamic_model, truth_model, apriori_covariance=None, initial_estimation_error=None)
 
     results = estimation_models.get_estimation_results(redirect_out=False)
     estimation_output = results[0]

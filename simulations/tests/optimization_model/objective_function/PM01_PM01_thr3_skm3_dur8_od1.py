@@ -21,10 +21,10 @@ from src.optimization_models import OptimizationModel
 
 dynamic_model_list = ["HF", "PM",0]
 truth_model_list = ["HF", "PM",0]
-threshold = 1
+threshold = 3
 skm_to_od_duration = 3
-duration = 16
-od_duration = 0.5
+duration = 100
+od_duration = 1
 bounds = (0.5, 1.5)
 
 # Create OptimizationModel instance based on timing characteristics

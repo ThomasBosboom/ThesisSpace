@@ -3,8 +3,9 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 import time
-import scipy as sp
+import json
 
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
@@ -45,18 +46,18 @@ def get_optimization_result(dynamic_model_list, truth_model_list, threshold, skm
 
 def get_combined_history_dict(dict):
 
-    stripped_dict = {key: value["history"] for key, value in dict.items()}
+    history_dict = {key: value["history"] for key, value in dict.items()}
+    final_result_dict = {key: value["final_result"] for key, value in dict.items()}
 
     # Extract the design_vector subkey for each main key
     names = ["design_vector", "objective_value"]
     results = []
     for name in names:
-        results.append({key: value[name] for key, value in stripped_dict.items()})
+        results.append({key: value[name] for key, value in history_dict.items()})
 
     combined_history_dict = {}
     for i, data in enumerate(results):
         transformed_data = {}
-
         for key in data[str(0)]:
             values = []
             for subkey in data:
@@ -65,15 +66,26 @@ def get_combined_history_dict(dict):
             transformed_data[key] = values
         combined_history_dict[names[i]] = transformed_data
 
+    results = []
+    names = ["approx_annual_deltav", "reduction_percentage", "run_time"]
+    for name in names:
+        results.append({key: value[name] for key, value in final_result_dict.items()})
+
+    for i, result in enumerate(results):
+        combined_history_dict[names[i]] = result
+
     return combined_history_dict
 
 
 def get_monte_carlo_stats_dict(dict):
 
+    dict = get_combined_history_dict(dict)
+
     stats = {}
     mean_values = {}
     std_dev_values = {}
-    for key, value in dict.items():
+    new_dict = {key: dict[key] for key in ["design_vector", "objective_value"]}
+    for key, value in new_dict.items():
 
         mean_list = []
         std_dev_list = []
@@ -96,12 +108,33 @@ def get_monte_carlo_stats_dict(dict):
     stats["mean"] = mean_values
     stats["std_dev"] = std_dev_values
 
+
+    new_dict = {key: dict[key] for key in ["approx_annual_deltav", "reduction_percentage", "run_time"]}
+
+    mean_values = {}
+    std_dev_values = {}
+    for key, value in new_dict.items():
+        mean_list = []
+        std_dev_list = []
+        for subkey, subvalue in value.items():
+            mean_list.append(subvalue)
+            std_dev_list.append(subvalue)
+
+        stats["mean"][key] = np.mean(mean_list)
+        stats["std_dev"][key] = np.std(std_dev_list)
+
+
+
+    print(stats)
+
     return stats
 
 
 def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, threshold, skm_to_od_duration, duration, od_duration, bounds=(0.5, 1.5), numruns=1, maxiter=5, factor=2, custom_initial_design_vector=None, label=None):
 
-    print("Starting MC simulation with following settings: \n")
+    current_time_string = datetime.now().strftime("%d%m%H%M")
+
+    print(f"Starting MC simulation at {current_time_string} with following settings: \n")
     print(f"dynamic_model_list: {dynamic_model_list}")
     print(f"truth_model_list: {truth_model_list}")
     print(f"threshold: {threshold}")
@@ -132,15 +165,35 @@ def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, thr
         monte_carlo_results_dict[str(run)] = optimization_result
 
         # Save individual run dictionary
-        utils.save_dicts_to_folder(dicts=[optimization_result], custom_sub_folder_name=label, labels=["run_"+str(run)+"_"+label])
+        utils.save_dicts_to_folder(dicts=[optimization_result], custom_sub_folder_name=label, labels=[current_time_string+"_run_"+str(run)+"_"+label])
 
     # Transform dictionaries and get statistics
-    combined_history_dict = get_combined_history_dict(monte_carlo_results_dict)
-    monte_carlo_stats_dict = get_monte_carlo_stats_dict(combined_history_dict)
+    # combined_history_dict = get_combined_history_dict(monte_carlo_results_dict)
+    monte_carlo_stats_dict = get_monte_carlo_stats_dict(monte_carlo_results_dict)
 
     # Save total statistics dictionary
-    utils.save_dicts_to_folder(dicts=[monte_carlo_results_dict], custom_sub_folder_name=label, labels=["combined_"+label])
-    utils.save_dicts_to_folder(dicts=[monte_carlo_stats_dict], custom_sub_folder_name=label, labels=["stats_"+label])
+    utils.save_dicts_to_folder(dicts=[monte_carlo_results_dict], custom_sub_folder_name=label, labels=[current_time_string+"_combined_"+label])
+    utils.save_dicts_to_folder(dicts=[monte_carlo_stats_dict], custom_sub_folder_name=label, labels=[current_time_string+"_stats_"+label])
 
     # print("Monte Carlo results: ", monte_carlo_results_dict)
     # print("Monte Carlo statistics: ", monte_carlo_stats_dict)
+
+
+def load_json_file(file_path):
+
+    with open(file_path, 'r') as file:
+        return json.load(file)
+
+
+def concatenate_json_files(folder_path):
+
+    concatenated_json = {}
+    file_count = 0
+    for filename in os.listdir(folder_path):
+        if filename.endswith('.json') and 'run' in filename:
+            file_path = os.path.join(folder_path, filename)
+            file_json = load_json_file(file_path)
+            concatenated_json[str(file_count)] = file_json
+            file_count += 1
+
+    return concatenated_json

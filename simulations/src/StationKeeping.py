@@ -62,6 +62,7 @@ class StationKeeping:
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)
+        # print(R_i.T + R_i, Q.T + Q)
         Phi = state_transition_matrix_history
 
         final_sum = np.empty((3,))
@@ -114,24 +115,24 @@ class StationKeeping:
 #                                                         get_only_first=False,
 #                                                         custom_initial_state=None)
 
-# dynamic_model_object = dynamic_model_objects["HF"]["PM"][0]
-# dynamic_model_object = dynamic_model_objects["LF"]["CRTBP"][0]
+# dynamic_model_object = dynamic_model_objects["HF"]["PMSRP"][0]
+# # dynamic_model_object = dynamic_model_objects["LF"]["CRTBP"][0]
 
-# custom_initial_state = np.array([-3.34034638e+08,  1.91822560e+08,  1.11600187e+08, -1.22100520e+02,
-#                                  -7.02130739e+02, -9.74257591e+02, -3.83004013e+08,  1.80617292e+08,
-#                                   1.22243914e+08, -6.84094596e+02, -8.16779163e+02, -6.68497305e+02])
+# # custom_initial_state = np.array([-3.34034638e+08,  1.91822560e+08,  1.11600187e+08, -1.22100520e+02,
+# #                                  -7.02130739e+02, -9.74257591e+02, -3.83004013e+08,  1.80617292e+08,
+# #                                   1.22243914e+08, -6.84094596e+02, -8.16779163e+02, -6.68497305e+02])
 
 # import time
 
 # # lists = [[7, [21]], [7, [21, 28]]]
-# lists = [[0, [3]], [0, [4]], [0, [5]], [0, [3, 4, 5]]]
+# lists = [[1, [3]], [1, [4]], [1, [5]], [1, [3, 4, 5]]]
 # for i, list1 in enumerate(lists):
 #     print(list1)
 #     start_time = time.time()
 #     station_keeping = StationKeeping(dynamic_model_object, custom_initial_state=None, custom_propagation_time=max(list1[1]), step_size=0.01)
 #     delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=list1[0], correction_epoch=list1[0], target_point_epochs=list1[1])
-#     # print("delta_v:", delta_v)
-#     lists[i].append(time.time()-start_time)
+#     print("delta_v:", delta_v)
+#     lists[i].extend([delta_v, time.time()-start_time])
 # print(lists)
 # plt.show()
 

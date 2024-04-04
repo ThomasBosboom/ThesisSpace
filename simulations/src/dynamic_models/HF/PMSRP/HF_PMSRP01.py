@@ -85,12 +85,12 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_acceleration_settings()
 
-        initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
-        initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
-
         if self.custom_initial_state is not None:
             self.initial_state = self.custom_initial_state
         else:
+            initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+            initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+
             self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
 
 
