@@ -92,51 +92,54 @@ class PlotNavigationResults():
                         transformation_matrix_dict.update({epoch: transformation_matrix})
 
 
-                    rotating_states_dict = {}
+                    synodic_states_dict = {}
                     for epoch, state in satellite_data_dict.items():
 
                         transformation_matrix = transformation_matrix_dict[epoch]
-                        rotating_state = np.dot(transformation_matrix, state[:3])
-                        rotating_state = rotating_state/np.linalg.norm((moon_data_dict[epoch][:3]))
-                        rotating_state = (1-mu)*rotating_state
+                        synodic_state = np.dot(transformation_matrix, state[:3])
+                        synodic_state = synodic_state/np.linalg.norm((moon_data_dict[epoch][:3]))
+                        synodic_state = (1-mu)*synodic_state
 
-                        rotating_states_dict.update({epoch: rotating_state})
+                        synodic_states_dict.update({epoch: synodic_state})
 
-                    rotating_moon_states_dict = {}
+                    synodic_moon_states_dict = {}
                     for epoch, state in moon_data_dict.items():
 
                         transformation_matrix = transformation_matrix_dict[epoch]
-                        rotating_state = np.dot(transformation_matrix, state[:3])
-                        rotating_state = rotating_state/np.linalg.norm(state[:3])
-                        rotating_state = (1-mu)*rotating_state
+                        synodic_state = np.dot(transformation_matrix, state[:3])
+                        synodic_state = synodic_state/np.linalg.norm(state[:3])
+                        synodic_state = (1-mu)*synodic_state
 
-                        rotating_moon_states_dict.update({epoch: rotating_state})
+                        synodic_moon_states_dict.update({epoch: synodic_state})
 
-                    rotating_states = np.stack(list(rotating_states_dict.values()))
-                    rotating_moon_states = np.stack(list(rotating_moon_states_dict.values()))
+                    synodic_states = np.stack(list(synodic_states_dict.values()))
+                    synodic_moon_states = np.stack(list(synodic_moon_states_dict.values()))
+                    print(np.shape(synodic_states))
 
 
                     fig, ax = plt.subplots(1, 3, figsize=(12, 3))
                     fig1_3d = plt.figure()
                     ax_3d = fig1_3d.add_subplot(111, projection='3d')
-                    ax[0].scatter(rotating_moon_states[:, 0], rotating_moon_states[:, 2], s=50, color="gray")
-                    ax[1].scatter(rotating_moon_states[:, 1], rotating_moon_states[:, 2], s=50, color="gray")
-                    ax[2].scatter(rotating_moon_states[:, 0], rotating_moon_states[:, 1], s=50, color="gray", label="Moon")
-                    ax[0].plot(rotating_states[:, 0], rotating_states[:, 2], lw=1)
-                    ax[1].plot(rotating_states[:, 1], rotating_states[:, 2], lw=1)
-                    ax[2].plot(rotating_states[:, 0], rotating_states[:, 1], lw=1)
-                    ax_3d.plot(rotating_states[:, 0], rotating_states[:, 1], rotating_states[:, 2])
-                    ax_3d.scatter(rotating_moon_states[:, 0], rotating_moon_states[:, 1], rotating_moon_states[:, 2], s=50, color="gray", label="Moon")
+                    ax[0].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 2], s=50, color="gray")
+                    ax[1].scatter(synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="gray")
+                    ax[2].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], s=50, color="gray", label="Moon")
+                    ax[0].plot(synodic_states[:, 0], synodic_states[:, 2], lw=1)
+                    ax[1].plot(synodic_states[:, 1], synodic_states[:, 2], lw=1)
+                    ax[2].plot(synodic_states[:, 0], synodic_states[:, 1], lw=1)
+                    ax_3d.plot(synodic_states[:, 0], synodic_states[:, 1], synodic_states[:, 2])
+                    ax_3d.scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="gray", label="Moon")
 
                     for num, (start, end) in enumerate(navigation_simulator.observation_windows):
-                        rotating_states_window_dict = {key: value for key, value in rotating_states_dict.items() if key >= start and key <= end}
-                        rotating_states_window = np.stack(list(rotating_states_window_dict.values()))
+                        print(start, end)
+                        synodic_states_window_dict = {key: value for key, value in synodic_states_dict.items() if key >= start and key <= end}
+                        synodic_states_window = np.stack(list(synodic_states_window_dict.values()))
+                        print(np.shape(synodic_states_window))
                         linewidth = 3
                         color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-                        ax[0].plot(rotating_states_window[:, 0], rotating_states_window[:, 2], linewidth=linewidth, color=color_cycle[num])
-                        ax[1].plot(rotating_states_window[:, 1], rotating_states_window[:, 2], linewidth=linewidth, color=color_cycle[num])
-                        ax[2].plot(rotating_states_window[:, 0], rotating_states_window[:, 1], linewidth=linewidth, color=color_cycle[num], label=f"Arc {num+1}")
-                        ax_3d.plot(rotating_states_window[:, 0], rotating_states_window[:, 1], rotating_states_window[:, 2], linewidth=linewidth, color=color_cycle[num], label=f"Arc {num+1}")
+                        ax[0].plot(synodic_states_window[:, 0], synodic_states_window[:, 2], linewidth=linewidth, color=color_cycle[num])
+                        ax[1].plot(synodic_states_window[:, 1], synodic_states_window[:, 2], linewidth=linewidth, color=color_cycle[num])
+                        ax[2].plot(synodic_states_window[:, 0], synodic_states_window[:, 1], linewidth=linewidth, color=color_cycle[num], label=f"Arc {num+1}")
+                        ax_3d.plot(synodic_states_window[:, 0], synodic_states_window[:, 1], synodic_states_window[:, 2], linewidth=linewidth, color=color_cycle[num], label=f"Arc {num+1}")
 
                     axes_labels = ['X [-]', 'Y [-]', 'Z [-]']
                     for i in range(3):

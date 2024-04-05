@@ -20,7 +20,7 @@ class NoiseDataClass:
         self.noise_range = 2.98 #102.44/50
 
         # Station keeping noise
-        self.relative_station_keeping_error = 1e-20
+        self.relative_station_keeping_error = 1e-2
 
         # Initial orbit uncertainties
         self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1e-2
