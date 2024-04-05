@@ -24,7 +24,7 @@ truth_model_list = ["HF", "PM",0]
 threshold = 3
 skm_to_od_duration = 3
 duration = 30
-od_duration = 1
+od_duration = 100
 bounds = (0.5, 1.5)
 
 # Create OptimizationModel instance based on timing characteristics
