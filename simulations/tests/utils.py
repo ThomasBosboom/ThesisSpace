@@ -91,7 +91,7 @@ def get_estimation_model_objects(dynamic_model_objects,
                 # for dynamic_model in dynamic_models:
                 #     simuat
                 # print("been here", dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
-                truth_model = FF_TRUTH.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
+                truth_model = TRUTH.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.propagation_time)

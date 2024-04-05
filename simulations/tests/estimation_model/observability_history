@@ -44,7 +44,7 @@ def observability_history():
     params = (simulation_start_epoch_MJD, propagation_time, custom_model_dict, get_only_fist, custom_initial_state)
 
     dynamic_model_objects = utils.get_dynamic_model_objects(*params)
-    truth_model = HF_PM01.HighFidelityDynamicModel(*params[:2])
+    truth_model = PM01.HighFidelityDynamicModel(*params[:2])
     custom_estimation_model_objects_results = utils.get_estimation_model_results(dynamic_model_objects, custom_truth_model=truth_model, get_only_first=get_only_fist, entry_list=None)
 
     model_type = "HF"

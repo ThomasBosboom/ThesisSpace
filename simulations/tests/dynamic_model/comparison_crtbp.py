@@ -41,7 +41,7 @@ def comparison_crtbp(simulation_start_epoch_MJD, propagation_time, durations, st
                                     1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
 
     # Generate LowFidelityDynamicModel object only
-    dynamic_model = LF_CRTBP.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, use_synodic_state=True)
+    dynamic_model = CRTBP.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, use_synodic_state=True)
 
     # Extract simulation histories tudatpy solution
     epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
