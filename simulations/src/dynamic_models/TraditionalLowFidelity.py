@@ -261,7 +261,7 @@ class TraditionalLowFidelity:
 # # Comparison on the models
 # system.t = system.t[0:int(0.5*stop/step)]
 # state_rotating_bary_LUMIO = state_rotating_bary_LUMIO[0:int(0.5*stop/step)]
-# state_rotating_bary_erdem = validation.get_state_history_erdem()[0:int(0.5*stop/step)]
+# state_rotating_bary_erdem = reference_data.get_state_history_erdem()[0:int(0.5*stop/step)]
 
 # system.t = np.array([0])
 # print(np.shape(system.t))

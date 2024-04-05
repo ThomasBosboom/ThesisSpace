@@ -1,0 +1,100 @@
+# Standard
+import os
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+import statistics
+import time
+
+# Define path to import src files
+file_directory = os.path.realpath(__file__)
+for _ in range(4):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
+
+# Third party
+import pytest
+import pytest_html
+from tudatpy.kernel import constants
+from tudatpy.kernel.astro import element_conversion
+from tudatpy.kernel.numerical_simulation import propagation_setup
+from tudatpy.kernel.numerical_simulation.estimation_setup import observation
+
+# Own
+from tests import utils
+import reference_data, Interpolator, FrameConverter
+from src.dynamic_models.FF.TRUTH import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
+from src.estimation_models import EstimationModel
+
+
+
+def observability_history():
+
+    simulation_start_epoch_MJD = 60390
+    propagation_time = 14
+    custom_model_dict = {"HF": ["PM"]}
+    get_only_fist = True
+    custom_initial_state = None
+
+    params = (simulation_start_epoch_MJD, propagation_time, custom_model_dict, get_only_fist, custom_initial_state)
+
+    dynamic_model_objects = utils.get_dynamic_model_objects(*params)
+    truth_model = PM01.HighFidelityDynamicModel(*params[:2])
+    custom_estimation_model_objects_results = utils.get_estimation_model_results(dynamic_model_objects, custom_truth_model=truth_model, get_only_first=get_only_fist, entry_list=None)
+
+    model_type = "HF"
+    model_name = "PM"
+    model_entry = 0
+    single_information_dict = custom_estimation_model_objects_results[model_type][model_name][model_entry].estimation_output.single_information_dict
+
+    fig, axs = plt.subplots(2, 1, figsize=(8.3, 5.7), sharex=True)
+    for i, (observable_type, information_sets) in enumerate(single_information_dict.items()):
+        for j, information_set in enumerate(information_sets.values()):
+            for k, single_information_set in enumerate(information_set):
+
+                information_dict = single_information_dict[observable_type][j][k]
+                epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
+                information_matrix_history = np.array(list(information_dict.values()))
+
+                for m in range(2):
+                    observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
+                    observability_lumio = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]]))
+                    observability_lpf_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1, keepdims=True))
+                    observability_lumio_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1, keepdims=True))
+
+                    axs[2*i+m].plot(epochs, observability_lpf_total, label="Total LPF", color="darkred")
+                    axs[2*i+m].plot(epochs, observability_lumio_total, label="Total LUMIO", color="darkblue")
+
+                    ls = ["dashdot", "dashed", "dotted"]
+                    label = [[[r"$x_{1}$", r"$y_{1}$", r"$z_{1}$"],[r"$\dot{x}_{1}$", r"$\dot{y}_{1}$", r"$\dot{z}_{1}$"]], [[r"$x_{2}$", r"$y_{2}$", r"$z_{2}$"],[r"$\dot{x}_{2}$", r"$\dot{y}_{2}$", r"$\dot{z}_{2}$"]]]
+                    ylabels = [r"$\sqrt{eig (\mathbf{\Lambda_{r}})}$ [-]", r"$\sqrt{eig (\mathbf{\Lambda_{v}})}$ [-]"]
+                    observable_types = ["Intersatellite range", "Intersatellite doppler"]
+                    for l in range(3):
+                        alpha=0.3
+                        axs[2*i+m].plot(epochs, observability_lpf[:,l], label=label[0][m][l], color="red", ls=ls[l], alpha=alpha)
+                        axs[2*i+m].plot(epochs, observability_lumio[:,l], label=label[1][m][l], color="blue", ls=ls[l], alpha=alpha)
+
+                    axs[2*i+m].set_ylabel(ylabels[m])
+                    axs[2*i+m].set_yscale("log")
+                    axs[2*i+m].grid(alpha=0.5, linestyle='--')
+
+                    if i == 0:
+                        axs[2*i+m].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+                axs[2*i].set_title(observable_types[i])
+                axs[-1].set_xlabel(f"Time since MJD {simulation_start_epoch_MJD} [days]")
+
+    fig.suptitle(f"Observability effectiveness for {propagation_time} [days]")
+    plt.tight_layout()
+
+    utils.save_figure_to_folder(figs=[fig], labels=[f"observability_{propagation_time}_days"])
+
+    # plt.show()
+
+
+observability_history()

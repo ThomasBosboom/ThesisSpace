@@ -1,0 +1,127 @@
+# Standard
+import os
+import sys
+import numpy as np
+import matplotlib.pyplot as plt
+import statistics
+import time
+
+# Define path to import src files
+file_directory = os.path.realpath(__file__)
+for _ in range(4):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
+
+# Third party
+import pytest
+import pytest_html
+from tudatpy.kernel import constants
+from tudatpy.kernel.astro import element_conversion
+from tudatpy.kernel.numerical_simulation import propagation_setup
+from tudatpy.kernel.numerical_simulation.estimation_setup import observation
+
+# Own
+from tests import utils
+import reference_data, Interpolator, FrameConverter
+from src.dynamic_models.FF.TRUTH import *
+from src.dynamic_models.LF.CRTBP import *
+from src.dynamic_models.HF.PM import *
+from src.dynamic_models.HF.PMSRP import *
+from src.dynamic_models.HF.SH import *
+from src.dynamic_models.HF.SHSRP import *
+from src.estimation_models import EstimationModel
+
+
+####################################
+#### Estimation model run times ####
+####################################
+
+
+def iteration_history():
+
+    # custom_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+    #                                 1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+    # dynamic_model = LF.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state, use_synodic_state=True)
+    # truth_model = LF.LowFidelityDynamicModel(60390, 14, custom_initial_state=custom_initial_state, use_synodic_state=True)
+
+    dynamic_model = HF_SHSRP01.HighFidelityDynamicModel(60390, 14, custom_initial_state=None)
+    truth_model = HF_SHSRP01.HighFidelityDynamicModel(60390, 14, custom_initial_state=None)
+    # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+    # initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+    estimation_models = EstimationModel.EstimationModel(dynamic_model, truth_model, apriori_covariance=None, initial_estimation_error=None)
+
+    results = estimation_models.get_estimation_results(redirect_out=False)
+    estimation_output = results[0]
+    parameter_history = estimation_output.parameter_history
+    residual_history = estimation_output.residual_history
+    covariance = estimation_output.covariance
+    formal_errors = estimation_output.formal_errors
+    weighted_design_matrix = estimation_output.weighted_design_matrix
+    residual_history = estimation_output.residual_history
+
+    for i, (observable_type, information_sets) in enumerate(results[-1].items()):
+        for j, observation_set in enumerate(information_sets.values()):
+            for k, single_observation_set in enumerate(observation_set):
+
+                residual_history = estimation_output.residual_history
+
+                fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
+                subplots_list = [ax1, ax2, ax3, ax4]
+
+                index = int(len(single_observation_set.observation_times))
+                for l in range(4):
+                    subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
+                    subplots_list[l].set_ylabel("Observation Residual")
+                    subplots_list[l].set_title("Iteration "+str(l+1))
+
+                ax3.set_xlabel("Time since J2000 [s]")
+                ax4.set_xlabel("Time since J2000 [s]")
+
+                plt.figure(figsize=(9,5))
+                plt.hist(residual_history[i*index:(i+1)*index, 0], 25)
+                plt.xlabel('Final iteration range residual')
+                plt.ylabel('Occurences [-]')
+                plt.title('Histogram of residuals on final iteration')
+
+                plt.tight_layout()
+                # plt.show()
+
+iteration_history()
+
+
+def correlations():
+
+    from matplotlib.lines import Line2D
+    import matplotlib.cm as cm
+
+    covariance_output = estimation_output.covariance
+
+    correlations = estimation_output.correlations
+    estimated_param_names = [r"$x_{1}$", r"$y_{1}$", r"$z_{1}$", r"$\dot{x}_{1}$", r"$\dot{y}_{1}$", r"$\dot{z}_{1}$",
+                            r"$x_{2}$", r"$y_{2}$", r"$z_{2}$", r"$\dot{x}_{2}$", r"$\dot{y}_{2}$", r"$\dot{z}_{2}$"]
+
+
+    fig, ax = plt.subplots(1, 1, figsize=(9, 7))
+
+    im = ax.imshow(correlations, cmap=cm.RdYlBu_r, vmin=-1, vmax=1)
+
+    ax.set_xticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
+    ax.set_yticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
+
+    # add numbers to each of the boxes
+    for i in range(len(estimated_param_names)):
+        for j in range(len(estimated_param_names)):
+            text = ax.text(
+                j, i, round(correlations[i, j], 2), ha="center", va="center", color="black"
+            )
+
+    cb = plt.colorbar(im)
+
+    ax.set_xlabel("Estimated Parameter")
+    ax.set_ylabel("Estimated Parameter")
+    fig.suptitle(f"Correlations for estimated parameters for LPF and LUMIO")
+    fig.set_tight_layout(True)
+    plt.show()
+
+
+correlations()

@@ -1,6 +1,5 @@
 # General imports
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 import sys
 import scipy as sp
@@ -9,7 +8,7 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 # Own
-from dynamic_models import NavigationSimulator, PlotNavigationResults
+import NavigationSimulator
 from tests import utils
 
 class OptimizationModel():
@@ -42,15 +41,12 @@ class OptimizationModel():
             self.observation_windows.append(window)
 
         self.vec_len = len(self.skm_epochs)-1
-
         self.initial_design_vector = self.od_duration*np.ones(self.vec_len)
-
         self.design_vector_bounds = list(zip(bounds[0]*np.ones(self.vec_len), bounds[-1]*np.ones(self.vec_len)))
-
         self.xk = self.initial_design_vector
 
         # optimization parmameters
-        self.factor = 2
+        self.factor = 1
         self.maxiter = 10
 
 
@@ -73,37 +69,52 @@ class OptimizationModel():
         return new_observation_windows
 
 
-    def objective_function(self, x, show_directly=False):
+    def get_adjusted_design_vector(self, x):
 
-        print("before adjustment: ", x)
-        x_old = self.xk
-        diff = np.array(x) - np.array(x_old)
+        # print("before adjustment: ", x)
+        diff = np.array(x) - np.array(self.xk)
         x = x + diff*(self.factor-1)
-        print("x_old: ", x_old)
-        print("diff: ", diff)
+        # print("self.xk: ", self.xk)
+        # print("diff: ", diff)
+
+        return x
+
+
+    def objective_function(self, x, plot_results=False, show_directly=False):
+
+        print("Start of objective calculation ===============")
+
+        x = self.get_adjusted_design_vector(x)
         observation_windows = self.get_updated_observation_windows(x)
         station_keeping_epochs = self.get_updated_skm_epochs(x)
         target_point_epochs = [self.skm_to_od_duration]
 
         print("Objective, design vector: \n", x)
-        print("Objective, observation windows: \n", observation_windows)
+        # print("Objective, observation windows: \n", observation_windows)
         # print("Objective, station keeping windows: \n", station_keeping_epochs)
         # print("Objective, target_point_epochs: \n", target_point_epochs)
 
         navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
                                                                        [self.model_type, self.model_name, self.model_number],
                                                                        [self.model_type_truth, self.model_name_truth, self.model_number_truth],
-                                                                       custom_station_keeping_epochs=station_keeping_epochs,
+                                                                       station_keeping_epochs=station_keeping_epochs,
                                                                        target_point_epochs=target_point_epochs,
                                                                        step_size=1e-2)
 
+        start_time = time.time()
         navigation_results = navigation_simulator.get_navigation_results()
+        run_time = time.time()-start_time
 
-        # navigation_simulator.plot_navigation_results(navigation_results, show_directly=show_directly)
+        if plot_results:
+            navigation_simulator.plot_navigation_results(navigation_results, show_directly=show_directly)
 
         delta_v = navigation_results[8][1]
         objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print(f"objective value at {x}: \n", delta_v, objective_value)
+        print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0], run_time)
+        print("End of objective calculation ===============")
+
+        if objective_value > 9:
+            print("OUTLIER: ", x)
 
         return objective_value
 
@@ -127,11 +138,12 @@ class OptimizationModel():
             callback.iteration += 1
 
         callback.iteration = 0
-        initial_simplex = x0
+        callback(x0)
 
         print("Design vector bounds: ", self.design_vector_bounds)
 
         # Minimize the objective function subject to constraints
+        start_time = time.time()
         result = sp.optimize.minimize(self.objective_function, x0,
                                         bounds=[(1-0.5/self.factor, 1+0.5/self.factor) for i, bound in enumerate(self.design_vector_bounds)],
                                         method='Nelder-Mead',
@@ -139,24 +151,20 @@ class OptimizationModel():
                                                  'maxiter': self.maxiter,
                                                  "return_all": True,
                                                  'disp': True,
-                                                #  "initial_simplex": initial_simplex,
-                                                 "xatol": 0.01,
                                                  "adaptive": True
                                                  },
                                         callback=callback)
+        run_time = time.time()-start_time
 
         # Extract optimized start times
         x_optim = result.x
-        print("x_optim:", x_optim)
-
-        # plt.plot(objective_values)
-        # plt.show()
-
-        print(iterations, design_vectors, objective_values)
 
         result_dict =  {"threshold": self.threshold,
                         "skm_to_od_duration": self.skm_to_od_duration,
                         "duration": self.duration-self.mission_start_time,
+                        "factor": self.factor,
+                        "maxiter": self.maxiter,
+                        "initial_design_vector": list(self.initial_design_vector),
                         "model":
                         {"dynamic":
                             {"model_type": self.model_type,
@@ -167,13 +175,14 @@ class OptimizationModel():
                              "model_name": self.model_name_truth,
                              "model_number": self.model_number_truth}
                         },
-                        "history": {iteration:
-                                        {"design_vector": list(design_vectors[iteration]),
-                                         "objective_function": objective_values[iteration]}
-                                    for iteration in iterations},
-                        "optim": {"x_optim": list(x_optim),
-                                  "x_observation_windows": self.get_updated_observation_windows(x_optim),
-                                  "x_skm_epochs": self.get_updated_skm_epochs(x_optim)}
+                        "history": {"design_vector": {iteration: list(design_vectors[iteration]) for iteration in iterations},
+                                    "objective_value": {iteration: objective_values[iteration] for iteration in iterations}},
+                        "final_result": {"x_optim": list(x_optim),
+                                        "observation_windows": self.get_updated_observation_windows(x_optim),
+                                        "skm_epochs": self.get_updated_skm_epochs(x_optim),
+                                        "approx_annual_deltav": objective_values[-1]*365/(self.duration-self.mission_start_time),
+                                        "reduction_percentage": (objective_values[-1]-objective_values[0])/objective_values[0]*100,
+                                        "run_time": run_time}
                         }
 
         return result_dict

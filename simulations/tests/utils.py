@@ -12,9 +12,9 @@ import inspect
 from tudatpy.kernel.astro import time_conversion
 
 # Own
-from src.dynamic_models import Interpolator
-from src.dynamic_models.full_fidelity.full_fidelity import *
-from src.estimation_models import estimation_model
+from src import Interpolator
+# from src.dynamic_models.FF.TRUTH import *
+from src.estimation_models import EstimationModel
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -22,7 +22,7 @@ parent_dir = os.path.dirname(os.path.dirname(__file__))
 def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_initial_state=None, custom_propagation_time=None):
 
     if custom_model_dict is None:
-        custom_model_dict = {"low_fidelity": ["three_body_problem"], "high_fidelity": ["point_mass", "point_mass_srp", "spherical_harmonics", "spherical_harmonics_srp"], "full_fidelity": ["full_fidelity"]}
+        custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["TRUTH"]}
     else:
         custom_model_dict = custom_model_dict
 
@@ -42,7 +42,7 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
                     module_path = f'{package_module_path}.{os.path.splitext(file_name)[0]}'
                     module = __import__(module_path, fromlist=[file_name])
 
-                    if package_type == "low_fidelity":
+                    if package_type == "LF":
                         DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
                     else:
                         DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
@@ -91,13 +91,13 @@ def get_estimation_model_objects(dynamic_model_objects,
                 # for dynamic_model in dynamic_models:
                 #     simuat
                 # print("been here", dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
-                truth_model = full_fidelity.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
+                truth_model = TRUTH.HighFidelityDynamicModel(dynamic_models[0].simulation_start_epoch_MJD, dynamic_models[0].propagation_time)
             else:
                 truth_model = custom_truth_model
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.propagation_time)
                 # print(f"VALUE IN UTILS {truth_model}: \n", truth_model.custom_propagation_time)
 
-            submodels = [estimation_model.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_estimation_error=initial_estimation_error) for dynamic_model in dynamic_models]
+            submodels = [EstimationModel.EstimationModel(dynamic_model, truth_model, apriori_covariance=apriori_covariance, initial_estimation_error=initial_estimation_error) for dynamic_model in dynamic_models]
 
             submodels_dict[package_name] = submodels
         estimation_model_objects[package_type] = submodels_dict
@@ -107,30 +107,30 @@ def get_estimation_model_objects(dynamic_model_objects,
     return estimation_model_objects
 
 
-def save_figures_to_folder(figs=[], labels=[], save_to_report=True, use_with_pytest=True):
+# def save_figures_to_folder(figs=[], labels=[], save_to_report=True, use_with_pytest=True):
 
-    extras = []
-    folder_name = inspect.currentframe().f_back.f_code.co_name
+#     extras = []
+#     folder_name = inspect.currentframe().f_back.f_code.co_name
 
-    base_folder = "figures"
-    if not os.path.exists(base_folder):
-        os.makedirs(base_folder, exist_ok=True)
+#     base_folder = "figures"
+#     if not os.path.exists(base_folder):
+#         os.makedirs(base_folder, exist_ok=True)
 
-    figure_folder = os.path.join(base_folder, folder_name)
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder, exist_ok=True)
+#     figure_folder = os.path.join(base_folder, folder_name)
+#     if not os.path.exists(figure_folder):
+#         os.makedirs(figure_folder, exist_ok=True)
 
-    for i, fig in enumerate(figs):
-        base_string = "_".join([str(label) for label in labels])
-        if save_to_report:
-            file_name = f"fig{i+1}_{base_string}.png"
-        else:
-            file_name = f"fig_3d{i+1}_{base_string}.png"
-        figure_path = os.path.join(figure_folder, file_name)
-        fig.savefig(figure_path)
-        if save_to_report:
-            if use_with_pytest:
-                extras.append(pytest_html.extras.png(figure_path))
+#     for i, fig in enumerate(figs):
+#         base_string = "_".join([str(label) for label in labels])
+#         if save_to_report:
+#             file_name = f"fig{i+1}_{base_string}.png"
+#         else:
+#             file_name = f"fig_3d{i+1}_{base_string}.png"
+#         figure_path = os.path.join(figure_folder, file_name)
+#         fig.savefig(figure_path)
+#         if save_to_report:
+#             if use_with_pytest:
+#                 extras.append(pytest_html.extras.png(figure_path))
 
 
 def get_dynamic_model_results(simulation_start_epoch_MJD,
@@ -243,10 +243,17 @@ def get_estimation_model_results(dynamic_model_objects,
                 if custom_observation_step_size_range is not None:
                     estimation_model.observation_step_size_range = custom_observation_step_size_range
 
+                # print("esimationmode", estimation_model)
                 # Solve the results of the estimation arc and save to dictionary
+                # start_time = time.time()
+                # results_list = list(estimation_model.get_estimation_results())
+                # results_list.append(time.time()-start_time)
+                # estimation_model_objects_results[model_type][model_name][i] = results_list
+
+                print("start estimation")
                 start_time = time.time()
-                results_list = list(estimation_model.get_estimation_results())
-                results_list.append(time.time()-start_time)
+                results_list = estimation_model.get_estimation_results()
+                print("estimation time: ", time.time()-start_time)
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 
     # Selectic only specific estimation model outputs to save to the dictionary
@@ -332,34 +339,38 @@ def get_max_depth(dictionary):
         return 0
 
 
-def save_dicts_to_folder(dicts=[], labels=[], folder_name='data'):
+def save_dicts_to_folder(dicts=[], labels=[], custom_sub_folder_name=None, folder_name='data'):
 
     # Get the frame of the caller
     caller_frame = inspect.stack()[1]
     file_path = caller_frame.filename
     file_path = os.path.dirname(file_path)
 
-    figure_folder = os.path.join(file_path, folder_name)
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder, exist_ok=True)
+    dict_folder = os.path.join(file_path, folder_name)
+    if not os.path.exists(dict_folder):
+        os.makedirs(dict_folder, exist_ok=True)
 
-    sub_figure_folder_name = inspect.currentframe().f_back.f_code.co_name
-    sub_figure_folder = os.path.join(figure_folder, sub_figure_folder_name)
-    if not os.path.exists(sub_figure_folder):
-        os.makedirs(sub_figure_folder, exist_ok=True)
+    if custom_sub_folder_name is None:
+        sub_folder_name = inspect.currentframe().f_back.f_code.co_name
+    else:
+        sub_folder_name = custom_sub_folder_name
+
+    sub_folder = os.path.join(dict_folder, sub_folder_name)
+    if not os.path.exists(sub_folder):
+        os.makedirs(sub_folder, exist_ok=True)
 
     for i, dict in enumerate(dicts):
         if len(dicts) != len(labels):
             file_name = f"dict_{i}.json"
         else:
             file_name = f"{labels[i]}.json"
-        path = os.path.join(sub_figure_folder, file_name)
+        path = os.path.join(sub_folder, file_name)
 
         with open(path, 'w') as json_file:
             json.dump(dict, json_file, indent=get_max_depth(dict))
 
 
-def save_figure_to_folder(figs=[], labels=[], folder_name='figures'):
+def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folder_name='figures'):
 
     # Get the frame of the caller
     caller_frame = inspect.stack()[1]
@@ -370,8 +381,12 @@ def save_figure_to_folder(figs=[], labels=[], folder_name='figures'):
     if not os.path.exists(figure_folder):
         os.makedirs(figure_folder, exist_ok=True)
 
-    sub_figure_folder_name = inspect.currentframe().f_back.f_code.co_name
-    sub_figure_folder = os.path.join(figure_folder, sub_figure_folder_name)
+    if custom_sub_folder_name is None:
+        sub_folder_name = inspect.currentframe().f_back.f_code.co_name
+    else:
+        sub_folder_name = custom_sub_folder_name
+
+    sub_figure_folder = os.path.join(figure_folder, sub_folder_name)
     if not os.path.exists(sub_figure_folder):
         os.makedirs(sub_figure_folder, exist_ok=True)
 
@@ -384,27 +399,28 @@ def save_figure_to_folder(figs=[], labels=[], folder_name='figures'):
         fig.savefig(figure_path)
 
 
-def get_monte_carlo_stats_dict(data_dict):
+# def get_monte_carlo_stats_dict(data_dict):
 
-    # Initialize dictionary to store mean and standard deviation for each value
-    stats = {}
-    for key, value in data_dict.items():
-        if isinstance(value, dict):
-            stats[key] = get_monte_carlo_stats_dict(value)
-        elif isinstance(value, list):
-            mean_value = np.mean(value, axis=0)
-            std_dev_value = np.std(value, axis=0)
-            if isinstance(mean_value, np.ndarray):
-                mean_value = list(mean_value)
-            if isinstance(std_dev_value, np.ndarray):
-                std_dev_value = list(std_dev_value)
-            stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
-        else:
-            stats[key] = value
+#     # Initialize dictionary to store mean and standard deviation for each value
+#     stats = {}
+#     for key, value in data_dict.items():
+#         if isinstance(value, dict):
+#             stats[key] = get_monte_carlo_stats_dict(value)
+#         elif isinstance(value, list):
+#             mean_value = np.mean(value, axis=0)
+#             std_dev_value = np.std(value, axis=0)
+#             if isinstance(mean_value, np.ndarray):
+#                 mean_value = list(mean_value)
+#             if isinstance(std_dev_value, np.ndarray):
+#                 std_dev_value = list(std_dev_value)
+#             stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
+#         else:
+#             stats[key] = value
 
-    return stats
+#     return stats
 
 
-# Commonly used parameters
-synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-                                  1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+# # Commonly used parameters
+# synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
+#                                   1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
+
