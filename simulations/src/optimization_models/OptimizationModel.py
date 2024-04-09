@@ -71,11 +71,8 @@ class OptimizationModel():
 
     def get_adjusted_design_vector(self, x):
 
-        # print("before adjustment: ", x)
         diff = np.array(x) - np.array(self.xk)
         x = x + diff*(self.factor-1)
-        # print("self.xk: ", self.xk)
-        # print("diff: ", diff)
 
         return x
 
@@ -90,9 +87,9 @@ class OptimizationModel():
         target_point_epochs = [self.skm_to_od_duration]
 
         print("Objective, design vector: \n", x)
-        # print("Objective, observation windows: \n", observation_windows)
-        # print("Objective, station keeping windows: \n", station_keeping_epochs)
-        # print("Objective, target_point_epochs: \n", target_point_epochs)
+        print("Objective, observation windows: \n", observation_windows)
+        print("Objective, station keeping windows: \n", station_keeping_epochs)
+        print("Objective, target_point_epochs: \n", target_point_epochs)
 
         navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
                                                                        [self.model_type, self.model_name, self.model_number],
@@ -113,8 +110,8 @@ class OptimizationModel():
         print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0], run_time)
         print("End of objective calculation ===============")
 
-        if objective_value > 9:
-            print("OUTLIER: ", x)
+        # if objective_value > 9:
+        #     print("OUTLIER: ", x)
 
         return objective_value
 
@@ -124,6 +121,7 @@ class OptimizationModel():
         # Initial guess for the design vector
         x0 = self.initial_design_vector
         print("Initial design vector: \n", x0)
+        # x0 = np.array([1.5, 1.5, 1.5, 1.5, 1.5, 1.5])
 
         # Define a callback function to record iteration history
         iterations = []

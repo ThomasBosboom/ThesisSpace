@@ -21,7 +21,7 @@ for _ in range(2):
 # Own
 import NoiseDataClass
 
-# np.random.seed(0)
+np.random.seed(0)
 
 class EstimationModel:
 

@@ -82,7 +82,7 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
     elif body == "moon":
         state_history = state_history[1]
 
-    # Example: User-defined epoch for interpolation
+    # User-defined epoch for interpolation
     user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
         time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))+69.1826417446136475
     user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
@@ -97,34 +97,19 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
     interp_func = interp1d(epochs, state_vectors, axis=0, kind=interpolation_kind, fill_value='extrapolate')
     interpolated_state = interp_func(user_start_epoch)
 
-    # print("amounts reference_data: ", (user_end_epoch+step_size*constants.JULIAN_DAY-user_start_epoch)/step_size)
     interpolated_states = np.zeros((1,6))
     epochs = np.arange(user_start_epoch, user_end_epoch+step_size*constants.JULIAN_DAY, step_size*constants.JULIAN_DAY)
-    # print("reference_data before: ", np.shape(epochs), user_start_epoch, user_end_epoch, step_size*constants.JULIAN_DAY)
     i = 0
     for epoch in epochs:
         interpolated_states = np.vstack((interpolated_states, interp_func(epoch)))
         i += 1
-        # print("interpolated_states shape: ", np.shape(interpolated_states))
     interpolated_states = np.delete(interpolated_states, 0, 0)
-    # print("interpolated_states shape: ", np.shape(interpolated_states))
-
-
-    # print("reference_data after: ", np.shape(interpolated_states))
 
     # Create a dictionary with epochs as keys and vectors as values
     data_dict = {epoch: vector for epoch, vector in zip(epochs, interpolated_states) \
                     if epoch <= user_end_epoch \
                         and epoch >= user_start_epoch}
 
-    # data_dict = {epoch: vector for epoch, vector in zip(epochs, interpolated_states) \
-    #                 if epoch-step_size*constants.JULIAN_DAY <= user_end_epoch \
-    #                     and epoch >= user_start_epoch}
-
-    # print("reference_data: ", np.shape(np.vstack(list(data_dict.values()))))
-    # print("epoch comparison start: ", epochs[0], user_start_epoch)
-    # print("epoch comparison end: ", epochs[-1], user_end_epoch)
-    # print("==========")
     if get_dict == False:
         if get_full_history == True:
             if get_epoch_in_array == True:
@@ -138,17 +123,19 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
         return {user_start_epoch: interpolated_states[0]}
 
 
+# epoch1 = 60397.0
+# step_size = 0.001
+# ref1 = np.concatenate((get_reference_state_history(epoch1, step_size, satellite="LPF", get_dict=False, get_full_history=False, get_epoch_in_array=True),
+# get_reference_state_history(epoch1, step_size, satellite="LUMIO", get_dict=False, get_full_history=False, get_epoch_in_array=True)))
 
-# print(get_reference_state_history(60390.00, 0.05, satellite="LPF", get_dict=False, get_full_history=True, get_epoch_in_array=True))
-# print(get_reference_state_history(60390.00, 0.05, satellite="LUMIO", get_dict=False, get_full_history=True, get_epoch_in_array=True))
-# # print(get_reference_state_history(60390.00, 5, satellite="LUMIO", get_dict=False, get_full_history=False))
-# states = get_reference_state_history(60390.00, 28, satellite="LUMIO", body="moon", get_dict=False, get_full_history=True)
-# import matplotlib.pyplot as plt
-# ax = plt.figure().add_subplot(projection='3d')
-# plt.plot(states[:,0], states[:,1], states[:,2])
-# # plt.plot(initial_states[:,6], initial_states[:,7], initial_states[:,8])
-# # plt.plot(state_history_moon[:,1], state_history_moon[:,2], state_history_moon[:,3])
-# plt.show()
+# # print(ref1)
+
+# epoch2 = 60397.01
+# ref2 = np.concatenate((get_reference_state_history(epoch2, step_size, satellite="LPF", get_dict=False, get_full_history=False, get_epoch_in_array=True),
+# get_reference_state_history(epoch2, step_size, satellite="LUMIO", get_dict=False, get_full_history=False, get_epoch_in_array=True)))
+
+# print("diff: ", ref1-ref2)
+
 
 
 def get_state_history_richardson(dc_corrected=False):

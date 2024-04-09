@@ -894,34 +894,606 @@ print("State in rotating frame:", rotating_state)
 
 # plt.show()
 
+# # Define the starting and ending keys
+# start_key = 60390
+# end_key = 60418
+
+# # Define the step size for each key range
+# skm_to_od_duration = 3
+# threshold = 3
+# od_duration = 1
+
+# # Generate the list of tuples representing the ranges of keys
+# key_ranges = []
+# last_key = start_key + threshold
+# for key in range(start_key, end_key, threshold):
+#     if key == start_key:
+#         key_ranges.append((key, key + threshold))
+#     else:
+#         key_ranges.append((last_key+skm_to_od_duration, last_key + skm_to_od_duration + od_duration))
+#         last_key += skm_to_od_duration + od_duration
+
+# print(key_ranges)
+
+
 
 import numpy as np
+
+# means = {}
+# # for num_run in range(100):
+
+# #     # Generate random variations
+# #     design_vector = np.random.normal(loc=1, scale=0.3, size=(1,10))
+# #     print(design_vector)
+# #     means[num_run] = design_vector
+
+# # print(means)
+
+
+# dynamic_model_list = ["HF", "PM", 0]
+# truth_model_list = ["HF", "PM", 0]
+# duration = 28
+# skm_to_od_duration = 3
+# threshold = 3
+# od_duration = 1
+# num_runs = 3
+# mean = od_duration
+# std_dev = 0.3
+# factors = [0.2, 0.5, 1.3]
+
+
+# np.random.seed(0)
+# for i in range(10):
+
+#     # Generate a vector with OD durations
+#     od_duration = np.random.normal(loc=1, scale=0.5, size=(20))
+#     start_epoch = 60390
+#     epoch = start_epoch + threshold + skm_to_od_duration + od_duration[0]
+#     skm_epochs = []
+#     i = 1
+#     while True:
+#         if epoch < start_epoch+duration:
+#             skm_epochs.append(epoch)
+#             epoch += skm_to_od_duration+od_duration[i]
+#         else:
+#             design_vector = np.ones(np.shape(skm_epochs))
+#             break
+#         i += 1
+
+#     # Extract observation windows
+#     observation_windows = [(start_epoch, start_epoch+threshold)]
+#     for i, skm_epoch in enumerate(skm_epochs):
+#         observation_windows.append((skm_epoch-od_duration[i], skm_epoch))
+
+#     print(design_vector)
+#     print(skm_epochs)
+#     print(observation_windows)import matplotlib.pyplot as plt
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
-# Generate some random data
-np.random.seed(0)
-x = np.random.randn(100)
-y = np.random.randn(100)
-z = np.random.randn(100)
+# Your data
+data = {
+         "0": 2.1903887228218757,
+         "1": 2.0446515105663163,
+         "2": 2.0675536395140153,
+         "3": 2.001580919753116,
+         "4": 1.9500991019574767,
+         "5": 1.9483660154209268,
+         "6": 1.8646913778530672,
+         "7": 1.905829697512337,
+         "8": 1.8307904809354973,
+         "9": 1.8257992552690268,
+         "10": 1.80761174118607,
+         "11": 1.7907643564792548,
+         "12": 1.7455211732509834,
+         "13": 1.6986275439575023,
+         "14": 1.6748493673144955,
+         "15": 1.6867387199075095,
+         "16": 1.6270213497183006,
+         "17": 1.6406894828975271,
+         "18": 1.5778766268099353,
+         "19": 1.5354745601173783
+      }
 
-# Create the 3D plot
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection='3d')
+# Extract keys and values
+keys = list(data.keys())
+values = list(data.values())
 
-# Plot the 3D scatter plot
-ax.scatter(x, y, z, c='b', marker='o')
-
-# Plot projections on each plane
-ax.plot([0]*len(x), y, z, c='r', linestyle='--')  # Projection on the yz-plane
-ax.plot(x, [0]*len(y), z, c='g', linestyle='--')  # Projection on the xz-plane
-ax.plot(x, y, [0]*len(z), c='m', linestyle='--')  # Projection on the xy-plane
-
-# Set labels and title
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
-ax.set_title('3D Scatter Plot with Projections')
-
+# Plot
+plt.figure(figsize=(10, 6))
+plt.bar(keys, values, color='skyblue')
+plt.xlabel('Keys')
+plt.ylabel('Values')
+plt.title('Values for Keys')
+plt.xticks(rotation=45)
 plt.show()
 
+
+import matplotlib.pyplot as plt
+
+data = {
+    "PM": {
+      "1": {
+         "0.2": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.09363680412393569
+         ],
+         "0.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.06070606729467502
+         ],
+         "1": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.29148474734381485
+         ],
+         "1.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            2.2338167400674473
+         ],
+         "1.8": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            1.1856268537018821
+         ]
+      },
+      "1.5": {
+         "0.2": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.06464035065645747
+         ],
+         "0.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.057429190063038815
+         ],
+         "1": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.08102001269334197
+         ],
+         "1.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.34960563340008766
+         ],
+         "1.8": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.5787290416205851
+         ]
+      },
+      "2": {
+         "0.2": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.043392411921006444
+         ],
+         "0.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.05641640582766283
+         ],
+         "1": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.09413647706872943
+         ],
+         "1.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.08120138788504139
+         ],
+         "1.8": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.18611536663103295
+         ]
+      },
+      "2.5": {
+         "0.2": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.06920252467181323
+         ],
+         "0.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.0872853890606162
+         ],
+         "1": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.08913143901727628
+         ],
+         "1.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.0785354839395427
+         ],
+         "1.8": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.07442836719462843
+         ]
+      },
+      "3": {
+         "0.2": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.42725689876853723
+         ],
+         "0.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.14468811342111085
+         ],
+         "1": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.28498131485602735
+         ],
+         "1.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.34981105873623486
+         ],
+         "1.8": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.6207681049704541
+         ]
+      },
+      "3.5": {
+         "0.2": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.10694577162797846
+         ],
+         "0.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.3780936029313599
+         ],
+         "1": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.6597606112338089
+         ],
+         "1.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.8294634472113437
+         ],
+         "1.8": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            1.3772817324108158
+         ]
+      },
+      "4": {
+         "0.2": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            0.07384715934016194
+         ],
+         "0.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            2.7389314069450394
+         ],
+         "1": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            1.2647237553377164
+         ],
+         "1.5": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            1.7883406536806423
+         ],
+         "1.8": [
+            [
+               1.0,
+               1.0,
+               1.0,
+               1.0
+            ],
+            1.9020630251033919
+         ]
+      }
+   }
+
+}
+
+# Extracting data for plotting
+subkeys = ["0.2", "0.5", "1", "1.5", "1.8"]
+values = {subkey: [data["PM"][key][subkey][1] for key in data["PM"]] for subkey in subkeys}
+
+# Plotting
+plt.figure(figsize=(10, 3))
+for i, subkey in enumerate(subkeys):
+    plt.bar([j + i * 0.1 for j in range(len(values[subkey]))], values[subkey], width=0.1, label=subkey)
+
+plt.xlabel('Subkey')
+plt.ylabel('Values')
+plt.title('Values for Subkeys under PM')
+plt.xticks([i + 0.2 for i in range(len(data["PM"]))], data["PM"].keys())
+plt.yscale('log')
+plt.legend(title='Subsubkey', bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+plt.grid(alpha=0.3)
+# plt.show()
+
+
+observation_windows = [(60390, 60393), (60396, 60397), (60400, 60401), (60404, 60405), (60408, 60409), (60412, 60413), (60416, 60417), (60420, 60421)]
+
+target_point_epochs = [observation_windows[1][0]-observation_windows[0][1]]
+print(target_point_epochs)

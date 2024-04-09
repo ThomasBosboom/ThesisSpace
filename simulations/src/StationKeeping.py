@@ -17,24 +17,26 @@ import reference_data, Interpolator
 
 class StationKeeping:
 
-    def __init__(self, dynamic_model_object, custom_initial_state=None, custom_propagation_time=14, step_size=0.001):
+    def __init__(self, dynamic_model_object, custom_initial_state=None, custom_propagation_time=14, step_size=1e-4):
+
+        print("START STATION KEEPING ======")
 
         self.dynamic_model_object = dynamic_model_object
         self.dynamic_model_object.custom_initial_state = custom_initial_state
         self.dynamic_model_object.custom_propagation_time = custom_propagation_time
         self.step_size = step_size
 
-        # print("START EPOCH IN STATIONKEEPING: ", self.dynamic_model_object.simulation_start_epoch_MJD)
+        # print("custom_initial_state: ", self.dynamic_model_object.custom_initial_state)
 
 
     def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch=0):
 
         # Propagate the results of the dynamic model to generate target points
-        # print("custom_initial_state at the start:", self.dynamic_model_object.custom_initial_state)
+
 
         # print("INITIAL TIME IN STATTION KEEPING: ", self.dynamic_model_object.simulation_start_epoch_MJD)
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-            Interpolator.Interpolator(epoch_in_MJD=False, step_size=self.step_size).get_propagation_results(self.dynamic_model_object,
+            Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(self.dynamic_model_object,
                                                                                                             custom_initial_state=self.dynamic_model_object.custom_initial_state,
                                                                                                             custom_propagation_time=self.dynamic_model_object.custom_propagation_time)
 
@@ -52,13 +54,14 @@ class StationKeeping:
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
 
-        # print(np.shape(state_deviation_history))
-        # fig = plt.figure()
-        # plt.plot(state_deviation_history[:,0:3])
-        # plt.plot(state_deviation_history[:,6:9])
-        # plt.plot(state_history[:,6:9])
-        # plt.plot(reference_state_history[:,6:9])
-        # plt.show()
+        # print("step size: ", self.step_size)
+        # print("start epoch: \n", self.dynamic_model_object.simulation_start_epoch_MJD)
+        # print("propagation time: \n", self.dynamic_model_object.custom_propagation_time)
+        # print("custom_initial_state:", self.dynamic_model_object.custom_initial_state)
+        # print("reference state at start epoch: \n" , reference_state_history[0, :])
+        # print("state at start epoch: \n" , state_history[0, :])
+        # print("deviation from reference: \n" , state_deviation_history[0, :])
+        # print("initial abs diff deviation: \n LPF: " , np.linalg.norm(state_deviation_history[0, 0:3]), "LUMIO: ", np.linalg.norm(state_deviation_history[0, 6:9]))
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)
@@ -105,6 +108,8 @@ class StationKeeping:
 
         state_history[i_tv, 9:12] += delta_v
 
+        print("END STATION KEEPING ======")
+
         return delta_v
 
 
@@ -125,7 +130,7 @@ class StationKeeping:
 # import time
 
 # # lists = [[7, [21]], [7, [21, 28]]]
-# lists = [[1, [3]], [1, [4]], [1, [5]], [1, [3, 4, 5]]]
+# lists = [[0, [0]]]
 # for i, list1 in enumerate(lists):
 #     print(list1)
 #     start_time = time.time()
@@ -143,3 +148,4 @@ class StationKeeping:
 
 
 
+#

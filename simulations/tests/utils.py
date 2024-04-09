@@ -250,10 +250,10 @@ def get_estimation_model_results(dynamic_model_objects,
                 # results_list.append(time.time()-start_time)
                 # estimation_model_objects_results[model_type][model_name][i] = results_list
 
-                print("start estimation")
-                start_time = time.time()
+                # print("start estimation")
+                # start_time = time.time()
                 results_list = estimation_model.get_estimation_results()
-                print("estimation time: ", time.time()-start_time)
+                # print("estimation time: ", time.time()-start_time)
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 
     # Selectic only specific estimation model outputs to save to the dictionary
