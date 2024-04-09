@@ -19,7 +19,7 @@ class StationKeeping:
 
     def __init__(self, dynamic_model_object, custom_initial_state=None, custom_propagation_time=14, step_size=1e-4):
 
-        print("START STATION KEEPING ======")
+        # print("START STATION KEEPING ======")
 
         self.dynamic_model_object = dynamic_model_object
         self.dynamic_model_object.custom_initial_state = custom_initial_state
@@ -108,7 +108,7 @@ class StationKeeping:
 
         state_history[i_tv, 9:12] += delta_v
 
-        print("END STATION KEEPING ======")
+        # print("END STATION KEEPING ======")
 
         return delta_v
 

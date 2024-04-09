@@ -14,7 +14,7 @@ class NoiseDataClass:
 
     def __init__(self):
 
-        np.random.seed(0)
+        # np.random.seed(0)
 
         # Measurement noise
         self.noise_range = 2.98e0 #102.44/50

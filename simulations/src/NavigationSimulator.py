@@ -23,7 +23,7 @@ from tudatpy.kernel import constants
 
 class NavigationSimulator():
 
-    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=1e-2, station_keeping_epochs=[], target_point_epochs=[3]):
+    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=1e-2, station_keeping_epochs=[], target_point_epochs=[3], custom_station_keeping_error=None):
 
         # Miscellaneous
         self.step_size = step_size
@@ -40,9 +40,8 @@ class NavigationSimulator():
 
         # Defining mission start
         self.mission_start_time = 60390
-        # Station keeping epochs
         self.station_keeping_epochs = station_keeping_epochs
-        self.target_point_epochs = target_point_epochs
+        self.target_point_epochs = [3]
 
         # Initial state and uncertainty parameters
         noise_data = NoiseDataClass.NoiseDataClass()
@@ -50,6 +49,9 @@ class NavigationSimulator():
         self.initial_estimation_error = noise_data.initial_estimation_error
         self.apriori_covariance = noise_data.apriori_covariance
         self.orbit_insertion_error = noise_data.orbit_insertion_error
+
+        if custom_station_keeping_error is not None:
+            self.station_keeping_error = custom_station_keeping_error
 
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(step_size).rstrip('0')
@@ -67,46 +69,12 @@ class NavigationSimulator():
         self.times = list(set(self.times))
         self.times = sorted(self.times)
 
-        # print("observation windowL ", self.observation_windows)
         self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
-        # print("navigation_arc_duration: ", self.navigation_arc_durations)
 
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
         print(self.estimation_arc_durations)
 
         print(self.times)
-
-    # def get_Gamma(self, delta_t):
-
-    #     # Construct the submatrices
-    #     submatrix1 = (delta_t**2 / 2) * np.eye(3)
-    #     submatrix2 = delta_t * np.eye(3)
-
-    #     # Concatenate the submatrices to form Gamma
-    #     Gamma = np.block([[submatrix1, np.zeros((3, 3))],
-    #                     [submatrix2, np.zeros((3, 3))],
-    #                     [np.zeros((3, 3)), submatrix1],
-    #                     [np.zeros((3, 3)), submatrix2]])
-
-    #     # print("Gamma: ", Gamma)
-
-    #     return Gamma
-
-
-    # def get_process_noise_matrix(self, delta_t, Q_c1, Q_c2):
-
-    #     Gamma = self.get_Gamma(delta_t)
-
-    #     # Q_c_diag = Q_c*np.eye(6)
-    #     # result = Gamma @ Q_c_diag @ Gamma.T
-
-    #     Q_c_diag = np.block([[Q_c1*np.eye(3), np.zeros((3, 3))], [np.zeros((3, 3)), Q_c2*np.eye(3)]])
-    #     result = Gamma @ Q_c_diag @ Gamma.T
-
-    #     # print("Result: ", result)
-
-    #     return result
-
 
 
     def perform_navigation(self):
@@ -195,13 +163,9 @@ class NavigationSimulator():
             #### LOOP FOR ESTIMATION ARCS ################################
             ##############################################################
             estimation_arc_activated = False
-            # print("TIME: ", time, "batch start time: ", self.batch_start_times)
             if time in self.batch_start_times:
-            # if time in np.round(self.batch_start_times, self.decimal_places):
 
                 estimation_arc_activated = True
-                # observation_window = self.observation_windows[estimation_arc]
-                # estimation_arc_duration = np.around(observation_window[1]-observation_window[0], self.decimal_places)
                 estimation_arc_duration = self.estimation_arc_durations[estimation_arc]
 
 
@@ -217,7 +181,6 @@ class NavigationSimulator():
 
                 truth_model.custom_propagation_time = estimation_arc_duration
 
-                # print(f"ESTIMATION AT {time}")
                 # Obtain estimation results for given batch and extract results of the estimation arc
                 estimation_model_results = utils.get_estimation_model_results({self.model_type: {self.model_name: [dynamic_model]}},
                                                                                     get_only_first=False,
@@ -239,10 +202,6 @@ class NavigationSimulator():
                                                                                                     custom_initial_state=parameter_history[:, best_iteration],
                                                                                                     custom_propagation_time=estimation_arc_duration,
                                                                                                     solve_variational_equations=True)
-
-                # print("Difference estimation iterations \n", parameter_history[:, 0] - parameter_history[:, best_iteration])
-                # print("state_history_final INITIAL \n", state_history_final[0,:])
-                # print("state_history_final FINAL \n", state_history_final[-1,:])
 
                 propagated_covariance_final = dict()
                 propagated_formal_errors_final = dict()
@@ -266,24 +225,9 @@ class NavigationSimulator():
                 self.custom_initial_state = state_history_final[-1,:]
                 self.initial_estimation_error = state_history_final[-1,:]-state_history_truth[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_final.values()))[-1]
-                # print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[0,:]-state_history_initial[0,:])
-                # print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[-1,:]-state_history_initial[-1,:])
             else:
                 self.custom_initial_state = state_history_initial[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_initial.values()))[-1]
-
-            # Include artificial process noise in case truth is not equal to the dynamic model
-            process_noise = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e-20
-            # process_noise = np.random.normal(scale=process_noise, size=len(process_noise))
-
-            if estimation_arc_activated:
-                delta_t = navigation_arc_duration*constants.JULIAN_DAY
-                # if self.model_name != self.model_name_truth:
-                #     # if np.all(["srp" in s1 and "srp" in s2])
-                #     self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
-
-                self.apriori_covariance += np.outer(process_noise, process_noise)
-
 
             # Save histories for reading out later
             full_estimation_error_dict.update(dict(zip(epochs, state_history_initial-state_history_truth)))
@@ -308,7 +252,7 @@ class NavigationSimulator():
             if self.times[navigation_arc+1] in self.station_keeping_epochs:
 
                 params = [0, self.target_point_epochs]
-                print("PARAMS: ", params)
+                # print("PARAMS: ", params)
                 dynamic_model.simulation_start_epoch_MJD = self.times[navigation_arc+1]
                 # print("dynamic_model.simulation_start_epoch_MJD:", dynamic_model.simulation_start_epoch_MJD)
                 station_keeping = StationKeeping.StationKeeping(dynamic_model, custom_initial_state=self.custom_initial_state, custom_propagation_time=max(params[1]), step_size=self.step_size)
@@ -316,9 +260,16 @@ class NavigationSimulator():
 
                 # Generate random noise to simulate station-keeping errors
                 if self.model_type == "HF":
-                    delta_v_noise = np.random.normal(loc=0, scale=self.station_keeping_error*np.abs(delta_v), size=delta_v.shape)
+                    # print("self.station_keeping_error: ", self.station_keeping_error)
+                    delta_v_noise_sigma = self.station_keeping_error*np.abs(delta_v)
+                    delta_v_noise = np.random.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
                     self.custom_initial_state[9:12] += delta_v
                     self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
+
+                    delta_v_noise_covariance = np.zeros(12)
+                    delta_v_noise_covariance[9:12] = delta_v_noise_sigma
+                    self.apriori_covariance += np.outer(delta_v_noise_covariance, delta_v_noise_covariance)
+                    # print(delta_v_noise_covariance)
 
                 print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
                 # print("self.custom_initial_state: ", self.custom_initial_state)

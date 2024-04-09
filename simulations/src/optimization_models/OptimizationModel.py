@@ -13,7 +13,7 @@ from tests import utils
 
 class OptimizationModel():
 
-    def __init__(self, dynamic_model_list, truth_model_list, threshold=8, duration=14, skm_to_od_duration=3, od_duration=1, bounds=(0.5, 1.5)):
+    def __init__(self, dynamic_model_list, truth_model_list, threshold=8, duration=14, skm_to_od_duration=3, od_duration=1, bounds=(0.5, 1.5), custom_station_keeping_error=None):
 
         # Specify the dynamic and truth model used for the estimation arcs
         self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
@@ -48,6 +48,9 @@ class OptimizationModel():
         # optimization parmameters
         self.factor = 1
         self.maxiter = 10
+
+        # Error parameters for SKMs
+        self.custom_station_keeping_error = custom_station_keeping_error
 
 
     def get_updated_skm_epochs(self, x):
@@ -96,6 +99,7 @@ class OptimizationModel():
                                                                        [self.model_type_truth, self.model_name_truth, self.model_number_truth],
                                                                        station_keeping_epochs=station_keeping_epochs,
                                                                        target_point_epochs=target_point_epochs,
+                                                                       custom_station_keeping_error=self.custom_station_keeping_error,
                                                                        step_size=1e-2)
 
         start_time = time.time()
@@ -163,6 +167,7 @@ class OptimizationModel():
                         "factor": self.factor,
                         "maxiter": self.maxiter,
                         "initial_design_vector": list(self.initial_design_vector),
+                        "station_keeping_noise": self.custom_station_keeping_error,
                         "model":
                         {"dynamic":
                             {"model_type": self.model_type,

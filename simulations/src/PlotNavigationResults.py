@@ -633,26 +633,9 @@ class PlotNavigationResults():
                             angle_degrees = np.degrees(angle_radians)
                             angles_dict.update({key: np.abs(angle_degrees) if np.abs(angle_degrees)<90 else (180-angle_degrees)})
 
-                        # print(angles_dict)
-
                         # Generate boolans for when treshold condition holds to generate estimation window
                         angle_to_range_dict = dict()
                         for i, state in enumerate(state_history):
-
-                            # # range_direction = np.dotrelative_state_history[0:3]
-                            # a = relative_state_history[i, 0:3]
-                            # x = np.array([state[6]-state[0], 0, 0])
-                            # y = np.array([0, state[7]-state[1], 0])
-                            # z = np.array([0, 0, state[8]-state[2]])
-                            # axes = [x, y, z]
-
-                            # angle_to_range = []
-                            # for axis in axes:
-                            #     cosine_angle = np.dot(a, axis)/(np.linalg.norm(a)*np.linalg.norm(axis))
-                            #     angle = np.arccos(cosine_angle)
-                            #     angle_to_range.append(np.degrees(angle))
-
-                            # angle_to_range_dict.update({epochs[i]: np.array(angle_to_range)})
 
                             # Define the 3D vector (replace these values with your actual vector)
                             vector = relative_state_history[i, 0:3]
@@ -667,14 +650,38 @@ class PlotNavigationResults():
                             angle_y_degrees = np.degrees(angle_y)
                             angle_z_degrees = np.degrees(angle_z)
 
-
                             angle_to_range_dict.update({epochs[i]: np.array([angle_x_degrees, angle_y_degrees, angle_z_degrees])})
 
                         # fig = plt.figure()
                         # ax[2].plot(np.stack(list(angles_dict.keys()))-self.mission_start_epoch, np.stack(list(angles_dict.values())), label="angles in degrees", color=color)
                         # plt.show()
 
-                        ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, np.stack(list(angle_to_range_dict.values())), label="angles in degrees")
+                        ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, np.stack(list(angle_to_range_dict.values())), label=[r"$\alpha$", r"$\beta$", r"$\gamma$"])
+                        ax[2].legend(loc='upper left', fontsize="small")
+
+                        states_history_LPF_moon = state_history[:, 0:3]-dependent_variables_history[:, 0:3]
+                        states_history_LUMIO_moon = state_history[:, 6:9]-dependent_variables_history[:, 0:3]
+
+                        angle_deg = []
+                        for i in range(len(epochs)):
+                            cosine_angle = np.dot(relative_state_history[i,:3], states_history_LUMIO_moon[i])/(np.linalg.norm(relative_state_history[i,:3])*np.linalg.norm(states_history_LUMIO_moon[i]))
+                            angle = np.arccos(cosine_angle)
+                            angle_deg.append(np.degrees(angle))
+
+                        # angle_deg = []
+                        # for i in range(len(epochs)):
+                        #     cosine_angle = np.dot(states_history_LPF_moon[i], states_history_LUMIO_moon[i])/(np.linalg.norm(states_history_LPF_moon[i])*np.linalg.norm(states_history_LUMIO_moon[i]))
+                        #     angle = np.arccos(cosine_angle)
+                        #     angle_deg.append(np.degrees(angle))
+
+
+                        # ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, state_history[:, 0:3]-dependent_variables_history[:, 0:3], label=[r"$\alpha$", r"$\beta$", r"$\gamma$"])
+                        # ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, angle_deg, label=[r"$\alpha$"], color="blue")
+
+                        # ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, np.linalg.norm(state_history[:, 0:3]-dependent_variables_history[:, 0:3], axis=1), label="Rel pos")
+                        # ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, np.linalg.norm(state_history[:, 3:6]-dependent_variables_history[:, 3:6], axis=1), label="Rel vel")
+
+
 
                         for j in range(len(ax)):
                             for i, gap in enumerate(self.observation_windows):
@@ -695,56 +702,15 @@ class PlotNavigationResults():
                             ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
                         ax[0].set_ylabel("Range [m]")
-                        ax[1].set_ylabel("Observation Residual [m]")
+                        ax[1].set_ylabel("Observation \n residual [m]")
+                        ax[2].set_ylabel("Angle obs. \n w.r.t J2000 [deg]")
                         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
                         ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
+
 
                         fig.suptitle(f"Intersatellite range observations \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
                         plt.tight_layout()
                         # plt.show()
-
-
-                        # fig, ax = plt.subplots(1, arc_nums, figsize=(9, 4), sharey=True)
-
-                        # for arc_num in range(arc_nums):
-
-                        #     estimation_output = results[-2][arc_num]
-                        #     # total_single_information_dict = results[-2][1]
-                        #     # total_covariance_dict = results[-2][2]
-                        #     # total_information_dict = results[-2][3]
-                        #     sorted_observation_sets = results[-2][arc_num][4]
-
-
-                        #     print(estimation_output)
-
-                        #     for i, (observable_type, information_sets) in enumerate(sorted_observation_sets.items()):
-                        #         for j, observation_set in enumerate(information_sets.values()):
-                        #             for k, single_observation_set in enumerate(observation_set):
-
-                        #                 residual_history = estimation_output.residual_history
-
-                        #                 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(9, 6))
-                        #                 subplots_list = [ax1, ax2, ax3, ax4]
-
-                        #                 index = int(len(single_observation_set.observation_times))
-                        #                 for l in range(4):
-                        #                     subplots_list[l].scatter(single_observation_set.observation_times, residual_history[i*index:(i+1)*index, l])
-                        #                     subplots_list[l].set_ylabel("Observation Residual")
-                        #                     subplots_list[l].set_title("Iteration "+str(l+1))
-
-                        #                 ax3.set_xlabel("Time since J2000 [s]")
-                        #                 ax4.set_xlabel("Time since J2000 [s]")
-
-                        #                 plt.figure(figsize=(9,5))
-                        #                 plt.hist(residual_history[i*index:(i+1)*index, -1], 25)
-                        #                 plt.xlabel('Final iteration range residual')
-                        #                 plt.ylabel('Occurences [-]')
-                        #                 plt.title('Histogram of residuals on final iteration')
-
-                        #                 plt.tight_layout()
-                        #                 plt.show()
-
-
 
 
     def plot_observability(self):
