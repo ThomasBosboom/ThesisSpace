@@ -33,7 +33,7 @@ od_duration = 1
 num_runs = 3
 od_durations = [0.2, 0.5, 1, 1.5, 1.8]
 skm_to_od_durations = [1, 1.5, 2, 2.5, 3, 3.5, 4]
-custom_station_keeping_error = 1e-2
+custom_station_keeping_error = 1e-10
 
 if run:
     navigation_results_dict = {}
@@ -92,7 +92,7 @@ if run:
     print(navigation_results_dict)
     print(delta_v_dict)
 
-    utils.save_dicts_to_folder(dicts=[delta_v_dict], labels=["delta_v_dict_constant_arc_duration"], custom_sub_folder_name=file_name)
+    utils.save_dicts_to_folder(dicts=[delta_v_dict], labels=[f"delta_v_dict_constant_arc_duration_{custom_station_keeping_error}"], custom_sub_folder_name=file_name)
 
 
 ### Run the navigation routines for varying observation windows
@@ -162,4 +162,4 @@ if run:
     print(navigation_results_dict)
     print(delta_v_dict)
 
-    utils.save_dicts_to_folder(dicts=[delta_v_dict], labels=["delta_v_dict_variable_arc_duration"], custom_sub_folder_name=file_name)
+    utils.save_dicts_to_folder(dicts=[delta_v_dict], labels=[f"delta_v_dict_variable_arc_duration_{custom_station_keeping_error}"], custom_sub_folder_name=file_name)
