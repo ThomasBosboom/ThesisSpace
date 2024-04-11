@@ -26,7 +26,7 @@ from src import NavigationSimulator, PlotNavigationResults
 dynamic_model_list = ["HF", "PM", 0]
 truth_model_list = ["HF", "PM", 0]
 duration = 28
-skm_to_od_duration = 0
+skm_to_od_duration = 3
 threshold = 3
 od_duration = 1
 custom_station_keeping_error = 1e-2
@@ -62,7 +62,7 @@ monte_carlo_results["station_keeping_error"] = custom_station_keeping_error
 monte_carlo_results["history"] = history
 monte_carlo_results["stats"] = helper_functions.get_monte_carlo_stats(history)
 
-utils.save_dicts_to_folder(dicts=[monte_carlo_results], labels=[f"num{num_runs}_err{custom_station_keeping_error}"], custom_sub_folder_name=file_name)
+utils.save_dicts_to_folder(dicts=[monte_carlo_results], labels=[f"skm{skm_to_od_duration}_num{num_runs}_err{custom_station_keeping_error}"], custom_sub_folder_name=file_name)
 
 
 
@@ -71,7 +71,7 @@ utils.save_dicts_to_folder(dicts=[monte_carlo_results], labels=[f"num{num_runs}_
 dynamic_model_list = ["HF", "PM", 0]
 truth_model_list = ["HF", "PM", 0]
 duration = 28
-skm_to_od_duration = 0
+skm_to_od_duration = 3
 threshold = 3
 od_duration = 1
 custom_station_keeping_error = 1e-10
@@ -107,14 +107,14 @@ monte_carlo_results["station_keeping_error"] = custom_station_keeping_error
 monte_carlo_results["history"] = history
 monte_carlo_results["stats"] = helper_functions.get_monte_carlo_stats(history)
 
-utils.save_dicts_to_folder(dicts=[monte_carlo_results], labels=[f"num{num_runs}_err{custom_station_keeping_error}"], custom_sub_folder_name=file_name)
+utils.save_dicts_to_folder(dicts=[monte_carlo_results], labels=[f"skm{skm_to_od_duration}_num{num_runs}_err{custom_station_keeping_error}"], custom_sub_folder_name=file_name)
 
 
 
 dynamic_model_list = ["HF", "PM", 0]
 truth_model_list = ["HF", "PM", 0]
 duration = 28
-skm_to_od_duration = 0
+skm_to_od_duration = 3
 threshold = 3
 od_duration = 1
 custom_station_keeping_error = 2e-2
@@ -150,4 +150,4 @@ monte_carlo_results["station_keeping_error"] = custom_station_keeping_error
 monte_carlo_results["history"] = history
 monte_carlo_results["stats"] = helper_functions.get_monte_carlo_stats(history)
 
-utils.save_dicts_to_folder(dicts=[monte_carlo_results], labels=[f"num{num_runs}_err{custom_station_keeping_error}"], custom_sub_folder_name=file_name)
+utils.save_dicts_to_folder(dicts=[monte_carlo_results], labels=[f"skm{skm_to_od_duration}_num{num_runs}_err{custom_station_keeping_error}"], custom_sub_folder_name=file_name)

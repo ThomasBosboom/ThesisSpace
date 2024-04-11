@@ -24,13 +24,14 @@ from src import NavigationSimulator, PlotNavigationResults
 
 ### Extract information from specific folder and run
 folder_name = "get_data_initial_navigation_routines"
+file_name = "delta_v_dict_constant_arc_duration_1e-10.json"
+# folder_name = "plot_navigation_routines"
+# file_name = "delta_v_dict_constant.json"
 folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", folder_name)
-
-file_name = "delta_v_dict_constant_arc_duration.json"
 file_path = os.path.join(folder_path, file_name)
 data = helper_functions.load_json_file(file_path)
 
-model = "PM"
+model = "PMSRP"
 # Extracting data for plotting
 subkeys = ["0.2", "0.5", "1", "1.5", "1.8"]
 values = {subkey: [data[model][key][subkey][1] for key in data[model]] for subkey in subkeys}

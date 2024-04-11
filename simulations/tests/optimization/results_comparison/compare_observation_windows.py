@@ -46,8 +46,8 @@ observation_windows_optim = [(60390, 60393), (60396.0, 60396.99264015196), (6039
 60405.02770961405), (60408.02770961405, 60408.983238073466), (60411.983238073466, 60413.0173276996), (60416.0173276996, 60417.029353446575)]
 
 ### Compare difference timing cases
-dynamic_model_list = ["HF", "PM", 0]
-truth_model_list = ["HF", "PM", 0]
+dynamic_model_list = ["HF", "PMSRP", 0]
+truth_model_list = ["HF", "PMSRP", 0]
 threshold = 3
 skm_to_od_duration = 3
 duration = 28
@@ -56,11 +56,11 @@ custom_station_keeping_error = 1e-10
 
 # Collect a series of observation window sets to compare
 observation_windows_list = []
-observation_windows_continuous = helper_functions.get_custom_observation_windows(duration, 0, threshold, od_duration)
-observation_windows_constant = helper_functions.get_custom_observation_windows(duration, 3, threshold, od_duration)
+# observation_windows_continuous = helper_functions.get_custom_observation_windows(duration, 0, threshold, od_duration)
+observation_windows_constant = helper_functions.get_custom_observation_windows(4, 0, 1, 0.1)
 # observation_windows_list.append(observation_windows_continuous)
-# observation_windows_list.append(observation_windows_constant)
-observation_windows_list.append(observation_windows_optim)
+observation_windows_list.append(observation_windows_constant)
+# observation_windows_list.append(observation_windows_optim)
 
 navigation_results_list = []
 for i, observation_windows in enumerate(observation_windows_list):
@@ -68,7 +68,6 @@ for i, observation_windows in enumerate(observation_windows_list):
     print("Running with observation windows: \n", observation_windows)
 
     station_keeping_epochs = [windows[1] for windows in observation_windows]
-    # target_point_epochs = [observation_windows[1][0]-observation_windows[0][1]]
 
     navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
                                                                     dynamic_model_list,

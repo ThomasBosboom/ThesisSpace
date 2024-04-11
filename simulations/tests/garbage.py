@@ -8,7 +8,12 @@
 # # # print(current_time_string)  # Output: "2024-03-29 14:30:00"
 
 # # # import numpy as np
-# # # import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+
+color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+print(color_cycle)
+for i in range(10):
+    print(color_cycle[i%10])
 
 # # # data = {"0": {
 # # #    "threshold": 60393,

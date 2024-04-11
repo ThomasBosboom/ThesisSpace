@@ -26,6 +26,9 @@ class SynodicToInertialHistoryConverter:
         h = m*r_norm*v_norm
         rotation_rate = h/(m*r_norm**2)
 
+        # print("Earth: ", self.dynamic_model.bodies.get("Earth").mass)
+        # print("Moon: ", self.dynamic_model.bodies.get("Moon").mass)
+
         Omega = np.array([[0, -rotation_rate, 0],[rotation_rate, 0, 0],[0, 0, 0]])
 
         # Update total transformation matrix with matrix derivative element
