@@ -13,14 +13,14 @@ from tests import utils
 
 class OptimizationModel():
 
-    def __init__(self, dynamic_model_list, truth_model_list, threshold=8, duration=14, skm_to_od_duration=3, od_duration=1, bounds=(0.5, 1.5), custom_station_keeping_error=None):
+    def __init__(self, dynamic_model_list, truth_model_list, threshold=8, duration=14, skm_to_od_duration=3, od_duration=1, bounds=(0.5, 1.5), custom_station_keeping_error=None, mission_start_time=60390):
 
         # Specify the dynamic and truth model used for the estimation arcs
         self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
         self.model_type_truth, self.model_name_truth, self.model_number_truth = truth_model_list[0], truth_model_list[1], truth_model_list[2]
 
         # Timing parameters
-        self.mission_start_time = 60390
+        self.mission_start_time = mission_start_time
         self.threshold = threshold + self.mission_start_time
         self.duration = duration + self.mission_start_time
 
@@ -102,20 +102,12 @@ class OptimizationModel():
                                                                        custom_station_keeping_error=self.custom_station_keeping_error,
                                                                        step_size=1e-2)
 
-        start_time = time.time()
-        navigation_results = navigation_simulator.get_navigation_results()
-        run_time = time.time()-start_time
-
-        if plot_results:
-            navigation_simulator.plot_navigation_results(navigation_results, show_directly=show_directly)
+        navigation_results = navigation_simulator.perform_navigation().navigation_results
 
         delta_v = navigation_results[8][1]
         objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0], run_time)
+        print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0])
         print("End of objective calculation ===============")
-
-        # if objective_value > 9:
-        #     print("OUTLIER: ", x)
 
         return objective_value
 
@@ -125,7 +117,6 @@ class OptimizationModel():
         # Initial guess for the design vector
         x0 = self.initial_design_vector
         print("Initial design vector: \n", x0)
-        # x0 = np.array([1.5, 1.5, 1.5, 1.5, 1.5, 1.5])
 
         # Define a callback function to record iteration history
         iterations = []
@@ -158,7 +149,6 @@ class OptimizationModel():
                                         callback=callback)
         run_time = time.time()-start_time
 
-        # Extract optimized start times
         x_optim = result.x
 
         result_dict =  {"threshold": self.threshold,

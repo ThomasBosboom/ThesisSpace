@@ -1,9 +1,7 @@
 # General imports
 import numpy as np
-from matplotlib import pyplot as plt
 import os
 import sys
-import copy
 
 # Tudatpy imports
 from tudatpy import util
@@ -11,17 +9,12 @@ from tudatpy.kernel import numerical_simulation
 from tudatpy.kernel.numerical_simulation import estimation, estimation_setup
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
-# sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
 file_directory = os.path.realpath(__file__)
 for _ in range(2):
     file_directory = os.path.dirname(file_directory)
     sys.path.append(file_directory)
 
-# Own
-import NoiseDataClass
-
-np.random.seed(0)
+# np.random.seed(0)
 
 class EstimationModel:
 
@@ -37,14 +30,11 @@ class EstimationModel:
 
         # Defining basis for observations
         self.bias_range = 0
-        # self.noise_range = 2.98 #102.44/50
+        self.noise_range = 2.98 #102.44/50
         self.observation_step_size_range = 600/1
         self.retransmission_delay = 0.5
         self.integration_time = 0.5
         self.time_drift_bias = 6.9e-20
-
-        noise_data = NoiseDataClass.NoiseDataClass()
-        self.noise_range = noise_data.noise_range
 
         self.maximum_iterations = 4
 

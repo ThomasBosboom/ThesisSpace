@@ -7,8 +7,8 @@ from scipy.interpolate import interp1d
 
 file_path = os.path.realpath(__file__)
 file_path = os.path.dirname(file_path)
-cut_value = 60390+100
-step_size = 0.005
+cut_value = 60390+50
+step_size = 0.01
 
 for body in ["LPF", "Moon"]:
 

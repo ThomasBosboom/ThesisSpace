@@ -65,6 +65,8 @@ class StationKeeping:
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)
+        # R_i = 1e-0*np.eye(3)
+        # Q = 3.9e11*np.eye(3)
         # print(R_i.T + R_i, Q.T + Q)
         Phi = state_transition_matrix_history
 
@@ -130,7 +132,7 @@ class StationKeeping:
 # import time
 
 # # lists = [[7, [21]], [7, [21, 28]]]
-# lists = [[0, [0]]]
+# lists = [[4, [7]]]
 # for i, list1 in enumerate(lists):
 #     print(list1)
 #     start_time = time.time()
