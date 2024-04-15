@@ -369,7 +369,7 @@ class PlotNavigationResults():
         propagated_covariance_epochs = self.navigation_results[2][0]
         full_propagated_formal_errors_history = self.navigation_results[3][1]
 
-        full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
+        # full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
 
         relative_epochs = propagated_covariance_epochs - propagated_covariance_epochs[0]
         for k in range(2):
@@ -557,7 +557,6 @@ class PlotNavigationResults():
     def plot_observability(self):
 
         fig, ax = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
-
         arc_nums = len(self.navigation_results[-1].keys())
 
         for arc_num in range(arc_nums):
@@ -657,6 +656,52 @@ class PlotNavigationResults():
         fig.suptitle(f"Intersatellite range observability \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         plt.tight_layout()
         plt.show()
+
+
+    def plot_od_error_delta_v_relation(self):
+
+        fig, ax = plt.subplots(1, 1, figsize=(12, 5), sharex=True)
+
+        delta_v_history = self.navigation_simulator.delta_v_dict
+        od_error_history = self.navigation_simulator.full_estimation_error_dict
+        estimation_arc_results_dict = self.navigation_simulator.estimation_arc_results_dict
+
+        delta_v = []
+        od_error_history_at_delta_v = []
+        for key, value in delta_v_history.items():
+            od_error_history_at_delta_v.append(od_error_history[key])
+            delta_v.append(value)
+            print(key)
+
+        print(od_error_history)
+
+        delta_v = np.array(delta_v)
+        od_error_history_at_delta_v = np.array(od_error_history_at_delta_v)
+
+        abs_delta_v_history = np.linalg.norm(delta_v[:, :3], axis=1)
+        abs_pos_od_error_history = np.linalg.norm(od_error_history_at_delta_v[:, 6:9], axis=1)
+
+
+        print(delta_v)
+        print(abs_pos_od_error_history)
+
+
+        ax.scatter(abs_pos_od_error_history, abs_delta_v_history)
+        ax.set_xlabel("Absolute position OD error before SKM [m]")
+        ax.set_ylabel(r"||$\Delta V$|| [m/s]")
+
+
+    plt.show()
+
+    # full_estimation_error_epochs = self.navigation_results[0][0]
+    # full_estimation_error_history = self.navigation_results[0][1]
+    # propagated_covariance_epochs = self.navigation_results[2][0]
+    # full_propagated_formal_errors_history = self.navigation_results[3][1]
+
+    # full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
+
+    # relative_epochs = propagated_covariance_epochs - propagated_covariance_epochs[0]
+
 
 
     # def plot_correlation_history(self):

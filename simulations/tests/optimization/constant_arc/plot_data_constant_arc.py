@@ -26,7 +26,7 @@ from src import NavigationSimulator, PlotNavigationResults
 # Extract information from specific folder and run
 folder_name = "get_data_constant_arc"
 folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", folder_name)
-file_name = f"delta_v_dict_constant_arc.json"
+file_name = f"14042327_delta_v_dict_constant_arc.json"
 file_path = os.path.join(folder_path, file_name)
 data = helper_functions.load_json_file(file_path)
 
@@ -37,7 +37,7 @@ print(input_values)
 
 # print(data)
 
-case_lists = [['PM', '28', '7', '1e-10', '2'], ['PM', '28', '7', '1e-10', '3.9']]
+case_lists = [['PM', '28', '1', '0.01', '3']]
 
 for i, (key, value) in enumerate(data['inputs'].items()):
    if key == "skm_to_od_durations":
@@ -60,7 +60,9 @@ for case_list in case_lists:
                 if key in current_dict:
                     current_dict = current_dict[key]
 
-            heatmap_data[i, j] = current_dict[str(parameter1)][str(parameter2)]
+            # print(current_dict)
+
+            heatmap_data[i, j] = current_dict[str(parameter1)][str(parameter2)][0]
     heatmap_data_list.append(heatmap_data)
 
 print(heatmap_data)
@@ -73,19 +75,16 @@ for heatmap_data in heatmap_data_list:
     plt.yticks(np.arange(len(parameters1)), parameters1)
     plt.xticks(np.arange(len(parameters2)), parameters2)
     plt.xlabel("Arc duration")
-    plt.ylabel("SKM interval")
-    plt.title('Heatmap of Values')
+    plt.ylabel("Arc separation interval")
+    plt.title(r'$\Delta V$ [m/s] for 28 days')
     # plt.show()
-
-
-print(current_dict)
 
 
 # model = "PMSRP"
 # Extracting data for plotting
 keys = data["inputs"]["skm_to_od_durations"]
 subkeys = data["inputs"]["od_durations"]
-values = {subkey: [current_dict[str(key)][str(subkey)] for key in current_dict] for subkey in subkeys}
+values = {subkey: [current_dict[str(key)][str(subkey)][0] for key in current_dict] for subkey in subkeys}
 
 # Plotting
 fig = plt.figure(figsize=(10, 3))

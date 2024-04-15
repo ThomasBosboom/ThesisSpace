@@ -15,7 +15,7 @@
   urldate    = {2023-02-23},
 }
 
-
+ 
 @InProceedings{Hamera2008,
   author    = {Hamera, K. and Mosher, T. and Gefreh, M. and Paul, R. and Slavkin, L. and Trojan, J.},
   booktitle = {{IEEE} {Aerospace} {Conference} 2008},
@@ -25,7 +25,7 @@
   note      = {ISSN: 1095-323X},
   pages     = {1--20},
   abstract  = {NASA's Global Exploration Strategy and proposed lunar architecture present a roadmap for future U.S. missions. The exploration plan begins with robotic precursor missions, followed by short human sorties, eventually progressing to a permanent base on the lunar surface. NASA's Lunar Architecture Team concluded that this permanent base would be located near the lunar South Pole. The location of an outpost at the lunar South limits direct communication links with the Earth. A lunar relay element will be necessary to provide critical communication and navigation support for the upcoming missions. This paper presents a highly evolvable, low-cost lunar relay constellation concept using small satellites in Halo orbits about the Earth-Moon libration points L1 and L2. The initial constellation is designed to provide coverage of the lunar south pole in support of the inaugural robotic missions and is easily expanded to provide global coverage. Two satellites in an L2 Halo orbit provide continuous South Pole coverage for the initial constellation. A final constellation providing nearly continuous global coverage can be achieved by the addition of two spacecraft in a Halo orbit about Li. A basic set of requirements and desired capabilities for the constellation is developed, based on NASA reports and Constellation C31 compatibility. A preliminary spacecraft bus and subsystems design is presented along with expected performance.},
-  comment   = {Halo orbits are not governed under two-body dynamics, and thus do not have a defining set of orbital elements, such as the Keplerian orbital elements.
+  comment   = {Halo orbits are not governed under two-body dynamics, and thus do not have a defining set of orbital elements, such as the Keplerian orbital elements.  
 Certain halo orbits at L2 have a unique advantage in that they are always in view of the Earth and can be oriented such that they provide excellent coverage of the lunar surface far-side and polar regions.},
   doi       = {10.1109/AERO.2008.4526326},
   file      = {IEEE Xplore Full Text PDF:https\://ieeexplore-ieee-org.tudelft.idm.oclc.org/stampPDF/getPDF.jsp?tp=&arnumber=4526326&ref=aHR0cHM6Ly9pZWVleHBsb3JlLmllZWUub3JnL2Fic3RyYWN0L2RvY3VtZW50LzQ1MjYzMjY=:application/pdf},
@@ -34,7 +34,7 @@ Certain halo orbits at L2 have a unique advantage in that they are always in vie
   urldate   = {2023-02-22},
 }
 
-
+ 
 @Article{Turan2022,
   author   = {Turan, E. and Speretta, S. and Gill, E.},
   journal  = {Frontiers in Space Technologies},
@@ -59,7 +59,7 @@ consider parameter, bk, is constant for all k and the bias covariance matrix, Bk
   urldate  = {2023-01-25},
 }
 
-
+ 
 @Article{Wang2019,
   author   = {Wang, W. and Shu, L. and Liu, J. and Gao, Y.},
   journal  = {Navigation: Journal of the Institute of Navigation},
@@ -81,7 +81,7 @@ DROs are more stable and are used for communication relay as well. By contrast, 
   urldate  = {2023-01-25},
 }
 
-
+ 
 @Article{Hill2008,
   author    = {Hill, K. A. and Born, G. H.},
   journal   = {Journal of Spacecraft and Rockets},
@@ -109,7 +109,7 @@ the desired nominal orbit at the segment end time, so a stationkeeping maneuver 
   urldate   = {2023-01-26},
 }
 
-
+ 
 @Book{Tapley2004,
   author    = {Tapley, B. and Schutz, B.E. and Born, G.H.},
   publisher = {Elsevier},
@@ -124,7 +124,7 @@ the desired nominal orbit at the segment end time, so a stationkeeping maneuver 
   urldate   = {2023-01-22},
 }
 
-
+ 
 @Article{Hill2007a,
   author    = {Hill, K. and Born, G. H.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -152,7 +152,7 @@ Shows the process noise matrix Q.},
   urldate   = {2023-01-26},
 }
 
-
+ 
 @Article{Lujan2022,
   author     = {Lujan, D. and Scheeres, D. J.},
   journal    = {Journal of Guidance, Control, and Dynamics},
@@ -176,7 +176,7 @@ Shows maximum and minimum values of the Jacobi constant between 3.00 and 3.15.},
   urldate    = {2023-01-27},
 }
 
-
+ 
 @Article{Turan2022a,
   author   = {Turan, E. and Speretta, S. and Gill, E.},
   journal  = {Advances in Space Research},
@@ -205,7 +205,7 @@ Best relative geometry is lunar orbits as mothercraft, halo orbiter as daughterc
   urldate  = {2023-01-27},
 }
 
-
+ 
 @Article{Turan2022b,
   author     = {Turan, E. and Speretta, S. and Gill, E.},
   journal    = {Acta Astronautica},
@@ -230,7 +230,7 @@ Overall great gateway to other research done on LiAISON around asteroids and dif
   urldate    = {2023-01-28},
 }
 
-
+ 
 @Article{Qin2019,
   author    = {Qin, T. and Qiao, D. and Macdonald, M.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -252,7 +252,7 @@ Relative measurements, in a two-body problem, do not provide the absolute orient
   urldate   = {2023-01-28},
 }
 
-
+ 
 @Article{Gao2014,
   author   = {Gao, Y. and Xu, B. and Zhang, L.},
   journal  = {Chinese Journal of Aeronautics},
@@ -264,7 +264,7 @@ Relative measurements, in a two-body problem, do not provide the absolute orient
   pages    = {1199--1210},
   volume   = {27},
   abstract = {In order to expand the coverage area of satellite navigation systems, a combined navigation constellation which is formed by a global navigation constellation and a Lagrangian navigation constellation was studied. Only the crosslink range measurement was used to achieve long-term precise autonomous orbit determination for the combined navigation constellation, and the measurement model was derived. Simulations of 180days based on the international global navigation satellite system (GNSS) service (IGS) ephemeris showed that the mentioned autonomous orbit determination method worked well in the Earth–Moon system. Statistical results were used to analyze the accuracy of autonomous orbit determination under the influences of different Lagrangian satellite constellations.},
-  comment  = {Relative range measurements alone are not sufficient to determine the full states for Earth orbiting satellites. That is because the crosslink range observation cannot determine the rotation and translation of the entire constellation. This phenomenon is also called the rank defect problem.
+  comment  = {Relative range measurements alone are not sufficient to determine the full states for Earth orbiting satellites. That is because the crosslink range observation cannot determine the rotation and translation of the entire constellation. This phenomenon is also called the rank defect problem. 
 
 The third-body perturbation in the Earth–Moon system causes the strongest asymmetric acceleration and is most likely to enable the application of crosslink measurements in determining the orbits of satellites.
 
@@ -277,7 +277,7 @@ Shows advantages of a satellite constellation for AOD.},
   urldate  = {2023-01-30},
 }
 
-
+ 
 @Article{Dianetti2017,
   author    = {Dianetti, A. D. and Weisman, R. M. and Crassidis, J. L.},
   journal   = {AIAA Guidance, Navigation, and Control Conference},
@@ -298,7 +298,7 @@ possible to identify which states have stronger and weaker observability.},
   urldate   = {2023-02-18},
 }
 
-
+ 
 @Article{Zanetti2012,
   author    = {Zanetti, R. and Bishop, R. H.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -324,7 +324,7 @@ while approaching the problem from different perspectives, are mathematically eq
   urldate   = {2023-02-19},
 }
 
-
+ 
 @Book{Montenbruck2000,
   author    = {Montenbruck, O. and Gill, E.},
   publisher = {Springer},
@@ -336,7 +336,7 @@ while approaching the problem from different perspectives, are mathematically eq
   abstract  = {The various types of satellite and projectile orbits are described and related to the conditions, in terms of energy and angular momentum, under which the ideal orbits occur. The transient nature of the initial and final part of a satellite's path and the conditions necessary for placing a satellite in a given orbit are discussed.},
   comment   = {Explains tone-ranging and code-ranging systems. The advantage of a code-ranging system lies in the simple acquisition of PN signals and the continuous frequency spectrum that allows sharing of the ranging signal with telecommand signals.
 
-Explains batch least squares method.
+Explains batch least squares method. 
 - The covariance is not an a-posteriori measure of the tracking data quality and accuracy. This can only be derived from an analysis of the final distribution of the measurement residuals and by solving for systematic errors.
 - Consider covariance matrix gives more realistic measure of OD accuracy. The consider covariance calculus is therefore well suited to assessing the impact of systematic errors in the orbit determination process. Typical examples of consider parameters are measurement biases, station location errors or uncertainties in the drag and radiation pressure model.
 - Aside from the approximate state xapr0 that is required to start the least-squares orbit determination, some information on the accuracy of this value is often available (error covariance matrix).},
@@ -346,7 +346,7 @@ Explains batch least squares method.
   urldate   = {2023-01-22},
 }
 
-
+ 
 @Article{Speretta2021,
   author     = {Speretta, S. and Cervone, A. and Menicucci, A. and Turan, E. and Bertels, E. and Bosman, B. N. and Topputo, F.},
   journal    = {72nd International Astronautical Conference},
@@ -363,7 +363,7 @@ Main communication is DTE link. This latter solution will be considered the sele
   urldate    = {2023-02-22},
 }
 
-
+ 
 @Article{Cervone2022,
   author     = {Cervone, A. and Topputo, F. and Speretta, S. and Menicucci, A. and Turan, E. and Di Lizia, P. and Massari, M. and Franzese, V. and Giordano, C. and Merisio, G. and Labate, D. and Pilato, G. and Costa, E. and Bertels, E. and Thorvaldsen, A. and Kukharenka, A. and Vennekens, J. and Walker, R.},
   journal    = {Acta Astronautica},
@@ -392,7 +392,7 @@ Phase A communication settings:
   urldate    = {2023-02-22},
 }
 
-
+ 
 @MastersThesis{Tanis2022,
   author   = {Tanis, T.},
   school   = {Delft University of Technology},
@@ -406,7 +406,7 @@ Phase A communication settings:
   urldate  = {2023-02-22},
 }
 
-
+ 
 @Article{Gao2016,
   author    = {Gao, Y. and Chen, J. and Xu, B. and Zhou, J.},
   journal   = {International Journal of Aerospace Engineering},
@@ -426,7 +426,7 @@ Phase A communication settings:
   urldate   = {2023-02-22},
 }
 
-
+ 
 @Article{Sirbu2023,
   author    = {Sirbu, G. and Leonardi, M.},
   journal   = {Remote Sensing},
@@ -457,7 +457,7 @@ Autonomous properties usefull for further missions too.},
   urldate   = {2023-02-22},
 }
 
-
+ 
 @InProceedings{Turan2022c,
   author    = {Turan, E. and Speretta, S. and Gill, E.},
   booktitle = {{IEEE} {Aerospace} {Conference} 2022},
@@ -474,7 +474,7 @@ Autonomous properties usefull for further missions too.},
   urldate   = {2023-02-22},
 }
 
-
+ 
 @MastersThesis{Caudill2021,
   author    = {Caudill, M. T.},
   school    = {University of Colorado Boulder},
@@ -491,7 +491,7 @@ Gives Advantages and Disadvantages of Linear and Nonlinear Estimation},
   urldate   = {2023-02-01},
 }
 
-
+ 
 @InCollection{Cheetham2022,
   author     = {Cheetham, B. and Gardner, T. and Forsman, A. and Kayser, E. and Clarkson, M.},
   booktitle  = {{Ascend} 2022},
@@ -509,7 +509,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate    = {2023-02-23},
 }
 
-
+ 
 @Article{Akhlaghi2017,
   author    = {Akhlaghi, S. and Zhou, N. and Huang, Z.},
   journal   = {2017 IEEE Power \& Energy Society General Meeting},
@@ -568,7 +568,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate = {2023-02-22},
 }
 
-
+ 
 @Article{Sweeting2018,
   author   = {Sweeting, M.N.},
   journal  = {Proceedings of the IEEE},
@@ -586,7 +586,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate  = {2023-02-22},
 }
 
-
+ 
 @Book{Murray2000,
   author    = {Murray, C. D. and Dermott, S. F.},
   publisher = {Cambridge University Press},
@@ -600,7 +600,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate   = {2023-03-11},
 }
 
-
+ 
 @InProceedings{Davis2017,
   author    = {Davis, D. and Bhatt, S. and Howell, K. and Jang, J. and Whitley, R. and Clark, F. and Guzzetti, D. and Zimovan, E. and Barton, G.},
   booktitle = {27th AAS/AIAA Space Flight Mechanics Meeting},
@@ -612,7 +612,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate   = {2023-02-22},
 }
 
-
+ 
 @Article{Folta2013,
   author   = {Folta, D. and Pavlac, T. and Haapala, A. and Howell, K. and Woodard, M.},
   journal  = {Acta Astronautica},
@@ -626,7 +626,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate  = {2023-02-12},
 }
 
-
+ 
 @Article{Oshima2019,
   author   = {Oshima, K.},
   journal  = {Celestial Mechanics and Dynamical Astronomy},
@@ -646,7 +646,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate  = {2023-03-11},
 }
 
-
+ 
 @InProceedings{Kota2017,
   author     = {Kota, K. and Stefano, C. and Naoya, O. and Zaki and Kenta, O. and Shima and Tomohiro, Y. and Ryu, F.},
   booktitle  = {International Symposium on Space Technology and Science 2017},
@@ -659,7 +659,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate    = {2023-03-14},
 }
 
-
+ 
 @PhdThesis{Pavlak2013,
   author   = {Pavlak, T. A.},
   school   = {Purdue University},
@@ -671,7 +671,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate  = {2023-03-14},
 }
 
-
+ 
 @Book{Mahooti2020,
   author   = {Mahooti, M.},
   title    = {{JPL} {Development} {Ephemerides} ({DE405})\_MATLAB code},
@@ -683,7 +683,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate  = {2023-01-30},
 }
 
-
+ 
 @Article{Guzzetti2016,
   author   = {Guzzetti, D. and Bosanac, N. and Haapala, A. and Howell, Kathleen C. and Folta, David C.},
   journal  = {Acta Astronautica},
@@ -703,7 +703,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate  = {2023-03-16},
 }
 
-
+ 
 @Article{Carvalho2019,
   author    = {{Carvalho}, R. A.},
   journal   = {Journal of Aerospace Technology and Management},
@@ -735,7 +735,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate   = {2023-02-13},
 }
 
-
+ 
 @Article{Hesar2015,
   author   = {Hesar, S. G. and Parker, J. S. and Leonard, J. M. and McGranaghan, R. M. and Born, G. H.},
   journal  = {Acta Astronautica},
@@ -754,7 +754,7 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   urldate  = {2023-03-27},
 }
 
-
+ 
 @Conference{Calvo2019,
   author    = {Romero-Calvo, Á. and Biggs, J. and Topputo, F.},
   booktitle = {70th International Astronautical Congress},
@@ -767,7 +767,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   file      = {Full Text PDF:https\://www.researchgate.net/profile/Alvaro-Romero-Calvo/publication/336778960_Attitude_Control_for_the_LUMIO_CubeSat_in_Deep_Space/links/5db23a0592851c577ebb3ad4/Attitude-Control-for-the-LUMIO-CubeSat-in-Deep-Space.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/336778960_Attitude_Control_for_the_LUMIO_CubeSat_in_Deep_Space:},
 }
 
-
+ 
 @Article{Luo2017,
   author   = {Luo, Y. and Yang, Z.},
   journal  = {Progress in Aerospace Sciences},
@@ -788,7 +788,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-04-25},
 }
 
-
+ 
 @InCollection{AlSaegh2014,
   author    = {Al-Saegh, A. M. and Sali, A. and Mandeep, J. S. and Ismail, A. and Al-Jumaily, A. H. J. and Gomes, C.},
   booktitle = {{MATLAB} {Applications} for the {Practical} {Engineer}},
@@ -805,7 +805,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-04-28},
 }
 
-
+ 
 @Article{Wan2000,
   author    = {Wan, E.A. and Van Der Merwe, R.},
   journal   = {Proceedings of the IEEE 2000 Adaptive Systems for Signal Processing, Communications, and Control Symposium (Cat. No.00EX373)},
@@ -822,7 +822,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-05-01},
 }
 
-
+ 
 @PhdThesis{Parker2007,
   author   = {Parker, Jeffrey S.},
   school   = {University of Colorado Boulder},
@@ -835,7 +835,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-04},
 }
 
-
+ 
 @MastersThesis{Haapala2010,
   author   = {Haapala, Amanda},
   school   = {Purdue University},
@@ -855,7 +855,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url    = {https://www.politesi.polimi.it/handle/10589/182044?mode=complete},
 }
 
-
+ 
 @InProceedings{Crassidis2004,
   author    = {Crassidis, John L. and Junkins, John L.},
   booktitle = {IEEE Aerospace Conference 2008},
@@ -880,7 +880,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url       = {https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python},
 }
 
-
+ 
 @Article{Lou2015,
   author   = {Lou, T. and Fu, H. and Zhang, Y. and Wang, Z.},
   journal  = {Advances in Space Research},
@@ -897,7 +897,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   language = {English},
 }
 
-
+ 
 @Article{Li2019,
   author   = {Li, Yong and Zhang, Ai},
   journal  = {Acta Astronautica},
@@ -917,7 +917,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-16},
 }
 
-
+ 
 @Article{Park2016,
   author   = {Park, Han-Earl and Kim, Young-Rok},
   journal  = {Advances in Space Research},
@@ -937,7 +937,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-17},
 }
 
-
+ 
 @Article{Chang2018,
   author    = {Chang, Insu and Bentsman, Joseph},
   journal   = {2018 Annual American Control Conference (ACC)},
@@ -956,7 +956,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-05-17},
 }
 
-
+ 
 @Article{Hu2020,
   author   = {Hu, Yunpeng and Sharf, Inna and Chen, Lei},
   journal  = {Acta Astronautica},
@@ -975,7 +975,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-17},
 }
 
-
+ 
 @Article{Suggs2014,
   author   = {Suggs, R. M. and Moser, D. E. and Cooke, W. J. and Suggs, R. J.},
   journal  = {Icarus},
@@ -994,7 +994,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-17},
 }
 
-
+ 
 @MastersThesis{Nett2021,
   author   = {Nett, Fabian},
   school   = {Delft University of Technology},
@@ -1008,7 +1008,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-18},
 }
 
-
+ 
 @MastersThesis{Gelmi2019,
   author     = {Gelmi, Samuele},
   school     = {Delft University of Technology},
@@ -1023,21 +1023,21 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate    = {2023-05-18},
 }
 
-
+ 
 @MastersThesis{CarmoCipriano2017,
   author   = {do Carmo Cipriano, Ana},
   school   = {Delft University of Technology},
   title    = {Orbit {Design} of a {Lunar} {Meteoroid} {Impact} {Flashes} {Observer}},
   year     = {2017},
   month    = nov,
-  abstract = {Fragments of asteroids and comets constantly encounter the Earth and Moon in their orbits, impacting them as meteoroids. Observations of meteor showers on Earth have been studied for at least 50 years, in order to construct accurate Solar System meteoroid models. More recently, Earth-based telescopic observations of the light flashes produced by lunar meteoroid impacts have revealed useful in the reference_data and improvement of such meteoroid models. However, Earth-based lunar observations are restricted by weather, geometric and illumination conditions. As such, it has been proposed that a lunar orbiter could improve the detection rate of lunar meteoroid impact flashes. Assessing which orbit a spacecraft should fly in order to detect these flashes and improve current Earth-based observation methods is the aim of this thesis. The study is restricted to spacecraft with the CubeSat format and its inherent limitations, since it is also inserted in the context of the feasibility study of the Lunar Meteoroid Impacts Observer (LUMIO) and ESA’s Lunar CubeSats for Exploration challenge.\&lt;br/\&gt;\&lt;br/\&gt;A methodology of sequential orbital trade-offs was followed, taking into account acceptance criteria based on the mission requirements and selection criteria based on the research objective. The goal was maximise the number of meteoroid detections, during the mission lifetime, while minimising the mission ∆V budget. Circular Frozen Orbits, Earth–Moon L2 Lyapunov, Halo, Near-Rectilinear, Vertical, Distant-Retrograde and Low-Prograde orbits were selected as candidates, based on a preliminary orbital trade-off. In order to determine the total number of meteoroid detections possible from a certain orbit, the lunar meteoroid environment was modelled and a coverage analysis tool was developed to determine the payload FOV-area in the lunar nightside.\&lt;br/\&gt;\&lt;br/\&gt;Frozen Orbits were found to allow the detection of meteoroid impacts with kinetic energies too small with respect to the desired, so the design space was restricted to CRTBP orbits. From Lyapunov, Halo, Near-Rectilinear and Vertical Orbits it would be possible to detect between 1000 and 10000 impacts during the mission lifetime, but detections from some DROs could be one order of magnitude larger. Nonetheless, since transfer costs to DROs are known to be high, a Near-Rectilinear Orbit, with a minimal ∆V budget, was chosen as the operational orbit.},
+  abstract = {Fragments of asteroids and comets constantly encounter the Earth and Moon in their orbits, impacting them as meteoroids. Observations of meteor showers on Earth have been studied for at least 50 years, in order to construct accurate Solar System meteoroid models. More recently, Earth-based telescopic observations of the light flashes produced by lunar meteoroid impacts have revealed useful in the validation and improvement of such meteoroid models. However, Earth-based lunar observations are restricted by weather, geometric and illumination conditions. As such, it has been proposed that a lunar orbiter could improve the detection rate of lunar meteoroid impact flashes. Assessing which orbit a spacecraft should fly in order to detect these flashes and improve current Earth-based observation methods is the aim of this thesis. The study is restricted to spacecraft with the CubeSat format and its inherent limitations, since it is also inserted in the context of the feasibility study of the Lunar Meteoroid Impacts Observer (LUMIO) and ESA’s Lunar CubeSats for Exploration challenge.\&lt;br/\&gt;\&lt;br/\&gt;A methodology of sequential orbital trade-offs was followed, taking into account acceptance criteria based on the mission requirements and selection criteria based on the research objective. The goal was maximise the number of meteoroid detections, during the mission lifetime, while minimising the mission ∆V budget. Circular Frozen Orbits, Earth–Moon L2 Lyapunov, Halo, Near-Rectilinear, Vertical, Distant-Retrograde and Low-Prograde orbits were selected as candidates, based on a preliminary orbital trade-off. In order to determine the total number of meteoroid detections possible from a certain orbit, the lunar meteoroid environment was modelled and a coverage analysis tool was developed to determine the payload FOV-area in the lunar nightside.\&lt;br/\&gt;\&lt;br/\&gt;Frozen Orbits were found to allow the detection of meteoroid impacts with kinetic energies too small with respect to the desired, so the design space was restricted to CRTBP orbits. From Lyapunov, Halo, Near-Rectilinear and Vertical Orbits it would be possible to detect between 1000 and 10000 impacts during the mission lifetime, but detections from some DROs could be one order of magnitude larger. Nonetheless, since transfer costs to DROs are known to be high, a Near-Rectilinear Orbit, with a minimal ∆V budget, was chosen as the operational orbit.},
   file     = {:CarmoCipriano2017 - Orbit Design of a Lunar Meteoroid Impact Flashes Observer.pdf:PDF},
   language = {en},
   url      = {https://repository.tudelft.nl/islandora/object/uuid\%3A0de52ef1-da7a-4c34-941f-d016758c3674},
   urldate  = {2023-05-18},
 }
 
-
+ 
 @MastersThesis{DeSmaele2023,
   author     = {De Smaele, Kasper},
   school     = {Delft University of Technology},
@@ -1052,7 +1052,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate    = {2023-05-18},
 }
 
-
+ 
 @Article{Nugmanov2021,
   author    = {Nugmanov, Arthur and Bober, Stanislav},
   journal   = {Journal of Physics: Conference Series},
@@ -1072,7 +1072,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-05-18},
 }
 
-
+ 
 @Article{Fu2022,
   author   = {Fu, Xiaoyu and Baresi, Nicola and Armellin, Roberto},
   journal  = {Advances in Space Research},
@@ -1092,7 +1092,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-18},
 }
 
-
+ 
 @InProceedings{Dirkx2022,
   author    = {Dirkx, Dominic and Fayolle, Marie and Garrett, Geoffrey and Avillez, Miguel and Cowan, Kevin and Cowan, Sean and Encarnacao, Joao and Fortuny Lombrana, Carlos and Gaffarel, Jérémie and Hener, Jonas and Hu, Xuanyu and van Nistelrooij, Maarten and Oggionni, Filippo and Plumaris, Michael},
   booktitle = {Europlanet Science Congress 2022},
@@ -1120,7 +1120,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-03-10},
 }
 
-
+ 
 @Article{Park2006,
   author     = {Park, Ryan S. and Scheeres, Daniel J.},
   journal    = {Journal of Guidance, Control, and Dynamics},
@@ -1140,7 +1140,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate    = {2023-06-28},
 }
 
-
+ 
 @MastersThesis{Gupta2018,
   author   = {Gupta, Mini},
   school   = {Luleå University of Technology},
@@ -1150,7 +1150,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   abstract = {In Space Situational Awareness (SSA), it is crucial to assess the uncertainty related to the state vector of resident space objects (RSO). This uncertainty plays a fundamental role in, for example, collision risk assessment and re-entry predictions. A realistic characterization of this uncertainty is, therefore, necessary.The most common representation of orbital uncertainty is through a Gaussian (or normal) distribution. However, in the absence of new observations, the uncertainty grows over time and the Gaussian representation is no longer valid under nonlinear dynamics like space mechanics. This study evaluates the time when the uncertainty starts becoming non-Gaussian in nature.  Different algorithms for evaluating the normality of a distribution were implemented and Monte Carlo tests were performed on them to assess their performance. Also, the distances between distributions when they are propagated under linear and nonlinear algorithms were computed and compared to the results from the Monte Carlo statistics tests in order to predict the time when the Gaussianity of the distribution breaks. Uncertainty propagation using StateTransition Tensors and Unscented Transform methods were also studied. Among the implemented algorithms for evaluating the normality of a distribution, it was found that Royston’s method gives the best performance. It was also found that if the Normalized L2 distance between the linear and non-linear propagated distributions is greater than 95\%, then uncertainty starts to become non-Gaussian. In the best case scenario of unperturbed two-body motion, it is observed that the Gaussianity is preserved for at least three orbital periods in the case of Low-Earth and Geostationary orbits when initial uncertainty corresponds to the mean precision of the space debris catalog. If the initial variances are reduced, then Gaussianity is preserved for a longer period of time. Time for which Gaussian assumption is valid on orbital uncertainty is also dependent on the initial mean anomaly. Effect of coordinates transformation on Gaussianity validity time is also analyzed by considering uncertainty in Cartesian, Keplerian and Poincaré coordinate systems.  This study can therefore be used to improve space debris cataloguing.},
 }
 
-
+ 
 @Article{Flegel2020,
   author   = {Flegel, Sven K. and Bennett, James C.},
   journal  = {The Journal of the Astronautical Sciences},
@@ -1170,7 +1170,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-06-28},
 }
 
-
+ 
 @Article{Younes2013,
   author   = {Bani Younes, Ahmad and Turner, James and Majji, Manoranjan and Junkins, John},
   journal  = {Advances in the Astronautical Sciences},
@@ -1181,7 +1181,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   abstract = {Modeling and simulation for complex applications in science and engineering develop behavior predictions based on mechanical loads. Imprecise knowledge of the model parameters or external force laws alters the system response from the assumed nominal model data. As a result, one seeks algorithms for generating insights into the range of variability that can be the expected due to model uncertainty. Two issues complicate approaches for handling model uncertainty. First, most systems are fundamentally nonlinear, which means that closed-form solutions are not available for predicting the response or designing control and/or estimation strategies. Second, series approximations are usually required, which demands that partial derivative models are available. Both of these issues have been significant barriers to previous researchers, who have been forced to invoke computationally intense Monte-Carlo methods to gain insight into a systems nonlinear behavior through a massive sampling process. These barriers are overcome by introducing three strategies: (1) Computational differentiation that automatically builds exact partial derivative models; (2) Automatic development of state transition tensor series-based solution for mapping initial uncertainty models into instantaneous uncertainty models; and (3) Development of nonlinear transformations for mapping an initial probability distribution function into a current probability distribution function for computing fully nonlinear statistical system properties. The resulting nonlinear probability distribution function (pdf) represents a Liouiville approximation for the stochastic Fokker Planck equation. Several applications, using nonlinear systems, are presented that demonstrate the effectiveness of the proposed mathematical developments, where the solution is validated by using a Mont-Carlo simulation method. A nonlinear covariance algorithm is presented that uses a closed-form solution for evaluating the expectation values of high-order tensor models for Gaussian variables. The general modeling methodology is expected to be broadly useful for science and engineering applications in general, as well as grand challenge problems that exist at the frontiers of computational science and mathematics.},
 }
 
-
+ 
 @Article{Grenier2022,
   author    = {Grenier, Antoine and Giordano, Pietro and Bucci, Lorenzo and Cropp, Alexander and Zoccarato, Paolo and Richard Swinden and Ventura-Traveset, Javier},
   journal   = {NAVIGATION: Journal of the Institute of Navigation},
@@ -1202,7 +1202,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-07-16},
 }
 
-
+ 
 @InProceedings{Turan2022d,
   author   = {Turan, E. and Speretta, S. and Gill, E.K.A.},
   title    = {Performance {Analysis} of {Radiometric} {Autonomous} {Navigation} for {Lunar} {Satellite} {Network} {Topologies}: 11th {International} {Workshop} on {Satellite} {Constellations} and {Formation} {Flying},},
@@ -1213,7 +1213,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   language = {English},
 }
 
-
+ 
 @MastersThesis{McLeod2013,
   author   = {McLeod, Christopher},
   school   = {Naval Postgraduate School},
@@ -1227,7 +1227,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-07-21},
 }
 
-
+ 
 @Article{Hoffman1994,
   author     = {Hoffman, F. Owen and Hammonds, Jana S.},
   journal    = {Risk Analysis},
@@ -1247,7 +1247,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate    = {2023-08-12},
 }
 
-
+ 
 @Article{Geller2006,
   author    = {Geller, David K.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1266,7 +1266,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-08-12},
 }
 
-
+ 
 @Article{Geller2009,
   author    = {Geller, David K. and Rose, M. Ben and Woffinden, David C.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1285,7 +1285,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-08-13},
 }
 
-
+ 
 @Article{Park2007,
   author    = {Park, Ryan S. and Scheeres, Daniel J.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1304,7 +1304,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-08-13},
 }
 
-
+ 
 @Article{Pasquale2022,
   author   = {Pasquale, Andrea and Zanotti, Giovanni and Prinetto, Jacopo and Ceresoli, Michele and Lavagna, Michèle},
   journal  = {Acta Astronautica},
@@ -1322,7 +1322,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-08-15},
 }
 
-
+ 
 @InProceedings{McGranaghan2013,
   author   = {McGranaghan, Ryan M. and Leonard, Jason M. and Fujimoto, Kohei and Parker, Jeffrey S. and Anderson, Rodney L. and Born, George H.},
   title    = {Interplanetary {Departure} {Stage} {Navigation} by {Means} of {Liaison} {Orbit} {Determination} {Architecture}},
@@ -1336,7 +1336,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-08-15},
 }
 
-
+ 
 @InCollection{Parker2012,
   author    = {Parker, Jeffrey and Anderson, Rodney and Born, George and Fujimoto, Kohei and Leonard, Jason and McGranaghan, Ryan},
   booktitle = {{AIAA}/{AAS} {Astrodynamics} {Specialist} {Conference}},
@@ -1348,7 +1348,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-08-15},
 }
 
-
+ 
 @InProceedings{Parker2013,
   author   = {Parker, Jeffrey S. and Leonard, Jason M. and Anderson, Rodney L. and Born, George H.},
   title    = {Liaison-{Supplemented} {Navigation} of a {Crewed} {Vehicle} in a {Lunar} {Halo} {Orbit}},
@@ -1362,7 +1362,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-08-15},
 }
 
-
+ 
 @Article{RochaCachim2022,
   author     = {Rocha Cachim, Pedro and Gomes, João and Ventura, Rodrigo},
   journal    = {Acta Astronautica},
@@ -1381,7 +1381,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate    = {2023-08-15},
 }
 
-
+ 
 @Article{Damico2013,
   author   = {Damico, S. and Ardaens, J.-S. and De Florio, S.},
   journal  = {Acta Astronautica},
@@ -1398,7 +1398,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   language = {English},
 }
 
-
+ 
 @Article{Xiong2013,
   author   = {Xiong, K. and Wei, C. and Liu, L.},
   journal  = {Acta Astronautica},
@@ -1414,7 +1414,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   language = {English},
 }
 
-
+ 
 @InProceedings{HurDiaz2007,
   author = {Hur-Diaz, Sun and Bamford, Bill and Gaylor, David},
   title  = {Autonomous {Lunar} {Orbit} {Navigation} {Using} {Optical} {Sensors}},
@@ -1423,7 +1423,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   file   = {Full Text PDF:https\://www.researchgate.net/profile/David-Gaylor/publication/303541834_Autonomous_Lunar_Orbit_Navigation_Using_Optical_Sensors/links/57473e9408aef66a78b07983/Autonomous-Lunar-Orbit-Navigation-Using-Optical-Sensors.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/303541834_Autonomous_Lunar_Orbit_Navigation_Using_Optical_Sensors:},
 }
 
-
+ 
 @Article{HurDiaz2008,
   author   = {Hur-Diaz, Sun and Bamford, Bill and Gaylor, Dave},
   journal  = {Astrodynamics 2007 - Advances in the Astronautical Sciences, Proceedings of the AAS/AIAA Astrodynamics Specialist Conference},
@@ -1437,7 +1437,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-08-16},
 }
 
-
+ 
 @Article{Hinga2023,
   author    = {Hinga, Mark B. and Williams, Dale A.},
   journal   = {NAVIGATION: Journal of the Institute of Navigation},
@@ -1459,7 +1459,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-08-16},
 }
 
-
+ 
 @Article{Bradley2020,
   author    = {Bradley, Nicholas and Olikara, Zubin and Bhaskaran, Shyam and Young, Brian},
   journal   = {Journal of Spacecraft and Rockets},
@@ -1479,7 +1479,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-08-16},
 }
 
-
+ 
 @Article{Boone2021,
   author    = {Boone, Spencer and McMahon, Jay},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1499,7 +1499,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-02},
 }
 
-
+ 
 @Article{Boone2023,
   author    = {Boone, Spencer and McMahon, Jay},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1517,7 +1517,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-02},
 }
 
-
+ 
 @Article{Zhang2014,
   author    = {Zhang, Lei and Xu, Bo},
   journal   = {The Journal of Navigation},
@@ -1538,7 +1538,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-11},
 }
 
-
+ 
 @InCollection{Chen2017,
   author    = {Chen, Lei and Bai, Xian-Zong and Liang, Yan-Gang and Li, Ke-Bo},
   publisher = {Springer},
@@ -1557,7 +1557,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-15},
 }
 
-
+ 
 @Article{Zhou2022,
   author    = {Zhou, Xingyu and Wang, Shuo and Qin, Tong},
   journal   = {Applied Sciences},
@@ -1579,7 +1579,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-15},
 }
 
-
+ 
 @Article{Yang2019,
   author   = {Yang, Zhen and Luo, Ya-Zhong and Zhang, Jin},
   journal  = {Astrodynamics},
@@ -1599,7 +1599,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-09-15},
 }
 
-
+ 
 @Article{Yang2018,
   author   = {Yang, Zhen and Luo, Ya-zhong and Lappas, Vaios and Tsourdos, Antonios},
   journal  = {Journal of Guidance, Control, and Dynamics},
@@ -1618,7 +1618,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-09-15},
 }
 
-
+ 
 @Article{Jin2019,
   author    = {Jin, Yang and Xu, Bo},
   journal   = {International Journal of Aerospace Engineering},
@@ -1637,7 +1637,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-21},
 }
 
-
+ 
 @Article{Zhang2015,
   author    = {Zhang, Lei and Xu, Bo},
   journal   = {The Journal of Navigation},
@@ -1658,7 +1658,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-30},
 }
 
-
+ 
 @Article{Genova2021,
   author    = {Genova, Antonio and Petricca, Flavio},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1677,7 +1677,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-09-30},
 }
 
-
+ 
 @Article{Shirobokov2017,
   author    = {Shirobokov, Maksim and Trofimov, Sergey and Ovchinnikov, Mikhail},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1694,7 +1694,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-10-02},
 }
 
-
+ 
 @Book{Parker2014,
   author    = {Parker, Jeffrey S. and Anderson, Rodney L.},
   publisher = {John Wiley \& Sons},
@@ -1709,7 +1709,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   language  = {en},
 }
 
-
+ 
 @Article{Pavlak2012,
   author   = {Pavlak, Thomas A. and Howell, Kathleen C.},
   journal  = {Acta Astronautica},
@@ -1728,7 +1728,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-10-20},
 }
 
-
+ 
 @Article{Farquhar1973,
   author   = {Farquhar, Robert W. and Kamel, Ahmed A.},
   journal  = {Celestial mechanics},
@@ -1748,7 +1748,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-10-20},
 }
 
-
+ 
 @InProceedings{Friedman2017,
   author   = {Friedman, Alex M. and Frueh, Carolin},
   title    = {Determining {Debris} {Characteristics} from {Observability} {Analysis} of {Artificial} {Near}-{Earth} {Objects}},
@@ -1760,7 +1760,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-09},
 }
 
-
+ 
 @Article{Tang2017,
   author   = {Tang, Yuhua and Wu, Weiren and Qiao, Dong and Li, Xiangyu},
   journal  = {Science China Information Sciences},
@@ -1780,7 +1780,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-09},
 }
 
-
+ 
 @Article{Su2018,
   author   = {Su, Qiya and Huang, Yi},
   journal  = {Journal of Systems Science and Complexity},
@@ -1800,7 +1800,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-09},
 }
 
-
+ 
 @Article{Luo2022,
   author    = {Luo, Yan and Qin, Tong and Zhou, Xingyu},
   journal   = {Aerospace},
@@ -1822,7 +1822,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-11-09},
 }
 
-
+ 
 @Article{Huxel2009,
   author    = {Huxel, Paul J. and Bishop, Robert H.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1841,7 +1841,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-11-09},
 }
 
-
+ 
 @Article{Fowler2023,
   author   = {Fowler, Erin E. and Paley, Derek A.},
   journal  = {The Journal of the Astronautical Sciences},
@@ -1861,7 +1861,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-10},
 }
 
-
+ 
 @Article{Cano2022,
   author   = {Cano, Alejandro and Pastor, Alejandro and Fernández, Sergio and Míguez, Joaquín and Sanjurjo-Rivo, Manuel and Escobar, Diego},
   journal  = {The Journal of the Astronautical Sciences},
@@ -1881,7 +1881,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-10},
 }
 
-
+ 
 @InProceedings{Lisano2007,
   author   = {Lisano, Michael E.},
   title    = {Comparing {Consider}-{Covariance} {Analysis} with {Sigma}-{Point} {Consider} {Filter} and {Linear}-{Theory} {Consider} {Filter} {Formulations}},
@@ -1895,7 +1895,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-10},
 }
 
-
+ 
 @Article{Psiaki2011,
   author    = {Psiaki, Mark L.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1914,7 +1914,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-11-13},
 }
 
-
+ 
 @Article{Zhou2023,
   author   = {Zhou, Xingyu and Qin, Tong and Macdonald, Malcolm and Qiao, Dong},
   journal  = {Acta Astronautica},
@@ -1932,7 +1932,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-13},
 }
 
-
+ 
 @InProceedings{Yim2004,
   author   = {Yim, J. and Crassidis, J. and Junkins, J.},
   title    = {1 {AAS} 04-257 Autonomous Orbit Determination for Two Spacecraft from Relative Position Measurements},
@@ -1943,7 +1943,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-13},
 }
 
-
+ 
 @Article{Christian2017,
   author   = {Christian, John A.},
   journal  = {Journal of Spacecraft and Rockets},
@@ -1963,7 +1963,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-13},
 }
 
-
+ 
 @Article{Mo2021,
   author   = {Mo, Shiming and Jin, Xiaojun and Lin, Chen and Zhang, Wei and Xu, Zhaobin and Jin, Zhonghe},
   journal  = {Sensors (Basel, Switzerland)},
@@ -1983,7 +1983,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-13},
 }
 
-
+ 
 @Article{Turan2023,
   author     = {Turan, E. and Speretta, S. and Gill, E.K.A.},
   journal    = {Proceedings of the 74th International Astronautical Congress (IAC)},
@@ -1994,7 +1994,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   shorttitle = {Particle {Swarm} {Optimization} {Based} {Tracking} {Window} {Planning} for {Cislunar} {Orbiters} {Performing} {Autonomous} {Radiometric} {Navigation}},
 }
 
-
+ 
 @Article{Kruger2023,
   author   = {Kruger, Justin and D’Amico, Simone},
   journal  = {Advances in Space Research},
@@ -2010,7 +2010,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-17},
 }
 
-
+ 
 @Book{Folcik2011,
   author   = {Folcik, Z. and Lue, A. and Vatsky, J.},
   title    = {Reconciling {Covariances} with {Reliable} {Orbital} {Uncertainty}},
@@ -2024,7 +2024,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-26},
 }
 
-
+ 
 @Article{Stiller2023,
   author   = {Stiller, Dominik},
   title    = {Short-term orbital effects of radiation pressure on the {Lunar} {Reconnaissance} {Orbiter}},
@@ -2036,7 +2036,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-11-30},
 }
 
-
+ 
 @Article{Floberghagen1999,
   author    = {Floberghagen, Rune and Pieter Visser, Pieter and Weischede, Frank},
   journal   = {Advances in Space Research},
@@ -2055,7 +2055,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate   = {2023-12-11},
 }
 
-
+ 
 @Article{Bertone2018,
   author   = {Bertone, Stefano and Le Poncin-Lafitte, Christophe and Rosenblatt, Pascal and Lainey, Valéry and Marty, Jean-Charles and Angonin, Marie-Christine},
   journal  = {Advances in Space Research},
@@ -2074,7 +2074,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2024-01-19},
 }
 
-
+ 
 @InProceedings{Deng2015,
   author   = {Deng, Lu and Sun, Xiucong and Han, Chao},
   title    = {Analysis and {Comparison} on {UKF} and {BLS} for {Orbit} {Determination}},
@@ -2084,7 +2084,7 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   file     = {Full Text PDF:https\://www.researchgate.net/profile/Xiucong-Sun-2/publication/310334667_Analysis_and_Comparison_on_UKF_and_BLS_for_Orbit_Determination/links/582c099608aef19cb806c739/Analysis-and-Comparison-on-UKF-and-BLS-for-Orbit-Determination.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/310334667_Analysis_and_Comparison_on_UKF_and_BLS_for_Orbit_Determination:},
 }
 
-
+ 
 @InProceedings{Thompson2022,
   author   = {Thompson, Michael and Forsman, Alec and Peters, Brian and Ely, Todd and Sorensen, Dana and Cheetham, Brad},
   title    = {Cislunar {Navigation} {Technology} {Demonstrations} on the {CAPSTONE} {Mission}},
@@ -2093,4 +2093,77 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   abstract = {The Cislunar Autonomous Positioning System Technology Operations and Navigation Experiment (CAPSTONE) mission is an upcoming lunar flight demonstration, with a targeted launch in early 2022. The primary objective of the mission is to test out navigation and operations in the same Near Rectilinear Halo Orbit (NRHO) that will be utilized by NASA’s Lunar Gateway.  In addition to this objective, CAPSTONE contains a dedicated flight board for the Cislunar Autonomous Positioning System (CAPS), a framework for autonomous or near-autonomous navigation in cislunar space developed by Advanced Space. During the mission, CAPS will demonstrate onboard orbit determination via both one-way uplink measurements and crosslink radiometric measurements with the Lunar Reconnaissance Orbiter (LRO). This paper previews the expected performance of these two experimental data types with a set of high-fidelity simulations using realistic CAPSTONE concept of operations (CONOPS) and radio specifications. For CAPSTONE, the nominal tracking architecture will rely on the standard two-way radiometric measurements of the Deep Space Network (DSN) – CAPS is intended is a technology demonstration. However, solutions will be processed onboard, and the expected navigation performance of these experimental data types are compared against the expected ground-based navigation performance.  The goal of CAPS is ultimately to provide a framework for autonomous navigation in cislunar space. The CAPS experiments onboard CAPSTONE will be the first on-orbit step towards this goal. While the early experiments will not replace the utilization of ground-based navigation, they should be able to supplement it and work towards a future where the reliance on two-way ground networks is greatly reduced. For the CAPSTONE orbit and radio specifications, the one-way uplink measurements are expected to provide navigation solutions with uncertainties on the order of single kilometers in position and single cm/s in velocity. These solutions could, in theory, be utilized to design stationkeeping maneuvers onboard the spacecraft and maintain its NRHO over time. Simulations of the expected crosslink measurements also show navigation performances similar to the expected performance of two-way tracking. In addition to examining the CAPSTONE operational CONOPS, the performance of a conceptual ground-based one-way beaconing system is examined, compared to standard two-way radiometric tracking, and used in conjunction with the expected crosslink performance to study what may be possible in terms of cislunar autonomous navigation provided by CAPS in the future.},
   doi      = {10.33012/2022.18208},
   file     = {Full Text PDF:https\://www.researchgate.net/profile/Michael-Thompson-46/publication/358117559_Cislunar_Navigation_Technology_Demonstrations_on_the_CAPSTONE_Mission/links/62e31e6b7782323cf1824094/Cislunar-Navigation-Technology-Demonstrations-on-the-CAPSTONE-Mission.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/358117559_Cislunar_Navigation_Technology_Demonstrations_on_the_CAPSTONE_Mission:},
+}
+
+ 
+@Article{Gao2012,
+  author   = {Gao, Fuchang and Han, Lixing},
+  journal  = {Computational Optimization and Applications},
+  title    = {Implementing the {Nelder}-{Mead} simplex algorithm with adaptive parameters},
+  year     = {2012},
+  issn     = {1573-2894},
+  month    = jan,
+  number   = {1},
+  pages    = {259--277},
+  volume   = {51},
+  abstract = {In this paper, we first prove that the expansion and contraction steps of the Nelder-Mead simplex algorithm possess a descent property when the objective function is uniformly convex. This property provides some new insights on why the standard Nelder-Mead algorithm becomes inefficient in high dimensions. We then propose an implementation of the Nelder-Mead method in which the expansion, contraction, and shrink parameters depend on the dimension of the optimization problem. Our numerical experiments show that the new implementation outperforms the standard Nelder-Mead method for high dimensional problems.},
+  doi      = {10.1007/s10589-010-9329-3},
+  file     = {:Gao2012 - Implementing the Nelder Mead Simplex Algorithm With adaptive Parameters.html:URL},
+  keywords = {Nelder-Mead method, Simplex, Polytope, Adaptive parameter, Optimization},
+  language = {en},
+  url      = {https://doi.org/10.1007/s10589-010-9329-3},
+  urldate  = {2024-03-12},
+}
+
+ 
+@Article{Greaves2023,
+  author    = {Greaves, Jesse A. and Scheeres, Daniel J.},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Autonomous {Optical}-{Only} {Spacecraft}-to-{Spacecraft} {Absolute} {Tracking} and {Maneuver} {Classification} in {Cislunar} {Space}},
+  year      = {2023},
+  issn      = {0731-5090},
+  month     = nov,
+  number    = {11},
+  pages     = {2092--2109},
+  volume    = {46},
+  abstract  = {Traditional concerns regarding spacecraft state estimation are exacerbated in cislunar space due to highly nonlinear dynamics, limited observational information, and increasingly overloaded Earth-based resources. These challenges motivate research into space-based navigation and observation capabilities that provide opportunities for autonomy. This paper demonstrates that relative optical measurements provide full inertial estimates of an agent and target spacecraft, while simultaneously enabling classification of unknown maneuvers in the cislunar environment. To achieve this objective two subtasks are demonstrated. First, the spacecraft-to-spacecraft absolute tracking method, which estimates the absolute state of two vehicles using relative measurements, is tested for observability and shown to produce consistent filter solutions given optical sensors. Second, maneuver classification is performed by labeling an estimated control profile generated from the optimal control based estimator. Collectively, this sequential methodology enables an agent craft to autonomously navigate itself while observing a target craft and classifying its maneuvers.},
+  doi       = {10.2514/1.G007223},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.G007223:application/pdf},
+  keywords  = {Space Exploration and Technology, Gaussian Mixture Models, Autonomous Navigation System, Maneuver Detection and Classification, Cislunar Orbit, Spacecraft Maneuvers, Nonlinear Filter, Unscented Kalman Filter, Optical Tracking},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/1.G007223},
+  urldate   = {2024-03-16},
+}
+
+ 
+@Article{Howell1993,
+  author    = {Howell, K. C. and Pernicka, H. J.},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Station-keeping method for libration point trajectories},
+  year      = {1993},
+  issn      = {0731-5090},
+  month     = jan,
+  number    = {1},
+  pages     = {151--159},
+  volume    = {16},
+  doi       = {10.2514/3.11440},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/3.11440:application/pdf},
+  keywords  = {Libration Points, Earth, Moon, Halo Orbit, International Sun Earth Explorer 3, Interplanetary Trajectories, Stationkeeping Maneuvers, Satellites, Computing, Probability Distribution},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/3.11440},
+  urldate   = {2024-03-17},
+}
+
+ 
+@InProceedings{Leonard2012,
+  author   = {Leonard, Jason M. and McGranaghan, Ryan M. and Fujimoto, Kohei and Born, George H. and Parker, Jeffrey S. and Anderson, Rodney L.},
+  title    = {{LiAISON}-{Supplemented} {Navigation} for {Geosynchronous} and {Lunar} {L1} {Orbiter}},
+  year     = {2012},
+  address  = {Minneapolis, MN},
+  month    = aug,
+  note     = {NTRS Author Affiliations: Colorado Univ., Jet Propulsion Lab., California Inst. of Tech. NTRS Document ID: 20130001783 NTRS Research Center: Jet Propulsion Laboratory (JPL)},
+  abstract = {A high-fidelity simulation is developed to test the theory that relative range and range-rate measurements between a satellite in a geosynchronous orbit and a satellite in orbit about the Earth-Moon L1 point may be used to improve the navigation accuracy of both satellites, compared with ground-only tracking. Recent research has determined that satellite-to-satellite range measurements between these two orbits are su cient to perform absolute state estimation as well as relative state estimation of both satellites - a technology known as LiAISON (Linked Autonomous Interplanetary Satellite Orbit Navigation). This study quanties the improvement in accuracy when LiAISON is used to supplement ground tracking of one or both satellites in a very realistic simulation. Orbit determination techniques show that the inclusion of LiAISON measurements with ground tracking observations can greatly improve absolute position and velocity estimates for both satellites in geosynchronous orbit and about the Earth-Moon L1 point.},
+  keywords = {Space Communications, Spacecraft Communications, Command And Tracking},
+  url      = {https://ntrs.nasa.gov/citations/20130001783},
+  urldate  = {2024-03-30},
 }

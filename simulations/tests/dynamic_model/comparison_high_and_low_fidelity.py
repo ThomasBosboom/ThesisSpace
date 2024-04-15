@@ -32,7 +32,7 @@ from src.estimation_models import EstimationModel
 
 
 
-def comparison_high_and_LF(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
+def comparison_high_and_low_fidelity(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
 
     custom_model_dict={"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"]}
     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=custom_model_dict)
