@@ -41,6 +41,10 @@ class EstimationModel:
         self.margin = 120
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.observation_step_size_range)
 
+        # print("length of obsrvation times:", len(self.observation_times_range))
+        # print("start of obsrvation times:", self.dynamic_model.simulation_start_epoch)
+        # print("end of obsrvation times:", self.dynamic_model.simulation_end_epoch)
+
 
     def set_observation_model_settings(self):
 
@@ -187,7 +191,7 @@ class EstimationModel:
         self.estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
 
-    def get_estimation_results(self, redirect_out=True):
+    def get_estimation_results(self, redirect_out=False):
 
         self.set_estimator_settings()
 

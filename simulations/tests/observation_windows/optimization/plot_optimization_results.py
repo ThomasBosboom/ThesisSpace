@@ -21,8 +21,8 @@ from tests import utils, helper_functions
 # Extract information from specific folder
 folder_name = "PM01_PM01_thr3_skm3_dur28_od1_num5_max20_err1e-10"
 batch_name = "09042312"
-folder_name = "PM01_PM01_thr3_skm3_dur28_od1_num5_max20_err1e-2"
-batch_name = "09042312"
+# folder_name = "PM01_PM01_thr3_skm3_dur28_od1_num5_max20_err1e-2"
+# batch_name = "09042312"
 folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", folder_name)
 
 concatenated_json = helper_functions.concatenate_json_files(folder_path, batch=batch_name)
@@ -68,9 +68,6 @@ axs[1].set_xticks(range(len(epochs)+1))
 fig.suptitle(f"Iteration histories for optimization runs \n ")
 plt.tight_layout()
 plt.legend()
+
+utils.save_figure_to_folder(figs=[fig], labels=[])
 plt.show()
-
-
-
-# n={monte_carlo_stats_dict["num_runs"]}, model: {1}
-

@@ -214,9 +214,9 @@ class PlotNavigationResults():
 
         ax[0][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
-        fig.suptitle(f"Observation windows for {epochs[-1]-epochs[0]} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
-        fig1_3d.suptitle(f"Observation windows for {epochs[-1]-epochs[0]} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
-        fig1_3d2.suptitle(f"Observation windows for {epochs[-1]-epochs[0]} days, inertial frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Observation windows for {28} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig1_3d.suptitle(f"Observation windows for {28} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig1_3d2.suptitle(f"Observation windows for {28} days, inertial frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
 
         plt.tight_layout()
         plt.legend()
@@ -402,7 +402,7 @@ class PlotNavigationResults():
                         label="Observation window" if i == 0 else None)
                 for i, epoch in enumerate(self.station_keeping_epochs):
                     station_keeping_epoch = epoch - propagated_covariance_epochs[0]
-                    ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
+                    ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.2, label="SKM" if i==0 else None)
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
                 # ax[0][0].set_ylim(-1000, 1000)
@@ -551,23 +551,26 @@ class PlotNavigationResults():
 
         fig.suptitle(f"Intersatellite range observations \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         plt.tight_layout()
-                        # plt.show()
+        # plt.show()
 
 
     def plot_observability(self):
 
-        fig, ax = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
+        fig, ax = plt.subplots(5, 1, figsize=(8, 11), sharex=True)
         arc_nums = len(self.navigation_results[-1].keys())
 
         for arc_num in range(arc_nums):
 
             estimation_model = self.navigation_results[-1][arc_num]
             estimation_output = estimation_model.estimation_output
+            estimator = estimation_model.estimator
+            state_transition_interface = estimator.state_transition_interface
 
             # Generate information and covariance histories based on all the combinations of observables and link definitions
             total_information_dict = dict()
             total_covariance_dict = dict()
             total_single_information_dict = dict()
+            state_transition_matrix_dict = dict()
             len_obs_list = []
             for i, (observable_type, observation_sets) in enumerate(estimation_model.sorted_observation_sets.items()):
                 total_information_dict[observable_type] = dict()
@@ -592,11 +595,16 @@ class PlotNavigationResults():
                         for index, weighted_design_matrix in enumerate(weighted_design_matrix_history):
 
                             epoch = epochs[index]
+
+                            state_transition_matrix = state_transition_interface.full_state_transition_sensitivity_at_epoch(epoch)
+                            # weighted_design_matrix = np.dot(weighted_design_matrix, np.linalg.inv(state_transition_matrix))
+                            state_transition_matrix_product = np.dot(state_transition_matrix, state_transition_matrix.T)
                             weighted_design_matrix_product = np.dot(weighted_design_matrix.T, weighted_design_matrix)
 
                             # Calculate the information matrix
                             current_information = total_information + weighted_design_matrix_product
                             single_information_dict[epoch] = weighted_design_matrix_product
+                            state_transition_matrix_dict[epoch] = state_transition_matrix_product
                             information_dict[epoch] = current_information
                             total_information = current_information
 
@@ -610,7 +618,6 @@ class PlotNavigationResults():
                         total_covariance_dict[observable_type][j].append(covariance_dict)
                         total_single_information_dict[observable_type][j].append(single_information_dict)
 
-
             for i, (observable_type, information_sets) in enumerate(total_single_information_dict.items()):
                 for j, information_set in enumerate(information_sets.values()):
                     for k, single_information_set in enumerate(information_set):
@@ -619,6 +626,7 @@ class PlotNavigationResults():
                         epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
                         epochs = epochs - self.mission_start_epoch
                         information_matrix_history = np.array(list(information_dict.values()))
+                        state_transition_matrix_product_history = np.array(list(state_transition_matrix_dict.values()))
 
                         for m in range(2):
                             observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
@@ -628,6 +636,19 @@ class PlotNavigationResults():
 
                             ax[m].plot(epochs, observability_lpf_total, label="LPF" if m == 0 and arc_num == 0 else None, color="darkred")
                             ax[m].plot(epochs, observability_lumio_total, label="LUMIO" if m == 0 and arc_num == 0 else None, color="darkblue")
+
+                            min_axis_stm_lpf = np.min(np.linalg.eigvals(state_transition_matrix_product_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1)
+                            max_axis_stm_lpf = np.max(np.linalg.eigvals(state_transition_matrix_product_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1)
+                            min_axis_stm_lumio = np.min(np.linalg.eigvals(state_transition_matrix_product_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1)
+                            max_axis_stm_lumio = np.max(np.linalg.eigvals(state_transition_matrix_product_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1)
+
+                            aspect_ratio_lpf = max_axis_stm_lpf/min_axis_stm_lpf
+                            aspect_ratio_lumio = max_axis_stm_lumio/min_axis_stm_lumio
+
+                            if m == 0:
+                                ax[2].plot(epochs, aspect_ratio_lpf, label="LPF" if m == 0 and arc_num == 0 else None, color="darkred")
+                                ax[3].plot(epochs, aspect_ratio_lumio, label="LUMIO" if m == 0 and arc_num == 0 else None, color="darkblue")
+                            ax[2].set_yscale("log")
 
         for j in range(len(ax)):
             for i, gap in enumerate(self.observation_windows):
@@ -642,110 +663,124 @@ class PlotNavigationResults():
                 ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
 
             ax[j].grid(alpha=0.5, linestyle='--')
-            ax[j].set_yscale("log")
+            ax[0].set_yscale("log")
+            ax[1].set_yscale("log")
 
             # Set y-axis tick label format to scientific notation with one decimal place
             ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-            ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+            # ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
 
-        ax[0].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{r}, j})}$ [m]')
-        ax[1].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{v}, j})}$ [m]')
+        ax[0].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{r}, j})}$')
+        ax[1].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{v}, j})}$')
+        ax[2].set_ylabel('Aspect ratio \n $\operatorname{eig} \mathbf{\Phi}_{rr}\mathbf{\Phi}_{rr}^T$')
+        ax[3].set_ylabel('Aspect ratio \n $\operatorname{eig} \mathbf{\Phi}_{rr}\mathbf{\Phi}_{rr}^T$')
+        ax[4].set_ylabel(r'$||\mathbf{v}_{LPF}||$')
         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
         ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
+        # Plot the history of observation angle with respect to the large covariance axis
+        state_history = self.navigation_results[6][1]
+        epochs = self.navigation_results[9][0]
+        dependent_variables_history = self.navigation_results[9][1]
+        moon_state_history = dependent_variables_history[:,0:6]
+
+        state_history_moon_lpf = state_history[:, 0:6] - moon_state_history
+        state_history_moon_lumio = state_history[:, 6:12] - moon_state_history
+
+        ax[4].plot(epochs-self.mission_start_epoch, np.linalg.norm(state_history_moon_lpf[:, 3:6], axis=1), color="green")
+
         fig.suptitle(f"Intersatellite range observability \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
-        plt.tight_layout()
-        plt.show()
+        # plt.tight_layout()
+        # plt.show()
 
 
     def plot_od_error_delta_v_relation(self):
 
-        fig, ax = plt.subplots(1, 1, figsize=(12, 5), sharex=True)
+        fig, axs = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
 
         delta_v_history = self.navigation_simulator.delta_v_dict
         od_error_history = self.navigation_simulator.full_estimation_error_dict
         estimation_arc_results_dict = self.navigation_simulator.estimation_arc_results_dict
 
+        full_reference_state_deviation_dict = self.navigation_simulator.full_reference_state_deviation_dict
+
         delta_v = []
         od_error_history_at_delta_v = []
+        reference_deviation_at_delta_v = []
         for key, value in delta_v_history.items():
-            od_error_history_at_delta_v.append(od_error_history[key])
+            index = min(od_error_history.keys(), key=lambda x: abs(x - key))
+            od_error_history_at_delta_v.append(od_error_history[index])
+            reference_deviation_at_delta_v.append(full_reference_state_deviation_dict[index])
             delta_v.append(value)
-            print(key)
-
-        print(od_error_history)
 
         delta_v = np.array(delta_v)
         od_error_history_at_delta_v = np.array(od_error_history_at_delta_v)
+        reference_deviation_at_delta_v = np.array(reference_deviation_at_delta_v)
 
         abs_delta_v_history = np.linalg.norm(delta_v[:, :3], axis=1)
         abs_pos_od_error_history = np.linalg.norm(od_error_history_at_delta_v[:, 6:9], axis=1)
+        abs_pos_deviation_history = np.linalg.norm(reference_deviation_at_delta_v[:, 6:9], axis=1)
+
+        axs[0].scatter(abs_delta_v_history, abs_pos_od_error_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
+        axs[1].scatter(abs_delta_v_history, abs_pos_deviation_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
 
 
-        print(delta_v)
-        print(abs_pos_od_error_history)
+        axs[1].set_xlabel(r"||$\Delta V$|| [m/s]")
+        axs[0].set_ylabel(r"||$\hat{\mathbf{r}}-\mathbf{r}$|| [m]")
+        axs[1].set_ylabel(r"||$\mathbf{r}-\mathbf{r}_{ref}$|| [m]")
+        axs[0].set_title("Maneuver cost versus OD error")
+        axs[1].set_title("Maneuver cost versus reference orbit deviation")
+        axs[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        fig.suptitle("Relations between SKM cost for run of 28 days")
+        plt.legend()
+        # plt.show()
 
 
-        ax.scatter(abs_pos_od_error_history, abs_delta_v_history)
-        ax.set_xlabel("Absolute position OD error before SKM [m]")
-        ax.set_ylabel(r"||$\Delta V$|| [m/s]")
-
-
-    plt.show()
-
-    # full_estimation_error_epochs = self.navigation_results[0][0]
-    # full_estimation_error_history = self.navigation_results[0][1]
-    # propagated_covariance_epochs = self.navigation_results[2][0]
-    # full_propagated_formal_errors_history = self.navigation_results[3][1]
-
-    # full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
-
-    # relative_epochs = propagated_covariance_epochs - propagated_covariance_epochs[0]
-
-
-
-    # def plot_correlation_history(self):
+    def plot_correlation_history(self):
 
         # Plot the estimation error history
-        # fig4, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
-        # for i, (model_type, model_names) in enumerate(self.navigation_output.items()):
-        #     for j, (model_name, models) in enumerate(model_names.items()):
-        #             for k, self.navigation_output in enumerate(models):
+        arc_nums = list(self.navigation_results[-1].keys())
 
-        #                 break
-        # arc_nums = len(self.navigation_results[-1].keys())
-        # arc_nums = 1
+        fig, ax = plt.subplots(1, 2, figsize=(8, 4))
+        # for arc_num in [arc_nums[0], arc_nums[-1]]:
 
-        # fig, ax = plt.subplots(1, arc_nums, figsize=(9, 4), sharey=True)
+        # estimation_model = self.navigation_results[-1][arc_nums[]]
+        # estimation_output = estimation_model.estimation_output
+        full_propagated_covariance_history = self.navigation_results[2][1]
 
-        # for arc_num in range(arc_nums):
+        correlation_start = np.corrcoef(full_propagated_covariance_history[0])
+        correlation_end = np.corrcoef(full_propagated_covariance_history[-1])
+        # correlations = estimation_output.correlations
 
-        #     break
+        estimated_param_names = [r"$x_{1}$", r"$y_{1}$", r"$z_{1}$", r"$\dot{x}_{1}$", r"$\dot{y}_{1}$", r"$\dot{z}_{1}$",
+                                r"$x_{2}$", r"$y_{2}$", r"$z_{2}$", r"$\dot{x}_{2}$", r"$\dot{y}_{2}$", r"$\dot{z}_{2}$"]
 
-        #     estimation_output = self.navigation_results[-1][arc_num]
-        #     covariance_output = estimation_output.covariance
+        im = ax[0].imshow(correlation_start, cmap="viridis", vmin=-1, vmax=1)
+        im1 = ax[1].imshow(correlation_end, cmap="viridis", vmin=-1, vmax=1)
 
-        #     correlations = estimation_output.correlations
-        #     estimated_param_names = [r"$x_{1}$", r"$y_{1}$", r"$z_{1}$", r"$\dot{x}_{1}$", r"$\dot{y}_{1}$", r"$\dot{z}_{1}$",
-        #                             r"$x_{2}$", r"$y_{2}$", r"$z_{2}$", r"$\dot{x}_{2}$", r"$\dot{y}_{2}$", r"$\dot{z}_{2}$"]
+        for i in range(2):
+            ax[i].set_xticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
+            ax[i].set_yticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
+            ax[i].set_xlabel("Estimated Parameter")
+            ax[i].set_ylabel("Estimated Parameter")
 
-        #     im = ax[arc_num].imshow(correlations, cmap=cm.RdYlBu_r, vmin=-1, vmax=1)
+        # add numbers to each of the boxes
+        # for i in range(len(estimated_param_names)):
+        #     for j in range(len(estimated_param_names)):
+        #         text = ax[arc_num].text(
+        #             j, i, round(correlations[i, j], 2), ha="center", va="center", color="black"
+        #         )
 
-        #     ax[arc_num].set_xticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
-        #     ax[arc_num].set_yticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
 
-        #     # add numbers to each of the boxes
-        #     for i in range(len(estimated_param_names)):
-        #         for j in range(len(estimated_param_names)):
-        #             text = ax[arc_num].text(
-        #                 j, i, round(correlations[i, j], 2), ha="center", va="center", color="black"
-        #             )
+        # ax[0].set_ylabel("Estimated Parameter")
+        ax[0].set_title("Start of navigation")
+        ax[1].set_title("End of navigation")
 
-        #     ax[arc_num].set_xlabel("Estimated Parameter")
-        #     ax[0].set_ylabel("Estimated Parameter")
+        cb = plt.colorbar(im)
+        cb = plt.colorbar(im1)
 
-        # cb = plt.colorbar(im)
+        fig.suptitle(f"Correlations for estimated parameters for LPF and LUMIO")
+        fig.tight_layout()
 
-        # fig.suptitle(f"Correlations for estimated parameters for LPF and LUMIO")
-        # fig.tight_layout()
         # plt.show()

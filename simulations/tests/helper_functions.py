@@ -22,42 +22,21 @@ from src import NavigationSimulator
 ###### Helper functions for monte carlo #########################################
 #################################################################################
 
-
-# def get_custom_observation_windows(duration, skm_to_od_duration, threshold, od_duration):
-
-#     # Generate a vector with OD durations
-#     start_epoch = 60390
-#     epoch = start_epoch + threshold + skm_to_od_duration + od_duration
-#     skm_epochs = []
-#     i = 1
-#     while True:
-#         if epoch <= start_epoch+duration:
-#             skm_epochs.append(epoch)
-#             epoch += skm_to_od_duration+od_duration
-#         else:
-#             design_vector = od_duration*np.ones(np.shape(skm_epochs))
-#             break
-#         i += 1
-
-#     # Extract observation windows
-#     observation_windows = [(start_epoch, start_epoch+threshold)]
-#     for i, skm_epoch in enumerate(skm_epochs):
-#         observation_windows.append((skm_epoch-od_duration, skm_epoch))
-
-#     return observation_windows
-
-
-# def get_monte_carlo_stats(dict):
-
-#     values = []
-#     for key, value in dict.items():
-#         values.append(value)
-
-#     return {"mean": np.mean(values), "std_dev": np.std(values)}
-
-
-
-def get_optimization_result(dynamic_model_list, truth_model_list, threshold, skm_to_od_duration, duration, od_duration, bounds=(0.5, 1.5), maxiter=5, factor=2, custom_initial_design_vector=None, custom_station_keeping_error=None):
+def get_optimization_result(dynamic_model_list,
+                            truth_model_list,
+                            threshold,
+                            skm_to_od_duration,
+                            duration,
+                            od_duration,
+                            bounds=(0.5, 1.5),
+                            maxiter=5,
+                            factor=2,
+                            custom_initial_design_vector=None,
+                            custom_station_keeping_error=None,
+                            custom_initial_estimation_error=None,
+                            custom_apriori_covariance=None,
+                            custom_orbit_insertion_error=None,
+                            mission_start_time = 60390):
 
     # Create OptimizationModel instance based on timing characteristics
     optimization_model = OptimizationModel.OptimizationModel(dynamic_model_list,
@@ -67,11 +46,17 @@ def get_optimization_result(dynamic_model_list, truth_model_list, threshold, skm
                                                              duration=duration,
                                                              od_duration=od_duration,
                                                              bounds=bounds,
-                                                             custom_station_keeping_error=custom_station_keeping_error)
+                                                             custom_station_keeping_error=custom_station_keeping_error,
+                                                             custom_initial_estimation_error=custom_initial_estimation_error,
+                                                             custom_apriori_covariance=custom_apriori_covariance,
+                                                             custom_orbit_insertion_error=custom_orbit_insertion_error,
+                                                             mission_start_time=mission_start_time,
+                                                             )
 
     # Adjust optimization attributes
     if custom_initial_design_vector is not None:
         optimization_model.initial_design_vector = custom_initial_design_vector
+
     optimization_model.maxiter = maxiter
     optimization_model.factor = factor
 
@@ -193,7 +178,23 @@ def concatenate_json_files(folder_path, batch=None):
     return concatenated_json
 
 
-def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, threshold, skm_to_od_duration, duration, od_duration, bounds=(0.5, 1.5), numruns=1, maxiter=5, factor=2, custom_initial_design_vector=None, custom_station_keeping_error=None, label=None):
+def run_monte_carlo_optimization_model(dynamic_model_list,
+                                       truth_model_list,
+                                       threshold,
+                                       skm_to_od_duration,
+                                       duration,
+                                       od_duration,
+                                       bounds=(0.5, 1.5),
+                                       numruns=1,
+                                       maxiter=5,
+                                       factor=2,
+                                       custom_initial_design_vector=None,
+                                       custom_station_keeping_error=None,
+                                       custom_initial_estimation_error=None,
+                                       custom_apriori_covariance=None,
+                                       custom_orbit_insertion_error=None,
+                                       mission_start_time = 60390,
+                                       label=None):
 
     current_time_string = datetime.now().strftime("%d%m%H%M")
 
@@ -223,6 +224,10 @@ def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, thr
                                                       maxiter=maxiter,
                                                       custom_initial_design_vector=custom_initial_design_vector,
                                                       custom_station_keeping_error=custom_station_keeping_error,
+                                                      custom_initial_estimation_error=custom_initial_estimation_error,
+                                                      custom_apriori_covariance=custom_apriori_covariance,
+                                                      custom_orbit_insertion_error=custom_orbit_insertion_error,
+                                                      mission_start_time=mission_start_time,
                                                       factor=factor)
 
         print(f"Optimization result of run {run}: ", optimization_result)
@@ -243,40 +248,14 @@ def run_monte_carlo_optimization_model(dynamic_model_list, truth_model_list, thr
     # print("Monte Carlo statistics: ", monte_carlo_stats_dict)
 
 
-
-def get_navigation_results(observation_windows, dynamic_model_list, truth_model_list, step_size=1e-2, station_keeping_epochs=[], target_point_epochs=[3], custom_station_keeping_error=None):
-
-    print(observation_windows)
-    print(station_keeping_epochs)
-    navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
-                                                                    dynamic_model_list,
-                                                                    truth_model_list,
-                                                                    station_keeping_epochs=station_keeping_epochs,
-                                                                    target_point_epochs=target_point_epochs,
-                                                                    custom_station_keeping_error=custom_station_keeping_error,
-                                                                    step_size=step_size)
-
-    navigation_results = navigation_simulator.perform_navigation().navigation_results
-
-    # navigation_simulator.plot_navigation_results(navigation_results, show_directly=False)
-
-    delta_v = navigation_results[8][1]
-    objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-    print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0], run_time)
-    print("End of objective calculation ===============")
-
-    return navigation_results
-
-
-
-def get_custom_observation_windows(duration, skm_to_od_duration, threshold, od_duration, start_epoch=60390):
+def get_custom_observation_windows(duration, skm_to_od_duration, threshold, od_duration, simulation_start_epoch=60390):
 
     # Generate a vector with OD durations
-    epoch = start_epoch + threshold + skm_to_od_duration + od_duration
+    epoch = simulation_start_epoch + threshold + skm_to_od_duration + od_duration
     skm_epochs = []
     i = 1
     while True:
-        if epoch <= start_epoch+duration:
+        if epoch <= simulation_start_epoch+duration:
             skm_epochs.append(epoch)
             epoch += skm_to_od_duration+od_duration
         else:
@@ -285,7 +264,7 @@ def get_custom_observation_windows(duration, skm_to_od_duration, threshold, od_d
         i += 1
 
     # Extract observation windows
-    observation_windows = [(start_epoch, start_epoch+threshold)]
+    observation_windows = [(simulation_start_epoch, simulation_start_epoch+threshold)]
     for i, skm_epoch in enumerate(skm_epochs):
         observation_windows.append((skm_epoch-od_duration, skm_epoch))
 

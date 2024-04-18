@@ -250,10 +250,8 @@ def get_estimation_model_results(dynamic_model_objects,
                 # results_list.append(time.time()-start_time)
                 # estimation_model_objects_results[model_type][model_name][i] = results_list
 
-                # print("start estimation")
-                # start_time = time.time()
+                print("range noise: ", custom_range_noise)
                 results_list = estimation_model.get_estimation_results()
-                # print("estimation time: ", time.time()-start_time)
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 
     # Selectic only specific estimation model outputs to save to the dictionary
@@ -377,25 +375,25 @@ def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folde
     file_path = caller_frame.filename
     file_path = os.path.dirname(file_path)
 
-    figure_folder = os.path.join(file_path, folder_name)
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder, exist_ok=True)
+    dict_folder = os.path.join(file_path, folder_name)
+    if not os.path.exists(dict_folder):
+        os.makedirs(dict_folder, exist_ok=True)
 
     if custom_sub_folder_name is None:
         sub_folder_name = inspect.currentframe().f_back.f_code.co_name
     else:
         sub_folder_name = custom_sub_folder_name
 
-    sub_figure_folder = os.path.join(figure_folder, sub_folder_name)
-    if not os.path.exists(sub_figure_folder):
-        os.makedirs(sub_figure_folder, exist_ok=True)
+    sub_folder = os.path.join(dict_folder, sub_folder_name)
+    if not os.path.exists(sub_folder):
+        os.makedirs(sub_folder, exist_ok=True)
 
     for i, fig in enumerate(figs):
         if len(figs) != len(labels):
             file_name = f"fig_{i}.png"
         else:
             file_name = f"{labels[i]}.png"
-        figure_path = os.path.join(sub_figure_folder, file_name)
+        figure_path = os.path.join(sub_folder, file_name)
         fig.savefig(figure_path)
 
 

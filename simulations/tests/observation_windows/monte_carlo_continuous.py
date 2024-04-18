@@ -12,9 +12,7 @@ for _ in range(5):
     sys.path.append(file_directory)
 
 from tests import utils, helper_functions
-from src.optimization_models import OptimizationModel
 from src import NavigationSimulator, PlotNavigationResults
-
 
 
 #################################################################

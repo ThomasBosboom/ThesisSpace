@@ -12,7 +12,6 @@ for _ in range(5):
     sys.path.append(file_directory)
 
 from tests import utils, helper_functions
-from src.optimization_models import OptimizationModel
 from src import NavigationSimulator, PlotNavigationResults
 
 
@@ -20,95 +19,57 @@ from src import NavigationSimulator, PlotNavigationResults
 ###### Compare results observation windows ######################
 #################################################################
 
-
-### Extract information from specific folder and run
-# folder_name = "PM01_PM01_thr3_skm3_dur28_od1_num1_max20_test"
-# batch_name = "09040214"
-# folder_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "variable_arc\data", folder_name)
-
-# concatenated_json = helper_functions.concatenate_json_files(folder_path, batch=batch_name)
-# monte_carlo_stats_dict = helper_functions.get_monte_carlo_stats_dict(concatenated_json)
-
-# Extract information directly
-# file_name = f"{batch_name}_stats_{folder_name}.json"
-# file_path = os.path.join(folder_path, file_name)
-# monte_carlo_stats_dict = helper_functions.load_json_file(file_path)
-
-# file_name = f"{batch_name}_run_0_{folder_name}.json"
-# file_path = os.path.join(folder_path, file_name)
-# run_data = helper_functions.load_json_file(file_path)
-
-# observation_windows_optim = run_data["final_result"]["observation_windows"]
-# station_keeping_epochs_optim = run_data["final_result"]["skm_epochs"]
-observation_windows_optim = [(60390, 60397), (60400.0, 60401.22475752616), (60404.22475752616, 60405.066958155025), (60408.066958155025, 60408.566958155025), (60411.566958155025, 60412.98370281383), (60415.98370281383, 60416.79029821602)]
-
 ### Compare difference timing cases
-dynamic_model_list = ["HF", "PMSRP", 0]
-truth_model_list = ["HF", "PMSRP", 0]
-threshold = 1
-skm_to_od_duration = 3
-duration = 28
-od_duration = 1
-custom_station_keeping_error = 1e-10
-custom_target_point_epoch = 3
-custom_initial_estimation_error = np.array([5e0, 5e0, 5e0, 1e-5, 1e-5, 1e-5, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*0
-custom_apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-custom_orbit_insertion_error = np.array([1e-20, 1e-20, 1e-20, 1e-20, 1e-20, 1e-20, 1e1, 1e1, 1e1, 1e-4, 1e-4, 1e-4])*1e2
-# orbit_insertion_error = np.array([1e-20, 1e-20, 1e-20, 1e-20, 1e-20, 1e-20, 1e1, 1e1, 1e1, 1e-4, 1e-4, 1e-4])*1e0
+# dynamic_model_list = ["HF", "PMSRP", 0]
+# truth_model_list = ["HF", "PMSRP", 0]
+num_runs = 1
+# custom_station_keeping_error =  2e-2
+# custom_range_noise = 2.98
+# custom_target_point_epoch = 3
+# custom_initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+# custom_apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+# custom_orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])
+simulation_start_epoch = 60390
 
 
 # Collect a series of observation window sets to compare
 observation_windows_list = []
-observation_windows_list.append(helper_functions.get_custom_observation_windows(28, 3, 1, 0.1))
-# observation_windows_list.append(helper_functions.get_custom_observation_windows(28, 3, 1, 0.2))
-# observation_windows_list.append(helper_functions.get_custom_observation_windows(28, 3, 1, 0.5))
-observation_windows_list.append(helper_functions.get_custom_observation_windows(28, 3, 1, 1))
-observation_windows_list.append(helper_functions.get_custom_observation_windows(28, 3, 1, 1.5))
+# observation_windows_list.append(helper_functions.get_custom_observation_windows(3, 3, 3, 0.1))
+# observation_windows_list.append([(60390.38, 60390.51), (60390.83, 60390.96), (60391.28, 60391.41), (60391.73, 60391.86), (60392.18, 60392.31), (60392.63, 60392.76), (60393.08, 60393.21), (60393.53, 60393.66), (60393.98, 60394.11), (60394.43, 60394.56), (60394.88, 60395.01), (60395.33, 60395.46), (60395.78, 60395.91), (60396.23, 60396.36), (60396.68, 60396.81), (60397.13, 60397.26), (60397.58, 60397.71), (60398.03, 60398.16), (60398.48, 60398.61), (60398.93, 60399.06), (60399.38, 60399.51), (60399.83, 60399.96), (60400.28, 60400.41), (60400.73, 60400.86), (60401.18, 60401.31), (60401.63, 60401.76), (60402.08, 60402.21), (60402.53, 60402.66), (60402.98, 60403.11), (60403.43, 60403.56), (60403.88, 60404.01), (60404.33, 60404.46), (60404.78, 60404.91), (60405.23, 60405.36), (60405.68, 60405.81), (60406.13, 60406.26), (60406.58, 60406.71), (60407.03, 60407.16), (60407.48, 60407.61), (60407.93, 60408.06), (60408.38, 60408.51),
+# (60408.83, 60408.96), (60409.28, 60409.41), (60409.73, 60409.86), (60410.18, 60410.31), (60410.63, 60410.76), (60411.08, 60411.21), (60411.53, 60411.66), (60411.98, 60412.11), (60412.43, 60412.56), (60412.88, 60413.01), (60413.33, 60413.46), (60413.78, 60413.91), (60414.23, 60414.36), (60414.68, 60414.81), (60415.13, 60415.26), (60415.58, 60415.71), (60416.03, 60416.16), (60416.48, 60416.61), (60416.93, 60417.06), (60417.38, 60417.51), (60417.83, 60417.96)])
+observation_windows_list.append(helper_functions.get_custom_observation_windows(28, 3, 1, 1, simulation_start_epoch=simulation_start_epoch))
 
-
+# Run the navigation routine using given settings
 navigation_results_list = []
 navigation_simulator_list = []
 navigation_output_list = []
-for i, observation_windows in enumerate(observation_windows_list):
+for run in range(num_runs):
+    for i, observation_windows in enumerate(observation_windows_list):
 
-    print("Running with observation windows: \n", observation_windows)
+        print("Running with observation windows: \n", observation_windows)
 
-    station_keeping_epochs = [windows[1] for windows in observation_windows]
+        navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows)
 
-    # custom_orbit_insertion_error = np.random.normal(loc=0, scale=orbit_insertion_error)
-    # print(custom_orbit_insertion_error)
+        navigation_output = navigation_simulator.perform_navigation()
+        navigation_results = navigation_output.navigation_results
+        navigation_simulator = navigation_output.navigation_simulator
 
-    navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
-                                                                    dynamic_model_list,
-                                                                    truth_model_list,
-                                                                    step_size=1e-2,
-                                                                    station_keeping_epochs=station_keeping_epochs,
-                                                                    target_point_epochs=[custom_target_point_epoch],
-                                                                    custom_station_keeping_error=custom_station_keeping_error,
-                                                                    custom_initial_estimation_error=custom_initial_estimation_error,
-                                                                    custom_apriori_covariance=custom_apriori_covariance,
-                                                                    custom_orbit_insertion_error=custom_orbit_insertion_error)
+        delta_v = navigation_output.navigation_results[8][1]
+        delta_v_per_skm = np.linalg.norm(delta_v, axis=1)
+        objective_value = np.sum(delta_v_per_skm)
+        print(f"Objective: \n", delta_v_per_skm, objective_value)
+        print("End of objective calculation ===============")
 
-    navigation_output = navigation_simulator.perform_navigation()
-    navigation_results = navigation_output.navigation_results
-    navigation_simulator = navigation_output.navigation_simulator
-
-    delta_v = navigation_output.navigation_results[8][1]
-    delta_v_per_skm = np.linalg.norm(delta_v, axis=1)
-    objective_value = np.sum(delta_v_per_skm)
-    print(f"Objective: \n", delta_v_per_skm, objective_value)
-    print("End of objective calculation ===============")
-
-    navigation_results_list.append(navigation_output.navigation_results)
-    navigation_simulator_list.append(navigation_simulator)
-    navigation_output_list.append(navigation_output)
+        navigation_results_list.append(navigation_output.navigation_results)
+        navigation_simulator_list.append(navigation_simulator)
+        navigation_output_list.append(navigation_output)
 
 
 fig, ax = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
 for i, navigation_results in enumerate(navigation_results_list):
 
     print(f"Delta V for case {i}: \n: ", np.linalg.norm(navigation_results_list[i][8][1], axis=1), np.sum(np.linalg.norm(navigation_results_list[i][8][1], axis=1)))
-    # formal_errror_history = navigation_results[3][0]
+
     # ax[i].plot(navigation_results[3][0]-navigation_results[3][0][0], np.linalg.norm(navigation_results[3][1][:, :3], axis=1))
 
 # plt.show()
@@ -118,17 +79,15 @@ for navigation_output in navigation_output_list:
     plot_navigation_results = PlotNavigationResults.PlotNavigationResults(navigation_output)
     plot_navigation_results.plot_estimation_error_history()
     plot_navigation_results.plot_uncertainty_history()
-    # plot_navigation_results.plot_reference_deviation_history()
-    # # plot_navigation_results.plot_full_state_history()
-    # plot_navigation_results.plot_formal_error_history()
-    # # plot_navigation_results.plot_correlation_history()
-    # plot_navigation_results.plot_observations()
-    # # plot_navigation_results.plot_observability()
-    # plot_navigation_results.plot_od_error_delta_v_relation()
+    plot_navigation_results.plot_reference_deviation_history()
+    plot_navigation_results.plot_full_state_history()
+    plot_navigation_results.plot_formal_error_history()
+    plot_navigation_results.plot_observations()
+    plot_navigation_results.plot_observability()
+    plot_navigation_results.plot_od_error_delta_v_relation()
+    plot_navigation_results.plot_correlation_history()
 
 # plt.show()
-
-
 
 
 fig, axs = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
@@ -176,6 +135,8 @@ fig.suptitle("Relations between SKM cost for run of 28 days")
 plt.legend()
 plt.show()
 
+
+utils.save_figure_to_folder(figs=[fig], labels=["CostVersusError"], custom_sub_folder_name=file_name)
 
 
 

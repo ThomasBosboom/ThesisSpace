@@ -12,7 +12,6 @@ for _ in range(5):
     sys.path.append(file_directory)
 
 from tests import utils, helper_functions
-from src.optimization_models import OptimizationModel
 from src import NavigationSimulator, PlotNavigationResults
 
 
@@ -26,8 +25,8 @@ from src import NavigationSimulator, PlotNavigationResults
 # Extract information from specific folder and run
 folder_name = "get_data_constant_arc"
 folder_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "data", folder_name)
-file_name = f"14042327_delta_v_dict_constant_arc.json"
-file_path = os.path.join(folder_path, file_name)
+data_file_name = f"17042033_delta_v_dict_constant_arc.json"
+file_path = os.path.join(folder_path, data_file_name)
 data = helper_functions.load_json_file(file_path)
 
 input_keys = data["inputs"].keys()
@@ -37,7 +36,7 @@ print(input_values)
 
 # print(data)
 
-case_lists = [['PM', '28', '1', '0.01', '3']]
+case_lists = [["1", 'PMSRP', '28', '1', '1e-10', '3', "2.98", "3"]]
 
 for i, (key, value) in enumerate(data['inputs'].items()):
    if key == "skm_to_od_durations":
@@ -79,31 +78,32 @@ for heatmap_data in heatmap_data_list:
     plt.title(r'$\Delta V$ [m/s] for 28 days')
     # plt.show()
 
-
-# model = "PMSRP"
-# Extracting data for plotting
-keys = data["inputs"]["skm_to_od_durations"]
-subkeys = data["inputs"]["od_durations"]
-values = {subkey: [current_dict[str(key)][str(subkey)][0] for key in current_dict] for subkey in subkeys}
-
-# Plotting
-fig = plt.figure(figsize=(10, 3))
-for i, subkey in enumerate(subkeys):
-    plt.bar([j + i * 0.1 for j in range(len(values[subkey]))], values[subkey], width=0.1, label=subkey)
-
-plt.xlabel('Arc separation interval [days]')
-plt.ylabel(r'$\Delta V$ [m/s]')
-plt.title(f'Station keeping costs, simulation of {28} [days]')
-plt.xticks([i + 0.2 for i in range(len(keys))], keys)
-plt.yscale('log')
-plt.legend(title='Arc durations', bbox_to_anchor=(1.05, 1), loc='upper left')
-plt.tight_layout()
-plt.grid(alpha=0.3)
 plt.show()
 
+# # Extracting data for plotting
+# keys = data["inputs"]["skm_to_od_durations"]
+# subkeys = data["inputs"]["od_durations"]
+# values = {subkey: [current_dict[str(key)][str(subkey)][0] for key in current_dict] for subkey in subkeys}
 
-# # utils.save_dicts_to_folder(figs=[fig], labels=["fig_constant_arc_duration"], custom_sub_folder_name=file_name)
+# # Plotting
+# fig = plt.figure(figsize=(10, 3))
+# for i, subkey in enumerate(subkeys):
+#     plt.bar([j + i * 0.1 for j in range(len(values[subkey]))], values[subkey], width=0.1, label=subkey)
 
+# plt.xlabel('Arc separation interval [days]')
+# plt.ylabel(r'$\Delta V$ [m/s]')
+# plt.title(f'Station keeping costs, simulation of {28} [days]')
+# plt.xticks([i + 0.2 for i in range(len(keys))], keys)
+# plt.yscale('log')
+# plt.legend(title='Arc durations', bbox_to_anchor=(1.05, 1), loc='upper left')
+# plt.tight_layout()
+# plt.grid(alpha=0.3)
+
+# plt.savefig(fig)
+
+plt.show()
+
+utils.save_figure_to_folder(figs=[fig], labels=["CostVersusError"], custom_sub_folder_name=file_name)
 
 
 

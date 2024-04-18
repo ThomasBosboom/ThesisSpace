@@ -13,16 +13,66 @@ for _ in range(2):
 # Own
 from tests import utils
 import reference_data, Interpolator, StationKeeping
-from NavigationSimulatorBase import NavigationSimulatorBase
 from tudatpy.kernel import constants
 
-class NavigationSimulator(NavigationSimulatorBase):
 
-    def __init__(self, observation_windows):
-        super().__init__()
+# np.random.seed(0)
+
+class NavigationSimulator():
+
+    def __init__(self, observation_windows,
+                       dynamic_model_list,
+                       truth_model_list,
+                       step_size=1e-2,
+                       station_keeping_epochs=[],
+                       target_point_epochs=[3],
+                       custom_range_noise=None,
+                       custom_station_keeping_error=None,
+                       custom_initial_estimation_error=None,
+                       custom_apriori_covariance=None,
+                       custom_orbit_insertion_error=None,
+                       delta_v_min=0.02,
+                       mission_start_time = 60390):
+
+        # Miscellaneous
+        self.step_size = step_size
+
+        # Managing the dynamic model specifications
+        self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
+        self.model_type_truth, self.model_name_truth, self.model_number_truth = truth_model_list[0], truth_model_list[1], truth_model_list[2]
+
+        # Customability of estimation arc attributes
+        self.custom_range_noise = custom_range_noise
+        self.custom_observation_step_size_range = None
+        self.custom_initial_state = None
+        self.custom_initial_state_truth = None
+
+        # Defining mission start
+        self.mission_start_time = mission_start_time
+        self.target_point_epochs = target_point_epochs
+
+        # Initial state and uncertainty parameters
+        self.station_keeping_error = 1e-20
+        self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1e0
+        self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
+        self.orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e1, 1e1, 1e1, 1e-4, 1e-4, 1e-4])*1e2
+
+        if custom_station_keeping_error is not None:
+            self.station_keeping_error = custom_station_keeping_error
+
+        if custom_initial_estimation_error is not None:
+            self.initial_estimation_error = custom_initial_estimation_error
+
+        if custom_apriori_covariance is not None:
+            self.apriori_covariance = custom_apriori_covariance
+
+        if custom_orbit_insertion_error is not None:
+            self.orbit_insertion_error = custom_orbit_insertion_error
+
+        self.delta_v_min = delta_v_min
 
         # Adjusting decimals based on the step size used
-        num_str = "{:.15f}".format(self.step_size).rstrip('0')
+        num_str = "{:.15f}".format(step_size).rstrip('0')
         self.decimal_places = len(num_str) - num_str.index('.') - 1
 
         # Rounding values
@@ -176,8 +226,8 @@ class NavigationSimulator(NavigationSimulatorBase):
                                                                                 custom_truth_model=truth_model,
                                                                                 apriori_covariance=self.apriori_covariance,
                                                                                 initial_estimation_error=self.initial_estimation_error,
-                                                                                custom_range_noise=self.range_noise,
-                                                                                custom_observation_step_size_range=self.observation_step_size_range)
+                                                                                custom_range_noise=self.custom_range_noise,
+                                                                                custom_observation_step_size_range=self.custom_observation_step_size_range)
 
                 estimation_model_result = estimation_model_results[self.model_type][self.model_name][0]
                 estimation_output = estimation_model_result.estimation_output

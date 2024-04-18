@@ -13,7 +13,18 @@ from tests import utils
 
 class OptimizationModel():
 
-    def __init__(self, dynamic_model_list, truth_model_list, threshold=8, duration=14, skm_to_od_duration=3, od_duration=1, bounds=(0.5, 1.5), custom_station_keeping_error=None, mission_start_time=60390):
+    def __init__(self, dynamic_model_list,
+                       truth_model_list,
+                       threshold=8,
+                       duration=14,
+                       skm_to_od_duration=3,
+                       od_duration=1,
+                       bounds=(0.5, 1.5),
+                       custom_station_keeping_error=None,
+                       custom_initial_estimation_error=None,
+                       custom_apriori_covariance=None,
+                       custom_orbit_insertion_error=None,
+                       mission_start_time=60390):
 
         # Specify the dynamic and truth model used for the estimation arcs
         self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
@@ -51,6 +62,9 @@ class OptimizationModel():
 
         # Error parameters for SKMs
         self.custom_station_keeping_error = custom_station_keeping_error
+        self.custom_initial_estimation_error = custom_initial_estimation_error
+        self.custom_apriori_covariance = custom_apriori_covariance
+        self.custom_orbit_insertion_error = custom_orbit_insertion_error
 
 
     def get_updated_skm_epochs(self, x):
@@ -72,19 +86,19 @@ class OptimizationModel():
         return new_observation_windows
 
 
-    def get_adjusted_design_vector(self, x):
+    # def get_adjusted_design_vector(self, x):
 
-        diff = np.array(x) - np.array(self.xk)
-        x = x + diff*(self.factor-1)
+    #     diff = np.array(x) - np.array(self.xk)
+    #     x = x + diff*(self.factor-1)
 
-        return x
+    #     return x
 
 
     def objective_function(self, x, plot_results=False, show_directly=False):
 
         print("Start of objective calculation ===============")
 
-        x = self.get_adjusted_design_vector(x)
+        # x = self.get_adjusted_design_vector(x)
         observation_windows = self.get_updated_observation_windows(x)
         station_keeping_epochs = self.get_updated_skm_epochs(x)
         target_point_epochs = [self.skm_to_od_duration]
@@ -97,10 +111,15 @@ class OptimizationModel():
         navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
                                                                        [self.model_type, self.model_name, self.model_number],
                                                                        [self.model_type_truth, self.model_name_truth, self.model_number_truth],
+                                                                       step_size=1e-2,
                                                                        station_keeping_epochs=station_keeping_epochs,
                                                                        target_point_epochs=target_point_epochs,
                                                                        custom_station_keeping_error=self.custom_station_keeping_error,
-                                                                       step_size=1e-2)
+                                                                       custom_initial_estimation_error=self.custom_initial_estimation_error,
+                                                                       custom_apriori_covariance=self.custom_apriori_covariance,
+                                                                       custom_orbit_insertion_error=self.custom_orbit_insertion_error,
+                                                                       mission_start_time=self.mission_start_time,
+                                                                       )
 
         navigation_results = navigation_simulator.perform_navigation().navigation_results
 
