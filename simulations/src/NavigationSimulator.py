@@ -40,11 +40,7 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
 
-        print("Start navigation simulation")
-        print("Observation windows \n ", self.observation_windows)
-        print("Station keeping epochs \n ", self.initial_station_keeping_epochs)
-        print("STATION KEEPING ERRORS", self.station_keeping_error)
-
+        # print("Random number: ", np.random.randint(1,1000))
 
     def get_Gamma(self, delta_t):
 
@@ -70,6 +66,15 @@ class NavigationSimulator(NavigationSimulatorBase):
 
 
     def perform_navigation(self):
+
+        self.initial_estimation_error = np.random.normal(loc=0, scale=self.initial_estimation_error_sigmas, size=self.initial_estimation_error_sigmas.shape)
+        self.orbit_insertion_error = np.random.normal(loc=0, scale=self.orbit_insertion_error_sigmas, size=self.orbit_insertion_error_sigmas.shape)
+
+        # self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
+        # self.orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])
+
+        print("initial_estimation_error: ", self.initial_estimation_error)
+        print("orbit_insertion_error: ", self.orbit_insertion_error)
 
         estimation_arc = 0
         navigation_arc = 0
@@ -118,14 +123,11 @@ class NavigationSimulator(NavigationSimulatorBase):
             state_history_reference = np.concatenate(state_history_reference, axis=1)
 
             if navigation_arc == 0:
-
                 self.custom_initial_state_truth = state_history_reference[0,:] + self.orbit_insertion_error
                 self.custom_initial_state = state_history_reference[0,:]
 
             dynamic_model.custom_initial_state = self.custom_initial_state
             truth_model.custom_initial_state = self.custom_initial_state_truth
-
-            # print("Difference initial state: ", self.custom_initial_state-self.custom_initial_state_truth)
 
             epochs, state_history_initial, dependent_variables_history_initial, state_transition_matrix_history_initial = \
                 Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model,
@@ -157,8 +159,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                 estimation_arc_activated = True
                 estimation_arc_duration = self.estimation_arc_durations[estimation_arc]
 
-
-                print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc}, at {time} for {estimation_arc_duration} days")
+                # print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc}, at {time} for {estimation_arc_duration} days")
 
                 # Define dynamic models and select one to test the estimation on
                 dynamic_model_objects = utils.get_dynamic_model_objects(time,
@@ -221,7 +222,10 @@ class NavigationSimulator(NavigationSimulatorBase):
             # Adding process noise
             delta_t = navigation_arc_duration*constants.JULIAN_DAY
             if self.model_name != self.model_name_truth:
-                self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
+                # self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
+                print("Before: ", np.diagonal(self.apriori_covariance))
+                self.apriori_covariance += self.get_process_noise_matrix(delta_t, 1e-11, 1e-11)
+                print("After: ", np.diagonal(self.apriori_covariance))
 
             # Save histories for reading out later
             self.full_estimation_error_dict.update(dict(zip(epochs, state_history_initial-state_history_truth)))
@@ -232,13 +236,8 @@ class NavigationSimulator(NavigationSimulatorBase):
             self.full_state_history_initial_dict.update(dict(zip(epochs, state_history_initial)))
             self.full_dependent_variables_history_initial.update(dict(zip(epochs, dependent_variables_history_initial)))
             self.full_state_transition_matrix_history_initial.update(dict(zip(epochs, state_transition_matrix_history_initial)))
-
-            # if len(state_history_reference) != len(state_history_initial):
-            #     state_history_initial = state_history_initial[:-1,:]
             self.full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_reference-state_history_truth)))
 
-
-            # print("HELLO THIS IS ESTIMATION ERROR: ", state_history_initial[0, :]-state_history_truth[0, :])
 
             ##############################################################
             #### STATION KEEPING #########################################
@@ -247,16 +246,14 @@ class NavigationSimulator(NavigationSimulatorBase):
             if self.times[navigation_arc+1] in self.initial_station_keeping_epochs:
 
                 params = [0, self.target_point_epochs]
-                # print("PARAMS: ", params)
                 dynamic_model.simulation_start_epoch_MJD = self.times[navigation_arc+1]
-                print("initial state before SKM: ", self.custom_initial_state)
                 station_keeping = StationKeeping.StationKeeping(dynamic_model, custom_initial_state=self.custom_initial_state, custom_propagation_time=max(params[1]), step_size=self.step_size)
                 delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=params[0], correction_epoch=params[0], target_point_epochs=params[1])
 
                 # Generate random noise to simulate station-keeping errors
                 if self.model_type == "HF":
-                    print(np.linalg.norm(delta_v))
-                    delta_v_noise_sigma = self.station_keeping_error*np.abs(delta_v)
+
+                    delta_v_noise_sigma = np.abs(self.station_keeping_error*delta_v)
                     delta_v_noise = np.random.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
 
                     if np.linalg.norm(delta_v) >= self.delta_v_min:
@@ -275,14 +272,10 @@ class NavigationSimulator(NavigationSimulatorBase):
 
             if navigation_arc<len(self.times)-2:
                 navigation_arc += 1
+
             else:
                 print("End navigation simulation")
                 break
-
-        # result_dicts = self.full_estimation_error_dict, self.full_reference_state_deviation_dict, self.full_propagated_covariance_dict, self.full_propagated_formal_errors_dict,\
-        #                 self.full_state_history_reference_dict, self.full_state_history_truth_dict, self.full_state_history_initial_dict, self.full_state_history_final_dict, self.delta_v_dict,\
-        #                 self.full_dependent_variables_history_initial, self.full_state_transition_matrix_history_initial, self.estimation_arc_results_dict
-
 
         self.navigation_result_dicts = [self.full_estimation_error_dict, self.full_reference_state_deviation_dict, self.full_propagated_covariance_dict, self.full_propagated_formal_errors_dict,\
                         self.full_state_history_reference_dict, self.full_state_history_truth_dict, self.full_state_history_initial_dict, self.full_state_history_final_dict, self.delta_v_dict,\
@@ -291,6 +284,13 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.navigation_output = NavigationOutput(self)
 
         return self.navigation_output
+
+
+    # Flexible initialization using optional parameters and default values
+    def configure(self, **kwargs):
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
 class NavigationOutput():

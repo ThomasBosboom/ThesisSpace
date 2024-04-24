@@ -27,7 +27,7 @@ class PlotNavigationResults():
         self.navigation_results = navigation_output.navigation_results
         self.sigma_number = sigma_number
 
-        self.mission_start_epoch = self.navigation_simulator.mission_start_time
+        self.mission_start_epoch = self.navigation_simulator.mission_start_epoch
         self.observation_windows = self.navigation_simulator.observation_windows
         self.station_keeping_epochs = self.navigation_simulator.station_keeping_epochs
         self.step_size = self.navigation_simulator.step_size
@@ -40,13 +40,14 @@ class PlotNavigationResults():
         ax_3d = fig1_3d.add_subplot(111, projection='3d')
         fig1_3d2 = plt.figure()
         ax_3d2 = fig1_3d2.add_subplot(111, projection='3d')
+        fig, ax = plt.subplots(2, 3, figsize=(11, 6))
 
         state_history_reference = self.navigation_results[4][1]
         state_history_truth = self.navigation_results[5][1]
         state_history_initial = self.navigation_results[6][1]
         epochs = self.navigation_results[9][0]
         dependent_variables_history = self.navigation_results[9][1]
-        navigation_simulator = self.navigation_results[-1]
+        # navigation_simulator = self.navigation_results[-1]
 
         moon_data_dict = {epoch: state for epoch, state in zip(epochs, dependent_variables_history[:, :6])}
         satellite_data_dict = {epoch: state for epoch, state in zip(epochs, state_history_initial[:, :])}
@@ -103,7 +104,7 @@ class PlotNavigationResults():
             synodic_satellite_states_dict.update({epoch: synodic_state})
 
         synodic_states = np.stack(list(synodic_satellite_states_dict.values()))
-        print(synodic_states[0, :])
+        # print(synodic_states[0, :])
 
         # Generate the synodic states of the moon
         synodic_moon_states_dict = {}
@@ -121,7 +122,6 @@ class PlotNavigationResults():
         synodic_states = np.stack(list(synodic_satellite_states_dict.values()))
         synodic_moon_states = np.stack(list(synodic_moon_states_dict.values()))
 
-        fig, ax = plt.subplots(2, 3, figsize=(13, 5))
         color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
         for i in range(2):
             if i == 0:
@@ -138,6 +138,7 @@ class PlotNavigationResults():
             ax[1][0].plot(synodic_states[:, 6*i+0], synodic_states[:, 6*i+2], lw=0.1, color=color)
             ax[1][1].plot(synodic_states[:, 6*i+1], synodic_states[:, 6*i+2], lw=0.1, color=color)
             ax[1][2].plot(synodic_states[:, 6*i+0], synodic_states[:, 6*i+1], lw=0.1, color=color, label="LUMIO" if i==1 else None)
+
 
         ax_3d.scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray", label="Moon")
         ax_3d.plot(synodic_states[:, 0], synodic_states[:, 1], synodic_states[:, 2], lw=0.2, color="gray")
@@ -172,9 +173,16 @@ class PlotNavigationResults():
 
             for i in range(2):
                 linewidth=2
+
+                if num == 0:
+                    ax[i][0].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+2], color=color_cycle[num%10], s=20, marker="X")
+                    ax[i][1].scatter(synodic_states_window[0, 6*i+1], synodic_states_window[0, 6*i+2], color=color_cycle[num%10], s=20, marker="X")
+                    ax[i][2].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+1], color=color_cycle[num%10], s=20, marker="X", label="Start" if i == 0 else None)
+
                 ax[i][0].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color_cycle[num%10])
                 ax[i][1].plot(synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color_cycle[num%10])
                 ax[i][2].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], linewidth=linewidth, color=color_cycle[num%10], label=f"Arc {num+1}" if i==0 else None)
+
                 ax_3d.plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=0.5 if i ==0 else 2, color=color_cycle[num%10], label=f"Arc {num+1}" if i==1 else None)
                 ax_3d2.plot(inertial_states_window[:, 6*i+0], inertial_states_window[:, 6*i+1], inertial_states_window[:, 6*i+2], linewidth=2, color=color_cycle[num%10], label=f"Arc {num+1}" if i==0 else None)
 
@@ -218,7 +226,7 @@ class PlotNavigationResults():
         fig1_3d.suptitle(f"Observation windows for {28} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         fig1_3d2.suptitle(f"Observation windows for {28} days, inertial frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
 
-        plt.tight_layout()
+        # plt.tight_layout()
         plt.legend()
 
     def plot_formal_error_history(self):
@@ -228,8 +236,7 @@ class PlotNavigationResults():
 
         full_propagated_formal_errors_epochs = self.navigation_results[3][0]
         full_propagated_formal_errors_history = self.navigation_results[3][1]
-        relative_epochs = full_propagated_formal_errors_epochs - full_propagated_formal_errors_epochs[0]
-
+        relative_epochs = full_propagated_formal_errors_epochs - self.mission_start_epoch
 
         linestyles = ["solid", "dotted", "dashed"]
         labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
@@ -250,7 +257,7 @@ class PlotNavigationResults():
                         alpha=0.1,
                         label="Observation window" if i == 0 else None)
                 for i, epoch in enumerate(self.station_keeping_epochs):
-                    station_keeping_epoch = epoch - full_propagated_formal_errors_epochs[0]
+                    station_keeping_epoch = epoch - self.mission_start_epoch
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
@@ -275,9 +282,9 @@ class PlotNavigationResults():
         full_propagated_formal_errors_epochs = self.navigation_results[3][0]
         full_propagated_formal_errors_history = self.navigation_results[3][1]
         propagated_covariance_epochs = self.navigation_results[2][0]
+        relative_epochs = full_propagated_formal_errors_epochs - self.mission_start_epoch
 
         # Plot the estimation error history
-        relative_epochs = full_propagated_formal_errors_epochs - full_propagated_formal_errors_epochs[0]
         for k in range(2):
             for j in range(2):
                 colors = ["red", "green", "blue"]
@@ -295,7 +302,7 @@ class PlotNavigationResults():
                         alpha=0.1,
                         label="Observation window" if i == 0 else None)
                 for i, epoch in enumerate(self.station_keeping_epochs):
-                    station_keeping_epoch = epoch - full_propagated_formal_errors_epochs[0]
+                    station_keeping_epoch = epoch - self.mission_start_epoch
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
@@ -320,7 +327,7 @@ class PlotNavigationResults():
         fig3, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
         full_reference_state_deviation_epochs = self.navigation_results[1][0]
         full_reference_state_deviation_history = self.navigation_results[1][1]
-        relative_epochs = full_reference_state_deviation_epochs - full_reference_state_deviation_epochs[0]
+        relative_epochs = full_reference_state_deviation_epochs - self.mission_start_epoch
 
         colors = ["red", "green", "blue"]
         labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
@@ -341,7 +348,7 @@ class PlotNavigationResults():
                         label="Observation window" if i == 0 else None)
 
                 for i, epoch in enumerate(self.station_keeping_epochs):
-                    station_keeping_epoch = epoch - full_reference_state_deviation_epochs[0]
+                    station_keeping_epoch = epoch - self.mission_start_epoch
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
 
                 ax[k][0].set_ylabel(ylabels[k])
@@ -371,7 +378,7 @@ class PlotNavigationResults():
 
         # full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
 
-        relative_epochs = propagated_covariance_epochs - propagated_covariance_epochs[0]
+        relative_epochs = propagated_covariance_epochs - self.mission_start_epoch
         for k in range(2):
             for j in range(2):
                 colors = ["red", "green", "blue"]
@@ -401,7 +408,7 @@ class PlotNavigationResults():
                         alpha=0.1,
                         label="Observation window" if i == 0 else None)
                 for i, epoch in enumerate(self.station_keeping_epochs):
-                    station_keeping_epoch = epoch - propagated_covariance_epochs[0]
+                    station_keeping_epoch = epoch - self.mission_start_epoch
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.2, label="SKM" if i==0 else None)
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
@@ -721,19 +728,22 @@ class PlotNavigationResults():
         abs_pos_od_error_history = np.linalg.norm(od_error_history_at_delta_v[:, 6:9], axis=1)
         abs_pos_deviation_history = np.linalg.norm(reference_deviation_at_delta_v[:, 6:9], axis=1)
 
-        axs[0].scatter(abs_delta_v_history, abs_pos_od_error_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
-        axs[1].scatter(abs_delta_v_history, abs_pos_deviation_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
+        # axs[0].scatter(abs_delta_v_history, abs_pos_od_error_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
+        # axs[1].scatter(abs_delta_v_history, abs_pos_deviation_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
 
+        for i in range(len(abs_delta_v_history)):
+            axs[0].scatter(abs_delta_v_history[i], abs_pos_od_error_history[i])
+            axs[1].scatter(abs_delta_v_history[i], abs_pos_deviation_history[i])
 
         axs[1].set_xlabel(r"||$\Delta V$|| [m/s]")
         axs[0].set_ylabel(r"||$\hat{\mathbf{r}}-\mathbf{r}$|| [m]")
         axs[1].set_ylabel(r"||$\mathbf{r}-\mathbf{r}_{ref}$|| [m]")
         axs[0].set_title("Maneuver cost versus OD error")
         axs[1].set_title("Maneuver cost versus reference orbit deviation")
-        axs[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+        axs[0].legend(title="Arc duration", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
         fig.suptitle("Relations between SKM cost for run of 28 days")
-        plt.legend()
+        plt.tight_layout()
         # plt.show()
 
 
@@ -742,22 +752,22 @@ class PlotNavigationResults():
         # Plot the estimation error history
         arc_nums = list(self.navigation_results[-1].keys())
 
-        fig, ax = plt.subplots(1, 2, figsize=(8, 4))
-        # for arc_num in [arc_nums[0], arc_nums[-1]]:
+        fig, ax = plt.subplots(1, 2, figsize=(9, 4))
 
-        # estimation_model = self.navigation_results[-1][arc_nums[]]
-        # estimation_output = estimation_model.estimation_output
         full_propagated_covariance_history = self.navigation_results[2][1]
 
         correlation_start = np.corrcoef(full_propagated_covariance_history[0])
         correlation_end = np.corrcoef(full_propagated_covariance_history[-1])
-        # correlations = estimation_output.correlations
+
+        estimation_model = self.navigation_results[-1][arc_nums[0]]
+        estimation_output = estimation_model.estimation_output
+        correlation_end = estimation_output.correlations
 
         estimated_param_names = [r"$x_{1}$", r"$y_{1}$", r"$z_{1}$", r"$\dot{x}_{1}$", r"$\dot{y}_{1}$", r"$\dot{z}_{1}$",
                                 r"$x_{2}$", r"$y_{2}$", r"$z_{2}$", r"$\dot{x}_{2}$", r"$\dot{y}_{2}$", r"$\dot{z}_{2}$"]
 
-        im = ax[0].imshow(correlation_start, cmap="viridis", vmin=-1, vmax=1)
-        im1 = ax[1].imshow(correlation_end, cmap="viridis", vmin=-1, vmax=1)
+        im_start = ax[0].imshow(correlation_start, cmap="viridis", vmin=-1, vmax=1)
+        im_end = ax[1].imshow(correlation_end, cmap="viridis", vmin=-1, vmax=1)
 
         for i in range(2):
             ax[i].set_xticks(np.arange(len(estimated_param_names)), labels=estimated_param_names)
@@ -765,22 +775,14 @@ class PlotNavigationResults():
             ax[i].set_xlabel("Estimated Parameter")
             ax[i].set_ylabel("Estimated Parameter")
 
-        # add numbers to each of the boxes
-        # for i in range(len(estimated_param_names)):
-        #     for j in range(len(estimated_param_names)):
-        #         text = ax[arc_num].text(
-        #             j, i, round(correlations[i, j], 2), ha="center", va="center", color="black"
-        #         )
-
-
         # ax[0].set_ylabel("Estimated Parameter")
-        ax[0].set_title("Start of navigation")
-        ax[1].set_title("End of navigation")
+        ax[0].set_title("Before arc")
+        ax[1].set_title("After arc")
 
-        cb = plt.colorbar(im)
-        cb = plt.colorbar(im1)
+        plt.colorbar(im_start)
+        plt.colorbar(im_end)
 
-        fig.suptitle(f"Correlations for estimated parameters for LPF and LUMIO")
+        fig.suptitle(f"State correlations for estimation, example arc of {self.navigation_simulator.estimation_arc_durations[0]} days")
         fig.tight_layout()
 
         # plt.show()

@@ -29,7 +29,7 @@ from src.dynamic_models.HF.PM import *
 from src.dynamic_models.HF.PMSRP import *
 from src.dynamic_models.HF.SH import *
 from src.dynamic_models.HF.SHSRP import *
-from src.estimation_models import EstimationModel
+from src import EstimationModel
 
 
 

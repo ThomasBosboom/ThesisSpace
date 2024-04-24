@@ -42,35 +42,3 @@ class DynamicModelBase:
         self.current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkf_45
         self.current_tolerance = 1e-18*constants.JULIAN_DAY
         self.initial_time_step = 1e-1*constants.JULIAN_DAY
-
-
-    def set_environment_settings(self):
-        pass
-
-
-    def set_acceleration_settings(self):
-        pass
-
-
-    def set_initial_state(self):
-        pass
-
-
-    def set_integration_settings(self):
-        pass
-
-
-    def set_dependent_variables_to_save(self):
-        pass
-
-
-    def set_termination_settings(self, custom_initial_state=None, custom_propagation_time=None):
-        pass
-
-
-    def set_propagator_settings(self, custom_initial_state=None):
-        pass
-
-
-    def get_propagation_simulator(self, custom_initial_state=None):
-        pass

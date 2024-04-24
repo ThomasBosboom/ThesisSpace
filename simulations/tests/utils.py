@@ -14,7 +14,7 @@ from tudatpy.kernel.astro import time_conversion
 # Own
 from src import Interpolator
 # from src.dynamic_models.FF.TRUTH import *
-from src.estimation_models import EstimationModel
+from src import EstimationModel
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -250,7 +250,7 @@ def get_estimation_model_results(dynamic_model_objects,
                 # results_list.append(time.time()-start_time)
                 # estimation_model_objects_results[model_type][model_name][i] = results_list
 
-                print("range noise: ", custom_range_noise)
+                # print("random number utisls", np.random.randint(1,1000))
                 results_list = estimation_model.get_estimation_results()
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 

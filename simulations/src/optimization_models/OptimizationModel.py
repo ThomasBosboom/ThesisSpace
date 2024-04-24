@@ -24,16 +24,16 @@ class OptimizationModel():
                        custom_initial_estimation_error=None,
                        custom_apriori_covariance=None,
                        custom_orbit_insertion_error=None,
-                       mission_start_time=60390):
+                       mission_start_epoch=60390):
 
         # Specify the dynamic and truth model used for the estimation arcs
         self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
         self.model_type_truth, self.model_name_truth, self.model_number_truth = truth_model_list[0], truth_model_list[1], truth_model_list[2]
 
         # Timing parameters
-        self.mission_start_time = mission_start_time
-        self.threshold = threshold + self.mission_start_time
-        self.duration = duration + self.mission_start_time
+        self.mission_start_epoch = mission_start_epoch
+        self.threshold = threshold + self.mission_start_epoch
+        self.duration = duration + self.mission_start_epoch
 
         self.skm_to_od_duration = skm_to_od_duration
         self.od_duration = od_duration
@@ -47,7 +47,7 @@ class OptimizationModel():
         for i, skm_epoch in enumerate(self.skm_epochs):
             window = (skm_epoch-self.od_duration, skm_epoch)
             if i == 0:
-                window = (self.mission_start_time, self.threshold)
+                window = (self.mission_start_epoch, self.threshold)
 
             self.observation_windows.append(window)
 
@@ -79,7 +79,7 @@ class OptimizationModel():
     def get_updated_observation_windows(self, x):
 
         new_skm_epochs = self.get_updated_skm_epochs(x)
-        new_observation_windows = [(self.mission_start_time, self.threshold)]
+        new_observation_windows = [(self.mission_start_epoch, self.threshold)]
         for i, skm_epoch in enumerate(new_skm_epochs[1:]):
             new_observation_windows.append((skm_epoch-x[i], skm_epoch))
 
@@ -118,7 +118,7 @@ class OptimizationModel():
                                                                        custom_initial_estimation_error=self.custom_initial_estimation_error,
                                                                        custom_apriori_covariance=self.custom_apriori_covariance,
                                                                        custom_orbit_insertion_error=self.custom_orbit_insertion_error,
-                                                                       mission_start_time=self.mission_start_time,
+                                                                       mission_start_epoch=self.mission_start_epoch,
                                                                        )
 
         navigation_results = navigation_simulator.perform_navigation().navigation_results
@@ -172,7 +172,7 @@ class OptimizationModel():
 
         result_dict =  {"threshold": self.threshold,
                         "skm_to_od_duration": self.skm_to_od_duration,
-                        "duration": self.duration-self.mission_start_time,
+                        "duration": self.duration-self.mission_start_epoch,
                         "factor": self.factor,
                         "maxiter": self.maxiter,
                         "initial_design_vector": list(self.initial_design_vector),
@@ -192,7 +192,7 @@ class OptimizationModel():
                         "final_result": {"x_optim": list(x_optim),
                                         "observation_windows": self.get_updated_observation_windows(x_optim),
                                         "skm_epochs": self.get_updated_skm_epochs(x_optim),
-                                        "approx_annual_deltav": objective_values[-1]*365/(self.duration-self.mission_start_time),
+                                        "approx_annual_deltav": objective_values[-1]*365/(self.duration-self.mission_start_epoch),
                                         "reduction_percentage": (objective_values[-1]-objective_values[0])/objective_values[0]*100,
                                         "run_time": run_time}
                         }
