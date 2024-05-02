@@ -28,31 +28,39 @@ from tests import utils
 
 # Collect a series of observation window sets to compare
 observation_windows_settings = {
-    "continuous_arc": [
+    "Perilune": [
+        (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=2, pass_interval=1), 1),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=1, pass_interval=4), 5),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=1, pass_interval=8), 5),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.05, threshold=0.5, pass_interval=4), 5),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.08, threshold=0.5, pass_interval=4), 5),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=0.5, pass_interval=4), 5),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=0.1, pass_interval=4), 5),
+    ],
+    "Apolune": [
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=1, pass_interval=4, apolune=True), 1),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.05, threshold=0.5, pass_interval=4, apolune=True), 5),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.08, threshold=0.5, pass_interval=4, apolune=True), 5),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=0.5, pass_interval=4, apolune=True), 5),
+    ],
+    "Random": [
+        # (comparison_helper_functions.get_random_arc_observation_windows(28, [2, 0.5], [0.5, 0.01], [0.2, 0.01], seed=0), 1),
+        # (comparison_helper_functions.get_random_arc_observation_windows(8, [1, 0.5], [0.5, 0.01], [0.2, 0.01], seed=1), 1),
+        # (comparison_helper_functions.get_random_arc_observation_windows(28, [2, 0.5], [0.5, 0.01], [0.1, 0.01], seed=1), 5),
+        # (comparison_helper_functions.get_random_arc_observation_windows(28, [2, 0.5], [0.5, 0.01], [0.1, 0.01], seed=2), 5),
+        # (comparison_helper_functions.get_random_arc_observation_windows(14, [2, 0.5], [1, 0.5], [0.1, 0.01], seed=3), 3),
+    ],
+    "Continuous": [
         # (comparison_helper_functions.get_constant_arc_observation_windows(28, 0, 1, 1), 1)
     ],
-    "constant_arc": [
-        # (comparison_helper_functions.get_constant_arc_observation_windows(28, 3, 1, 0.1), 30),
+    "Constant": [
+        (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=0.1, threshold=7, od_duration=1), 1),
         # (comparison_helper_functions.get_constant_arc_observation_windows(28, 3, 1, 0.5), 10),
         # (comparison_helper_functions.get_constant_arc_observation_windows(28, 3, 1, 1), 10),
-    ],
-    "perilune_arc": [
-        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, step_size=0.01, threshold=0, pass_interval=0), 2),
-        (comparison_helper_functions.get_orbit_based_arc_observation_windows(6, margin=0.1, step_size=0.01, threshold=0.5, pass_interval=6), 2),
-        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.08, step_size=0.01, threshold=0.5, pass_interval=6), 10),
-        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.05, step_size=0.01, threshold=0.5, pass_interval=6), 10),
-
-
-    ],
-    "apolune_arc": [
-        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, step_size=0.01, threshold=0.5, pass_interval=6, apolune=True), 10),
-        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.08, step_size=0.01, threshold=0.5, pass_interval=6, apolune=True), 10),
-        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.05, step_size=0.01, threshold=0.5, pass_interval=6, apolune=True), 10),
     ]
 }
 
 print(observation_windows_settings)
-
 
 
 #################################################################
@@ -60,78 +68,54 @@ print(observation_windows_settings)
 #################################################################
 
 # Run the navigation routine using given settings
-initial_estimation_error_sigmas = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
-orbit_insertion_error_sigmas = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])
 navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings,
-                                                                             initial_estimation_error_sigmas=initial_estimation_error_sigmas,
-                                                                             orbit_insertion_error_sigmas=orbit_insertion_error_sigmas)
+                                                                             mission_start_epoch=60390,
+                                                                             range_noise=2.98,
+                                                                             observation_step_size_range=600,
+                                                                             station_keeping_error=0,
+                                                                             orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
+                                                                             initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]))
 
-print(navigation_outputs)
+# Generate results
+objective_value_results           = comparison_helper_functions.generate_objective_value_results(navigation_outputs)
+orbit_determination_error_results = comparison_helper_functions.generate_orbit_determination_error_results(navigation_outputs)
+reference_orbit_deviation_results = comparison_helper_functions.generate_reference_orbit_deviation_results(navigation_outputs)
+global_uncertainty_results        = comparison_helper_functions.generate_global_uncertainty_results(navigation_outputs)
 
+# Save results
 utils.save_dicts_to_folder(dicts=[observation_windows_settings], labels=[current_time+"_observation_windows_settings"], custom_sub_folder_name=file_name)
-
-
-### Extracting the relevant information for each NavigationOutput object
-
-
-# Get objective value history
-objective_value_results = {}
-for window_type in navigation_outputs.keys():
-
-    objective_value_results_per_window_case = []
-    for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
-
-        objective_values = []
-        for run, navigation_output in navigation_output_list.items():
-
-            print(f"Results for {window_type} window_case {window_case} run {run}:")
-
-            # Extracting the relevant objects
-            navigation_results = navigation_output.navigation_results
-            navigation_simulator = navigation_output.navigation_simulator
-
-            # Extracting the relevant results from objects
-            delta_v = navigation_results[8][1]
-            delta_v_per_skm = np.linalg.norm(delta_v, axis=1)
-            objective_value = np.sum(delta_v_per_skm)
-            objective_values.append(objective_value)
-
-            print("Objective: ", delta_v_per_skm, objective_value)
-
-        objective_value_results_per_window_case.append((len(objective_values),
-                                                    min(objective_values),
-                                                    max(objective_values),
-                                                    np.mean(objective_values),
-                                                    np.std(objective_values),
-                                                    objective_values))
-
-    objective_value_results[window_type] = objective_value_results_per_window_case
-
-
-print(objective_value_results)
-
-
 utils.save_dicts_to_folder(dicts=[objective_value_results], labels=[current_time+"_objective_value_results"], custom_sub_folder_name=file_name)
+utils.save_dicts_to_folder(dicts=[orbit_determination_error_results], labels=[current_time+"_orbit_determination_error_results"], custom_sub_folder_name=file_name)
+utils.save_dicts_to_folder(dicts=[reference_orbit_deviation_results], labels=[current_time+"_reference_orbit_deviation_results"], custom_sub_folder_name=file_name)
+utils.save_dicts_to_folder(dicts=[global_uncertainty_results], labels=[current_time+"_global_uncertainty_results"], custom_sub_folder_name=file_name)
 
 
-
+fig, ax = plt.subplots(figsize=(10, 4))
+comparison_helper_functions.bar_plot(ax, objective_value_results, bar_labeler=None)
+utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_objective_value_results"], custom_sub_folder_name=file_name)
+# plt.show()
 
 
 # Plot OD errors given the arcs
-fig, axs = plt.subplots(4, 1, figsize=(12, 5), sharex=True)
+# fig, axs = plt.subplots(4, 1, figsize=(12, 5), sharex=True)
 fig2, axs2 = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
+fig3, axs3 = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
+fig4, axs4 = plt.subplots(figsize=(12, 3), sharex=True)
+axs4_twin = axs4.twinx()
 color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-j = 0
+line_style_cycle = ["solid", "dashed", "dashdot"]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
 
-    objective_value_results_per_window_case = []
+    color = color_cycle[int(type_index%len(color_cycle))]
+
     for case_index, window_case in enumerate(navigation_outputs_cases):
 
-        color = color_cycle[j]
-        j += 1
+        line_style = line_style_cycle[int(case_index%len(line_style_cycle))]
 
-        objective_values = []
+        full_propagated_formal_errors_histories = []
         for run_index, (run, navigation_output) in enumerate(window_case.items()):
+
+            alpha = 0.3
 
             print(f"Results for {window_type} window_case {case_index} run {run}:")
 
@@ -139,7 +123,9 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
             navigation_results = navigation_output.navigation_results
             navigation_simulator = navigation_output.navigation_simulator
 
-            alpha = np.random.randint(98,100)/100
+            # Extracting the relevant results from objects
+            delta_v_per_skm_list = np.linalg.norm(navigation_results[8][1], axis=1).tolist()
+            print("Size list: ", delta_v_per_skm_list)
 
             orbit_determination_errors = {}
             for window_index, (start_epoch, end_epoch) in enumerate(navigation_simulator.observation_windows):
@@ -154,154 +140,188 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                 orbit_determination_error = full_estimation_error_dict[end_epoch]
                 orbit_determination_errors.update({end_epoch: list(orbit_determination_error)})
 
-                axs[0].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[0:3]), color=color, alpha=alpha, label=f"{window_type}" if window_index==0 and run_index==0 else None)
-                axs[1].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[3:6]), color=color, alpha=alpha)
-                axs[2].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[6:9]), color=color, alpha=alpha)
-                axs[3].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[9:12]), color=color, alpha=alpha)
-                axs[3].set_xlabel(f"Epoch since {navigation_simulator.mission_start_epoch} [MJD]")
 
-                labels = [r"$||\hat{\mathbf{r}}_{0, LPF}-\mathbf{r}_{LPF}||$",
-                          r"$||\hat{\mathbf{v}}_{0, LPF}-\mathbf{v}_{LPF}||$",
-                          r"$||\hat{\mathbf{r}}_{0, LUMIO}-\mathbf{r}_{LUMIO}||$",
-                          r"$||\hat{\mathbf{v}}_{0, LUMIO}-\mathbf{v}_{LUMIO}||$"]
+                # axs[0].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[0:3]), color=color, alpha=alpha, label=f"{window_type}" if window_index==0 and run_index==0 else None)
+                # axs[1].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[3:6]), color=color, alpha=alpha)
+                # axs[2].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[6:9]), color=color, alpha=alpha)
+                # axs[3].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[9:12]), color=color, alpha=alpha)
+                # axs[3].set_xlabel(f"Epoch since {navigation_simulator.mission_start_epoch} [MJD]")
 
-                for i in range(len(axs)):
-                    axs[i].set_ylabel(labels[i])
-                    axs[i].grid(alpha=0.3)
-                    if run_index == 0:
-                        axs[i].axvspan(
-                            xmin=start_epoch-navigation_simulator.mission_start_epoch,
-                            xmax=end_epoch-navigation_simulator.mission_start_epoch,
-                            color=color,
-                            alpha=0.1,
-                            # label="Observation window" if type_index == 0 else None
-                            )
+                axs2[0][0].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[0:3]), color=color, alpha=alpha)
+                axs2[1][0].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[3:6]), color=color, alpha=alpha)
+                axs2[0][1].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[6:9]), color=color, alpha=alpha)
+                axs2[1][1].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.linalg.norm(orbit_determination_error[9:12]), color=color, alpha=alpha)
+
+                for k in range(2):
+                    for j in range(2):
+                        for i in range(3):
+                            axs3[k][j].scatter(end_epoch-navigation_simulator.mission_start_epoch, np.abs(orbit_determination_error[3*k+6*j+i]), color=color, alpha=alpha)
 
 
+                axs4_twin.bar(end_epoch-navigation_simulator.mission_start_epoch, delta_v_per_skm_list[window_index], color=color, width=0.2)
+
+                for k in range(2):
+                    for j in range(2):
+
+                        if run_index==0:
+
+                            axs2[k][j].axvspan(
+                                xmin=start_epoch-navigation_simulator.mission_start_epoch,
+                                xmax=end_epoch-navigation_simulator.mission_start_epoch,
+                                color=color,
+                                alpha=0.2,
+                                label=f"Observation window" if k == 0 and j == 1 and window_index==0 and case_index==0 else None
+                                )
+
+                            axs3[k][j].axvspan(
+                                xmin=start_epoch-navigation_simulator.mission_start_epoch,
+                                xmax=end_epoch-navigation_simulator.mission_start_epoch,
+                                color=color,
+                                alpha=0.2,
+                                label=f"Observation window" if k == 0 and j == 1 and window_index==0 and case_index==0 else None
+                                )
+
+                            if k == 0 and j == 0:
+
+                                axs4.axvspan(
+                                    xmin=start_epoch-navigation_simulator.mission_start_epoch,
+                                    xmax=end_epoch-navigation_simulator.mission_start_epoch,
+                                    color=color,
+                                    alpha=0.2,
+                                    label=f"Observation window" if k == 0 and j == 1 and window_index==0 and case_index==0 else None
+                                )
+
+            # colors = ["red", "green", "blue"]
+            # symbols = [[r"x", r"y", r"z"], [r"v_{x}", r"v_{y}", r"v_{z}"]]
+            ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
 
             full_propagated_formal_errors_epochs = navigation_results[3][0]
             full_propagated_formal_errors_history = navigation_results[3][1]
             propagated_covariance_epochs = navigation_results[2][0]
             relative_epochs = full_propagated_formal_errors_epochs - navigation_simulator.mission_start_epoch
 
-            # Plot the estimation error history
-            for k in range(2):
-                for j in range(2):
-                    colors = ["red", "green", "blue"]
-                    symbols = [[r"x", r"y", r"z"], [r"v_{x}", r"v_{y}", r"v_{z}"]]
-                    ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
-                    axs2[k][j].plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1), label=navigation_simulator.model_name)
+            full_propagated_formal_errors_histories.append(full_propagated_formal_errors_history)
 
             for k in range(2):
                 for j in range(2):
-                    for i, gap in enumerate(navigation_simulator.observation_windows):
-                        axs2[k][j].axvspan(
-                            xmin=gap[0]-navigation_simulator.mission_start_epoch,
-                            xmax=gap[1]-navigation_simulator.mission_start_epoch,
-                            color="gray",
-                            alpha=0.1,
-                            label="Observation window" if i == 0 else None)
-                    for i, epoch in enumerate(navigation_simulator.station_keeping_epochs):
-                        station_keeping_epoch = epoch - navigation_simulator.mission_start_epoch
-                        axs2[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
-                    axs2[k][0].set_ylabel(ylabels[k])
-                    axs2[k][j].grid(alpha=0.5, linestyle='--')
-                    axs2[k][j].set_yscale("log")
-                    axs2[k][0].set_title("LPF")
-                    axs2[k][1].set_title("LUMIO")
 
-                    # Set y-axis tick label format to scientific notation with one decimal place
-                    axs2[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-                    axs2[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-                    axs2[-1][j].set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]")
+                    if run_index == 0:
 
-axs2[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
+                        for i, epoch in enumerate(navigation_simulator.station_keeping_epochs):
+                            station_keeping_epoch = epoch - navigation_simulator.mission_start_epoch
+                            axs2[k][j].axvline(x=station_keeping_epoch,
+                                                color='black',
+                                                linestyle='--',
+                                                alpha=0.3,
+                                                label="SKM" if k == 0 and j == 1 and i==0 else None
+                                                )
+
+                            axs3[k][j].axvline(x=station_keeping_epoch,
+                                                color='black',
+                                                linestyle='--',
+                                                alpha=0.3,
+                                                label="SKM" if k == 0 and j == 1 and i==0 else None
+                                                )
+
+                            axs4.axvline(x=station_keeping_epoch,
+                                                color='black',
+                                                linestyle='--',
+                                                alpha=0.3,
+                                                label="SKM" if k == 0 and j == 1 and i==0 else None
+                                                )
+
+                    if run_index == 0 and case_index == 0:
+
+                        axs2[k][0].set_ylabel(ylabels[k])
+                        axs2[k][j].grid(alpha=0.5, linestyle='--')
+                        axs2[k][j].set_yscale("log")
+                        axs2[k][0].set_title("LPF")
+                        axs2[k][1].set_title("LUMIO")
+                        axs2[-1][j].set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]")
+
+                        axs3[k][0].set_ylabel(ylabels[k])
+                        axs3[k][j].grid(alpha=0.5, linestyle='--')
+                        axs3[k][j].set_yscale("log")
+                        axs3[k][0].set_title("LPF")
+                        axs3[k][1].set_title("LUMIO")
+                        axs3[-1][j].set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]")
+
+                        axs4.set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]")
+                        axs4_twin.set_ylabel(r"$||\Delta V||$ [m/s]")
+                        axs4.grid(alpha=0.5, linestyle='--')
+                        axs4.set_title("Station keeping costs")
+                        axs4.set_ylabel(ylabels[0])
+                        axs4.set_yscale("log")
+
+
+                    axs2[k][j].plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1),
+                                    # label=window_type if case_index==0 and run_index==0 else None,
+                                    color=color,
+                                    ls=line_style,
+                                    alpha=alpha)
+
+                    axs3[k][j].plot(relative_epochs, 3*np.abs(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3]),
+                                    # label=window_type if case_index==0 and run_index==0 else None,
+                                    color=color,
+                                    ls=line_style,
+                                    alpha=alpha)
+
+                    axs4.plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 6:9], axis=1),
+                                    # label=window_type if case_index==0 and run_index==0 else None,
+                                    color=color,
+                                    ls=line_style,
+                                    alpha=0.1)
+
+        for k in range(2):
+            for j in range(2):
+
+                mean_full_propagated_formal_errors_histories = np.mean(np.array(full_propagated_formal_errors_histories), axis=0)
+                axs2[k][j].plot(relative_epochs, 3*np.linalg.norm(mean_full_propagated_formal_errors_histories[:, 3*k+6*j:3*k+6*j+3], axis=1),
+                    label="Mean",
+                    color=color,
+                    ls=line_style,
+                    alpha=1)
+
+
+# axs2[0][1].legend(title="Details", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
 fig2.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
 plt.tight_layout()
 
 
+utils.save_figure_to_folder(figs=[fig2], labels=[current_time+"_uncertainty_history"], custom_sub_folder_name=file_name)
 
 
-
-
-
-axs[0].legend(title="Setup", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+# axs[0].legend(title="Setup", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 # plt.legend()
+# plt.show()
+
+
+
+# Plot specific runs
+objective_value_results = {}
+for window_type in navigation_outputs.keys():
+
+    objective_value_results_per_window_case = []
+    for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
+
+        objective_values = []
+        for run, navigation_output in navigation_output_list.items():
+
+            print(f"Results for {window_type} window_case {window_case} run {run}:")
+
+            # Plotting results
+            plot_navigation_results = PlotNavigationResults.PlotNavigationResults(navigation_output)
+            plot_navigation_results.plot_estimation_error_history()
+            # plot_navigation_results.plot_uncertainty_history()
+            plot_navigation_results.plot_reference_deviation_history()
+            # plot_navigation_results.plot_full_state_history()
+            # plot_navigation_results.plot_formal_error_history()
+            # plot_navigation_results.plot_observations()
+            # plot_navigation_results.plot_observability()
+            # plot_navigation_results.plot_od_error_delta_v_relation()
+            # plot_navigation_results.plot_correlation_history()
+
+            # plt.show()
+
 plt.show()
-
-
-
-
-# # Plot specific runs
-# objective_value_results = {}
-# for window_type in navigation_outputs.keys():
-
-#     objective_value_results_per_window_case = []
-#     for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
-
-#         objective_values = []
-#         for run, navigation_output in navigation_output_list.items():
-
-#             print(f"Results for {window_type} window_case {window_case} run {run}:")
-
-#             # Plotting results
-#             plot_navigation_results = PlotNavigationResults.PlotNavigationResults(navigation_output)
-#             plot_navigation_results.plot_estimation_error_history()
-#             plot_navigation_results.plot_uncertainty_history()
-#             # plot_navigation_results.plot_reference_deviation_history()
-#             plot_navigation_results.plot_full_state_history()
-#             plot_navigation_results.plot_formal_error_history()
-#             # plot_navigation_results.plot_observations()
-#             # plot_navigation_results.plot_observability()
-#             # plot_navigation_results.plot_od_error_delta_v_relation()
-#             # plot_navigation_results.plot_correlation_history()
-
-#             # plt.show()
-
-# plt.show()
-
-
-
-
-
-# mission_start_epoch = 60390
-# fig, ax = plt.subplots(len(observation_windows_list), 1, figsize=(12, 5), sharex=True)
-# color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-# for j in range(len(ax)):
-#     for i, gap in enumerate(observation_windows_list[j]):
-#         ax[j].axvspan(
-#             xmin=gap[0]-mission_start_epoch,
-#             xmax=gap[1]-mission_start_epoch,
-#             color=color_cycle[i],
-#             alpha=0.1,
-#             label=f"Arc {i}" if j == 0 else None)
-#     for i, epoch in enumerate([windows[1] for windows in observation_windows_list[j]]):
-#         station_keeping_epoch = epoch - 60390
-#         ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', label="SKM" if i==0 else None)
-
-#     ax[j].grid(alpha=0.5, linestyle='--')
-
-#     # Set y-axis tick label format to scientific notation with one decimal place
-#     # ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-#     # ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-
-# ax[0].set_ylabel("Range [m]")
-# ax[1].set_ylabel("Observation Residual [m]")
-# ax[-1].set_xlabel(f"Time since MJD {mission_start_epoch} [days]")
-# ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
-
-# # fig.suptitle(f"Intersatellite range observations \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
-# plt.tight_layout()
-# plt.show()
-
-
-
-
-
-
-
-
-
-
-

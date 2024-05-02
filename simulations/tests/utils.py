@@ -12,9 +12,7 @@ import inspect
 from tudatpy.kernel.astro import time_conversion
 
 # Own
-from src import Interpolator
-# from src.dynamic_models.FF.TRUTH import *
-from src import EstimationModel
+from src import Interpolator, EstimationModel
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
@@ -207,6 +205,9 @@ def get_estimation_model_results(dynamic_model_objects,
                                  initial_estimation_error=None,
                                  custom_range_noise=None,
                                  custom_observation_step_size_range=None):
+
+
+    print("initial_estimation_error in utils: ", initial_estimation_error)
 
     if custom_estimation_model_objects is None:
         estimation_model_objects = get_estimation_model_objects(dynamic_model_objects,

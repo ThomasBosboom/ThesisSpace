@@ -18,10 +18,17 @@ class NavigationSimulatorBase():
         self.observation_step_size_range = 600
         self.range_noise = 2.98
         self.delta_v_min = 0.00
-        self.station_keeping_error = 2e-2
+        self.include_station_keeping = True
+        self.station_keeping_error = 0
+        self.state_noise_compensation = 1e-18
         self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
         self.initial_estimation_error_sigmas = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
         self.orbit_insertion_error_sigmas = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])
+        # self.initial_estimation_error = np.random.normal(loc=0, scale=self.initial_estimation_error_sigmas, size=self.initial_estimation_error_sigmas.shape)
+        # self.orbit_insertion_error = np.random.normal(loc=0, scale=self.orbit_insertion_error_sigmas, size=self.orbit_insertion_error_sigmas.shape)
+
+        self.orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])
+        self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
 
 
 
