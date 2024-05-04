@@ -16,7 +16,7 @@ for _ in range(2):
 
 class EstimationModel:
 
-    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_estimation_error=None):
+    def __init__(self, dynamic_model, truth_model, apriori_covariance=None, initial_estimation_error=None, **kwargs):
 
         # Loading dynamic model
         self.dynamic_model = dynamic_model
@@ -35,6 +35,11 @@ class EstimationModel:
         self.time_drift_bias = 6.9e-20
         self.maximum_iterations = 4
         self.margin = 120
+
+        # Flexible initialization using optional parameters and default values
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
     def set_observation_model_settings(self):
@@ -142,6 +147,16 @@ class EstimationModel:
         # Create the parameters that will be estimated
         self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.dynamic_model.bodies)
 
+        # self.set_simulated_observations()
+        # self.truth_model.set_propagator_settings()
+        # self.dynamic_model.set_propagator_settings()
+
+        # # Setup parameters settings to propagate the state transition matrix
+        # self.parameter_settings = estimation_setup.parameter.initial_states(self.truth_model.propagator_settings, self.truth_model.bodies)
+
+        # # Create the parameters that will be estimated
+        # self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.truth_model.bodies)
+
 
     def set_estimator_settings(self):
 
@@ -154,37 +169,39 @@ class EstimationModel:
             self.observation_settings_list,
             self.dynamic_model.propagator_settings)
 
-        # Save the true parameters to later analyse the error
-        self.truth_parameters = self.parameters_to_estimate.parameter_vector
-
-        # Perturb the initial state estimate from the truth
-        self.perturbed_parameters = self.truth_parameters
-        if self.initial_estimation_error is not None:
-            for i in range(3):
-                for j in range(2):
-                    self.perturbed_parameters[i+6*j] += self.initial_estimation_error[i+6*j]
-                    self.perturbed_parameters[i+6*j+3] += self.initial_estimation_error[i+6*j+3]
-
-        self.parameters_to_estimate.parameter_vector[:12] = self.perturbed_parameters
-
-        print("Difference: ", self.parameters_to_estimate.parameter_vector-self.truth_parameters)
-
         # # Save the true parameters to later analyse the error
         # self.truth_parameters = self.parameters_to_estimate.parameter_vector
 
         # # Perturb the initial state estimate from the truth
-        # perturbed_parameters = self.truth_parameters.copy()
+        # self.perturbed_parameters = self.truth_parameters.copy()
         # if self.initial_estimation_error is not None:
-        #     for i in range(3):
-        #         for j in range(2):
-        #             perturbed_parameters[i+6*j] += self.initial_estimation_error[i+6*j]
-        #             perturbed_parameters[i+6*j+3] += self.initial_estimation_error[i+6*j+3]
-        # self.parameters_to_estimate.parameter_vector = perturbed_parameters
+        #     self.perturbed_parameters += self.initial_estimation_error
+        # self.parameters_to_estimate.parameter_vector[:12] = self.perturbed_parameters
 
-        # print("Estimation error before estimation: ", self.parameters_to_estimate.parameter_vector-self.truth_parameters)
+        # print("Truth at start of arc: ", self.truth_parameters)
+        # print("Estimate at start of arc: ", self.parameters_to_estimate.parameter_vector)
+
+
+        # print("Dynamic model initial state: \n", self.dynamic_model.initial_state)
+        # print("Truth model initial state: \n", self.truth_model.initial_state)
+        # print("DIFFERENCE: \n", self.dynamic_model.initial_state-self.truth_model.initial_state)
+
+        # # # Save the true parameters to later analyse the error
+        # self.truth_parameters = self.parameters_to_estimate.parameter_vector
+
+        # # Perturb the initial state estimate from the truth
+        # self.perturbed_parameters = self.truth_parameters.copy()
+        # if self.initial_estimation_error is not None:
+        #     self.perturbed_parameters += self.initial_estimation_error
+        # self.parameters_to_estimate.parameter_vector = self.perturbed_parameters
+
+        # print("Truth at start of arc: ", self.truth_parameters)
+        # print("Estimate at start of arc: ", self.parameters_to_estimate.parameter_vector)
+
 
         # Create input object for the estimation
-        convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=self.maximum_iterations)
+        convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=self.maximum_iterations,
+                                                                        minimum_residual_change = 1.5*self.noise_range)
         if self.apriori_covariance is None:
             self.estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
                                                                convergence_checker=convergence_checker)
@@ -202,16 +219,19 @@ class EstimationModel:
         self.estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
 
-    def get_estimation_results(self, redirect_out=True):
+    def get_estimation_results(self, redirect_out=False):
 
         self.set_estimator_settings()
 
+        # od_error = self.parameters_to_estimate.parameter_vector-self.truth_parameters
+        # print("Estimation error before estimation: \n", od_error)
         # Run the estimation
         with util.redirect_std(redirect_out=redirect_out):
             self.estimation_output = self.estimator.perform_estimation(self.estimation_input)
 
-
-        print("Estimation error after estimation: \n", self.truth_parameters - self.parameters_to_estimate.parameter_vector)
+        # od_error = self.estimation_output.parameter_history[:, self.estimation_output.best_iteration]-self.truth_model.initial_state
+        # print("Estimation error after estimation: \n", od_error)
+        # print("LUMIO pos 3D OD error: \n", np.linalg.norm(od_error[6:9]))
 
         return self
 
@@ -221,73 +241,71 @@ class EstimationModel:
 # import Interpolator
 # from matplotlib import pyplot as plt
 
-
 # initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
 # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 
-# for dynamic_model in [PMSRP01.HighFidelityDynamicModel(60390, 1)]:
+# for propagation_time in np.arange(0.1, 0.5, 0.1):
 
+#     print("NEXT LOOP ==============")
+#     print(propagation_time)
 
+#     for dynamic_model in [PMSRP01.HighFidelityDynamicModel(60390, propagation_time)]:
 
-#     estimation_model = EstimationModel(dynamic_model,
-#                                     dynamic_model,
-#                                     apriori_covariance=apriori_covariance,
-#                                     initial_estimation_error=initial_estimation_error)
+#         estimation_model = EstimationModel(dynamic_model,
+#                                            dynamic_model,
+#                                            apriori_covariance=apriori_covariance,
+#                                            initial_estimation_error=initial_estimation_error,
+#                                            maximum_iterations=10,
+#                                            noise_range=1,
+#                                            observation_step_size_range=600)
 
-#     estimation_model.maximum_iterations = 4
-#     estimation_model.noise_range = 2.98
+#         estimation_model = estimation_model.get_estimation_results()
 
-#     estimation_model = estimation_model.get_estimation_results()
+#         epochs_truth, state_history_truth, dependent_variables_history_truth = \
+#             Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(dynamic_model,
+#                                                                                         custom_initial_state=estimation_model.truth_parameters,
+#                                                                                         custom_propagation_time=dynamic_model.propagation_time,
+#                                                                                         solve_variational_equations=False)
 
-#     # print("self.truth_parameters: \n", estimation_model.truth_parameters)
+#         epochs_estimated, state_history_estimated, dependent_variables_history_estimated = \
+#             Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(dynamic_model,
+#                                                                                         # custom_initial_state=estimation_model.estimation_output.parameter_history[:, estimation_model.estimation_output.best_iteration],
+#                                                                                         custom_initial_state=estimation_model.parameters_to_estimate.parameter_vector,
+#                                                                                         custom_propagation_time=dynamic_model.propagation_time,
+#                                                                                         solve_variational_equations=False)
 
-#     # print("parameters_to_estimate.parameter_vector \n", estimation_model.parameters_to_estimate.parameter_vector)
+#         est_error_0 = state_history_estimated[0,:]-state_history_truth[0,:]
+#         est_error = state_history_estimated[-1,:]-state_history_truth[-1,:]
+#         print("Estimation error x0: \n", est_error_0)
+#         print("Estimation error xf: \n", est_error)
 
-#     # print("Estimate x0: ", estimation_model.estimation_output.parameter_history[:, estimation_model.estimation_output.best_iteration])
+#         # print(np.linalg.norm(est_error_0[0:3]), np.linalg.norm(est_error_0[3:6]), np.linalg.norm(est_error_0[6:9]), np.linalg.norm(est_error_0[9:12]))
+#         # print(np.linalg.norm(est_error[0:3]), np.linalg.norm(est_error[3:6]), np.linalg.norm(est_error[6:9]), np.linalg.norm(est_error[9:12]))
+#         # print("Formal errors: \n", 3*np.sqrt(np.diagonal(estimation_model.estimation_output.covariance)))
 
+#         plt.plot(epochs_truth-dynamic_model.simulation_start_epoch_MJD, state_history_estimated-state_history_truth)
 
-#     # print("Estimation error x0: \n", estimation_model.estimation_output.parameter_history[:, estimation_model.estimation_output.best_iteration]-estimation_model.truth_parameters)
+#         final_residuals = estimation_model.estimation_output.final_residuals
+#         observation_times = np.array(estimation_model.simulated_observations.concatenated_times)
 
+#         fig, ax1 = plt.subplots(1, 1, figsize=(9, 6))
 
-#     epochs_truth, state_history_truth, dependent_variables_history_truth = \
-#         Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.01).get_propagation_results(dynamic_model,
-#                                                                                     custom_initial_state=estimation_model.truth_parameters,
-#                                                                                     custom_propagation_time=dynamic_model.propagation_time,
-#                                                                                     solve_variational_equations=False)
+#         ax1.scatter((observation_times - observation_times[0]) / (3600*24),
+#                     final_residuals)
 
-#     epochs_estimated, state_history_estimated, dependent_variables_history_estimated = \
-#         Interpolator.Interpolator(epoch_in_MJD=False, step_size=0.01).get_propagation_results(dynamic_model,
-#                                                                                     custom_initial_state=estimation_model.estimation_output.parameter_history[:, estimation_model.estimation_output.best_iteration],
-#                                                                                     custom_propagation_time=dynamic_model.propagation_time,
-#                                                                                     solve_variational_equations=False)
+#         ax1.set_title("Observations as a function of time")
+#         ax1.set_xlabel(r'Time [days]')
+#         ax1.set_ylabel(r'Final Residuals [m]')
+#         plt.tight_layout()
+#         # plt.show()
 
-#     # simulator_object = estimation_model.estimation_output.simulation_results_per_iteration[-1]
-#     # state_history = simulator_object.dynamics_results.state_history
-#     # state_history_estimated_2 = np.vstack(list(state_history.values()))
-#     # state_history_estimated_2_epochs = np.vstack(list(state_history.keys()))
-
-#     # print("State history 1: \n", state_history_estimated[0,:])
-#     # print("State history 2: \n", state_history_estimated_2[0,:])
-
-#     # print("State history 1: \n", epochs_estimated[-1], state_history_estimated[-1,:])
-#     # print("State history 2: \n", state_history_estimated_2_epochs[-1], state_history_estimated_2[-1,:])
-
-#     # epochs_estimated_2, state_history_estimated_2, dependent_variables_history_estimated_2 = \
-#     #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(dynamic_model,
-#     #                                                                                 custom_initial_state=estimation_model.estimation_output.parameter_history[:, estimation_model.estimation_output.best_iteration],
-#     #                                                                                 custom_propagation_time=dynamic_model.propagation_time,
-#     #                                                                                 solve_variational_equations=False)
-
-#     est_error_0 = state_history_estimated[0,:]-state_history_truth[0,:]
-#     est_error = state_history_estimated[-1,:]-state_history_truth[-1,:]
-#     # print("Estimation error x0: \n", est_error_0)
-#     # print("Estimation error xf: \n", est_error)
-
-#     # print(np.linalg.norm(est_error_0[0:3]), np.linalg.norm(est_error_0[3:6]), np.linalg.norm(est_error_0[6:9]), np.linalg.norm(est_error_0[9:12]))
-#     # print(np.linalg.norm(est_error[0:3]), np.linalg.norm(est_error[3:6]), np.linalg.norm(est_error[6:9]), np.linalg.norm(est_error[9:12]))
-#     # print("Formal errors: \n", 3*np.sqrt(np.diagonal(estimation_model.estimation_output.covariance)))
-
-#     plt.plot(epochs_truth-dynamic_model.simulation_start_epoch_MJD, state_history_estimated-state_history_truth)
+#         fig, ax = plt.subplots(1, 1, figsize=(9, 6))
+#         for i, (observable_type, information_sets) in enumerate(estimation_model.sorted_observation_sets.items()):
+#             for j, observation_set in enumerate(information_sets.values()):
+#                 for k, single_observation_set in enumerate(observation_set):
+#                     observation_times = np.array(single_observation_set.observation_times)
+#                     observation_times = observation_times - observation_times[0]
+#                     ax.scatter(observation_times, single_observation_set.concatenated_observations)
 
 # plt.show()
 

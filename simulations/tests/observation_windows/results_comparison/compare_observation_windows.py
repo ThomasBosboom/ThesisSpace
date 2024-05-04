@@ -29,7 +29,8 @@ from tests import utils
 # Collect a series of observation window sets to compare
 observation_windows_settings = {
     "Perilune": [
-        (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=2, pass_interval=1), 1),
+        (comparison_helper_functions.get_orbit_based_arc_observation_windows(4, margin=0.05, threshold=0.1, pass_interval=0), 1),
+        (comparison_helper_functions.get_orbit_based_arc_observation_windows(4, margin=0.05, threshold=0.5, pass_interval=0), 1),
         # (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=1, pass_interval=4), 5),
         # (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=1, pass_interval=8), 5),
         # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.05, threshold=0.5, pass_interval=4), 5),
@@ -38,23 +39,24 @@ observation_windows_settings = {
         # (comparison_helper_functions.get_orbit_based_arc_observation_windows(14, margin=0.1, threshold=0.1, pass_interval=4), 5),
     ],
     "Apolune": [
-        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=1, pass_interval=4, apolune=True), 1),
+        # (comparison_helper_functions.get_orbit_based_arc_observation_windows(4, margin=0.05, threshold=2, pass_interval=0, apolune=True), 1),
         # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.05, threshold=0.5, pass_interval=4, apolune=True), 5),
         # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.08, threshold=0.5, pass_interval=4, apolune=True), 5),
         # (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=0.5, pass_interval=4, apolune=True), 5),
     ],
     "Random": [
-        # (comparison_helper_functions.get_random_arc_observation_windows(28, [2, 0.5], [0.5, 0.01], [0.2, 0.01], seed=0), 1),
+        # (comparison_helper_functions.get_random_arc_observation_windows(14, [2, 0.01], [2, 0.01], [2, 0.01], seed=0), 1),
         # (comparison_helper_functions.get_random_arc_observation_windows(8, [1, 0.5], [0.5, 0.01], [0.2, 0.01], seed=1), 1),
         # (comparison_helper_functions.get_random_arc_observation_windows(28, [2, 0.5], [0.5, 0.01], [0.1, 0.01], seed=1), 5),
         # (comparison_helper_functions.get_random_arc_observation_windows(28, [2, 0.5], [0.5, 0.01], [0.1, 0.01], seed=2), 5),
         # (comparison_helper_functions.get_random_arc_observation_windows(14, [2, 0.5], [1, 0.5], [0.1, 0.01], seed=3), 3),
     ],
     "Continuous": [
-        # (comparison_helper_functions.get_constant_arc_observation_windows(28, 0, 1, 1), 1)
+        # (comparison_helper_functions.get_constant_arc_observation_windows(10, skm_to_od_duration=0.1, threshold=0.1, od_duration=0.1), 1)
+        # (comparison_helper_functions.get_constant_arc_observation_windows(14, 3, 0.5, 0.5), 1)
     ],
     "Constant": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=0.1, threshold=7, od_duration=1), 1),
+        # (comparison_helper_functions.get_constant_arc_observation_windows(20, skm_to_od_duration=1, threshold=2, od_duration=2), 1),
         # (comparison_helper_functions.get_constant_arc_observation_windows(28, 3, 1, 0.5), 10),
         # (comparison_helper_functions.get_constant_arc_observation_windows(28, 3, 1, 1), 10),
     ]
@@ -70,11 +72,15 @@ print(observation_windows_settings)
 # Run the navigation routine using given settings
 navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings,
                                                                              mission_start_epoch=60390,
-                                                                             range_noise=2.98,
+                                                                             noise_range=2.98,
                                                                              observation_step_size_range=600,
+                                                                             maximum_iterations=5,
                                                                              station_keeping_error=0,
+                                                                             target_point_epochs = [3],
+                                                                             include_station_keeping=True,
                                                                              orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-                                                                             initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]))
+                                                                             initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
+                                                                             apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2)
 
 # Generate results
 objective_value_results           = comparison_helper_functions.generate_objective_value_results(navigation_outputs)
@@ -191,6 +197,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                                     label=f"Observation window" if k == 0 and j == 1 and window_index==0 and case_index==0 else None
                                 )
 
+            print(list(orbit_determination_errors.values()))
             # colors = ["red", "green", "blue"]
             # symbols = [[r"x", r"y", r"z"], [r"v_{x}", r"v_{y}", r"v_{z}"]]
             ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
@@ -252,6 +259,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         axs4.set_title("Station keeping costs")
                         axs4.set_ylabel(ylabels[0])
                         axs4.set_yscale("log")
+                        axs4_twin.set_yscale("log")
 
 
                     axs2[k][j].plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1),
