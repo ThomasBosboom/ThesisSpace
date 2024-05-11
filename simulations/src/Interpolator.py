@@ -28,10 +28,13 @@ class Interpolator:
 
     def get_propagation_results(self, dynamic_model_object, custom_initial_state=None, solve_variational_equations=True, custom_propagation_time=None):
 
-        dynamic_model_object.custom_initial_state = custom_initial_state
-        dynamic_model_object.custom_propagation_time = custom_propagation_time
-        print(dynamic_model_object.propagation_time)
-        print(dynamic_model_object.custom_propagation_time)
+        if custom_initial_state is not None:
+            dynamic_model_object.custom_initial_state = custom_initial_state
+        if custom_propagation_time is not None:
+            dynamic_model_object.custom_propagation_time = custom_propagation_time
+        # print(dynamic_model_object.propagation_time)
+        # print(dynamic_model_object.custom_propagation_time)
+        # print(dynamic_model_object.custom_initial_state)
 
         # Get simulation results from each dynamic model
         if solve_variational_equations:
@@ -41,7 +44,7 @@ class Interpolator:
 
         self.simulation_start_epoch = dynamic_model_object.simulation_start_epoch
         self.simulation_end_epoch = dynamic_model_object.simulation_end_epoch
-        print("Interpolator:", self.simulation_start_epoch, self.simulation_end_epoch)
+        # print("Interpolator:", self.simulation_start_epoch, self.simulation_end_epoch)
 
         # Define updated time vector that is the same for all dynamic models irrespective of their own time vector
         interp_epochs = np.arange(self.simulation_start_epoch, self.simulation_end_epoch+self.step_size, self.step_size)
@@ -67,7 +70,7 @@ class Interpolator:
             interp_epochs = np.array([time_conversion.julian_day_to_modified_julian_day(\
                 time_conversion.seconds_since_epoch_to_julian_day(interp_epoch)) for interp_epoch in interp_epochs])
 
-        print(len(interp_epochs))
+        # print(len(interp_epochs))
         # print("INTERPOLATOR")
         # print(dynamic_model_object)
         # print("state_history start: \n ", interp_epochs[0], interp_state_history[0, :], "\n")

@@ -21,8 +21,9 @@ class DynamicModelBase:
         self.propagation_time = propagation_time
         self.simulation_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
             time_conversion.modified_julian_day_to_julian_day(self.simulation_start_epoch_MJD))
-        self.simulation_end_epoch   = time_conversion.julian_day_to_seconds_since_epoch(\
-            time_conversion.modified_julian_day_to_julian_day(self.simulation_start_epoch_MJD+self.propagation_time))
+        # self.simulation_end_epoch   = time_conversion.julian_day_to_seconds_since_epoch(\
+        #     time_conversion.modified_julian_day_to_julian_day(self.simulation_start_epoch_MJD+self.propagation_time))
+        self.simulation_end_epoch = self.simulation_start_epoch + propagation_time*constants.JULIAN_DAY
 
         # Define constant environment settings
         self.global_frame_origin = self.name_primary

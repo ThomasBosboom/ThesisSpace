@@ -25,11 +25,7 @@ class StationKeeping:
 
     def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch=0):
 
-        # Propagate the results of the dynamic model to generate target points
-        epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
-            Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(self.dynamic_model,
-                                                                                                            custom_initial_state=self.dynamic_model.custom_initial_state,
-                                                                                                            custom_propagation_time=self.dynamic_model.propagation_time)
+
 
         # Get the reference orbit states
         reference_state_history = list()
@@ -42,9 +38,26 @@ class StationKeeping:
 
         reference_state_history = np.concatenate(reference_state_history, axis=1)
 
+        # Propagate the results of the dynamic model to generate target points
+        epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
+            Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(self.dynamic_model,
+                                                                                                            custom_initial_state=self.dynamic_model.custom_initial_state,
+                                                                                                            custom_propagation_time=self.dynamic_model.propagation_time)
+
+
+        # epochs, reference_state_history, dependent_variables_history_reference, state_transition_matrix_history_reference = \
+        #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(self.dynamic_model,
+        #                                                                                                     custom_initial_state=reference_state_history[0, :],
+        #                                                                                                     custom_propagation_time=self.dynamic_model.propagation_time)
+
+
+
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
-        print("state_deviation_history: \n", self.dynamic_model.simulation_start_epoch_MJD, epochs[0], state_deviation_history[0, :])
+        # print(f"Difference estimated and reference orbit at {epochs[0]}: \n",
+        #     np.linalg.norm(state_deviation_history[0, 6:9]),
+        #     np.linalg.norm(state_deviation_history[0, 9:12])
+        #     )
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)
@@ -84,6 +97,8 @@ class StationKeeping:
         A = -np.linalg.inv(np.add((Q.T+Q), total_sum))
 
         delta_v = A @ final_sum
+
+        # delta_v = -np.linalg.inv(Phi_tcti_rv) @ Phi_tcti_rr @ dr_tc - dv_tc
 
         return delta_v
 

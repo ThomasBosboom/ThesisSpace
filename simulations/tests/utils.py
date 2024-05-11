@@ -398,25 +398,25 @@ def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folde
         fig.savefig(figure_path)
 
 
-# def get_monte_carlo_stats_dict(data_dict):
+def get_monte_carlo_stats_dict(data_dict):
 
-#     # Initialize dictionary to store mean and standard deviation for each value
-#     stats = {}
-#     for key, value in data_dict.items():
-#         if isinstance(value, dict):
-#             stats[key] = get_monte_carlo_stats_dict(value)
-#         elif isinstance(value, list):
-#             mean_value = np.mean(value, axis=0)
-#             std_dev_value = np.std(value, axis=0)
-#             if isinstance(mean_value, np.ndarray):
-#                 mean_value = list(mean_value)
-#             if isinstance(std_dev_value, np.ndarray):
-#                 std_dev_value = list(std_dev_value)
-#             stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
-#         else:
-#             stats[key] = value
+    # Initialize dictionary to store mean and standard deviation for each value
+    stats = {}
+    for key, value in data_dict.items():
+        if isinstance(value, dict):
+            stats[key] = get_monte_carlo_stats_dict(value)
+        elif isinstance(value, list):
+            mean_value = np.mean(value, axis=0)
+            std_dev_value = np.std(value, axis=0)
+            if isinstance(mean_value, np.ndarray):
+                mean_value = list(mean_value)
+            if isinstance(std_dev_value, np.ndarray):
+                std_dev_value = list(std_dev_value)
+            stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
+        else:
+            stats[key] = value
 
-#     return stats
+    return stats
 
 
 # # Commonly used parameters

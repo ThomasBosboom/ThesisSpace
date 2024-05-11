@@ -83,14 +83,14 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
         state_history = state_history[1]
 
     # User-defined epoch for interpolation
-    user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
-        time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))+69.1826417446136475
+    # user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
+    #     time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))+69.1826417446136475
     user_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
         time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD))
     user_end_epoch = user_start_epoch + propagation_time*constants.JULIAN_DAY
     # user_end_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
     #     time_conversion.modified_julian_day_to_julian_day(simulation_start_epoch_MJD+propagation_time))
-    print("reference_data:", user_start_epoch, user_end_epoch)
+    # print("reference_data:", user_start_epoch, user_end_epoch)
 
     # Perform interpolation using SciPy's interp1d
     epochs = state_history[:, 1]
@@ -100,7 +100,7 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
 
     interpolated_states = np.zeros((1,6))
     epochs = np.arange(user_start_epoch, user_end_epoch+step_size*constants.JULIAN_DAY, step_size*constants.JULIAN_DAY)
-    print(len(epochs))
+    # print(len(epochs))
     i = 0
     for epoch in epochs:
         interpolated_states = np.vstack((interpolated_states, interp_func(epoch)))

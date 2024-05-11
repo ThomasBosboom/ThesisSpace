@@ -104,7 +104,7 @@ def get_orbit_based_arc_observation_windows(duration, period=0.4597, margin=0.05
 
     observation_windows = []
     for start_index, end_index in ranges:
-        values = epochs[start_index:end_index]
+        values = epochs[start_index:end_index+1]
         observation_windows.append((min(values), max(values)))
 
     return observation_windows
@@ -140,6 +140,31 @@ def generate_navigation_outputs(observation_windows_settings, seed=0, **kwargs):
         navigation_outputs[window_type] = navigation_output_per_type
 
     return navigation_outputs
+
+
+def generate_navigation_outputs_sensitivity(observation_windows_settings, arg_dict, **kwargs):
+
+    navigation_outputs_sensitivity = {}
+    for arg_name, arg_values in arg_dict.items():
+        for arg_index, arg_value in enumerate(arg_values):
+
+            print("Input: \n", {arg_name: arg_value})
+            # Run the navigation routine using given settings
+            navigation_outputs = generate_navigation_outputs(observation_windows_settings, **{arg_name: arg_value}, **kwargs)
+
+            for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
+                for case_index, window_case in enumerate(navigation_outputs_cases):
+
+                    if window_type not in navigation_outputs_sensitivity:
+                        navigation_outputs_sensitivity[window_type] = {}
+
+                    if arg_name not in navigation_outputs_sensitivity[window_type]:
+                        navigation_outputs_sensitivity[window_type][arg_name] = [window_case]
+
+                    else:
+                        navigation_outputs_sensitivity[window_type][arg_name].append(window_case)
+
+    return navigation_outputs_sensitivity
 
 
 def generate_objective_value_results(navigation_outputs):

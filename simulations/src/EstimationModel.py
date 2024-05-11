@@ -35,6 +35,7 @@ class EstimationModel:
         self.time_drift_bias = 6.9e-20
         self.maximum_iterations = 4
         self.margin = 120
+        self.redirect_out = True
 
         # Flexible initialization using optional parameters and default values
         for key, value in kwargs.items():
@@ -79,6 +80,7 @@ class EstimationModel:
         self.set_observation_model_settings()
 
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.observation_step_size_range)
+
 
         # Define observation simulation times for each link
         self.observation_simulation_settings = list()
@@ -187,7 +189,7 @@ class EstimationModel:
         # print("DIFFERENCE: \n", self.dynamic_model.initial_state-self.truth_model.initial_state)
 
         # # # Save the true parameters to later analyse the error
-        # self.truth_parameters = self.parameters_to_estimate.parameter_vector
+        self.truth_parameters = self.parameters_to_estimate.parameter_vector
 
         # # Perturb the initial state estimate from the truth
         # self.perturbed_parameters = self.truth_parameters.copy()
@@ -201,7 +203,8 @@ class EstimationModel:
 
         # Create input object for the estimation
         convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=self.maximum_iterations,
-                                                                        minimum_residual_change = 1.5*self.noise_range)
+                                                                        # minimum_residual_change = 1.5*self.noise_range
+                                                                        )
         if self.apriori_covariance is None:
             self.estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
                                                                convergence_checker=convergence_checker)
@@ -219,14 +222,14 @@ class EstimationModel:
         self.estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
 
-    def get_estimation_results(self, redirect_out=False):
+    def get_estimation_results(self):
 
         self.set_estimator_settings()
 
         # od_error = self.parameters_to_estimate.parameter_vector-self.truth_parameters
         # print("Estimation error before estimation: \n", od_error)
         # Run the estimation
-        with util.redirect_std(redirect_out=redirect_out):
+        with util.redirect_std(redirect_out=self.redirect_out):
             self.estimation_output = self.estimator.perform_estimation(self.estimation_input)
 
         # od_error = self.estimation_output.parameter_history[:, self.estimation_output.best_iteration]-self.truth_model.initial_state
@@ -244,7 +247,8 @@ class EstimationModel:
 # initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
 # apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 
-# for propagation_time in np.arange(0.1, 0.5, 0.1):
+# for propagation_time in [0.1]:
+# # for propagation_time in [0.1, 0.2, 0.3, 0.4, 0.5]:
 
 #     print("NEXT LOOP ==============")
 #     print(propagation_time)
@@ -257,20 +261,26 @@ class EstimationModel:
 #                                            initial_estimation_error=initial_estimation_error,
 #                                            maximum_iterations=10,
 #                                            noise_range=1,
-#                                            observation_step_size_range=600)
+#                                            observation_step_size_range=60)
 
 #         estimation_model = estimation_model.get_estimation_results()
 
+#         print("==============")
+#         print("observation times: \n", estimation_model.observation_times_range)
+#         print(estimation_model.estimation_output.formal_errors)
+#         print(estimation_model.parameters_to_estimate.parameter_vector-estimation_model.truth_parameters)
+#         print((estimation_model.parameters_to_estimate.parameter_vector-estimation_model.truth_parameters)/estimation_model.estimation_output.formal_errors)
+
 #         epochs_truth, state_history_truth, dependent_variables_history_truth = \
 #             Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(dynamic_model,
-#                                                                                         custom_initial_state=estimation_model.truth_parameters,
+#                                                                                         custom_initial_state=dynamic_model.custom_initial_state,
 #                                                                                         custom_propagation_time=dynamic_model.propagation_time,
 #                                                                                         solve_variational_equations=False)
 
 #         epochs_estimated, state_history_estimated, dependent_variables_history_estimated = \
 #             Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.01).get_propagation_results(dynamic_model,
-#                                                                                         # custom_initial_state=estimation_model.estimation_output.parameter_history[:, estimation_model.estimation_output.best_iteration],
-#                                                                                         custom_initial_state=estimation_model.parameters_to_estimate.parameter_vector,
+#                                                                                         custom_initial_state=estimation_model.estimation_output.parameter_history[:, estimation_model.estimation_output.best_iteration],
+#                                                                                         # custom_initial_state=estimation_model.parameters_to_estimate.parameter_vector,
 #                                                                                         custom_propagation_time=dynamic_model.propagation_time,
 #                                                                                         solve_variational_equations=False)
 

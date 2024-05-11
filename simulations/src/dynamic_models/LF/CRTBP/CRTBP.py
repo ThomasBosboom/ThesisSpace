@@ -105,7 +105,7 @@ class LowFidelityDynamicModel(DynamicModelBase):
                                                                             self.bodies.get("Earth").mass,
                                                                             self.bodies.get("Moon").mass,
                                                                             self.distance_between_primaries,
-                                                                            14, # max 14 days, to save run time, full period halo orbit approximate
+                                                                            14,
                                                                             step_size)
         reference_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, step_size=step_size, satellite=self.name_LPO, get_full_history=True, get_dict=False)
         distance_array = np.empty((0, 1))

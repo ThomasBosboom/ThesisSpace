@@ -225,14 +225,14 @@ class PlotNavigationResults():
         fig.suptitle(f"Observation windows for {28} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         fig1_3d.suptitle(f"Observation windows for {28} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         fig1_3d2.suptitle(f"Observation windows for {28} days, inertial frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
-
-        # plt.tight_layout()
+        plt.tight_layout()
         plt.legend()
+
 
     def plot_formal_error_history(self):
 
         # Plot how the formal errors grow over time
-        fig1, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
+        fig, ax = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
 
         full_propagated_formal_errors_epochs = self.navigation_results[3][0]
         full_propagated_formal_errors_history = self.navigation_results[3][1]
@@ -249,6 +249,7 @@ class PlotNavigationResults():
 
         for k in range(2):
             for j in range(2):
+
                 for i, gap in enumerate(self.observation_windows):
                     ax[k][j].axvspan(
                         xmin=gap[0]-self.mission_start_epoch,
@@ -256,9 +257,11 @@ class PlotNavigationResults():
                         color="gray",
                         alpha=0.1,
                         label="Observation window" if i == 0 else None)
+
                 for i, epoch in enumerate(self.station_keeping_epochs):
                     station_keeping_epoch = epoch - self.mission_start_epoch
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
+
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
                 ax[k][j].set_yscale("log")
@@ -272,13 +275,13 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig1.suptitle(f"Formal error history \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Formal error history \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         plt.tight_layout()
 
 
     def plot_uncertainty_history(self):
 
-        fig2, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
+        fig, ax = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
         full_propagated_formal_errors_epochs = self.navigation_results[3][0]
         full_propagated_formal_errors_history = self.navigation_results[3][1]
         propagated_covariance_epochs = self.navigation_results[2][0]
@@ -289,11 +292,12 @@ class PlotNavigationResults():
             for j in range(2):
                 colors = ["red", "green", "blue"]
                 symbols = [[r"x", r"y", r"z"], [r"v_{x}", r"v_{y}", r"v_{z}"]]
-                ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
+                ylabels = ["3D RSS OD position \nuncertainty [m]", "3D RSS OD velocity \nuncertainty [m/s]"]
                 ax[k][j].plot(relative_epochs, self.sigma_number*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1), label=self.navigation_simulator.model_name)
 
         for k in range(2):
             for j in range(2):
+
                 for i, gap in enumerate(self.observation_windows):
                     ax[k][j].axvspan(
                         xmin=gap[0]-self.mission_start_epoch,
@@ -301,9 +305,11 @@ class PlotNavigationResults():
                         color="gray",
                         alpha=0.1,
                         label="Observation window" if i == 0 else None)
+
                 for i, epoch in enumerate(self.station_keeping_epochs):
                     station_keeping_epoch = epoch - self.mission_start_epoch
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
+
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
                 ax[k][j].set_yscale("log")
@@ -317,14 +323,14 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig2.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         plt.tight_layout()
 
 
     def plot_reference_deviation_history(self):
 
         # Plot how the deviation from the reference orbit
-        fig3, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
+        fig, ax = plt.subplots(2, 1, figsize=(11, 4), sharex=True)
         full_reference_state_deviation_epochs = self.navigation_results[1][0]
         full_reference_state_deviation_history = self.navigation_results[1][1]
         relative_epochs = full_reference_state_deviation_epochs - self.mission_start_epoch
@@ -332,53 +338,49 @@ class PlotNavigationResults():
         colors = ["red", "green", "blue"]
         labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
         ylabels = [r"$\mathbf{r}-\mathbf{r}_{ref}$ [m]", r"$\mathbf{v}-\mathbf{v}_{ref}$ [m/s]"]
-        for l in range(2):
-            for m in range(2):
-                for i in range(3):
-                    ax[l][m].plot(relative_epochs, full_reference_state_deviation_history[:,3*l+6*m+i], label=labels[l][i])
 
-        for k in range(2):
-            for j in range(2):
-                for i, gap in enumerate(self.observation_windows):
-                    ax[k][j].axvspan(
-                        xmin=gap[0]-self.mission_start_epoch,
-                        xmax=gap[1]-self.mission_start_epoch,
-                        color="gray",
-                        alpha=0.1,
-                        label="Observation window" if i == 0 else None)
+        for j in range(2):
 
-                for i, epoch in enumerate(self.station_keeping_epochs):
-                    station_keeping_epoch = epoch - self.mission_start_epoch
-                    ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
+            for i in range(3):
+                ax[j].plot(relative_epochs, full_reference_state_deviation_history[:,6+3*j+i], label=labels[j][i])
 
-                ax[k][0].set_ylabel(ylabels[k])
-                ax[k][j].grid(alpha=0.5, linestyle='--')
-                ax[k][0].set_title("LPF")
-                ax[k][1].set_title("LUMIO")
+            for i, gap in enumerate(self.observation_windows):
+                ax[j].axvspan(
+                    xmin=gap[0]-self.mission_start_epoch,
+                    xmax=gap[1]-self.mission_start_epoch,
+                    color="gray",
+                    alpha=0.1,
+                    label="Observation window" if i == 0 else None)
 
-                # Set y-axis tick label format to scientific notation with one decimal place
-                ax[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-                ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-                ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
+            for i, epoch in enumerate(self.station_keeping_epochs):
+                station_keeping_epoch = epoch - self.mission_start_epoch
+                ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
 
-            ax[k][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+            ax[j].set_ylabel(ylabels[j])
+            ax[j].grid(alpha=0.5, linestyle='--')
+            # ax[0].set_title("LUMIO")
 
-        fig3.suptitle(f"Deviation from reference orbit \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+            # Set y-axis tick label format to scientific notation with one decimal place
+            ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+            ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+            ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
+            ax[j].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        plt.tight_layout()
+        fig.suptitle(f"Deviation from reference orbit LUMIO \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
 
 
     def plot_estimation_error_history(self):
 
         # Plot the estimation error history
-        fig4, ax = plt.subplots(2, 2, figsize=(12, 5), sharex=True)
+        fig, ax = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
 
         full_estimation_error_epochs = self.navigation_results[0][0]
         full_estimation_error_history = self.navigation_results[0][1]
         propagated_covariance_epochs = self.navigation_results[2][0]
         full_propagated_formal_errors_history = self.navigation_results[3][1]
-
-        # full_estimation_error_history = np.array([interp1d(full_estimation_error_epochs, state, kind='linear', fill_value='extrapolate')(propagated_covariance_epochs) for state in full_estimation_error_history.T]).T
-
         relative_epochs = propagated_covariance_epochs - self.mission_start_epoch
+
         for k in range(2):
             for j in range(2):
                 colors = ["red", "green", "blue"]
@@ -412,6 +414,9 @@ class PlotNavigationResults():
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.2, label="SKM" if i==0 else None)
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
+                ax[0][0].set_ylim(-100, 100)
+                ax[1][0].set_ylim(-0.03, 0.03)
+                # ax[0][0].set_ylim(-1000, 1000)
                 # ax[0][0].set_ylim(-1000, 1000)
                 ax[k][0].set_title("LPF")
                 ax[k][1].set_title("LUMIO")
@@ -421,14 +426,14 @@ class PlotNavigationResults():
                 ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
                 ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
 
-        fig4.suptitle(f"Estimaton error history | range-only \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Estimaton error history | range-only \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         # fig4.suptitle("Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
         plt.tight_layout()
 
 
     def plot_observations(self):
 
-        fig, ax = plt.subplots(3, 1, figsize=(12, 5), sharex=True)
+        fig, ax = plt.subplots(3, 1, figsize=(11, 4), sharex=True)
         arc_nums = len(self.navigation_results[-1].keys())
 
         # For each arc, plot the observations and its residuals
@@ -703,7 +708,7 @@ class PlotNavigationResults():
 
     def plot_od_error_delta_v_relation(self):
 
-        fig, axs = plt.subplots(2, 1, figsize=(12, 5), sharex=True)
+        fig, axs = plt.subplots(2, 1, figsize=(11, 4), sharex=True)
 
         delta_v_history = self.navigation_simulator.delta_v_dict
         od_error_history = self.navigation_simulator.full_estimation_error_dict
