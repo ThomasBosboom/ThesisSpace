@@ -32,15 +32,15 @@ observation_windows_settings = {
     "Perilune": [
         (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=0.5, pass_interval=7), 5),
     ],
-    # "Apolune": [
-    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(10, margin=0.1, threshold=0.5, pass_interval=7, apolune=True), 1),
-    # ],
+    "Apolune": [
+        (comparison_helper_functions.get_orbit_based_arc_observation_windows(10, margin=0.1, threshold=0.5, pass_interval=7, apolune=True), 1),
+    ],
     "Random": [
         (comparison_helper_functions.get_random_arc_observation_windows(28, skm_to_od_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], od_duration_vars=[0.5, 0.1], seed=0), 5),
     ],
-    # "Constant": [
-    #     (comparison_helper_functions.get_constant_arc_observation_windows(10, skm_to_od_duration=3.5, threshold=0.5, od_duration=0.5), 1),
-    # ],
+    "Constant": [
+        (comparison_helper_functions.get_constant_arc_observation_windows(10, skm_to_od_duration=3.5, threshold=0.5, od_duration=0.5), 1),
+    ],
     # "Continuous": [
     #     # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=0.1, threshold=0.1, od_duration=0.1), 1)
     # ],
@@ -54,32 +54,16 @@ print(observation_windows_settings)
 #################################################################
 
 # Run the navigation routine using given settings
-# navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings,
-#                                                                              model_name = "SHSRP",
-#                                                                              model_name_truth = "SHSRP",
-#                                                                              mission_start_epoch=60390,
-#                                                                              noise_range=2.98,
-#                                                                              observation_step_size_range=600,
-#                                                                              maximum_iterations=5,
-#                                                                              station_keeping_error=0,
-#                                                                              target_point_epochs = [3],
-#                                                                              include_station_keeping=True,
-#                                                                              orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-#                                                                              initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
-#                                                                             #  apriori_covariance = np.diag([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2,
-#                                                                              apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-#                                                                              )
+navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings)
 
-navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings,
-                                                                             noise_range=2.98
-                                                                             )
 
-# Generate results
-objective_value_results = comparison_helper_functions.generate_objective_value_results(navigation_outputs)
-
+############################################################
+#### Total maneuvre cost ###################################
+############################################################
 
 ### Bar chart of the total station-keeping costs
 fig, ax = plt.subplots(figsize=(10, 4))
+objective_value_results = comparison_helper_functions.generate_objective_value_results(navigation_outputs)
 comparison_helper_functions.bar_plot(ax, objective_value_results, bar_labeler=None)
 utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_objective_value_results"], custom_sub_folder_name=file_name)
 # plt.show()
