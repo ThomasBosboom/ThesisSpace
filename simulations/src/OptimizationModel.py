@@ -13,12 +13,21 @@ from tests import utils
 
 class OptimizationModel():
 
+
+    def __init__(self, observation_window):
+
+
+
+
+
+
+
     def __init__(self, dynamic_model_list,
                        truth_model_list,
                        threshold=8,
                        duration=14,
-                       skm_to_od_duration=3,
-                       od_duration=1,
+                       skm_to_arc_duration=3,
+                       arc_duration=1,
                        bounds=(0.5, 1.5),
                        custom_station_keeping_error=None,
                        custom_initial_estimation_error=None,
@@ -35,24 +44,24 @@ class OptimizationModel():
         self.threshold = threshold + self.mission_start_epoch
         self.duration = duration + self.mission_start_epoch
 
-        self.skm_to_od_duration = skm_to_od_duration
-        self.od_duration = od_duration
+        self.skm_to_arc_duration = skm_to_arc_duration
+        self.arc_duration = arc_duration
 
         skm_epochs = [self.threshold]
         while skm_epochs[-1]<self.duration:
-            skm_epochs.append(skm_epochs[-1] + self.skm_to_od_duration + self.od_duration)
+            skm_epochs.append(skm_epochs[-1] + self.skm_to_arc_duration + self.arc_duration)
         self.skm_epochs = skm_epochs[:-1]
 
         self.observation_windows = []
         for i, skm_epoch in enumerate(self.skm_epochs):
-            window = (skm_epoch-self.od_duration, skm_epoch)
+            window = (skm_epoch-self.arc_duration, skm_epoch)
             if i == 0:
                 window = (self.mission_start_epoch, self.threshold)
 
             self.observation_windows.append(window)
 
         self.vec_len = len(self.skm_epochs)-1
-        self.initial_design_vector = self.od_duration*np.ones(self.vec_len)
+        self.initial_design_vector = self.arc_duration*np.ones(self.vec_len)
         self.design_vector_bounds = list(zip(bounds[0]*np.ones(self.vec_len), bounds[-1]*np.ones(self.vec_len)))
         self.xk = self.initial_design_vector
 
@@ -71,7 +80,7 @@ class OptimizationModel():
 
         new_skm_epochs = [self.threshold]
         for i, epoch in enumerate(self.skm_epochs[1:]):
-            new_skm_epochs.append(new_skm_epochs[-1]+self.skm_to_od_duration+x[i])
+            new_skm_epochs.append(new_skm_epochs[-1]+self.skm_to_arc_duration+x[i])
 
         return new_skm_epochs
 
@@ -101,7 +110,7 @@ class OptimizationModel():
         # x = self.get_adjusted_design_vector(x)
         observation_windows = self.get_updated_observation_windows(x)
         station_keeping_epochs = self.get_updated_skm_epochs(x)
-        target_point_epochs = [self.skm_to_od_duration]
+        target_point_epochs = [self.skm_to_arc_duration]
 
         print("Objective, design vector: \n", x)
         print("Objective, observation windows: \n", observation_windows)
@@ -171,7 +180,7 @@ class OptimizationModel():
         x_optim = result.x
 
         result_dict =  {"threshold": self.threshold,
-                        "skm_to_od_duration": self.skm_to_od_duration,
+                        "skm_to_arc_duration": self.skm_to_arc_duration,
                         "duration": self.duration-self.mission_start_epoch,
                         "factor": self.factor,
                         "maxiter": self.maxiter,

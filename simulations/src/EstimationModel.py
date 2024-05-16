@@ -30,6 +30,7 @@ class EstimationModel:
         self.bias_range = 0
         self.noise_range = 2.98
         self.observation_step_size_range = 600
+        self.total_observation_count = None
         self.retransmission_delay = 0.5e-10
         self.integration_time = 0.5e-10
         self.time_drift_bias = 6.9e-20
@@ -80,7 +81,10 @@ class EstimationModel:
         self.set_observation_model_settings()
 
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.observation_step_size_range)
-
+        if self.total_observation_count is not None:
+            self.observation_times_range = np.linspace(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.total_observation_count)
+            # print((self.observation_times_range[-1]-self.observation_times_range[0])/len(self.observation_times_range))
+            # print(len(self.observation_times_range))
 
         # Define observation simulation times for each link
         self.observation_simulation_settings = list()
@@ -225,6 +229,10 @@ class EstimationModel:
     def get_estimation_results(self):
 
         self.set_estimator_settings()
+
+        # print(self.observation_times_range[0], self.observation_times_range[-1], \
+        #     (self.observation_times_range[-1], self.observation_times_range[0]),\
+        # self.observation_times_range)
 
         # od_error = self.parameters_to_estimate.parameter_vector-self.truth_parameters
         # print("Estimation error before estimation: \n", od_error)

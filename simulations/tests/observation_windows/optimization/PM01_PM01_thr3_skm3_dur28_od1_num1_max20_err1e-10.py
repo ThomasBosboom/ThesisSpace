@@ -20,9 +20,9 @@ from tests import utils, helper_functions
 dynamic_model_list = ["HF", "PM", 0]
 truth_model_list = ["HF", "PM", 0]
 threshold = 3
-skm_to_od_duration = 3
+skm_to_arc_duration = 3
 duration = 28
-od_duration = 1
+arc_duration = 1
 numruns = 1
 maxiter = 20
 factor = 1
@@ -31,9 +31,9 @@ custom_station_keeping_error=1e-10
 helper_functions.run_monte_carlo_optimization_model(dynamic_model_list,
                                                     truth_model_list,
                                                     threshold,
-                                                    skm_to_od_duration,
+                                                    skm_to_arc_duration,
                                                     duration,
-                                                    od_duration,
+                                                    arc_duration,
                                                     bounds=bounds,
                                                     numruns=numruns,
                                                     maxiter=maxiter,

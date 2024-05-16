@@ -28,13 +28,10 @@ class NavigationSimulatorBase():
         self.bias_range = 0
         self.noise_range = 1
         self.observation_step_size_range = 600
+        self.total_observation_count = 10
         self.retransmission_delay = 0.5e-10
         self.integration_time = 1
         self.time_drift_bias = 6.9e-20
         self.maximum_iterations = 5
         self.margin = 120
         self.redirect_out = True
-
-
-
-

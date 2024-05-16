@@ -108,14 +108,14 @@ def comparison_models_reference(simulation_start_epoch_MJD, propagation_time, st
                                 FrameConverter.InertialToSynodicHistoryConverter(dynamic_model, step_size=step_size).get_results(state_history)
 
                             # Plot comparison figures
-                            reference_deviation_history = state_history - reference_state_history
-                            # axs[j].plot(epochs-epochs[0], np.linalg.norm(reference_deviation_history[:, 6:9], axis=1), label=str(area))
+                            dispersion_history = state_history - reference_state_history
+                            # axs[j].plot(epochs-epochs[0], np.linalg.norm(dispersion_history[:, 6:9], axis=1), label=str(area))
                             # axs[j].set_yscale("log")
                             # axs[j].set_title(model_name)
                             # axs[-1].set_xlabel(f"Days since {simulation_start_epoch_MJD}")
                             # axs[j].set_ylabel(r"||$\mathbf{r}-\mathbf{r}_{ref}$||")
-                            print(gravitational_parameter_primary, gravitational_parameter_secondary, max(np.linalg.norm(reference_deviation_history[:, 6:9], axis=1)))
-                            ax_3d.scatter(gravitational_parameter_primary, gravitational_parameter_secondary, max(np.linalg.norm(reference_deviation_history[:, 6:9], axis=1)))
+                            print(gravitational_parameter_primary, gravitational_parameter_secondary, max(np.linalg.norm(dispersion_history[:, 6:9], axis=1)))
+                            ax_3d.scatter(gravitational_parameter_primary, gravitational_parameter_secondary, max(np.linalg.norm(dispersion_history[:, 6:9], axis=1)))
 
 
     axs[0].legend()

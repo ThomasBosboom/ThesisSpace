@@ -31,8 +31,8 @@ thresholds = [1]
 custom_station_keeping_errors = [1e-10]
 custom_target_point_epochs = [3]
 custom_range_noises = [2.98]
-skm_to_od_durations = [3]
-od_durations = [0.1, 0.2, 0.5, 1, 1.5]
+skm_to_arc_durations = [3]
+arc_durations = [0.1, 0.2, 0.5, 1, 1.5]
 custom_initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1e0
 custom_apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
 custom_orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1e0
@@ -55,8 +55,8 @@ input_dict["thresholds"] = thresholds
 input_dict["custom_station_keeping_errors"] = custom_station_keeping_errors
 input_dict["custom_target_point_epochs"] = custom_target_point_epochs
 input_dict["custom_range_noises"] = custom_range_noises
-input_dict["skm_to_od_durations"] = skm_to_od_durations
-input_dict["od_durations"] = od_durations
+input_dict["skm_to_arc_durations"] = skm_to_arc_durations
+input_dict["arc_durations"] = arc_durations
 input_dict["custom_initial_estimation_error"] = list(custom_initial_estimation_error)
 input_dict["custom_apriori_covariance"] = list(np.diagonal(custom_apriori_covariance))
 input_dict["custom_orbit_insertion_error"] = list(custom_orbit_insertion_error)
@@ -720,32 +720,32 @@ for run in range(runs):
                         delta_v_dict_per_range_noise = {}
                         for custom_range_noise in custom_range_noises:
 
-                            delta_v_dict_per_skm_to_od_duration = {}
-                            for skm_to_od_duration in skm_to_od_durations:
+                            delta_v_dict_per_skm_to_arc_duration = {}
+                            for skm_to_arc_duration in skm_to_arc_durations:
 
-                                delta_v_dict_per_od_duration = {}
-                                for od_duration in od_durations:
+                                delta_v_dict_per_arc_duration = {}
+                                for arc_duration in arc_durations:
 
                                     # objective_value = np.random.randint(1, 100)
-                                    # delta_v_dict_per_od_duration[od_duration] = objective_value
+                                    # delta_v_dict_per_arc_duration[arc_duration] = objective_value
 
                                     # Generate a vector with OD durations
-                                    epoch = start_epoch + threshold + skm_to_od_duration + od_duration
+                                    epoch = start_epoch + threshold + skm_to_arc_duration + arc_duration
                                     skm_epochs = []
                                     i = 1
                                     while True:
                                         if epoch <= start_epoch+duration:
                                             skm_epochs.append(epoch)
-                                            epoch += skm_to_od_duration+od_duration
+                                            epoch += skm_to_arc_duration+arc_duration
                                         else:
-                                            design_vector = od_duration*np.ones(np.shape(skm_epochs))
+                                            design_vector = arc_duration*np.ones(np.shape(skm_epochs))
                                             break
                                         i += 1
 
                                     # Extract observation windows
                                     observation_windows = [(start_epoch, start_epoch+threshold)]
                                     for i, skm_epoch in enumerate(skm_epochs):
-                                        observation_windows.append((skm_epoch-od_duration, skm_epoch))
+                                        observation_windows.append((skm_epoch-arc_duration, skm_epoch))
 
                                     station_keeping_epochs = [windows[1] for windows in observation_windows]
 
@@ -770,7 +770,7 @@ for run in range(runs):
 
                                     reference_state_deviations = np.linalg.norm(full_reference_state_deviation_history[:,:3], axis=1)
 
-                                    navigation_results_dict[od_duration] = navigation_results
+                                    navigation_results_dict[arc_duration] = navigation_results
 
                                     delta_v = navigation_results[8][1]
                                     delta_v_norm = np.linalg.norm(delta_v, axis=1)
@@ -778,13 +778,13 @@ for run in range(runs):
                                     print(f"Objective: \n", delta_v, objective_value)
                                     print("End of objective calculation ===============")
 
-                                    delta_v_dict_per_od_duration[od_duration] = [objective_value, min(delta_v_norm), max(delta_v_norm), max(reference_state_deviations), len(navigation_simulator.station_keeping_epochs)]
+                                    delta_v_dict_per_arc_duration[arc_duration] = [objective_value, min(delta_v_norm), max(delta_v_norm), max(reference_state_deviations), len(navigation_simulator.station_keeping_epochs)]
 
-                                delta_v_dict_per_skm_to_od_duration[skm_to_od_duration] = delta_v_dict_per_od_duration
+                                delta_v_dict_per_skm_to_arc_duration[skm_to_arc_duration] = delta_v_dict_per_arc_duration
 
-                            delta_v_dict_per_range_noise[custom_range_noise] = delta_v_dict_per_skm_to_od_duration
+                            delta_v_dict_per_range_noise[custom_range_noise] = delta_v_dict_per_skm_to_arc_duration
 
-                        delta_v_dict_per_target_point_epoch[custom_target_point_epoch] = delta_v_dict_per_skm_to_od_duration
+                        delta_v_dict_per_target_point_epoch[custom_target_point_epoch] = delta_v_dict_per_skm_to_arc_duration
 
                     delta_v_dict_per_station_keeping_error[custom_station_keeping_error] = delta_v_dict_per_target_point_epoch
 
@@ -808,11 +808,11 @@ utils.save_dicts_to_folder(dicts=[delta_v_dict_per_run], labels=[current_time_st
 # dynamic_model_list = ["HF", "PM", 0]
 # truth_model_list = ["HF", "PM", 0]
 # duration = 28
-# skm_to_od_duration = 3
+# skm_to_arc_duration = 3
 # threshold = 3
-# od_duration = 1
+# arc_duration = 1
 # runs = 10
-# mean = od_duration
+# mean = arc_duration
 # std_dev = 0.3
 # custom_station_keeping_error = 1e-2
 
@@ -826,15 +826,15 @@ utils.save_dicts_to_folder(dicts=[delta_v_dict_per_run], labels=[current_time_st
 #         for run in range(runs):
 
 #             # Generate a vector with OD durations
-#             od_durations = np.random.normal(loc=mean, scale=std_dev, size=(20))
+#             arc_durations = np.random.normal(loc=mean, scale=std_dev, size=(20))
 #             start_epoch = 60390
-#             epoch = start_epoch + threshold + skm_to_od_duration + od_durations[0]
+#             epoch = start_epoch + threshold + skm_to_arc_duration + arc_durations[0]
 #             skm_epochs = []
 #             i = 1
 #             while True:
 #                 if epoch < start_epoch+duration:
 #                     skm_epochs.append(epoch)
-#                     epoch += skm_to_od_duration+od_durations[i]
+#                     epoch += skm_to_arc_duration+arc_durations[i]
 #                 else:
 #                     design_vector = np.ones(np.shape(skm_epochs))
 #                     break
@@ -843,7 +843,7 @@ utils.save_dicts_to_folder(dicts=[delta_v_dict_per_run], labels=[current_time_st
 #             # Extract observation windows
 #             observation_windows = [(start_epoch, start_epoch+threshold)]
 #             for i, skm_epoch in enumerate(skm_epochs):
-#                 observation_windows.append((skm_epoch-od_durations[i], skm_epoch))
+#                 observation_windows.append((skm_epoch-arc_durations[i], skm_epoch))
 
 #             # Start running the navigation routine
 #             navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
@@ -863,7 +863,7 @@ utils.save_dicts_to_folder(dicts=[delta_v_dict_per_run], labels=[current_time_st
 #             print(f"Objective: \n", delta_v, objective_value)
 #             print("End of objective calculation ===============")
 
-#             delta_v_dict_per_run[run] = [list(od_durations[:len(design_vector)]), objective_value]
+#             delta_v_dict_per_run[run] = [list(arc_durations[:len(design_vector)]), objective_value]
 
 #         delta_v_dict[model] = delta_v_dict_per_run
 

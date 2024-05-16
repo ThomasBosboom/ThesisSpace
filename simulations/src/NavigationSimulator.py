@@ -47,35 +47,37 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
 
 
-    def get_Gamma(self, delta_t):
+    # def get_Gamma(self, delta_t):
 
-        # Construct the submatrices
-        submatrix1 = (delta_t**2 / 2) * np.eye(3)
-        submatrix2 = delta_t * np.eye(3)
+    #     # Construct the submatrices
+    #     submatrix1 = (delta_t**2 / 2) * np.eye(3)
+    #     submatrix2 = delta_t * np.eye(3)
 
-        # Concatenate the submatrices to form Gamma
-        Gamma = np.block([[submatrix1, np.zeros((3, 3))],
-                        [submatrix2, np.zeros((3, 3))],
-                        [np.zeros((3, 3)), submatrix1],
-                        [np.zeros((3, 3)), submatrix2]])
-        return Gamma
+    #     # Concatenate the submatrices to form Gamma
+    #     Gamma = np.block([[submatrix1, np.zeros((3, 3))],
+    #                     [submatrix2, np.zeros((3, 3))],
+    #                     [np.zeros((3, 3)), submatrix1],
+    #                     [np.zeros((3, 3)), submatrix2]])
+    #     return Gamma
 
 
-    def get_process_noise_matrix(self, delta_t, Q_c1, Q_c2):
+    # def get_process_noise_matrix(self, delta_t, Q_c1, Q_c2):
 
-        Gamma = self.get_Gamma(delta_t)
+    #     Gamma = self.get_Gamma(delta_t)
 
-        Q_c_diag = np.block([[Q_c1*np.eye(3), np.zeros((3, 3))], [np.zeros((3, 3)), Q_c2*np.eye(3)]])
-        result = Gamma @ Q_c_diag @ Gamma.T
+    #     Q_c_diag = np.block([[Q_c1*np.eye(3), np.zeros((3, 3))], [np.zeros((3, 3)), Q_c2*np.eye(3)]])
+    #     result = Gamma @ Q_c_diag @ Gamma.T
 
-        return result
+    #     return result
 
 
     def perform_navigation(self):
 
-        print("Start navigation simulation")
+        # print(self.noise_range, self.observation_step_size_range)
+        # print(vars(self))
 
-        print(self.noise_range, self.target_point_epochs)
+        print("=========================")
+        print("Start navigation simulation")
 
         estimation_arc = 0
         navigation_arc = 0
@@ -163,22 +165,14 @@ class NavigationSimulator(NavigationSimulatorBase):
                 # print("dynamic_model: \n", dynamic_model.simulation_start_epoch_MJD, dynamic_model.propagation_time, dynamic_model.custom_initial_state)
                 # print("truth_model: \n", truth_model.simulation_start_epoch_MJD, truth_model.propagation_time, truth_model.custom_initial_state)
 
-                # print("3D OD errors before: \n", \
-                #     np.linalg.norm(dynamic_model.custom_initial_state[0:3]-truth_model.custom_initial_state[0:3]), "\n",
-                #     np.linalg.norm(dynamic_model.custom_initial_state[3:6]-truth_model.custom_initial_state[3:6]), "\n",
-                #     np.linalg.norm(dynamic_model.custom_initial_state[6:9]-truth_model.custom_initial_state[6:9]), "\n",
-                #     np.linalg.norm(dynamic_model.custom_initial_state[9:12]-truth_model.custom_initial_state[9:12])
-                #     )
+                print("3D OD errors before: \n", \
+                    np.linalg.norm(dynamic_model.custom_initial_state[0:3]-truth_model.custom_initial_state[0:3]), "\n",
+                    np.linalg.norm(dynamic_model.custom_initial_state[3:6]-truth_model.custom_initial_state[3:6]), "\n",
+                    np.linalg.norm(dynamic_model.custom_initial_state[6:9]-truth_model.custom_initial_state[6:9]), "\n",
+                    np.linalg.norm(dynamic_model.custom_initial_state[9:12]-truth_model.custom_initial_state[9:12])
+                    )
 
-                # Obtain estimation results for given batch and extract results of the estimation arc
-                estimation_model = EstimationModel.EstimationModel(dynamic_model,
-                                                                   truth_model,
-                                                                   apriori_covariance=self.apriori_covariance,
-                                                                   initial_estimation_error=self.initial_estimation_error,
-                                                                   observation_step_size_range=self.observation_step_size_range,
-                                                                   noise_range=self.noise_range,
-                                                                   maximum_iterations=self.maximum_iterations,
-                                                                   redirect_out=self.redirect_out)
+                estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self))
 
                 estimation_model_result = estimation_model.get_estimation_results()
                 estimation_output = estimation_model_result.estimation_output
@@ -194,6 +188,12 @@ class NavigationSimulator(NavigationSimulatorBase):
                     state_history_final = state_history_truth + np.dot(state_transition_history_matrix_final, parameter_history[:, best_iteration]-state_history_truth[0,:])
                     # print("length: \n", epochs_final[0], epochs_final[-1], len(state_history_final))
 
+                print("3D OD errors after: \n", \
+                    np.linalg.norm(parameter_history[:, best_iteration][0:3]-self.custom_initial_state_truth[0:3]), "\n",
+                    np.linalg.norm(parameter_history[:, best_iteration][3:6]-self.custom_initial_state_truth[3:6]), "\n",
+                    np.linalg.norm(parameter_history[:, best_iteration][6:9]-self.custom_initial_state_truth[6:9]), "\n",
+                    np.linalg.norm(parameter_history[:, best_iteration][9:12]-self.custom_initial_state_truth[9:12])
+                    )
 
                 propagated_covariance_final = dict()
                 propagated_formal_errors_final = dict()
@@ -216,16 +216,16 @@ class NavigationSimulator(NavigationSimulatorBase):
                 self.custom_initial_state = state_history_final[-1,:]
                 self.initial_estimation_error = state_history_final[-1,:]-state_history_truth[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_final.values()))[-1]
-                self.apriori_covariance += self.get_process_noise_matrix(navigation_arc_duration*constants.JULIAN_DAY,
-                                                                            self.state_noise_compensation,
-                                                                            self.state_noise_compensation)
+                # self.apriori_covariance += self.get_process_noise_matrix(navigation_arc_duration*constants.JULIAN_DAY,
+                #                                                             self.state_noise_compensation,
+                #                                                             self.state_noise_compensation)
 
-                # print("3D OD errors after: \n", \
-                #     np.linalg.norm(self.custom_initial_state[0:3]-self.custom_initial_state_truth[0:3]), "\n",
-                #     np.linalg.norm(self.custom_initial_state[3:6]-self.custom_initial_state_truth[3:6]), "\n",
-                #     np.linalg.norm(self.custom_initial_state[6:9]-self.custom_initial_state_truth[6:9]), "\n",
-                #     np.linalg.norm(self.custom_initial_state[9:12]-self.custom_initial_state_truth[9:12])
-                #     )
+                print("3D OD errors propagated: \n", \
+                    np.linalg.norm(self.custom_initial_state[0:3]-self.custom_initial_state_truth[0:3]), "\n",
+                    np.linalg.norm(self.custom_initial_state[3:6]-self.custom_initial_state_truth[3:6]), "\n",
+                    np.linalg.norm(self.custom_initial_state[6:9]-self.custom_initial_state_truth[6:9]), "\n",
+                    np.linalg.norm(self.custom_initial_state[9:12]-self.custom_initial_state_truth[9:12])
+                    )
 
                 # print("3D OD errors propagated: \n", \
                 #     np.linalg.norm(self.initial_estimation_error[0:3]), "\n",
@@ -284,7 +284,8 @@ class NavigationSimulator(NavigationSimulatorBase):
                             self.station_keeping_epochs.append(self.times[navigation_arc+1])
                             self.delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
 
-                            print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
+                            # print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
+                            print(f"Correction at {self.times[navigation_arc+1]}: ", np.linalg.norm(delta_v))
 
 
             if navigation_arc < len(self.times)-2:
@@ -294,6 +295,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                 break
 
         print("End navigation simulation")
+        print("=========================")
 
         self.navigation_result_dicts = [self.full_estimation_error_dict, self.full_reference_state_deviation_dict, self.full_propagated_covariance_dict, self.full_propagated_formal_errors_dict,\
                         self.full_state_history_reference_dict, self.full_state_history_truth_dict, self.full_state_history_initial_dict, self.full_state_history_final_dict, self.delta_v_dict,\

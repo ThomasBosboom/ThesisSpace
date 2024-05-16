@@ -19,10 +19,10 @@
                 "custom_range_noises": [
                         2.98
                 ],
-                "skm_to_od_durations": [
+                "skm_to_arc_durations": [
                         3
                 ],
-                "od_durations": [
+                "arc_durations": [
                         0.1,
                         0.2,
                         0.5,

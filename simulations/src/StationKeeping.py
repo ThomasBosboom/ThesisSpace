@@ -54,10 +54,6 @@ class StationKeeping:
 
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
-        # print(f"Difference estimated and reference orbit at {epochs[0]}: \n",
-        #     np.linalg.norm(state_deviation_history[0, 6:9]),
-        #     np.linalg.norm(state_deviation_history[0, 9:12])
-        #     )
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)
@@ -77,6 +73,8 @@ class StationKeeping:
             dr_tc = state_deviation_history[i_tc,6:9]
             dv_tc = state_deviation_history[i_tc,9:12]
             dr_ti = state_deviation_history[i_ti,6:9]
+            print(f"Difference estimated and reference orbit at {epochs[0]}: \n",
+            np.linalg.norm(dr_tc), np.linalg.norm(dv_tc))
 
             # Define the STMs at the right epochs
             Phi_tcti = Phi[i_ti] @ np.linalg.inv(Phi[i_tc])

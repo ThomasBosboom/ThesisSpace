@@ -25,9 +25,9 @@ from src import NavigationSimulator
 def get_optimization_result(dynamic_model_list,
                             truth_model_list,
                             threshold,
-                            skm_to_od_duration,
+                            skm_to_arc_duration,
                             duration,
-                            od_duration,
+                            arc_duration,
                             bounds=(0.5, 1.5),
                             maxiter=5,
                             factor=2,
@@ -42,9 +42,9 @@ def get_optimization_result(dynamic_model_list,
     optimization_model = OptimizationModel.OptimizationModel(dynamic_model_list,
                                                              truth_model_list,
                                                              threshold=threshold,
-                                                             skm_to_od_duration=skm_to_od_duration,
+                                                             skm_to_arc_duration=skm_to_arc_duration,
                                                              duration=duration,
-                                                             od_duration=od_duration,
+                                                             arc_duration=arc_duration,
                                                              bounds=bounds,
                                                              custom_station_keeping_error=custom_station_keeping_error,
                                                              custom_initial_estimation_error=custom_initial_estimation_error,
@@ -181,9 +181,9 @@ def concatenate_json_files(folder_path, batch=None):
 def run_monte_carlo_optimization_model(dynamic_model_list,
                                        truth_model_list,
                                        threshold,
-                                       skm_to_od_duration,
+                                       skm_to_arc_duration,
                                        duration,
-                                       od_duration,
+                                       arc_duration,
                                        bounds=(0.5, 1.5),
                                        numruns=1,
                                        maxiter=5,
@@ -202,9 +202,9 @@ def run_monte_carlo_optimization_model(dynamic_model_list,
     print(f"dynamic_model_list: {dynamic_model_list}")
     print(f"truth_model_list: {truth_model_list}")
     print(f"threshold: {threshold}")
-    print(f"skm_to_od_duration: {skm_to_od_duration}")
+    print(f"skm_to_arc_duration: {skm_to_arc_duration}")
     print(f"duration: {duration}")
-    print(f"od_duration: {od_duration}")
+    print(f"arc_duration: {arc_duration}")
     print(f"bounds: {bounds}")
     print(f"numruns: {numruns}")
     print(f"maxiter: {maxiter}")
@@ -217,9 +217,9 @@ def run_monte_carlo_optimization_model(dynamic_model_list,
         optimization_result = get_optimization_result(dynamic_model_list,
                                                       truth_model_list,
                                                       threshold,
-                                                      skm_to_od_duration,
+                                                      skm_to_arc_duration,
                                                       duration,
-                                                      od_duration,
+                                                      arc_duration,
                                                       bounds=bounds,
                                                       maxiter=maxiter,
                                                       custom_initial_design_vector=custom_initial_design_vector,
@@ -248,25 +248,25 @@ def run_monte_carlo_optimization_model(dynamic_model_list,
     # print("Monte Carlo statistics: ", monte_carlo_stats_dict)
 
 
-# def get_custom_observation_windows(duration, skm_to_od_duration, threshold, od_duration, simulation_start_epoch=60390):
+# def get_custom_observation_windows(duration, skm_to_arc_duration, threshold, arc_duration, simulation_start_epoch=60390):
 
 #     # Generate a vector with OD durations
-#     epoch = simulation_start_epoch + threshold + skm_to_od_duration + od_duration
+#     epoch = simulation_start_epoch + threshold + skm_to_arc_duration + arc_duration
 #     skm_epochs = []
 #     i = 1
 #     while True:
 #         if epoch <= simulation_start_epoch+duration:
 #             skm_epochs.append(epoch)
-#             epoch += skm_to_od_duration+od_duration
+#             epoch += skm_to_arc_duration+arc_duration
 #         else:
-#             design_vector = od_duration*np.ones(np.shape(skm_epochs))
+#             design_vector = arc_duration*np.ones(np.shape(skm_epochs))
 #             break
 #         i += 1
 
 #     # Extract observation windows
 #     observation_windows = [(simulation_start_epoch, simulation_start_epoch+threshold)]
 #     for i, skm_epoch in enumerate(skm_epochs):
-#         observation_windows.append((skm_epoch-od_duration, skm_epoch))
+#         observation_windows.append((skm_epoch-arc_duration, skm_epoch))
 
 #     return observation_windows
 

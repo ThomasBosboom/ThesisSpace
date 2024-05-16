@@ -18,12 +18,12 @@
                      3,
                      3.9
               ],
-              "skm_to_od_durations": [
+              "skm_to_arc_durations": [
                      2,
                      3,
                      4
               ],
-              "od_durations": [
+              "arc_durations": [
                      0.1,
                      1,
                      2,

@@ -327,7 +327,7 @@ class PlotNavigationResults():
         plt.tight_layout()
 
 
-    def plot_reference_deviation_history(self):
+    def plot_dispersion_history(self):
 
         # Plot how the deviation from the reference orbit
         fig, ax = plt.subplots(2, 1, figsize=(11, 4), sharex=True)
@@ -429,6 +429,54 @@ class PlotNavigationResults():
         fig.suptitle(f"Estimaton error history | range-only \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
         # fig4.suptitle("Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
         plt.tight_layout()
+
+
+    def plot_dispersion_to_estimation_error_history(self):
+
+        # Plot how the deviation from the reference orbit
+        fig, ax = plt.subplots(2, 1, figsize=(11, 4), sharex=True)
+        full_reference_state_deviation_epochs = self.navigation_results[1][0]
+        full_reference_state_deviation_history = self.navigation_results[1][1]
+        full_estimation_error_epochs = self.navigation_results[0][0]
+        full_estimation_error_history = self.navigation_results[0][1]
+        relative_epochs = full_estimation_error_epochs - self.mission_start_epoch
+
+        estimation_error_to_dispersion_history = full_reference_state_deviation_history/full_estimation_error_history
+
+        colors = ["red", "green", "blue"]
+        labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
+        ylabels = [r"$\mathbf{r}-\mathbf{r}_{ref}$ [m]", r"$\mathbf{v}-\mathbf{v}_{ref}$ [m/s]"]
+
+        for j in range(2):
+
+            for i in range(3):
+                ax[j].plot(relative_epochs, estimation_error_to_dispersion_history[:,6+3*j+i], label=labels[j][i])
+
+            for i, gap in enumerate(self.observation_windows):
+                ax[j].axvspan(
+                    xmin=gap[0]-self.mission_start_epoch,
+                    xmax=gap[1]-self.mission_start_epoch,
+                    color="gray",
+                    alpha=0.1,
+                    label="Observation window" if i == 0 else None)
+
+            for i, epoch in enumerate(self.station_keeping_epochs):
+                station_keeping_epoch = epoch - self.mission_start_epoch
+                ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
+
+            ax[j].set_ylabel(ylabels[j])
+            ax[j].grid(alpha=0.5, linestyle='--')
+            # ax[0].set_title("LUMIO")
+
+            # Set y-axis tick label format to scientific notation with one decimal place
+            ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+            ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+            ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
+            ax[j].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        plt.tight_layout()
+        fig.suptitle(f"Deviation from reference orbit LUMIO \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+
 
 
     def plot_observations(self):

@@ -142,7 +142,7 @@
 # # # # # # # #                      3.9,
 # # # # # # # #                      4
 # # # # # # # #               ],
-# # # # # # # #               "skm_to_od_durations": [
+# # # # # # # #               "skm_to_arc_durations": [
 # # # # # # # #                      1,
 # # # # # # # #                      1.5,
 # # # # # # # #                      2,
@@ -152,7 +152,7 @@
 # # # # # # # #                      4,
 # # # # # # # #                      4.5
 # # # # # # # #               ],
-# # # # # # # #               "od_durations": [
+# # # # # # # #               "arc_durations": [
 # # # # # # # #                      0.1,
 # # # # # # # #                      0.2,
 # # # # # # # #                      0.5,
@@ -1179,10 +1179,10 @@
 # # # # # # # # #                      2,
 # # # # # # # # #                      3
 # # # # # # # # #               ],
-# # # # # # # # #               "skm_to_od_durations": [
+# # # # # # # # #               "skm_to_arc_durations": [
 # # # # # # # # #                      3
 # # # # # # # # #               ],
-# # # # # # # # #               "od_durations": [
+# # # # # # # # #               "arc_durations": [
 # # # # # # # # #                      0.1,
 # # # # # # # # #                      3
 # # # # # # # # #               ]
@@ -1215,14 +1215,14 @@
 # # # # # # # # print(values)
 
 
-# # # # # # # # # parameter1 = "skm_to_od_durations"
-# # # # # # # # # parameter2 = "od_durations"
+# # # # # # # # # parameter1 = "skm_to_arc_durations"
+# # # # # # # # # parameter2 = "arc_durations"
 # # # # # # # # keys_list = ['PM', '28', '7', '0.001', '2']
 
 # # # # # # # # for i, (key, value) in enumerate(data['inputs'].items()):
-# # # # # # # #    if key == "skm_to_od_durations":
+# # # # # # # #    if key == "skm_to_arc_durations":
 # # # # # # # #       parameters1 = value
-# # # # # # # #    if key == "od_durations":
+# # # # # # # #    if key == "arc_durations":
 # # # # # # # #       parameters2 = value
 
 # # # # # # # # print(parameters1, parameters2)
@@ -1259,7 +1259,7 @@
 
 # # # # # # # # # # # data = {"0": {
 # # # # # # # # # # #    "threshold": 60393,
-# # # # # # # # # # #    "skm_to_od_duration": 3,
+# # # # # # # # # # #    "skm_to_arc_duration": 3,
 # # # # # # # # # # #    "duration": 28,
 # # # # # # # # # # #    "factor": 1,
 # # # # # # # # # # #    "maxiter": 60,
@@ -2146,9 +2146,9 @@
 # # # # # # # # # # end_key = 60418
 
 # # # # # # # # # # # Define the step size for each key range
-# # # # # # # # # # skm_to_od_duration = 3
+# # # # # # # # # # skm_to_arc_duration = 3
 # # # # # # # # # # threshold = 3
-# # # # # # # # # # od_duration = 1
+# # # # # # # # # # arc_duration = 1
 
 # # # # # # # # # # # Generate the list of tuples representing the ranges of keys
 # # # # # # # # # # key_ranges = []
@@ -2157,8 +2157,8 @@
 # # # # # # # # # #     if key == start_key:
 # # # # # # # # # #         key_ranges.append((key, key + threshold))
 # # # # # # # # # #     else:
-# # # # # # # # # #         key_ranges.append((last_key+skm_to_od_duration, last_key + skm_to_od_duration + od_duration))
-# # # # # # # # # #         last_key += skm_to_od_duration + od_duration
+# # # # # # # # # #         key_ranges.append((last_key+skm_to_arc_duration, last_key + skm_to_arc_duration + arc_duration))
+# # # # # # # # # #         last_key += skm_to_arc_duration + arc_duration
 
 # # # # # # # # # # print(key_ranges)
 
@@ -2180,11 +2180,11 @@
 # # # # # # # # # # dynamic_model_list = ["HF", "PM", 0]
 # # # # # # # # # # truth_model_list = ["HF", "PM", 0]
 # # # # # # # # # # duration = 28
-# # # # # # # # # # skm_to_od_duration = 3
+# # # # # # # # # # skm_to_arc_duration = 3
 # # # # # # # # # # threshold = 3
-# # # # # # # # # # od_duration = 1
+# # # # # # # # # # arc_duration = 1
 # # # # # # # # # # num_runs = 3
-# # # # # # # # # # mean = od_duration
+# # # # # # # # # # mean = arc_duration
 # # # # # # # # # # std_dev = 0.3
 # # # # # # # # # # factors = [0.2, 0.5, 1.3]
 
@@ -2193,15 +2193,15 @@
 # # # # # # # # # # for i in range(10):
 
 # # # # # # # # # #     # Generate a vector with OD durations
-# # # # # # # # # #     od_duration = np.random.normal(loc=1, scale=0.5, size=(20))
+# # # # # # # # # #     arc_duration = np.random.normal(loc=1, scale=0.5, size=(20))
 # # # # # # # # # #     start_epoch = 60390
-# # # # # # # # # #     epoch = start_epoch + threshold + skm_to_od_duration + od_duration[0]
+# # # # # # # # # #     epoch = start_epoch + threshold + skm_to_arc_duration + arc_duration[0]
 # # # # # # # # # #     skm_epochs = []
 # # # # # # # # # #     i = 1
 # # # # # # # # # #     while True:
 # # # # # # # # # #         if epoch < start_epoch+duration:
 # # # # # # # # # #             skm_epochs.append(epoch)
-# # # # # # # # # #             epoch += skm_to_od_duration+od_duration[i]
+# # # # # # # # # #             epoch += skm_to_arc_duration+arc_duration[i]
 # # # # # # # # # #         else:
 # # # # # # # # # #             design_vector = np.ones(np.shape(skm_epochs))
 # # # # # # # # # #             break
@@ -2210,7 +2210,7 @@
 # # # # # # # # # #     # Extract observation windows
 # # # # # # # # # #     observation_windows = [(start_epoch, start_epoch+threshold)]
 # # # # # # # # # #     for i, skm_epoch in enumerate(skm_epochs):
-# # # # # # # # # #         observation_windows.append((skm_epoch-od_duration[i], skm_epoch))
+# # # # # # # # # #         observation_windows.append((skm_epoch-arc_duration[i], skm_epoch))
 
 # # # # # # # # # import matplotlib.pyplot as plt
 # # # # # # # # # import numpy as np
@@ -3003,57 +3003,63 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Sample data
-data = {"type_1":
-    {
-    'key1': [10, 20, 30],
-    'key2': [15, 25, 35],
-    'key3': [12, 22, 32],
-    'key4': [10, 20, 30],
-    'key5': [15, 25, 35],
-    'key6': [12, 22, 32]
-    },
-    "type_2":
-    {
-    'key1': [100, 20, 30],
-    'key2': [150, 25, 35],
-    'key3': [12, 22, 32],
-    'key4': [10, 20, 30],
-    'key5': [15, 25, 35],
-    'key6': [12, 22, 32]
-    }
-}
+size = 1
+fig, axs = plt.subplots(size, 4, figsize=(14, 7), sharex=True)
+# axs.reshape((size, 4))
+axs = np.array([axs])
+print(axs.shape, axs[0][1])
 
-# Step 1: Calculate the sum of the first entry of each key's value
-stats_types = {}
-for type_key, type_value in data.items():
+# # Sample data
+# data = {"type_1":
+#     {
+#     'key1': [10, 20, 30],
+#     'key2': [15, 25, 35],
+#     'key3': [12, 22, 32],
+#     'key4': [10, 20, 30],
+#     'key5': [15, 25, 35],
+#     'key6': [12, 22, 32]
+#     },
+#     "type_2":
+#     {
+#     'key1': [100, 20, 30],
+#     'key2': [150, 25, 35],
+#     'key3': [12, 22, 32],
+#     'key4': [10, 20, 30],
+#     'key5': [15, 25, 35],
+#     'key6': [12, 22, 32]
+#     }
+# }
 
-    print(type_key)
+# # Step 1: Calculate the sum of the first entry of each key's value
+# stats_types = {}
+# for type_key, type_value in data.items():
 
-    runs = len(list(data[type_key].values())[0])
-    print(runs, list(data[type_key].values()))
-    sums = {}
-    for run in range(runs):
-        value_list = []
-        for key, value in data[type_key].items():
-            value_list.append(value[run])
-        sums[run] = value_list
+#     print(type_key)
 
-    for key, value in sums.items():
-        sums[key] = np.sum(value)
+#     runs = len(list(data[type_key].values())[0])
+#     print(runs, list(data[type_key].values()))
+#     sums = {}
+#     for run in range(runs):
+#         value_list = []
+#         for key, value in data[type_key].items():
+#             value_list.append(value[run])
+#         sums[run] = value_list
 
-    # Extract values from the dictionary
-    all_values = list(sums.values())
-    stats_types[type_key] = [np.mean(all_values), np.std(all_values)]
+#     for key, value in sums.items():
+#         sums[key] = np.sum(value)
 
-plt.barh(list(stats_types.keys()), [stats[0] for stats in stats_types.values()],
-        color="green",
-        # width=0.2,
-        xerr=[stats[1] for stats in stats_types.values()],
-        capsize=4
-        )
+#     # Extract values from the dictionary
+#     all_values = list(sums.values())
+#     stats_types[type_key] = [np.mean(all_values), np.std(all_values)]
 
-plt.show()
+# plt.barh(list(stats_types.keys()), [stats[0] for stats in stats_types.values()],
+#         color="green",
+#         # width=0.2,
+#         xerr=[stats[1] for stats in stats_types.values()],
+#         capsize=4
+#         )
+
+# plt.show()
 
 
 # sums = {run: np.sum(value[0]) for key, value in data.items() for run in range(3)}

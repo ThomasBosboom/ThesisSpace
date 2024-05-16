@@ -16,13 +16,13 @@
               "custom_target_point_epochs": [
                      3
               ],
-              "skm_to_od_durations": [
+              "skm_to_arc_durations": [
                      1,
                      2,
                      3,
                      4
               ],
-              "od_durations": [
+              "arc_durations": [
                      0.1,
                      0.2,
                      0.5,

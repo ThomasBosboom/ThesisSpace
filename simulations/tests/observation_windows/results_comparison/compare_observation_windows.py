@@ -33,17 +33,29 @@ observation_windows_settings = {
         (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=0.5, pass_interval=7), 5),
     ],
     "Apolune": [
-        (comparison_helper_functions.get_orbit_based_arc_observation_windows(10, margin=0.1, threshold=0.5, pass_interval=7, apolune=True), 1),
+        (comparison_helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.1, threshold=0.5, pass_interval=7, apolune=True), 5),
     ],
     "Random": [
-        (comparison_helper_functions.get_random_arc_observation_windows(28, skm_to_od_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], od_duration_vars=[0.5, 0.1], seed=0), 5),
+        (comparison_helper_functions.get_random_arc_observation_windows(28, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], arc_duration_vars=[0.5, 0.1], seed=0), 5),
     ],
     "Constant": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(10, skm_to_od_duration=3.5, threshold=0.5, od_duration=0.5), 1),
-    ],
-    # "Continuous": [
-    #     # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=0.1, threshold=0.1, od_duration=0.1), 1)
+        (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_arc_duration=3.5, threshold=0.5, arc_duration=0.5), 5),
+    ]
+}
+
+observation_windows_settings = {
+    # "Perilune": [
+    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(5, margin=0.1, threshold=0.1, pass_interval=7), 1),
     # ],
+    # "Apolune": [
+    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(5, margin=0.1, threshold=0.1, pass_interval=7, apolune=True), 1),
+    # ],
+    # "Random": [
+    #     (comparison_helper_functions.get_random_arc_observation_windows(28, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], arc_duration_vars=[0.5, 0.1], seed=0), 3),
+    # ],
+    "Constant": [
+        (comparison_helper_functions.get_constant_arc_observation_windows(5, skm_to_arc_duration=3.5, threshold=0.1, arc_duration=0.1), 1),
+    ]
 }
 
 print(observation_windows_settings)
@@ -54,11 +66,17 @@ print(observation_windows_settings)
 #################################################################
 
 # Run the navigation routine using given settings
-navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings)
+navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings,
+                                                                            #  observation_step_size_range=600,
+                                                                             noise_range=1,
+                                                                            #  maximum_iterations=20,
+                                                                             redirect_out=True,
+                                                                             total_observation_count=10
+                                                                             )
 
 
 ############################################################
-#### Total maneuvre cost ###################################
+###### Total maneuvre cost #################################
 ############################################################
 
 ### Bar chart of the total station-keeping costs
@@ -70,11 +88,12 @@ utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_objective_value_r
 
 
 ############################################################
-#### Compare uncertainties #################################
+###### Compare uncertainties ###############################
 ############################################################
 
 fig, axs = plt.subplots(2, 2, figsize=(12.5, 5), sharex=True)
-detailed_results = [["Perilune", "Apolune", "Random"], [0], [0]]
+# detailed_results = [["Perilune", "Apolune", "Random"], [0], [0]]
+detailed_results = [["Constant"], [0], [0]]
 color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 line_style_cycle = ["solid", "dashed", "dashdot"]
 ylabels = ["3D RSS OD position \nuncertainty [m]", "3D RSS OD velocity \nuncertainty [m/s]"]
@@ -93,15 +112,16 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                     if run_index in detailed_results[2]:
 
                         plot_navigation_results = PlotNavigationResults.PlotNavigationResults(navigation_output)
-                        plot_navigation_results.plot_estimation_error_history()
+                        # plot_navigation_results.plot_estimation_error_history()
                         # plot_navigation_results.plot_uncertainty_history()
-                        # plot_navigation_results.plot_reference_deviation_history()
+                        # plot_navigation_results.plot_dispersion_history()
+                        # plot_navigation_results.plot_dispersion_to_estimation_error_history()
                         # plot_navigation_results.plot_full_state_history()
                         # plot_navigation_results.plot_formal_error_history()
                         # plot_navigation_results.plot_observations()
                         # plot_navigation_results.plot_observability()
                         # plot_navigation_results.plot_od_error_delta_v_relation()
-                        plot_navigation_results.plot_correlation_history()
+                        # plot_navigation_results.plot_correlation_history()
 
             # print(f"Results for {window_type} window_case {case_index} run {run}:")
 
@@ -117,11 +137,19 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
             full_propagated_formal_errors_histories.append(full_propagated_formal_errors_history)
 
             # Plot observation windows
-
             if run_index==0:
 
                 for k in range(2):
                     for j in range(2):
+
+                        for i, epoch in enumerate(navigation_simulator.station_keeping_epochs):
+
+                            axs[k][j].axvline(x=epoch - navigation_simulator.mission_start_epoch,
+                                                color='black',
+                                                linestyle='--',
+                                                alpha=0.3,
+                                                label="SKM" if k==0 and j==1 and i==0 and type_index==0 else None
+                                                )
 
                         for window_index, (start_epoch, end_epoch) in enumerate(navigation_simulator.observation_windows):
 
@@ -130,24 +158,18 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                                 xmax=end_epoch-navigation_simulator.mission_start_epoch,
                                 color=color,
                                 alpha=0.2,
-                                label=f"Observation \nwindow" if k==0 and j==1 and window_index==0 and case_index==0 else None
+                                label=f"Tracking arc" if k==0 and j==1 and window_index==0 and case_index==0 else None
                                 )
 
-                        for i, epoch in enumerate(navigation_simulator.station_keeping_epochs):
 
-                            axs[k][j].axvline(x=epoch - navigation_simulator.mission_start_epoch,
-                                                color='black',
-                                                linestyle='--',
-                                                alpha=0.3,
-                                                label="SKM" if k==0 and j==1 and i==0 and case_index==0 else None
-                                                )
 
-                        axs[k][j].plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1),
-                                        # label=window_type if case_index==0 and run_index==0 else None,
-                                        color=color,
-                                        ls=line_style,
-                                        alpha=0.1
-                                        )
+                        # Plot the results of the first run
+                        # axs[k][j].plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1),
+                        #                 # label=window_type if case_index==0 and run_index==0 else None,
+                        #                 color=color,
+                        #                 ls=line_style,
+                        #                 alpha=0.1
+                        #                 )
 
         mean_full_propagated_formal_errors_histories = np.mean(np.array(full_propagated_formal_errors_histories), axis=0)
         for k in range(2):
@@ -176,7 +198,7 @@ plt.tight_layout()
 
 
 ############################################################
-#### Compare maneuvre costs windows ########################
+###### Compare maneuvre costs windows ######################
 ############################################################
 
 fig, axs = plt.subplots(figsize=(12, 4), sharex=True)
@@ -228,6 +250,9 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
             relative_epochs = full_propagated_formal_errors_epochs - navigation_simulator.mission_start_epoch
             full_propagated_formal_errors_histories.append(full_propagated_formal_errors_history)
 
+            full_estimation_error_epochs = navigation_results[0][0]
+            full_estimation_error_history = navigation_results[0][1]
+
             if run_index == 0:
 
                 for i, epoch in enumerate(navigation_simulator.station_keeping_epochs):
@@ -242,7 +267,12 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                 axs_twin.plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 6:9], axis=1),
                                 color=color,
                                 ls=line_style,
-                                alpha=0.1)
+                                alpha=0.3)
+
+                axs_twin.plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
+                                color=color,
+                                ls='--',
+                                alpha=0.2)
 
         # Plot the station keeping costs standard deviations
         for delta_v_runs_dict_index, (end_epoch, delta_v_runs) in enumerate(delta_v_runs_dict.items()):
@@ -269,18 +299,20 @@ plt.tight_layout()
 
 
 ############################################################
-#### Compare Monte Carlo estimation errors #################
+###### Compare Monte Carlo estimation errors ###############
 ############################################################
 
-fig, axs = plt.subplots(len(navigation_outputs.keys()), 4, figsize=(14, 7), sharex=True)
+fig, axs = plt.subplots(len(navigation_outputs.keys()), 4, figsize=(14, 8), sharex=True)
+if len(navigation_outputs.keys())==1:
+    axs = np.array([axs])
 label_index = 0
 detailed_results = [["Perilune", "Apolune", "Random"], [0], [0]]
 color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 line_style_cycle = ["solid", "dashed", "dashdot"]
 colors = ["red", "green", "blue"]
-# symbols = [[r"x", r"y", r"z"], [r"v_{x}", r"v_{y}", r"v_{z}"]]
 symbols = [[r"x", r"y", r"z"], [r"x", r"y", r"z"]]
-titles = [r"$\mathbf{r}-\hat{\mathbf{r}}$ LPF [m]", r"$\mathbf{r}-\hat{\mathbf{r}}$ LUMIO [m]", r"$\mathbf{v}-\hat{\mathbf{v}}$ LPF [m/s]", r"$\mathbf{v}-\hat{\mathbf{v}}$ LUMIO [m/s]"]
+units = ["[m]", "[m]", "[m/s]", "[m/s]"]
+titles = [r"$\mathbf{r}-\hat{\mathbf{r}}$ LPF", r"$\mathbf{r}-\hat{\mathbf{r}}$ LUMIO", r"$\mathbf{v}-\hat{\mathbf{v}}$ LPF", r"$\mathbf{v}-\hat{\mathbf{v}}$ LUMIO"]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
 
     color = color_cycle[int(type_index%len(color_cycle))]
@@ -301,65 +333,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
             relative_epochs = full_estimation_error_epochs - navigation_simulator.mission_start_epoch
             full_estimation_error_histories.append(full_estimation_error_history)
 
-            print("Run: \n", full_estimation_error_history[-1, :])
-
             for n in range(axs.shape[1]):
-
-                # m = 0
-                # for k in range(2):
-                #     for j in range(2):
-
-                #         # sigma = 3*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1)
-                #         # estimation_error = np.linalg.norm(full_estimation_error_history[:, 3*k+6*j:3*k+6*j+3], axis=1)
-
-                #         # print(np.shape(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3]), np.shape(sigma), np.shape(estimation_error))
-
-                #         # axs[type_index][m].plot(relative_epochs, sigma,
-                #         #                         color=colors[0],
-                #         #                         ls="--",
-                #         #                         alpha=0.3,
-                #         #                         # label=f"$3\sigma_{{{symbols[k][i]}}}$" if window_index==0 and j==0 else None,
-                #         #                         label=r"$3\sigma$" if type_index==0 and j==0 else None,
-                #         #                         )
-
-                #         # axs[type_index][m].plot(relative_epochs, estimation_error,
-                #         #                         color=colors[0],
-                #         #                         # label=f"${symbols[k][i]}-\hat{{{symbols[k][i]}}}$" if window_index==0 and j==0 else None,
-                #         #                         label=r"$Estimation error$" if type_index==0 and j==0 else None
-                #         #                         )
-
-                #         # m += 1
-
-
-                #         for i in range(3):
-
-                #             # print(3*k+6*j+i, np.shape(full_estimation_error_history[:,3*k+6*j+i]))
-                #             sigma = 3*full_propagated_formal_errors_history[:, 3*k+6*j+i]
-                #             print(m, i, j, k)
-                #             axs[type_index][m].plot(relative_epochs, full_estimation_error_history[:,3*k+6*j+i],
-                #                                     color=colors[i],
-                #                                     alpha=0.3,
-                #                                     label=f"${symbols[k][i]}-\hat{{{symbols[k][i]}}}$" \
-                #                                         if label_index in range(6) else None
-                #                                         )
-
-                #             axs[type_index][m].plot(relative_epochs, -sigma,
-                #                                     color=colors[i],
-                #                                     ls="--",
-                #                                     alpha=0.1,
-                #                                     label=f"$3\sigma_{{{symbols[k][i]}}}$" \
-                #                                         if label_index in range(6) else None
-                #                                         )
-
-                #             axs[type_index][m].plot(relative_epochs, sigma,
-                #                                     color=colors[i],
-                #                                     ls="--",
-                #                                     alpha=0.1)
-
-                #             if type_index == 0 and run_index==0:
-                #                 print(label_index)
-                #                 label_index += 1
-                #         m += 1
 
                 if run_index==0:
                     for i, gap in enumerate(navigation_simulator.observation_windows):
@@ -385,7 +359,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                     # axs[type_index][3].set_ylim(-0.03, 0.03)
 
                     axs[-1][n].set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]", fontsize="small")
-                    axs[type_index][n].set_title(titles[n], fontsize="small")
+                    # axs[type_index][n].set_title(titles[n], fontsize="small")
 
                 # if run_index==0:
                     axs[type_index][0].set_ylabel(window_type, fontsize="small")
@@ -425,7 +399,8 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                     n += 1
 
         mean_full_estimation_error_histories = np.mean(np.array(full_estimation_error_histories), axis=0)
-        print("Mean: \n", mean_full_estimation_error_histories[-1, :])
+        # print("Mean: \n", mean_full_estimation_error_histories[-1, :])
+
         n=0
         for k in range(2):
             for j in range(2):
@@ -436,11 +411,19 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                             if n==3 else None,
                         color=colors[i],
                         alpha=1)
+
+                rss_values = np.mean(np.sqrt(np.sum(np.square(mean_full_estimation_error_histories[:, 3*k+6*j:3*k+6*j+3]), axis=1)))
+                if type_index == 0:
+                    axs[type_index][n].set_title(titles[n]+f"\nMean RSS: {np.round(rss_values, 2)} "+units[n], fontsize="small")
+                else:
+                    axs[type_index][n].set_title(f"Mean RSS: {np.round(rss_values, 1)} "+units[n], fontsize="small")
                 n += 1
 
+
 axs[0][-1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
 # fig.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
-fig.suptitle(f"Estimaton error history | range-only \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
+fig.suptitle(f"Estimaton error history \nModel: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
 # fig4.suptitle("Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
 # plt.tight_layout()
 

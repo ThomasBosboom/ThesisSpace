@@ -39,9 +39,9 @@ print(input_values)
 case_lists = [["1", 'PMSRP', '28', '1', '1e-10', '3', "2.98", "3"]]
 
 for i, (key, value) in enumerate(data['inputs'].items()):
-   if key == "skm_to_od_durations":
+   if key == "skm_to_arc_durations":
       parameters1 = value
-   if key == "od_durations":
+   if key == "arc_durations":
       parameters2 = value
 
 print(parameters1, parameters2)
@@ -81,8 +81,8 @@ for heatmap_data in heatmap_data_list:
 plt.show()
 
 # # Extracting data for plotting
-# keys = data["inputs"]["skm_to_od_durations"]
-# subkeys = data["inputs"]["od_durations"]
+# keys = data["inputs"]["skm_to_arc_durations"]
+# subkeys = data["inputs"]["arc_durations"]
 # values = {subkey: [current_dict[str(key)][str(subkey)][0] for key in current_dict] for subkey in subkeys}
 
 # # Plotting

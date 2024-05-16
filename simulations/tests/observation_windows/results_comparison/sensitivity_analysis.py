@@ -37,13 +37,13 @@ observation_windows_settings = {
     #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(6, margin=0.1, threshold=0.5, pass_interval=7, apolune=True), 2),
     # ],
     # "Random": [
-    #     # (comparison_helper_functions.get_random_arc_observation_windows(28, skm_to_od_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], od_duration_vars=[0.5, 0.1], seed=0), 5),
+    #     # (comparison_helper_functions.get_random_arc_observation_windows(28, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], arc_duration_vars=[0.5, 0.1], seed=0), 5),
     # ],
     # # "Continuous": [
-    # #     # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=0.1, threshold=0.1, od_duration=0.1), 1)
+    # #     # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_arc_duration=0.1, threshold=0.1, arc_duration=0.1), 1)
     # # ],
     "Constant": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=3.5, threshold=0.5, od_duration=0.5), 3),
+        (comparison_helper_functions.get_constant_arc_observation_windows(14, skm_to_arc_duration=3.5, threshold=0.1, arc_duration=0.1), 3),
     ]
 }
 
@@ -54,14 +54,14 @@ print(observation_windows_settings)
 ###### Window-based sensitivity analysis ########################
 #################################################################
 
-observation_window_sensitivity_settings = {
-    # "threshold": [0.1, 0.2, 0.3],
-    "skm_to_od_duration": [2, 3, 4],
-    "od_duration": [0.1, 0.2, 0.3]
-}
+# observation_window_sensitivity_settings = {
+#     # "threshold": [0.1, 0.2, 0.3],
+#     "skm_to_arc_duration": [2, 3, 4],
+#     "arc_duration": [0.1, 0.2, 0.3]
+# }
 
-observation_windows_sensitivity_settings = comparison_helper_functions.generate_observation_windows_sensitivity_settings(14, observation_windows_settings, observation_window_sensitivity_settings)
-print(observation_windows_sensitivity_settings)
+# observation_windows_sensitivity_settings = comparison_helper_functions.generate_observation_windows_sensitivity_settings(14, observation_windows_settings, observation_window_sensitivity_settings)
+# print(observation_windows_sensitivity_settings)
 
 
 
@@ -71,25 +71,25 @@ print(observation_windows_sensitivity_settings)
 #################################################################
 
 auxiliary_sensitivity_settings = {
-    # "noise_range": [1, 100],
-    "noise_range": [1, 5, 10, 20, 50, 100],
-    "target_point_epochs": [[3], [2, 3], [1, 2, 3], [4]],
-    "station_keeping_error": [0.00, 0.01, 0.02, 0.05],
+    "noise_range": [1, 50, 100],
+    # "noise_range": [1, 5, 10, 50, 100],
+    # "total_observation_count": [5, 10, 50, 100],
+    # "target_point_epochs": [[3], [2, 3], [1, 2, 3], [4]],
+    # "station_keeping_error": [0.00, 0.01, 0.02, 0.05],
     # "delta_v_min": [0.00, 0.001, 0.01, 0.02, 0.03],
-    "observation_step_size_range": [60, 120, 300, 600],
+    # "observation_step_size_range": [60, 120, 300, 600],
     # "mission_start_epoch": [60390, 60395, 60400]
 }
 
-# auxiliary_sensitivity_settings = {
-#     # "noise_range": [1, 100],
-#     # "noise_range": [1, 5, 10, 20, 50, 100],
-#     # "target_point_epochs": [[3], [2, 3], [1, 2, 3], [4]],
-#     # "station_keeping_error": [0.00, 0.01, 0.02, 0.05],
-#     # "delta_v_min": [0.05],
-#     "observation_step_size_range": [300, 600]
-# }
+auxiliary_settings = {
+    # "redirect_out": False,
+    # "total_observation_count": 100
+}
 
-navigation_outputs_sensitivity = comparison_helper_functions.generate_navigation_outputs_parameter_sensitivity(observation_windows_settings, auxiliary_sensitivity_settings)
+
+navigation_outputs_sensitivity = comparison_helper_functions.generate_navigation_outputs_parameter_sensitivity(observation_windows_settings,
+                                                                                                               auxiliary_sensitivity_settings,
+                                                                                                               **auxiliary_settings)
 print(navigation_outputs_sensitivity)
 
 ylabels = ["3D RSS OD \nposition uncertainty [m]", "3D RSS OD \nvelocity uncertainty [m/s]"]
@@ -100,7 +100,7 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
     color = color_cycle[int(type_index%len(color_cycle))]
     for sensitivity_type_index, (sensitivity_type, navigation_outputs_sensitivity_cases) in enumerate(navigation_outputs_sensitivity_types.items()):
 
-        fig, axs = plt.subplots(2, 1, figsize=(12, 6))
+        fig, axs = plt.subplots(3, 1, figsize=(12, 9))
         axs_twin = axs[0].twinx()
 
         shades = color_cycle
@@ -112,6 +112,7 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
 
             # line_style = line_style_cycle[int(case_index%len(line_style_cycle))]
             full_propagated_formal_errors_histories = []
+            full_reference_state_deviation_histories = []
             delta_v_runs_dict = {}
             for run_index, (run, navigation_output) in enumerate(navigation_outputs_sensitivity_case.items()):
 
@@ -142,10 +143,25 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
                             # label=f"Observation window" if window_index==0 and case_index==0 else None
                             )
 
+                        axs[2].axvspan(
+                            xmin=start_epoch-navigation_simulator.mission_start_epoch,
+                            xmax=end_epoch-navigation_simulator.mission_start_epoch,
+                            color=shades[index],
+                            alpha=0.2,
+                            # label=f"Observation window" if window_index==0 and case_index==0 else None
+                            )
+
                 full_propagated_formal_errors_epochs = navigation_results[3][0]
                 full_propagated_formal_errors_history = navigation_results[3][1]
                 relative_epochs = full_propagated_formal_errors_epochs - navigation_simulator.mission_start_epoch
                 full_propagated_formal_errors_histories.append(full_propagated_formal_errors_history)
+
+                full_estimation_error_epochs = navigation_results[0][0]
+                full_estimation_error_history = navigation_results[0][1]
+
+                full_reference_state_deviation_epochs = navigation_results[1][0]
+                full_reference_state_deviation_history = navigation_results[1][1]
+                full_reference_state_deviation_histories.append(full_reference_state_deviation_history)
 
                 if run_index == 0:
 
@@ -156,6 +172,14 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
                                             color='black',
                                             linestyle='--',
                                             alpha=0.3,
+                                            zorder=0,
+                                            label="SKM" if i==0 and index==0 else None)
+
+                        axs[2].axvline(x=station_keeping_epoch,
+                                            color='black',
+                                            linestyle='--',
+                                            alpha=0.3,
+                                            zorder=0,
                                             label="SKM" if i==0 and index==0 else None)
 
                 axs_twin.plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 6:9], axis=1),
@@ -165,12 +189,32 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
                                 # label=f"{auxiliary_sensitivity_settings[sensitivity_type][index]}"
                                 )
 
+                axs_twin.plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
+                                color=shades[index],
+                                # ls='--',
+                                alpha=0.2)
+
+                axs[2].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1),
+                                color=shades[index],
+                                # ls='--',
+                                alpha=0.2
+                                )
+
             mean_full_propagated_formal_errors_histories = np.mean(np.array(full_propagated_formal_errors_histories), axis=0)
-            axs_twin.plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 6:9], axis=1),
+            axs_twin.plot(relative_epochs, 3*np.linalg.norm(mean_full_propagated_formal_errors_histories[:, 6:9], axis=1),
                             color=shades[index],
                             # ls=line_style,
                             alpha=0.8,
-                            label=f"{auxiliary_sensitivity_settings[sensitivity_type][index]}")
+                            # label=f"{auxiliary_sensitivity_settings[sensitivity_type][index]}"
+                            )
+
+            mean_full_reference_state_deviation_histories = np.mean(np.array(full_reference_state_deviation_histories), axis=0)
+            axs[2].plot(relative_epochs, np.linalg.norm(mean_full_reference_state_deviation_histories[:, 6:9], axis=1),
+                            color=shades[index],
+                            # ls=line_style,
+                            alpha=0.8,
+                            # label=f"{auxiliary_sensitivity_settings[sensitivity_type][index]}"
+                            )
 
             # Plot the station keeping costs standard deviations
             for delta_v_runs_dict_index, (end_epoch, delta_v_runs) in enumerate(delta_v_runs_dict.items()):
@@ -191,6 +235,11 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
         axs[1].set_title("Parameter Sensitivity")
         axs[1].set_ylabel("Parameter value")
         axs[1].set_xlabel(r"Total $||\Delta V||$ [m/s]")
+
+        axs[2].grid(alpha=0.5, linestyle='--', zorder=0)
+        axs[2].set_title("Dispersion from reference orbit LUMIO")
+        axs[2].set_ylabel(r"||$\hat{\mathbf{r}}-\mathbf{r}_{ref}$|| [m]")
+        axs[2].set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]", fontsize="small")
 
         stats_types = {}
         for index, (type_key, type_value) in enumerate(delta_v_runs_dict_sensitivity_case.items()):
@@ -215,18 +264,20 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
                 color=shades[index],
                 # width=0.2,
                 xerr=np.std(all_values),
-                capsize=4
+                capsize=4,
+                label=f"{auxiliary_sensitivity_settings[sensitivity_type][index]}"
                 )
 
-        axs[0].set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]")
+        axs[0].set_xlabel(f"Time since MJD {navigation_simulator.mission_start_epoch} [days]", fontsize="small")
         axs[0].set_ylabel(r"$||\Delta V||$ [m/s]")
         axs[0].grid(alpha=0.5, linestyle='--', zorder=0)
         axs[0].set_title("Station keeping costs")
         axs_twin.set_ylabel(ylabels[0])
-        axs[0].set_yscale("log")
+        # axs[0].set_yscale("log")
         axs_twin.set_yscale("log")
         # axs.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(navigation_outputs_sensitivity_cases)+1, fontsize="small")
-        axs_twin.legend(loc='upper center', bbox_to_anchor=(0.5, -0.23), ncol=len(navigation_outputs_sensitivity_cases)+1, fontsize="small")
+        # axs_twin.legend(loc='upper center', bbox_to_anchor=(0.5, -0.23), ncol=len(navigation_outputs_sensitivity_cases)+1, fontsize="small")
+        axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.23), ncol=len(navigation_outputs_sensitivity_cases)+1, fontsize="small")
         plt.tight_layout()
         # utils.save_figure_to_folder(figs=[fig2], labels=[current_time+"_uncertainty_history"], custom_sub_folder_name=file_name)
 

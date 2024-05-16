@@ -38,10 +38,10 @@ observation_windows_settings = {
         # (comparison_helper_functions.get_random_arc_observation_windows(28, [2, 0.01], [2, 0.01], [2, 0.01], seed=0), 1),
     ],
     "Continuous": [
-        # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=0.1, threshold=0.1, od_duration=0.1), 1)
+        # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_arc_duration=0.1, threshold=0.1, arc_duration=0.1), 1)
     ],
     "Constant": [
-        # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_od_duration=3, threshold=0.2, od_duration=0.1), 1),
+        # (comparison_helper_functions.get_constant_arc_observation_windows(28, skm_to_arc_duration=3, threshold=0.2, arc_duration=0.1), 1),
     ]
 }
 
@@ -145,7 +145,7 @@ for model_index, model_name in enumerate(["PM", "PMSRP", "SHSRP"]):
     plot_navigation_results = PlotNavigationResults.PlotNavigationResults(navigation_output)
     plot_navigation_results.plot_estimation_error_history()
     plot_navigation_results.plot_uncertainty_history()
-    plot_navigation_results.plot_reference_deviation_history()
+    plot_navigation_results.plot_dispersion_history()
     plot_navigation_results.plot_full_state_history()
     plot_navigation_results.plot_formal_error_history()
     # plot_navigation_results.plot_observations()

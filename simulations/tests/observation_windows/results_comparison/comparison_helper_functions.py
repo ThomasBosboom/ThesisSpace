@@ -21,54 +21,54 @@ from src import NavigationSimulator
 #################################################################
 
 
-def get_random_arc_observation_windows(duration=28, skm_to_od_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], od_duration_vars=[0.5, 0.1], seed=0, simulation_start_epoch=60390):
+def get_random_arc_observation_windows(duration=28, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], arc_duration_vars=[0.5, 0.1], seed=0, simulation_start_epoch=60390):
 
     np.random.seed(seed)
 
-    skm_to_od_duration = np.random.normal(loc=skm_to_od_duration_vars[0], scale=skm_to_od_duration_vars[1], size=100)
-    od_duration = np.random.normal(loc=od_duration_vars[0], scale=od_duration_vars[1], size=100)
+    skm_to_arc_duration = np.random.normal(loc=skm_to_arc_duration_vars[0], scale=skm_to_arc_duration_vars[1], size=100)
+    arc_duration = np.random.normal(loc=arc_duration_vars[0], scale=arc_duration_vars[1], size=100)
     threshold = np.random.normal(loc=threshold_vars[0], scale=threshold_vars[1], size=100)
 
     # Generate a vector with OD durations
-    epoch = simulation_start_epoch + threshold[0] + skm_to_od_duration[0] + od_duration[0]
+    epoch = simulation_start_epoch + threshold[0] + skm_to_arc_duration[0] + arc_duration[0]
     skm_epochs = []
     i = 1
     while True:
         if epoch <= simulation_start_epoch+duration:
             skm_epochs.append(epoch)
-            epoch += skm_to_od_duration[i]+od_duration[i]
+            epoch += skm_to_arc_duration[i]+arc_duration[i]
         else:
-            design_vector = od_duration[i]*np.ones(np.shape(skm_epochs))
+            design_vector = arc_duration[i]*np.ones(np.shape(skm_epochs))
             break
         i += 1
 
     # Extract observation windows
     observation_windows = [(simulation_start_epoch, simulation_start_epoch+threshold[0])]
     for i, skm_epoch in enumerate(skm_epochs):
-        observation_windows.append((skm_epoch-od_duration[i+1], skm_epoch))
+        observation_windows.append((skm_epoch-arc_duration[i+1], skm_epoch))
 
     return observation_windows
 
 
-def get_constant_arc_observation_windows(duration=28, skm_to_od_duration=3.5, threshold=0.5, od_duration=0.5, simulation_start_epoch=60390):
+def get_constant_arc_observation_windows(duration=28, skm_to_arc_duration=3.5, threshold=0.5, arc_duration=0.5, simulation_start_epoch=60390):
 
     # Generate a vector with OD durations
-    epoch = simulation_start_epoch + threshold + skm_to_od_duration + od_duration
+    epoch = simulation_start_epoch + threshold + skm_to_arc_duration + arc_duration
     skm_epochs = []
     i = 1
     while True:
         if epoch <= simulation_start_epoch+duration:
             skm_epochs.append(epoch)
-            epoch += skm_to_od_duration+od_duration
+            epoch += skm_to_arc_duration+arc_duration
         else:
-            design_vector = od_duration*np.ones(np.shape(skm_epochs))
+            design_vector = arc_duration*np.ones(np.shape(skm_epochs))
             break
         i += 1
 
     # Extract observation windows
     observation_windows = [(simulation_start_epoch, simulation_start_epoch+threshold)]
     for i, skm_epoch in enumerate(skm_epochs):
-        observation_windows.append((skm_epoch-od_duration, skm_epoch))
+        observation_windows.append((skm_epoch-arc_duration, skm_epoch))
 
     return observation_windows
 
