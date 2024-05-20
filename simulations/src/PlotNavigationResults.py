@@ -33,6 +33,21 @@ class PlotNavigationResults():
         self.step_size = self.navigation_simulator.step_size
 
 
+class PlotNavigationResults():
+
+    def __init__(self, navigation_output, sigma_number=3):
+
+        self.navigation_output = navigation_output
+        self.navigation_simulator = navigation_output.navigation_simulator
+        self.navigation_results = navigation_output.navigation_results
+        self.sigma_number = sigma_number
+
+        self.mission_start_epoch = self.navigation_simulator.mission_start_epoch
+        self.observation_windows = self.navigation_simulator.observation_windows
+        self.station_keeping_epochs = self.navigation_simulator.station_keeping_epochs
+        self.step_size = self.navigation_simulator.step_size
+
+
     def plot_full_state_history(self):
 
         # Plot the trajectory over time
@@ -754,48 +769,36 @@ class PlotNavigationResults():
         # plt.show()
 
 
-    def plot_od_error_delta_v_relation(self):
+    def plot_od_error_dispersion_relation(self):
 
-        fig, axs = plt.subplots(2, 1, figsize=(11, 4), sharex=True)
+        fig, axs = plt.subplots(1, 1, figsize=(11, 4), sharex=True)
 
-        delta_v_history = self.navigation_simulator.delta_v_dict
-        od_error_history = self.navigation_simulator.full_estimation_error_dict
-        estimation_arc_results_dict = self.navigation_simulator.estimation_arc_results_dict
-
+        full_estimation_error_dict = self.navigation_simulator.full_estimation_error_dict
         full_reference_state_deviation_dict = self.navigation_simulator.full_reference_state_deviation_dict
 
-        delta_v = []
-        od_error_history_at_delta_v = []
-        reference_deviation_at_delta_v = []
-        for key, value in delta_v_history.items():
-            index = min(od_error_history.keys(), key=lambda x: abs(x - key))
-            od_error_history_at_delta_v.append(od_error_history[index])
-            reference_deviation_at_delta_v.append(full_reference_state_deviation_dict[index])
-            delta_v.append(value)
+        epochs = np.stack(list(full_estimation_error_dict.keys()))
+        full_estimation_error_history = np.stack(list(full_estimation_error_dict.values()))
+        full_reference_state_deviation_history = np.stack(list(full_reference_state_deviation_dict.values()))
 
-        delta_v = np.array(delta_v)
-        od_error_history_at_delta_v = np.array(od_error_history_at_delta_v)
-        reference_deviation_at_delta_v = np.array(reference_deviation_at_delta_v)
+        print(len(full_estimation_error_history), len(full_reference_state_deviation_history))
 
-        abs_delta_v_history = np.linalg.norm(delta_v[:, :3], axis=1)
-        abs_pos_od_error_history = np.linalg.norm(od_error_history_at_delta_v[:, 6:9], axis=1)
-        abs_pos_deviation_history = np.linalg.norm(reference_deviation_at_delta_v[:, 6:9], axis=1)
+        relative_epochs = epochs - self.mission_start_epoch
+        od_error = np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1)
+        dispersion = np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1)
+        od_error_dispersion_relation = dispersion/od_error
 
-        # axs[0].scatter(abs_delta_v_history, abs_pos_od_error_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
-        # axs[1].scatter(abs_delta_v_history, abs_pos_deviation_history, label=str(self.navigation_simulator.estimation_arc_durations[-1]))
+        axs.plot(relative_epochs, dispersion)
+        axs.plot(relative_epochs, od_error)
+        axs.plot(relative_epochs, od_error_dispersion_relation)
 
-        for i in range(len(abs_delta_v_history)):
-            axs[0].scatter(abs_delta_v_history[i], abs_pos_od_error_history[i])
-            axs[1].scatter(abs_delta_v_history[i], abs_pos_deviation_history[i])
+        # axs[1].set_xlabel(r"||$\Delta V$|| [m/s]")
+        # axs[0].set_ylabel(r"||$\hat{\mathbf{r}}-\mathbf{r}$|| [m]")
+        # axs[1].set_ylabel(r"||$\mathbf{r}-\mathbf{r}_{ref}$|| [m]")
+        # axs[0].set_title("Maneuver cost versus OD error")
+        # axs[1].set_title("Maneuver cost versus reference orbit deviation")
+        # axs[0].legend(title="Arc duration", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
-        axs[1].set_xlabel(r"||$\Delta V$|| [m/s]")
-        axs[0].set_ylabel(r"||$\hat{\mathbf{r}}-\mathbf{r}$|| [m]")
-        axs[1].set_ylabel(r"||$\mathbf{r}-\mathbf{r}_{ref}$|| [m]")
-        axs[0].set_title("Maneuver cost versus OD error")
-        axs[1].set_title("Maneuver cost versus reference orbit deviation")
-        axs[0].legend(title="Arc duration", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
-
-        fig.suptitle("Relations between SKM cost for run of 28 days")
+        # fig.suptitle("Relations between SKM cost for run of 28 days")
         plt.tight_layout()
         # plt.show()
 

@@ -21,13 +21,14 @@ from DynamicModelBase import DynamicModelBase
 
 class LowFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None, custom_propagation_time=None, use_synodic_state=False):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, **kwargs):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
 
-        self.custom_initial_state = custom_initial_state
-        self.custom_propagation_time = custom_propagation_time
+        self.use_synodic_state = False
 
-        self.use_synodic_state = use_synodic_state
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
         # Get CRTBP characteristics
         self.distance_between_primaries = 3.84747963e8
@@ -219,7 +220,6 @@ class LowFidelityDynamicModel(DynamicModelBase):
         else:
             self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
                                                                                            self.current_coefficient_set)
-
 
     def set_dependent_variables_to_save(self):
 

@@ -18,20 +18,24 @@ class NavigationSimulatorBase():
         self.delta_v_min = 0.00
         self.include_station_keeping = True
         self.station_keeping_error = 0.00
-        self.state_noise_compensation = 1e-25
-        self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
-        self.orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
+        self.state_noise_compensation_lpf = 1e-21 # 1e-21
+        self.state_noise_compensation_lumio = 1e-18 # 1e-18
+        # self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
         self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
-        self.propagate_dynamics_linearly = True
+        self.apriori_covariance = np.diag([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2
+        # self.apriori_covariance = np.diag(self.initial_estimation_error**2)
+        self.orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
+        self.propagate_dynamics_linearly = False
 
         # Estimation settings
         self.bias_range = 0
         self.noise_range = 1
-        self.observation_step_size_range = 600
-        self.total_observation_count = 10
-        self.retransmission_delay = 0.5e-10
-        self.integration_time = 1
+        self.observation_step_size_range = 300
+        self.total_observation_count = 50
+        self.retransmission_delay = 0
+        self.integration_time = 1e-20
         self.time_drift_bias = 6.9e-20
         self.maximum_iterations = 5
+        self.maximum_iterations_first_arc = 10
         self.margin = 120
         self.redirect_out = True

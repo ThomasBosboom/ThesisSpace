@@ -26,24 +26,20 @@ class Interpolator:
             return interpolated_history
 
 
-    def get_propagation_results(self, dynamic_model_object, custom_initial_state=None, solve_variational_equations=True, custom_propagation_time=None):
+    def get_propagation_results(self, dynamic_model, solve_variational_equations=True, **kwargs):
 
-        if custom_initial_state is not None:
-            dynamic_model_object.custom_initial_state = custom_initial_state
-        if custom_propagation_time is not None:
-            dynamic_model_object.custom_propagation_time = custom_propagation_time
-        # print(dynamic_model_object.propagation_time)
-        # print(dynamic_model_object.custom_propagation_time)
-        # print(dynamic_model_object.custom_initial_state)
+        for key, value in kwargs.items():
+            if hasattr(dynamic_model, key):
+                setattr(dynamic_model, key, value)
 
         # Get simulation results from each dynamic model
         if solve_variational_equations:
-            self.dynamics_simulator, self.variational_equations_solver = dynamic_model_object.get_propagation_simulator(solve_variational_equations=solve_variational_equations)
+            self.dynamics_simulator, self.variational_equations_solver = dynamic_model.get_propagation_simulator(solve_variational_equations=solve_variational_equations)
         else:
-            self.dynamics_simulator = dynamic_model_object.get_propagation_simulator(solve_variational_equations=solve_variational_equations)
+            self.dynamics_simulator = dynamic_model.get_propagation_simulator(solve_variational_equations=solve_variational_equations)
 
-        self.simulation_start_epoch = dynamic_model_object.simulation_start_epoch
-        self.simulation_end_epoch = dynamic_model_object.simulation_end_epoch
+        self.simulation_start_epoch = dynamic_model.simulation_start_epoch
+        self.simulation_end_epoch = dynamic_model.simulation_end_epoch
         # print("Interpolator:", self.simulation_start_epoch, self.simulation_end_epoch)
 
         # Define updated time vector that is the same for all dynamic models irrespective of their own time vector
@@ -72,7 +68,7 @@ class Interpolator:
 
         # print(len(interp_epochs))
         # print("INTERPOLATOR")
-        # print(dynamic_model_object)
+        # print(dynamic_model)
         # print("state_history start: \n ", interp_epochs[0], interp_state_history[0, :], "\n")
         # print("state_history end: \n ", interp_epochs[-1], interp_state_history[-1, :], "\n")
 

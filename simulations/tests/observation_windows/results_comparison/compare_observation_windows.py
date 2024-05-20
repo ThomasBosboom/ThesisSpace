@@ -22,7 +22,6 @@ from src import NavigationSimulator, NavigationSimulatorBase, PlotNavigationResu
 from tests import utils
 
 
-
 #################################################################
 ###### Define the observation windows ###########################
 #################################################################
@@ -43,20 +42,61 @@ observation_windows_settings = {
     ]
 }
 
+
+# observation_windows_settings = {
+#     "Perilune": [
+#         (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7), 1),
+#     ],
+#     "Apolune": [
+#         (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7, apolune=True), 1),
+#     ],
+#     "Random": [
+#         (comparison_helper_functions.get_random_arc_observation_windows(15, skm_to_arc_duration_vars=[3.5, 0.001], threshold_vars=[0.1, 0.4], arc_duration_vars=[1, 0.4], seed=0), 1),
+#     ],
+#     "Constant": [
+#         (comparison_helper_functions.get_constant_arc_observation_windows(15, skm_to_arc_duration=3.5, threshold=0.1, arc_duration=0.1), 1),
+#     ]
+# }
+
+
 observation_windows_settings = {
     # "Perilune": [
-    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(5, margin=0.1, threshold=0.1, pass_interval=7), 1),
+    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7), 1),
     # ],
     # "Apolune": [
-    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(5, margin=0.1, threshold=0.1, pass_interval=7, apolune=True), 1),
-    # ],
-    # "Random": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(28, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], arc_duration_vars=[0.5, 0.1], seed=0), 3),
+    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7, apolune=True), 1),
     # ],
     "Constant": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(5, skm_to_arc_duration=3.5, threshold=0.1, arc_duration=0.1), 1),
+        (comparison_helper_functions.get_constant_arc_observation_windows(5, skm_to_arc_duration=3, threshold=0.1, arc_duration=0.1), 1),
+    ],
+    "Constant2": [
+        (comparison_helper_functions.get_constant_arc_observation_windows(5, skm_to_arc_duration=3, threshold=0.2, arc_duration=0.2), 1),
+    ],
+    "Constant3": [
+        (comparison_helper_functions.get_constant_arc_observation_windows(5, skm_to_arc_duration=3, threshold=0.3, arc_duration=0.3), 1),
     ]
+
 }
+
+# observation_windows_settings = {
+#     # "Perilune": [
+#     #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7), 1),
+#     # ],
+#     # "Apolune": [
+#     #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7, apolune=True), 1),
+#     # ],
+#     "Random1": [
+#         (comparison_helper_functions.get_random_arc_observation_windows(15, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=0), 2),
+#     ],
+#     "Random2": [
+#         (comparison_helper_functions.get_random_arc_observation_windows(15, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=1), 2),
+#     ],
+#     "Random3": [
+#         (comparison_helper_functions.get_random_arc_observation_windows(15, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=2), 2),
+#     ],
+
+# }
+
 
 print(observation_windows_settings)
 
@@ -67,11 +107,14 @@ print(observation_windows_settings)
 
 # Run the navigation routine using given settings
 navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings,
-                                                                            #  observation_step_size_range=600,
                                                                              noise_range=1,
-                                                                            #  maximum_iterations=20,
-                                                                             redirect_out=True,
-                                                                             total_observation_count=10
+                                                                             redirect_out=False,
+                                                                             maximum_iterations=4,
+                                                                            #  total_observation_count=None,
+                                                                            #  initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 0, 0, 0, 0, 0, 0])
+                                                                            #  mission_start_epoch=60390.5
+                                                                            #  propagate_dynamics_linearly=True
+                                                                            # step_size=0.001
                                                                              )
 
 
@@ -120,7 +163,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         # plot_navigation_results.plot_formal_error_history()
                         # plot_navigation_results.plot_observations()
                         # plot_navigation_results.plot_observability()
-                        # plot_navigation_results.plot_od_error_delta_v_relation()
+                        # plot_navigation_results.plot_od_error_dispersion_relation()
                         # plot_navigation_results.plot_correlation_history()
 
             # print(f"Results for {window_type} window_case {case_index} run {run}:")
@@ -194,6 +237,8 @@ axs[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 # fig.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=len(navigation_outputs.keys()), fontsize='small')
 fig.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty \n Model: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
 plt.tight_layout()
+
+utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_compare_uncertainties"], custom_sub_folder_name=file_name)
 
 
 
@@ -269,10 +314,10 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                                 ls=line_style,
                                 alpha=0.3)
 
-                axs_twin.plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
-                                color=color,
-                                ls='--',
-                                alpha=0.2)
+            axs_twin.plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
+                            color=color,
+                            ls='--',
+                            alpha=0.2)
 
         # Plot the station keeping costs standard deviations
         for delta_v_runs_dict_index, (end_epoch, delta_v_runs) in enumerate(delta_v_runs_dict.items()):
@@ -294,15 +339,15 @@ axs.set_yscale("log")
 axs_twin.set_yscale("log")
 axs.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(navigation_outputs.keys()), fontsize="small")
 plt.tight_layout()
-# utils.save_figure_to_folder(figs=[fig2], labels=[current_time+"_uncertainty_history"], custom_sub_folder_name=file_name)
+utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_compare_maneuvre_cost"], custom_sub_folder_name=file_name)
 
 
 
 ############################################################
 ###### Compare Monte Carlo estimation errors ###############
 ############################################################
-
-fig, axs = plt.subplots(len(navigation_outputs.keys()), 4, figsize=(14, 8), sharex=True)
+rows = len(navigation_outputs.keys())
+fig, axs = plt.subplots(rows, 4, figsize=(13, 3*rows), sharex=True)
 if len(navigation_outputs.keys())==1:
     axs = np.array([axs])
 label_index = 0
@@ -428,6 +473,7 @@ fig.suptitle(f"Estimaton error history \nModel: on-board: {navigation_simulator.
 # plt.tight_layout()
 
 
+utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_estimation_error_history"], custom_sub_folder_name=file_name)
 
 
 

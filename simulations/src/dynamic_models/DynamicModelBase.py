@@ -3,6 +3,18 @@ from tudatpy.kernel.astro import time_conversion
 from tudatpy.kernel.interface import spice
 from tudatpy.kernel import constants
 
+import sys
+import os
+import numpy as np
+
+file_directory = os.path.realpath(__file__)
+for _ in range(4):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
+
+from src import reference_data
+
+
 # Load spice kernels.
 spice.load_standard_kernels()
 
@@ -43,3 +55,12 @@ class DynamicModelBase:
         self.current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkf_45
         self.current_tolerance = 1e-18*constants.JULIAN_DAY
         self.initial_time_step = 1e-1*constants.JULIAN_DAY
+
+        # Initial state based on reference orbit
+        initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+        self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
+
+        # Custom parameters
+        self.custom_initial_state = None
+        self.custom_propagation_time = None

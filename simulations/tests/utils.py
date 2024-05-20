@@ -17,7 +17,7 @@ from src import Interpolator, EstimationModel
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_initial_state=None, custom_propagation_time=None):
+def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_model_list=None, custom_initial_state=None, custom_propagation_time=None):
 
     if custom_model_dict is None:
         custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["TRUTH"]}
@@ -35,7 +35,10 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
             package_module = __import__(package_module_path, fromlist=[package_name])
             package_files = os.listdir(os.path.join(packages_dir, package_name))
 
-            for file_name in package_files:
+            if custom_model_list is not None:
+                package_files = [package_files[i] for i in custom_model_list]
+
+            for file_name_index, file_name in enumerate(package_files):
                 if file_name.endswith('.py') and not file_name.startswith('__init__'):
                     module_path = f'{package_module_path}.{os.path.splitext(file_name)[0]}'
                     module = __import__(module_path, fromlist=[file_name])
@@ -48,25 +51,35 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
                     sub_dict[package_name_list[package_name_counter]].extend([DynamicModel])
                     dynamic_model_objects[package_type] = sub_dict
 
+                if get_only_first:
+                    break
+
+                # if file_name_index in custom_model_list:
+
+
+
             package_name_counter += 1
 
-    if get_only_first:
-        result_dict = {}
-        for key, inner_dict in dynamic_model_objects.items():
-            if inner_dict and isinstance(inner_dict, dict):
-                updated_inner_dict = {}
-                for subkey, sublist in inner_dict.items():
-                    if sublist and isinstance(sublist, list):
-                        updated_inner_dict[subkey] = [sublist[0]]
-                    else:
-                        updated_inner_dict[subkey] = sublist
+    # if get_only_first:
+    #     result_dict = {}
+    #     for key, inner_dict in dynamic_model_objects.items():
+    #         if inner_dict and isinstance(inner_dict, dict):
+    #             updated_inner_dict = {}
+    #             for subkey, sublist in inner_dict.items():
+    #                 if sublist and isinstance(sublist, list):
+    #                     print(key, subkey, sublist)
+    #                     updated_inner_dict[subkey] = [sublist[0]]
+    #                 else:
+    #                     updated_inner_dict[subkey] = sublist
 
-                result_dict[key] = updated_inner_dict
+    #             result_dict[key] = updated_inner_dict
 
-        return result_dict
+    #     return result_dict
 
-    else:
-        return dynamic_model_objects
+    # else:
+    #     return dynamic_model_objects
+
+    return dynamic_model_objects
 
 
 def get_estimation_model_objects(dynamic_model_objects,
@@ -206,8 +219,6 @@ def get_estimation_model_results(dynamic_model_objects,
                                  custom_range_noise=None,
                                  custom_observation_step_size_range=None):
 
-
-    print("initial_estimation_error in utils: ", initial_estimation_error)
 
     if custom_estimation_model_objects is None:
         estimation_model_objects = get_estimation_model_objects(dynamic_model_objects,

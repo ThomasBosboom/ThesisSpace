@@ -25,8 +25,6 @@ class StationKeeping:
 
     def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch=0):
 
-
-
         # Get the reference orbit states
         reference_state_history = list()
         for body in self.dynamic_model.bodies_to_propagate:
@@ -73,8 +71,8 @@ class StationKeeping:
             dr_tc = state_deviation_history[i_tc,6:9]
             dv_tc = state_deviation_history[i_tc,9:12]
             dr_ti = state_deviation_history[i_ti,6:9]
-            print(f"Difference estimated and reference orbit at {epochs[0]}: \n",
-            np.linalg.norm(dr_tc), np.linalg.norm(dv_tc))
+            # print(f"Difference estimated and reference orbit at {epochs[0]}: \n",
+            # np.linalg.norm(dr_tc), np.linalg.norm(dv_tc))
 
             # Define the STMs at the right epochs
             Phi_tcti = Phi[i_ti] @ np.linalg.inv(Phi[i_tc])
@@ -97,8 +95,7 @@ class StationKeeping:
         delta_v = A @ final_sum
 
         # delta_v = -np.linalg.inv(Phi_tcti_rv) @ Phi_tcti_rr @ dr_tc - dv_tc
-
-        return delta_v
+        return delta_v, np.concatenate((dr_tc, dv_tc))
 
 
 

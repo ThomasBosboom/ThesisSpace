@@ -21,7 +21,7 @@ from src import NavigationSimulator
 #################################################################
 
 
-def get_random_arc_observation_windows(duration=28, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], arc_duration_vars=[0.5, 0.1], seed=0, simulation_start_epoch=60390):
+def get_random_arc_observation_windows(duration=28, skm_to_arc_duration_vars=[3.5, 0.1], threshold_vars=[0.5, 0.001], arc_duration_vars=[0.5, 0.1], seed=0, mission_start_epoch=60390):
 
     np.random.seed(seed)
 
@@ -30,11 +30,11 @@ def get_random_arc_observation_windows(duration=28, skm_to_arc_duration_vars=[3.
     threshold = np.random.normal(loc=threshold_vars[0], scale=threshold_vars[1], size=100)
 
     # Generate a vector with OD durations
-    epoch = simulation_start_epoch + threshold[0] + skm_to_arc_duration[0] + arc_duration[0]
+    epoch = mission_start_epoch + threshold[0] + skm_to_arc_duration[0] + arc_duration[0]
     skm_epochs = []
     i = 1
     while True:
-        if epoch <= simulation_start_epoch+duration:
+        if epoch <= mission_start_epoch+duration:
             skm_epochs.append(epoch)
             epoch += skm_to_arc_duration[i]+arc_duration[i]
         else:
@@ -43,21 +43,21 @@ def get_random_arc_observation_windows(duration=28, skm_to_arc_duration_vars=[3.
         i += 1
 
     # Extract observation windows
-    observation_windows = [(simulation_start_epoch, simulation_start_epoch+threshold[0])]
+    observation_windows = [(mission_start_epoch, mission_start_epoch+threshold[0])]
     for i, skm_epoch in enumerate(skm_epochs):
         observation_windows.append((skm_epoch-arc_duration[i+1], skm_epoch))
 
     return observation_windows
 
 
-def get_constant_arc_observation_windows(duration=28, skm_to_arc_duration=3.5, threshold=0.5, arc_duration=0.5, simulation_start_epoch=60390):
+def get_constant_arc_observation_windows(duration=28, skm_to_arc_duration=3.5, threshold=0.5, arc_duration=0.5, mission_start_epoch=60390):
 
     # Generate a vector with OD durations
-    epoch = simulation_start_epoch + threshold + skm_to_arc_duration + arc_duration
+    epoch = mission_start_epoch + threshold + skm_to_arc_duration + arc_duration
     skm_epochs = []
     i = 1
     while True:
-        if epoch <= simulation_start_epoch+duration:
+        if epoch <= mission_start_epoch+duration:
             skm_epochs.append(epoch)
             epoch += skm_to_arc_duration+arc_duration
         else:
@@ -66,17 +66,17 @@ def get_constant_arc_observation_windows(duration=28, skm_to_arc_duration=3.5, t
         i += 1
 
     # Extract observation windows
-    observation_windows = [(simulation_start_epoch, simulation_start_epoch+threshold)]
+    observation_windows = [(mission_start_epoch, mission_start_epoch+threshold)]
     for i, skm_epoch in enumerate(skm_epochs):
         observation_windows.append((skm_epoch-arc_duration, skm_epoch))
 
     return observation_windows
 
 
-def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_size=0.01, simulation_start_epoch=60390, margin=0.05,  apolune=False, pass_interval=2, threshold=0):
+def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_size=0.01, mission_start_epoch=60390, margin=0.05,  apolune=False, pass_interval=2, threshold=0):
 
     ### Constant arc, around perilune
-    epochs = np.arange(0, duration, step_size) + simulation_start_epoch
+    epochs = np.arange(0, duration, step_size) + mission_start_epoch
     total_indices = len(epochs)
     pass_interval += 1
     pass_interval_index = int(pass_interval*period/step_size)
@@ -138,15 +138,89 @@ def generate_navigation_outputs(observation_windows_settings, seed=0, **kwargs):
     return navigation_outputs
 
 
-def generate_navigation_outputs_parameter_sensitivity(observation_windows_settings, arg_dict, **kwargs):
+# def generate_navigation_outputs_parameter_sensitivity(observation_windows_settings, arg_dict, **kwargs):
+
+#     navigation_outputs_sensitivity = {}
+#     for arg_name, arg_values in arg_dict.items():
+#         for arg_index, arg_value in enumerate(arg_values):
+
+#             print("Input: \n", {arg_name: arg_value})
+#             # Run the navigation routine using given settings
+#             navigation_outputs = generate_navigation_outputs(observation_windows_settings, **{arg_name: arg_value}, **kwargs)
+
+#             for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
+#                 for case_index, window_case in enumerate(navigation_outputs_cases):
+
+#                     if window_type not in navigation_outputs_sensitivity:
+#                         navigation_outputs_sensitivity[window_type] = {}
+
+#                     if arg_name not in navigation_outputs_sensitivity[window_type]:
+#                         navigation_outputs_sensitivity[window_type][arg_name] = [window_case]
+
+#                     else:
+#                         navigation_outputs_sensitivity[window_type][arg_name].append(window_case)
+
+#     return navigation_outputs_sensitivity
+
+
+# def generate_navigation_outputs_observation_window_sensitivity(duration, numruns, observation_windows_settings, arg_dict, **kwargs):
+
+#     navigation_outputs_sensitivity = {}
+
+#     for arg_name, arg_values in arg_dict.items():
+#         for arg_index, arg_value in enumerate(arg_values):
+
+#             observation_windows_sensitivity_settings = {}
+#             for window_type in observation_windows_settings.keys():
+
+#                 print({arg_name: arg_value})
+#                 observation_windows_sensitivity_settings[window_type] = [(get_constant_arc_observation_windows(duration, **{arg_name: arg_value}), numruns)]
+
+#             print("settings: ", observation_windows_sensitivity_settings)
+
+#             navigation_outputs = generate_navigation_outputs(observation_windows_sensitivity_settings, **kwargs)
+#             print("outputs: ", navigation_outputs)
+
+#             for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
+#                 for case_index, window_case in enumerate(navigation_outputs_cases):
+
+#                     if window_type not in navigation_outputs_sensitivity:
+#                         navigation_outputs_sensitivity[window_type] = {}
+
+#                     if arg_name not in navigation_outputs_sensitivity[window_type]:
+#                         navigation_outputs_sensitivity[window_type][arg_name] = [window_case]
+
+#                     else:
+#                         navigation_outputs_sensitivity[window_type][arg_name].append(window_case)
+
+#     return navigation_outputs_sensitivity
+
+
+def generate_navigation_outputs_sensitivity(duration, numruns, observation_windows_settings, arg_dict, **kwargs):
 
     navigation_outputs_sensitivity = {}
+
     for arg_name, arg_values in arg_dict.items():
         for arg_index, arg_value in enumerate(arg_values):
 
             print("Input: \n", {arg_name: arg_value})
-            # Run the navigation routine using given settings
-            navigation_outputs = generate_navigation_outputs(observation_windows_settings, **{arg_name: arg_value}, **kwargs)
+
+            if arg_name in ["threshold", "skm_to_arc_duration", "arc_duration", "mission_start_epoch"]:
+
+                observation_windows_sensitivity_settings = {}
+                for window_type in observation_windows_settings.keys():
+
+                    observation_windows_sensitivity_settings[window_type] = [(get_constant_arc_observation_windows(duration, **{arg_name: arg_value}), numruns)]
+                    print(observation_windows_sensitivity_settings[window_type])
+
+                if arg_name == "mission_start_epoch":
+                    print({arg_name: arg_value})
+
+                navigation_outputs = generate_navigation_outputs(observation_windows_sensitivity_settings, **{arg_name: arg_value}, **kwargs)
+
+            else:
+                navigation_outputs = generate_navigation_outputs(observation_windows_settings, **{arg_name: arg_value}, **kwargs)
+
 
             for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
                 for case_index, window_case in enumerate(navigation_outputs_cases):
@@ -161,31 +235,6 @@ def generate_navigation_outputs_parameter_sensitivity(observation_windows_settin
                         navigation_outputs_sensitivity[window_type][arg_name].append(window_case)
 
     return navigation_outputs_sensitivity
-
-
-def generate_observation_windows_sensitivity_settings(duration, observation_windows_settings, observation_window_sensitivity_settings):
-
-    observation_windows_sensitivity_settings = {}
-
-    for window_type in observation_windows_settings.keys():
-
-        if window_type not in observation_windows_sensitivity_settings:
-            observation_windows_sensitivity_settings[window_type] = {}
-
-        for arg_name, arg_values in observation_window_sensitivity_settings.items():
-
-            for arg_value in arg_values:
-
-                # print({arg_name: arg_value})
-                observation_windows = get_constant_arc_observation_windows(duration, **{arg_name: arg_value})
-
-                if arg_name not in observation_windows_sensitivity_settings[window_type]:
-                    observation_windows_sensitivity_settings[window_type][arg_name] = {arg_value: observation_windows}
-
-                else:
-                    observation_windows_sensitivity_settings[window_type][arg_name].update({arg_value: observation_windows})
-
-    return observation_windows_sensitivity_settings
 
 
 def generate_objective_value_results(navigation_outputs):

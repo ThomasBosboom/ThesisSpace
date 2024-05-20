@@ -150,7 +150,7 @@ for model_index, model_name in enumerate(["PM", "PMSRP", "SHSRP"]):
     plot_navigation_results.plot_formal_error_history()
     # plot_navigation_results.plot_observations()
     # plot_navigation_results.plot_observability()
-    # plot_navigation_results.plot_od_error_delta_v_relation()
+    # plot_navigation_results.plot_od_error_dispersion_relation()
     # plot_navigation_results.plot_correlation_history()
 
 for k in range(2):
