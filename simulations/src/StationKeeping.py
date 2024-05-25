@@ -52,6 +52,11 @@ class StationKeeping:
 
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
+        # print(state_deviation_history[0, :])
+
+        # print(self.dynamic_model.simulation_start_epoch_MJD, self.dynamic_model.propagation_time)
+        # print("State history: \n", state_history[0, :])
+        # print("reference state history: \n", reference_state_history[0, :])
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)

@@ -496,7 +496,7 @@ class PlotNavigationResults():
 
     def plot_observations(self):
 
-        fig, ax = plt.subplots(3, 1, figsize=(11, 4), sharex=True)
+        fig, ax = plt.subplots(3, 1, figsize=(12, 7), sharex=True)
         arc_nums = len(self.navigation_results[-1].keys())
 
         # For each arc, plot the observations and its residuals
@@ -621,7 +621,7 @@ class PlotNavigationResults():
         ax[1].set_ylabel("Observation \n residual [m]")
         ax[2].set_ylabel("Angle obs. \n w.r.t J2000 [deg]")
         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
-        ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
+        ax[-1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, fontsize="small")
 
 
         fig.suptitle(f"Intersatellite range observations \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
