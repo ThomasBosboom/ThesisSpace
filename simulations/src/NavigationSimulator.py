@@ -2,9 +2,9 @@
 import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 import time
-
+from matplotlib import pyplot as plt
+import copy
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
 for _ in range(2):
@@ -13,57 +13,41 @@ for _ in range(2):
 
 # Own
 from tests import utils
-import NoiseDataClass
-import reference_data, Interpolator, StationKeeping, PlotNavigationResults
-from src.estimation_models import EstimationModel
+import reference_data, Interpolator, StationKeeping, EstimationModel
+from NavigationSimulatorBase import NavigationSimulatorBase
 from tudatpy.kernel import constants
 
+class NavigationSimulator(NavigationSimulatorBase):
 
-# np.random.seed(0)
+    def __init__(self, observation_windows, **kwargs):
+        super().__init__()
 
-class NavigationSimulator():
-
-    def __init__(self, observation_windows, dynamic_model_list, truth_model_list, step_size=1e-2, station_keeping_epochs=[], target_point_epochs=[3]):
-
-        # Miscellaneous
-        self.step_size = step_size
-
-        # Managing the dynamic model specifications
-        self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
-        self.model_type_truth, self.model_name_truth, self.model_number_truth = truth_model_list[0], truth_model_list[1], truth_model_list[2]
-
-        # Customability of estimation arc attributes
-        self.custom_range_noise = None
-        self.custom_observation_step_size_range = None
-        self.custom_initial_state = None
-        self.custom_initial_state_truth = None
-
-        # Station keeping epochs
-        self.station_keeping_epochs = station_keeping_epochs
-        self.target_point_epochs = target_point_epochs
-
-        # Initial state and uncertainty parameters
-        noise_data = NoiseDataClass.NoiseDataClass()
-        self.station_keeping_error = noise_data.relative_station_keeping_error
-        self.initial_estimation_error = noise_data.initial_estimation_error
-        self.apriori_covariance = noise_data.apriori_covariance
-        self.orbit_insertion_error = noise_data.orbit_insertion_error
+        # Flexible initialization using optional parameters and default values
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
         # Adjusting decimals based on the step size used
-        num_str = "{:.15f}".format(step_size).rstrip('0')
+        num_str = "{:.15f}".format(self.step_size).rstrip('0')
         self.decimal_places = len(num_str) - num_str.index('.') - 1
 
-        # Managing the timing aspect of the navigation arcs
+        # Update mission start epoch based on given observation window
+        self.mission_start_epoch = observation_windows[0][0]
+
+        # Rounding values
         self.observation_windows = observation_windows
-        self.mission_start_time = self.observation_windows[0][0]
-        self.mission_end_time = self.observation_windows[-1][-1]
+        self.observation_windows = [(np.round(tup[0], self.decimal_places), np.round(tup[1], self.decimal_places)) for tup in observation_windows]
+        self.initial_station_keeping_epochs = [np.round(observation_window[1], self.decimal_places) for observation_window in observation_windows]
         self.batch_start_times = np.array([t[0] for t in self.observation_windows])
-        # self.batch_end_times = np.array([t[1] for t in self.observation_windows])
-        self.times = list(set([self.mission_start_time] + [item for sublist in self.observation_windows for item in sublist] + [self.mission_end_time]))
+        self.station_keeping_epochs = []
 
         # Managing the time vector to define all arcs
-        self.times.extend(self.station_keeping_epochs)
-        self.times = np.round(sorted(list(set(self.times))), self.decimal_places)
+        self.times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
+        self.times = list(set(self.times))
+        self.times = sorted(self.times)
+
+        self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
+        self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
 
 
     def get_Gamma(self, delta_t):
@@ -77,9 +61,6 @@ class NavigationSimulator():
                         [submatrix2, np.zeros((3, 3))],
                         [np.zeros((3, 3)), submatrix1],
                         [np.zeros((3, 3)), submatrix2]])
-
-        # print("Gamma: ", Gamma)
-
         return Gamma
 
 
@@ -87,50 +68,55 @@ class NavigationSimulator():
 
         Gamma = self.get_Gamma(delta_t)
 
-        # Q_c_diag = Q_c*np.eye(6)
-        # result = Gamma @ Q_c_diag @ Gamma.T
-
         Q_c_diag = np.block([[Q_c1*np.eye(3), np.zeros((3, 3))], [np.zeros((3, 3)), Q_c2*np.eye(3)]])
         result = Gamma @ Q_c_diag @ Gamma.T
-
-        # print("Result: ", result)
 
         return result
 
 
+    def perform_navigation(self, seed=0):
 
-    def perform_navigation(self):
+        # print(self.noise_range, self.observation_step_size_range)
+        # print(vars(self))
+
+        np.random.seed(seed)
+
+        print("=========================")
+        # print("Start navigation simulation")
 
         estimation_arc = 0
         navigation_arc = 0
-        full_estimation_error_dict = dict()
-        full_reference_state_deviation_dict = dict()
-        full_propagated_covariance_dict = dict()
-        full_propagated_formal_errors_dict = dict()
-        full_state_history_reference_dict = dict()
-        full_state_history_truth_dict = dict()
-        full_state_history_initial_dict = dict()
-        full_state_history_final_dict = dict()
-        delta_v_dict = dict()
-        full_dependent_variables_history_initial = dict()
-        full_state_transition_matrix_history_initial = dict()
-        estimation_arc_results_dict = dict()
-        print("Start navigation simulation")
+        self.full_estimation_error_dict = dict()
+        self.full_reference_state_deviation_dict = dict()
+        self.full_propagated_covariance_dict = dict()
+        self.full_propagated_formal_errors_dict = dict()
+        self.full_state_history_reference_dict = dict()
+        self.full_state_history_truth_dict = dict()
+        self.full_state_history_estimated_dict = dict()
+        self.full_state_history_final_dict = dict()
+        self.delta_v_dict = dict()
+        self.full_dependent_variables_history_estimated = dict()
+        self.full_state_transition_matrix_history_estimated = dict()
+        self.estimation_arc_results_dict = dict()
+        self.full_od_dispersion_relation_dict = dict()
         for t, time in enumerate(self.times):
 
-            navigation_arc_duration = np.round(np.diff(self.times)[navigation_arc], self.decimal_places)
+            navigation_arc_duration = self.navigation_arc_durations[navigation_arc]
 
             # print(f"Start of navigation arc {navigation_arc} at {time} for {navigation_arc_duration} days")
 
-            if navigation_arc_duration == 0 or time == self.times[-1]:
-                continue
-
             # Define dynamic and truth models to calculate the relevant histories
-            dynamic_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration, custom_initial_state=self.custom_initial_state)
-            dynamic_model = dynamic_model_objects[self.model_type][self.model_name][self.model_number]
+            dynamic_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration,
+                                                                    custom_initial_state=self.custom_initial_state,
+                                                                    custom_model_dict={self.model_type: [self.model_name]},
+                                                                    custom_model_list=[self.model_number])
+            dynamic_model = dynamic_model_objects[self.model_type][self.model_name][0]
 
-            truth_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration, custom_initial_state=self.custom_initial_state_truth)
-            truth_model = truth_model_objects[self.model_type_truth][self.model_name_truth][self.model_number_truth]
+            truth_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration,
+                                                                  custom_initial_state=self.custom_initial_state_truth,
+                                                                  custom_model_dict={self.model_type_truth: [self.model_name_truth]},
+                                                                  custom_model_list=[self.model_number_truth])
+            truth_model = truth_model_objects[self.model_type_truth][self.model_name_truth][0]
 
 
             ##############################################################
@@ -138,43 +124,43 @@ class NavigationSimulator():
             ##############################################################
 
             # Obtain the initial state of the whole simulation once
-            if navigation_arc == 0:
-                epochs, state_history_initialize, dependent_variables_history_initialize = \
-                    Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model, solve_variational_equations=False)
+            state_history_reference = list()
+            for body in dynamic_model.bodies_to_propagate:
+                state_history_reference.append(reference_data.get_reference_state_history(time, navigation_arc_duration,
+                                                                                          satellite=body,
+                                                                                          step_size=self.step_size,
+                                                                                          get_full_history=True))
+            state_history_reference = np.concatenate(state_history_reference, axis=1)
 
-                self.custom_initial_state_truth = state_history_initialize[0,:]
-                self.custom_initial_state = self.custom_initial_state_truth + self.initial_estimation_error + self.orbit_insertion_error
+            if navigation_arc == 0:
+                self.custom_initial_state_truth = truth_model.initial_state + self.orbit_insertion_error
+                self.custom_initial_state = self.custom_initial_state_truth + self.initial_estimation_error
 
             dynamic_model.custom_initial_state = self.custom_initial_state
             truth_model.custom_initial_state = self.custom_initial_state_truth
 
-            # Update the reference orbit that the estimated orbit should follow
-            state_history_reference = list()
-            for body in dynamic_model.bodies_to_propagate:
-                state_history_reference.append(reference_data.get_reference_state_history(time,
-                                                                                    navigation_arc_duration,
-                                                                                        satellite=body,
-                                                                                        step_size=self.step_size,
-                                                                                        get_full_history=True))
-            state_history_reference = np.concatenate(state_history_reference, axis=1)
-
-            epochs, state_history_initial, dependent_variables_history_initial, state_transition_history_initial = \
-                Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model,
-                                                                                                    custom_initial_state=self.custom_initial_state,
-                                                                                                    custom_propagation_time=navigation_arc_duration,
-                                                                                                    solve_variational_equations=True)
+            epochs, state_history_estimated, dependent_variables_history_estimated, state_transition_matrix_history_estimated = \
+                Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model, solve_variational_equations=True)
 
             epochs, state_history_truth, dependent_variables_history_truth = \
-                Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(truth_model,
-                                                                                                        custom_initial_state=self.custom_initial_state_truth,
-                                                                                                        custom_propagation_time=navigation_arc_duration,
-                                                                                                        solve_variational_equations=False)
+                Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(truth_model, solve_variational_equations=False)
+
+            # print("difference initial and truth: \n", state_history_estimated[0, :]-state_history_truth[0, :])
+            od_error = state_history_estimated[0, :]-state_history_truth[0, :]
+            # print("state_history_estimated: \n", state_history_estimated[0, :])
+            # print("state_history_truth: \n", state_history_truth[0, :])
+            # print("epoch before: ", epochs[-1])
+            # print("LUMIO OD error before arc:  ", np.linalg.norm(od_error[6:9]))
+
+            if self.propagate_dynamics_linearly:
+                state_history_estimated = state_history_truth + np.dot(state_transition_matrix_history_estimated, self.custom_initial_state-self.custom_initial_state_truth)
+                # print("length: \n", epochs[0], epochs[-1], len(state_history_estimated))
 
             # Save the propagated histories of the uncertainties
             propagated_covariance_initial = dict()
             propagated_formal_errors_initial = dict()
             for i in range(len(epochs)):
-                propagated_covariance = state_transition_history_initial[i] @ self.apriori_covariance @ state_transition_history_initial[i].T
+                propagated_covariance = state_transition_matrix_history_estimated[i] @ self.apriori_covariance @ state_transition_matrix_history_estimated[i].T
                 propagated_covariance_initial.update({epochs[i]: propagated_covariance})
                 propagated_formal_errors_initial.update({epochs[i]: np.sqrt(np.diagonal(propagated_covariance))})
 
@@ -186,74 +172,80 @@ class NavigationSimulator():
             if time in self.batch_start_times:
 
                 estimation_arc_activated = True
-                observation_window = self.observation_windows[estimation_arc]
-                estimation_arc_duration = np.around(observation_window[1]-observation_window[0], self.decimal_places)
+                estimation_arc_duration = self.estimation_arc_durations[estimation_arc]
 
-                # print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc},  at {time} for {estimation_arc_duration} days")
+                # print(f"Start of estimation arc {estimation_arc} at navigation arc {navigation_arc}, at {time} for {estimation_arc_duration} days")
 
-                # Define dynamic models and select one to test the estimation on
-                dynamic_model_objects = utils.get_dynamic_model_objects(time,
-                                                                        estimation_arc_duration,
-                                                                        custom_model_dict=None,
-                                                                        get_only_first=False,
-                                                                        custom_initial_state=self.custom_initial_state)
-                dynamic_model = dynamic_model_objects[self.model_type][self.model_name][self.model_number]
+                # print("dynamic_model: \n", dynamic_model.simulation_start_epoch_MJD, dynamic_model.propagation_time, dynamic_model.custom_initial_state)
+                # print("truth_model: \n", truth_model.simulation_start_epoch_MJD, truth_model.propagation_time, truth_model.custom_initial_state)
 
-                truth_model.custom_propagation_time = estimation_arc_duration
+                # print("3D OD errors before: \n", \
+                #     np.linalg.norm(dynamic_model.custom_initial_state[0:3]-truth_model.custom_initial_state[0:3]), "\n",
+                #     np.linalg.norm(dynamic_model.custom_initial_state[3:6]-truth_model.custom_initial_state[3:6]), "\n",
+                #     np.linalg.norm(dynamic_model.custom_initial_state[6:9]-truth_model.custom_initial_state[6:9]), "\n",
+                #     np.linalg.norm(dynamic_model.custom_initial_state[9:12]-truth_model.custom_initial_state[9:12])
+                #     )
 
-                # Obtain estimation results for given batch and extract results of the estimation arc
-                estimation_model_results = utils.get_estimation_model_results({self.model_type: {self.model_name: [dynamic_model]}},
-                                                                                    get_only_first=False,
-                                                                                    custom_truth_model=truth_model,
-                                                                                    apriori_covariance=self.apriori_covariance,
-                                                                                    initial_estimation_error=self.initial_estimation_error,
-                                                                                    custom_range_noise=self.custom_range_noise,
-                                                                                    custom_observation_step_size_range=self.custom_observation_step_size_range)
+                maximum_iterations = copy.deepcopy(self.maximum_iterations)
+                if estimation_arc == 0:
+                    self.maximum_iterations = self.maximum_iterations_first_arc
 
-                estimation_model_result = estimation_model_results[self.model_type][self.model_name][0]
+                estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self))
+                # print(vars(estimation_model))
+                estimation_model_result = estimation_model.get_estimation_results()
                 estimation_output = estimation_model_result.estimation_output
                 parameter_history = estimation_output.parameter_history
                 final_covariance = estimation_output.covariance
-                formal_errors = estimation_output.formal_errors
                 best_iteration = estimation_output.best_iteration
+                final_residuals = estimation_output.final_residuals
 
-                # print(estimation_output.final_residuals)
+                dynamic_model.custom_initial_state = parameter_history[:, best_iteration]
+                epochs_final, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
+                    Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model, solve_variational_equations=True)
 
-                # print("NAVIGATIONSIMULATOR")
-                # print("Estimation model start and end: ", estimation_model_result.observation_times_range[0], estimation_model_result.observation_times_range[-1])
-                # print(dynamic_model.simulation_start_epoch_MJD)
+                if self.propagate_dynamics_linearly:
+                    state_history_final = state_history_truth + np.dot(state_transition_history_matrix_final, dynamic_model.custom_initial_state-state_history_truth[0,:])
+                    # print("length: \n", epochs_final[0], epochs_final[-1], len(state_history_final))
 
+                # print("3D OD errors after: \n", \
+                #     np.linalg.norm(parameter_history[:, best_iteration][0:3]-self.custom_initial_state_truth[0:3]), "\n",
+                #     np.linalg.norm(parameter_history[:, best_iteration][3:6]-self.custom_initial_state_truth[3:6]), "\n",
+                #     np.linalg.norm(parameter_history[:, best_iteration][6:9]-self.custom_initial_state_truth[6:9]), "\n",
+                #     np.linalg.norm(parameter_history[:, best_iteration][9:12]-self.custom_initial_state_truth[9:12])
+                #     )
 
-                # start = time.time()
-                epochs, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
-                    Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model,
-                                                                                                    custom_initial_state=parameter_history[:, best_iteration],
-                                                                                                    custom_propagation_time=estimation_arc_duration,
-                                                                                                    solve_variational_equations=True)
+                # print("estimated: \n", parameter_history[:, best_iteration])
+                # print("initial model: \n", self.custom_initial_state)
+                # print("diff update: ", parameter_history[:, best_iteration]-self.custom_initial_state)
+                # print("OD error: \n", parameter_history[:, best_iteration]-self.custom_initial_state_truth)
+                # print("epoch before: ", epochs[-1])
+                # print("LUMIO OD error before arc:  ", np.linalg.norm(od_error[6:9]))
 
-                # print("DEZE: ", time.time()-start)
+                # print("difference best and final before: ", parameter_history[:, best_iteration]-parameter_history[:, -1])
+                # dynamic_model.custom_initial_state = parameter_history[:, -1]
+                # epochs_final_test, state_history_final_test, dependent_variables_history_final_test, state_transition_history_matrix_final_test = \
+                #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(dynamic_model, solve_variational_equations=True)
 
-                # measurement_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e0
-                # measurement_noise = np.random.normal(scale=measurement_noise_sigmas, size=len(measurement_noise_sigmas))
-                # measurement_noise_matrix = np.outer(measurement_noise, measurement_noise)
+                # print("epoch final: ", epochs_final_test[-1])
+                # print("difference best and best and truth after: ", np.linalg.norm(state_history_final[-1,:] - state_history_truth[-1,:]))
+                # print("difference best and final and truth after: ", np.linalg.norm(state_history_final_test[-1,:] - state_history_truth[-1,:]))
 
-                # print(np.sqrt(np.diag(estimation_output.covariance)))
-                # print(np.sqrt(np.diag(self.apriori_covariance)))
 
                 propagated_covariance_final = dict()
                 propagated_formal_errors_final = dict()
-                for i in range(len(epochs)):
-                    propagated_covariance = state_transition_history_matrix_final[i] @ estimation_output.covariance @ state_transition_history_matrix_final[i].T
-                    propagated_covariance_final.update({epochs[i]: propagated_covariance})
-                    propagated_formal_errors_final.update({epochs[i]: np.sqrt(np.diagonal(propagated_covariance))})
+                for i in range(len(epochs_final)):
+                    propagated_covariance = state_transition_history_matrix_final[i] @ final_covariance @ state_transition_history_matrix_final[i].T
+                    propagated_covariance_final.update({epochs_final[i]: propagated_covariance})
+                    propagated_formal_errors_final.update({epochs_final[i]: np.sqrt(np.diagonal(propagated_covariance))})
 
-                # Save the history
-                full_state_history_final_dict.update(dict(zip(epochs, state_history_final)))
+                # Save the results relevant to the estimation arc
+                self.full_state_history_final_dict.update(dict(zip(epochs_final, state_history_final)))
+                self.estimation_arc_results_dict.update({estimation_arc: estimation_model_result})
 
-                # Save the estimation arc results to a dict
-                estimation_arc_results_dict.update({estimation_arc: estimation_model_result})
+                self.maximum_iterations = maximum_iterations
 
                 estimation_arc += 1
+
 
             # Update the values for the next navigation arc
             self.custom_initial_state_truth = state_history_truth[-1,:]
@@ -262,109 +254,121 @@ class NavigationSimulator():
                 self.custom_initial_state = state_history_final[-1,:]
                 self.initial_estimation_error = state_history_final[-1,:]-state_history_truth[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_final.values()))[-1]
-                # print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[0,:]-state_history_initial[0,:])
-                # print("DIFFERENCE INITIAL AND FINAL: ", state_history_final[-1,:]-state_history_initial[-1,:])
+                self.apriori_covariance += self.get_process_noise_matrix(navigation_arc_duration*constants.JULIAN_DAY,
+                                                                            self.state_noise_compensation_lpf,
+                                                                            self.state_noise_compensation_lumio)
+
+                # arc_final_od_error = self.custom_initial_state[0:3]-self.custom_initial_state_truth[0:3]
+                # print("3D OD errors propagated: \n", \
+                #     np.linalg.norm(self.custom_initial_state[0:3]-self.custom_initial_state_truth[0:3]), "\n",
+                #     np.linalg.norm(self.custom_initial_state[3:6]-self.custom_initial_state_truth[3:6]), "\n",
+                #     np.linalg.norm(self.custom_initial_state[6:9]-self.custom_initial_state_truth[6:9]), "\n",
+                #     np.linalg.norm(self.custom_initial_state[9:12]-self.custom_initial_state_truth[9:12])
+                #     )
+
+
             else:
-                self.custom_initial_state = state_history_initial[-1,:]
+                self.custom_initial_state = state_history_estimated[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_initial.values()))[-1]
-
-            # Include artificial process noise in case truth is not equal to the dynamic model
-            process_noise_sigmas = np.array([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])*1e0
-            process_noise = np.random.normal(scale=process_noise_sigmas, size=len(process_noise_sigmas))
-
-            if estimation_arc_activated:
-                delta_t = navigation_arc_duration*constants.JULIAN_DAY
-                if self.model_name != self.model_name_truth:
-                    # if np.all(["srp" in s1 and "srp" in s2])
-                    self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
-
-                else:
-                    self.apriori_covariance += np.outer(process_noise, process_noise)
-                # self.apriori_covariance += np.outer(process_noise, process_noise)
-                # print(self.get_process_noise_matrix(delta_t, sigma_i))
-                # self.apriori_covariance += self.get_process_noise_matrix(delta_t, 5.415871378079487e-12, 3.4891012134067807e-14)
-                # self.apriori_covariance += np.diag([1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3, 1e2, 1e2, 1e2, 1e-3, 1e-3, 1e-3])**2
-                # self.apriori_covariance += delta_t**3 * sigma_i**2*np.eye(12)
 
 
             # Save histories for reading out later
-            full_estimation_error_dict.update(dict(zip(epochs, state_history_initial-state_history_truth)))
-            full_propagated_covariance_dict.update(propagated_covariance_initial)
-            full_propagated_formal_errors_dict.update(propagated_formal_errors_initial)
-            full_state_history_reference_dict.update(dict(zip(epochs, state_history_reference)))
-            full_state_history_truth_dict.update(dict(zip(epochs, state_history_truth)))
-            full_state_history_initial_dict.update(dict(zip(epochs, state_history_initial)))
-
-            full_dependent_variables_history_initial.update(dict(zip(epochs, dependent_variables_history_initial)))
-            full_state_transition_matrix_history_initial.update(dict(zip(epochs, state_transition_history_initial)))
-
-            if len(state_history_reference) != len(state_history_initial):
-                state_history_initial = state_history_initial[:-1,:]
-            full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_initial-state_history_reference)))
+            self.full_estimation_error_dict.update(dict(zip(epochs, state_history_estimated-state_history_truth)))
+            self.full_propagated_covariance_dict.update(propagated_covariance_initial)
+            self.full_propagated_formal_errors_dict.update(propagated_formal_errors_initial)
+            self.full_state_history_reference_dict.update(dict(zip(epochs, state_history_reference)))
+            self.full_state_history_truth_dict.update(dict(zip(epochs, state_history_truth)))
+            self.full_state_history_estimated_dict.update(dict(zip(epochs, state_history_estimated)))
+            self.full_dependent_variables_history_estimated.update(dict(zip(epochs, dependent_variables_history_estimated)))
+            self.full_state_transition_matrix_history_estimated.update(dict(zip(epochs, state_transition_matrix_history_estimated)))
+            self.full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_truth-state_history_reference)))
 
 
             ##############################################################
             #### STATION KEEPING #########################################
             ##############################################################
 
-            if self.times[navigation_arc+1] in np.round(self.station_keeping_epochs, self.decimal_places):
+            if self.include_station_keeping:
+                if self.times[navigation_arc+1] in self.initial_station_keeping_epochs:
 
-                params = [0, self.target_point_epochs]
-                dynamic_model.simulation_start_epoch_MJD = self.times[navigation_arc+1]
-                station_keeping = StationKeeping.StationKeeping(dynamic_model, custom_initial_state=self.custom_initial_state, custom_propagation_time=max(params[1]), step_size=self.step_size)
-                delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=params[0], correction_epoch=params[0], target_point_epochs=params[1])
+                    params = [0, self.target_point_epochs]
 
-                # Generate random noise to simulate station-keeping errors
-                if self.model_type == "HF":
-                    delta_v_noise = np.random.normal(loc=0, scale=self.station_keeping_error*np.abs(delta_v), size=delta_v.shape)
-                    self.custom_initial_state[9:12] += delta_v
-                    self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
+                    dynamic_model_objects = utils.get_dynamic_model_objects(self.times[navigation_arc+1], max(params[1]),
+                                                                            custom_initial_state=self.custom_initial_state,
+                                                                            custom_model_dict={self.model_type: [self.model_name]},
+                                                                            custom_model_list=[self.model_number])
+                    dynamic_model_station_keeping = dynamic_model_objects[self.model_type][self.model_name][0]
 
-                # print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
+                    station_keeping = StationKeeping.StationKeeping(dynamic_model_station_keeping, step_size=self.step_size)
+                    delta_v, dispersion = station_keeping.get_corrected_state_vector(cut_off_epoch=params[0],
+                                                                                    correction_epoch=params[0],
+                                                                                    target_point_epochs=params[1])
+                    # print(dispersion, self.initial_estimation_error)
+                    # ratio = np.linalg.norm(self.initial_estimation_error[6:9])/np.linalg.norm(dispersion[:3])
+                    # print(np.linalg.norm(dispersion[:3]), np.linalg.norm(dispersion[3:]))
+                    # print("ratio: ", ratio)
 
-                delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
+                    # print(dynamic_model.custom_initial_state[0:3], parameter_history[:, best_iteration], truth_model.custom_initial_state[0:3])
+                    # print("Final residuals: ", np.sqrt(np.mean(final_residuals**2)), "Dispersion: ", np.linalg.norm(dispersion[:3]), "xhat0: ", np.linalg.norm(parameter_history[:, best_iteration][6:9]-truth_model.custom_initial_state[6:9]),  "Estimation error: xhatf", np.linalg.norm(self.initial_estimation_error[6:9]))
 
-            if navigation_arc<len(self.times)-2:
+                    # self.full_od_dispersion_relation_dict.update({estimation_arc: [np.linalg.norm(dispersion[:3]), np.linalg.norm(dispersion[3:]), np.linalg.norm(self.initial_estimation_error[6:9]), np.linalg.norm(self.initial_estimation_error[9:12]), ratio]})
+                    # self.full_od_dispersion_relation_dict.update({estimation_arc: [np.linalg.norm(dispersion[:3]), np.linalg.norm(dispersion[3:]), np.linalg.norm(self.initial_estimation_error[6:9]), np.linalg.norm(self.initial_estimation_error[9:12]), ratio]})
+
+                    # Generate random noise to simulate station-keeping errors
+                    if self.model_type == "HF":
+
+                        delta_v_noise_sigma = np.abs(self.station_keeping_error*delta_v)
+                        delta_v_noise = np.random.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
+
+                        od_update = np.linalg.norm(state_history_estimated[0, 6:9]-state_history_truth[0, 6:9])-np.linalg.norm(self.initial_estimation_error[6:9])
+
+                        if np.linalg.norm(delta_v) >= self.delta_v_min:
+                            self.custom_initial_state[9:12] += delta_v
+                            self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
+
+                            delta_v_noise_covariance = np.zeros(12)
+                            delta_v_noise_covariance[9:12] = delta_v_noise_sigma
+                            self.apriori_covariance += np.outer(delta_v_noise_covariance, delta_v_noise_covariance)
+
+                            self.station_keeping_epochs.append(self.times[navigation_arc+1])
+                            self.delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
+
+                            # print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
+                            print(f"Correction at {self.times[navigation_arc+1]}: ", np.linalg.norm(delta_v), " m/s")
+
+
+            if navigation_arc < len(self.times)-2:
                 navigation_arc += 1
+
             else:
-                print("End navigation simulation")
                 break
 
-        return full_estimation_error_dict, full_reference_state_deviation_dict, full_propagated_covariance_dict, full_propagated_formal_errors_dict,\
-               full_state_history_reference_dict, full_state_history_truth_dict, full_state_history_initial_dict, full_state_history_final_dict, delta_v_dict,\
-               full_dependent_variables_history_initial, full_state_transition_matrix_history_initial, estimation_arc_results_dict
+        # print("End navigation simulation")
+        print("=========================")
+
+        self.navigation_result_dicts = [self.full_estimation_error_dict, self.full_reference_state_deviation_dict, self.full_propagated_covariance_dict, self.full_propagated_formal_errors_dict,\
+                        self.full_state_history_reference_dict, self.full_state_history_truth_dict, self.full_state_history_estimated_dict, self.full_state_history_final_dict, self.delta_v_dict,\
+                        self.full_dependent_variables_history_estimated, self.full_state_transition_matrix_history_estimated, self.estimation_arc_results_dict]
+
+        self.navigation_output = NavigationResults(self)
+
+        return self.navigation_output
 
 
-    def get_navigation_results(self, include_instance=True):
+class NavigationResults():
 
-        navigation_results = []
-        for i, result_dict in enumerate(self.perform_navigation()):
+    def __init__(self, navigation_simulator):
 
-            if result_dict:
+        self.navigation_simulator = navigation_simulator
+        navigation_result_dicts = navigation_simulator.navigation_result_dicts
+
+        self.navigation_results = []
+        for i, navigation_result_dict in enumerate(navigation_result_dicts):
+
+            if navigation_result_dict:
                 if i in range(0, 11):
-                    navigation_results.append(utils.convert_dictionary_to_array(result_dict))
+                    self.navigation_results.append(utils.convert_dictionary_to_array(navigation_result_dict))
                 else:
-                    navigation_results.append(result_dict)
+                    self.navigation_results.append(navigation_result_dict)
             else:
-                navigation_results.append(([],[]))
-
-        if include_instance:
-            navigation_results.append(self)
-
-        return navigation_results
-
-
-    def plot_navigation_results(self, navigation_results, show_directly=False):
-
-        results_dict = {self.model_type: {self.model_name: [navigation_results]}}
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_estimation_error_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_uncertainty_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_reference_deviation_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_full_state_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_formal_error_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_correlation_history()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_observations()
-        PlotNavigationResults.PlotNavigationResults(results_dict).plot_observability()
-
-        if show_directly:
-            plt.show()
+                self.navigation_results.append(([],[]))

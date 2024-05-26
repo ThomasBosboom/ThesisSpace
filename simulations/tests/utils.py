@@ -12,14 +12,12 @@ import inspect
 from tudatpy.kernel.astro import time_conversion
 
 # Own
-from src import Interpolator
-# from src.dynamic_models.FF.TRUTH import *
-from src.estimation_models import EstimationModel
+from src import Interpolator, EstimationModel
 
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_initial_state=None, custom_propagation_time=None):
+def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_model_list=None, custom_initial_state=None, custom_propagation_time=None):
 
     if custom_model_dict is None:
         custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["TRUTH"]}
@@ -37,7 +35,10 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
             package_module = __import__(package_module_path, fromlist=[package_name])
             package_files = os.listdir(os.path.join(packages_dir, package_name))
 
-            for file_name in package_files:
+            if custom_model_list is not None:
+                package_files = [package_files[i] for i in custom_model_list]
+
+            for file_name_index, file_name in enumerate(package_files):
                 if file_name.endswith('.py') and not file_name.startswith('__init__'):
                     module_path = f'{package_module_path}.{os.path.splitext(file_name)[0]}'
                     module = __import__(module_path, fromlist=[file_name])
@@ -50,25 +51,35 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
                     sub_dict[package_name_list[package_name_counter]].extend([DynamicModel])
                     dynamic_model_objects[package_type] = sub_dict
 
+                if get_only_first:
+                    break
+
+                # if file_name_index in custom_model_list:
+
+
+
             package_name_counter += 1
 
-    if get_only_first:
-        result_dict = {}
-        for key, inner_dict in dynamic_model_objects.items():
-            if inner_dict and isinstance(inner_dict, dict):
-                updated_inner_dict = {}
-                for subkey, sublist in inner_dict.items():
-                    if sublist and isinstance(sublist, list):
-                        updated_inner_dict[subkey] = [sublist[0]]
-                    else:
-                        updated_inner_dict[subkey] = sublist
+    # if get_only_first:
+    #     result_dict = {}
+    #     for key, inner_dict in dynamic_model_objects.items():
+    #         if inner_dict and isinstance(inner_dict, dict):
+    #             updated_inner_dict = {}
+    #             for subkey, sublist in inner_dict.items():
+    #                 if sublist and isinstance(sublist, list):
+    #                     print(key, subkey, sublist)
+    #                     updated_inner_dict[subkey] = [sublist[0]]
+    #                 else:
+    #                     updated_inner_dict[subkey] = sublist
 
-                result_dict[key] = updated_inner_dict
+    #             result_dict[key] = updated_inner_dict
 
-        return result_dict
+    #     return result_dict
 
-    else:
-        return dynamic_model_objects
+    # else:
+    #     return dynamic_model_objects
+
+    return dynamic_model_objects
 
 
 def get_estimation_model_objects(dynamic_model_objects,
@@ -208,6 +219,7 @@ def get_estimation_model_results(dynamic_model_objects,
                                  custom_range_noise=None,
                                  custom_observation_step_size_range=None):
 
+
     if custom_estimation_model_objects is None:
         estimation_model_objects = get_estimation_model_objects(dynamic_model_objects,
                                                                 custom_truth_model=custom_truth_model,
@@ -250,10 +262,8 @@ def get_estimation_model_results(dynamic_model_objects,
                 # results_list.append(time.time()-start_time)
                 # estimation_model_objects_results[model_type][model_name][i] = results_list
 
-                print("start estimation")
-                start_time = time.time()
+                # print("random number utisls", np.random.randint(1,1000))
                 results_list = estimation_model.get_estimation_results()
-                print("estimation time: ", time.time()-start_time)
                 estimation_model_objects_results[model_type][model_name][i] = results_list
 
     # Selectic only specific estimation model outputs to save to the dictionary
@@ -377,47 +387,47 @@ def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folde
     file_path = caller_frame.filename
     file_path = os.path.dirname(file_path)
 
-    figure_folder = os.path.join(file_path, folder_name)
-    if not os.path.exists(figure_folder):
-        os.makedirs(figure_folder, exist_ok=True)
+    dict_folder = os.path.join(file_path, folder_name)
+    if not os.path.exists(dict_folder):
+        os.makedirs(dict_folder, exist_ok=True)
 
     if custom_sub_folder_name is None:
         sub_folder_name = inspect.currentframe().f_back.f_code.co_name
     else:
         sub_folder_name = custom_sub_folder_name
 
-    sub_figure_folder = os.path.join(figure_folder, sub_folder_name)
-    if not os.path.exists(sub_figure_folder):
-        os.makedirs(sub_figure_folder, exist_ok=True)
+    sub_folder = os.path.join(dict_folder, sub_folder_name)
+    if not os.path.exists(sub_folder):
+        os.makedirs(sub_folder, exist_ok=True)
 
     for i, fig in enumerate(figs):
         if len(figs) != len(labels):
             file_name = f"fig_{i}.png"
         else:
             file_name = f"{labels[i]}.png"
-        figure_path = os.path.join(sub_figure_folder, file_name)
+        figure_path = os.path.join(sub_folder, file_name)
         fig.savefig(figure_path)
 
 
-# def get_monte_carlo_stats_dict(data_dict):
+def get_monte_carlo_stats_dict(data_dict):
 
-#     # Initialize dictionary to store mean and standard deviation for each value
-#     stats = {}
-#     for key, value in data_dict.items():
-#         if isinstance(value, dict):
-#             stats[key] = get_monte_carlo_stats_dict(value)
-#         elif isinstance(value, list):
-#             mean_value = np.mean(value, axis=0)
-#             std_dev_value = np.std(value, axis=0)
-#             if isinstance(mean_value, np.ndarray):
-#                 mean_value = list(mean_value)
-#             if isinstance(std_dev_value, np.ndarray):
-#                 std_dev_value = list(std_dev_value)
-#             stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
-#         else:
-#             stats[key] = value
+    # Initialize dictionary to store mean and standard deviation for each value
+    stats = {}
+    for key, value in data_dict.items():
+        if isinstance(value, dict):
+            stats[key] = get_monte_carlo_stats_dict(value)
+        elif isinstance(value, list):
+            mean_value = np.mean(value, axis=0)
+            std_dev_value = np.std(value, axis=0)
+            if isinstance(mean_value, np.ndarray):
+                mean_value = list(mean_value)
+            if isinstance(std_dev_value, np.ndarray):
+                std_dev_value = list(std_dev_value)
+            stats[key] = {'mean': mean_value, 'std_dev': std_dev_value}
+        else:
+            stats[key] = value
 
-#     return stats
+    return stats
 
 
 # # Commonly used parameters

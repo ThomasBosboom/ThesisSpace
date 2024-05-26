@@ -20,11 +20,12 @@ from DynamicModelBase import DynamicModelBase
 
 class HighFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None, custom_propagation_time=None):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, **kwargs):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
 
-        self.custom_initial_state = custom_initial_state
-        self.custom_propagation_time = custom_propagation_time
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
         self.new_bodies_to_create = ["Sun"]
         for new_body in self.new_bodies_to_create:
@@ -85,13 +86,9 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_acceleration_settings()
 
+        self.simulation_initial_state = self.initial_state
         if self.custom_initial_state is not None:
-            self.initial_state = self.custom_initial_state
-        else:
-            initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
-            initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
-
-            self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
+            self.simulation_initial_state = self.custom_initial_state
 
 
     def set_integration_settings(self):
@@ -108,8 +105,6 @@ class HighFidelityDynamicModel(DynamicModelBase):
         else:
             self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
                                                                                            self.current_coefficient_set)
-
-
 
     def set_dependent_variables_to_save(self):
 
@@ -151,15 +146,12 @@ class HighFidelityDynamicModel(DynamicModelBase):
 
         self.set_termination_settings()
 
-        if self.custom_initial_state is not None:
-            self.initial_state = self.custom_initial_state
-
         # Create propagation settings
         self.propagator_settings = propagation_setup.propagator.translational(
             self.central_bodies,
             self.acceleration_models,
             self.bodies_to_propagate,
-            self.initial_state,
+            self.simulation_initial_state,
             self.simulation_start_epoch,
             self.integrator_settings,
             self.termination_settings,
@@ -193,15 +185,45 @@ class HighFidelityDynamicModel(DynamicModelBase):
             return dynamics_simulator
 
 
+# from src import Interpolator
 
-# test2 = HighFidelityDynamicModel(60450, 10)
-# dep_var = np.stack(list(test2.get_propagation_simulator()[0].dependent_variable_history.values()))
 
-# print(np.shape(dep_var))
+# start = 60390
+# prop = 0.2
+# step_size = 0.01
+# custom_initial_state = np.array([-2.80124257e+08,  2.53325273e+08,  1.46944225e+08 ,-1.61474900e+03,
+#                                 -2.23501800e+03, -2.97164000e+02, -3.10468779e+08, 2.49476676e+08,
+#                                 1.74974583e+08, -9.93404005e+02, -7.66335485e+02, -5.24989115e+02])
+# model = HighFidelityDynamicModel(start, prop, custom_initial_state=custom_initial_state)
+# _, state_history, _, _ = \
+#     Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(model, solve_variational_equations=True)
+
+
+# custom_initial_state = np.array([
+#     -2.80124837e+08, 2.53324810e+08, 1.46943682e+08, -1.61474821e+03,
+#     -2.23501636e+03, -2.97163878e+02, -3.10468232e+08, 2.49475875e+08,
+#     1.74975213e+08, -9.93403510e+02, -7.66335369e+02, -5.24989596e+02
+# ])
+# model_estimated = HighFidelityDynamicModel(start, prop, custom_initial_state=custom_initial_state)
+# _, state_history_estimated, _, _ = \
+#     Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(model_estimated, solve_variational_equations=True)
+
+# custom_initial_state = np.array([-2.80124257e+08,  2.53325273e+08,  1.46944225e+08 ,-1.61474900e+03,
+#                                 -2.23501800e+03, -2.97164000e+02, -3.10468779e+08, 2.49476676e+08,
+#                                 1.74974583e+08, -9.93404005e+02, -7.66335485e+02, -5.24989115e+02])
+# model_truth = HighFidelityDynamicModel(start, prop, custom_initial_state=custom_initial_state)
+# _, state_history_truth, _, _ = \
+#     Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(model_truth, solve_variational_equations=True)
+
+# print("initial states: \n", state_history[0,:], state_history_estimated[0,:]-state_history_truth[0,:])
+
 # ax = plt.figure()
 # # plt.plot(states[:,0], states[:,1], states[:,2])
 # # plt.plot(states[:,6], states[:,7], states[:,8])
-# plt.plot(dep_var[:,:6])
+# plt.plot(state_history[:,6:9]-state_history_truth[:,6:9], color="red")
+# plt.plot(state_history_estimated[:,6:9]-state_history_truth[:,6:9], color="blue")
+# # plt.plot(states[:,6], states[:,7])
+# # plt.plot(dep_var[:,:6])
 # # plt.plot(dep_var[:,-8:-6])
 # plt.legend()
 # plt.show()

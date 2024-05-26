@@ -1,188 +1,213 @@
-# General imports
 import numpy as np
 import os
 import sys
 import scipy as sp
-import time
+import json
+from datetime import datetime
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+# Define current time
+current_time = datetime.now().strftime("%d%m%H%M")
+
 # Own
 import NavigationSimulator
-from tests import utils
 
-class OptimizationModel():
+class OptimizationModel:
+    def __init__(self, duration=28, arc_length=1, arc_interval=3, mission_start_epoch=60390, max_iterations=20, bounds_values=(0.9, 0.9), optimization_method="Nelder-Mead"):
 
-    def __init__(self, dynamic_model_list, truth_model_list, threshold=8, duration=14, skm_to_od_duration=3, od_duration=1, bounds=(0.5, 1.5)):
+        self.duration = duration
+        self.arc_length = arc_length
+        self.arc_interval = arc_interval
+        self.mission_start_epoch = mission_start_epoch
+        self.optimization_method = optimization_method
+        self.max_iterations = max_iterations
+        self.bounds_values = bounds_values
 
-        # Specify the dynamic and truth model used for the estimation arcs
-        self.model_type, self.model_name, self.model_number = dynamic_model_list[0], dynamic_model_list[1], dynamic_model_list[2]
-        self.model_type_truth, self.model_name_truth, self.model_number_truth = truth_model_list[0], truth_model_list[1], truth_model_list[2]
-
-        # Timing parameters
-        self.mission_start_time = 60390
-        self.threshold = threshold + self.mission_start_time
-        self.duration = duration + self.mission_start_time
-
-        self.skm_to_od_duration = skm_to_od_duration
-        self.od_duration = od_duration
-
-        skm_epochs = [self.threshold]
-        while skm_epochs[-1]<self.duration:
-            skm_epochs.append(skm_epochs[-1] + self.skm_to_od_duration + self.od_duration)
-        self.skm_epochs = skm_epochs[:-1]
-
-        self.observation_windows = []
-        for i, skm_epoch in enumerate(self.skm_epochs):
-            window = (skm_epoch-self.od_duration, skm_epoch)
-            if i == 0:
-                window = (self.mission_start_time, self.threshold)
-
-            self.observation_windows.append(window)
-
-        self.vec_len = len(self.skm_epochs)-1
-        self.initial_design_vector = self.od_duration*np.ones(self.vec_len)
-        self.design_vector_bounds = list(zip(bounds[0]*np.ones(self.vec_len), bounds[-1]*np.ones(self.vec_len)))
-        self.xk = self.initial_design_vector
-
-        # optimization parmameters
-        self.factor = 1
-        self.maxiter = 10
+        self.iteration = 0
+        self.iteration_history = {}
+        self.intermediate_iteration_history = {}
+        self.initial_objective_value = None
 
 
-    def get_updated_skm_epochs(self, x):
+    def generate_observation_windows(self, design_vector):
 
-        new_skm_epochs = [self.threshold]
-        for i, epoch in enumerate(self.skm_epochs[1:]):
-            new_skm_epochs.append(new_skm_epochs[-1]+self.skm_to_od_duration+x[i])
+        observation_windows = []
+        current_time = self.mission_start_epoch
+        for arc_length in design_vector:
+            if current_time + arc_length > current_time + self.duration:
+                arc_length = self.duration - current_time
+            observation_windows.append((current_time, current_time + arc_length))
+            current_time += arc_length + self.arc_interval
 
-        return new_skm_epochs
-
-
-    def get_updated_observation_windows(self, x):
-
-        new_skm_epochs = self.get_updated_skm_epochs(x)
-        new_observation_windows = [(self.mission_start_time, self.threshold)]
-        for i, skm_epoch in enumerate(new_skm_epochs[1:]):
-            new_observation_windows.append((skm_epoch-x[i], skm_epoch))
-
-        return new_observation_windows
+        return observation_windows
 
 
-    def get_adjusted_design_vector(self, x):
+    def optimize(self, objective_function):
 
-        # print("before adjustment: ", x)
-        diff = np.array(x) - np.array(self.xk)
-        x = x + diff*(self.factor-1)
-        # print("self.xk: ", self.xk)
-        # print("diff: ", diff)
+        self.options = {'maxiter': self.max_iterations, 'disp': True}
+        self.best_objective_value = None
+        self.latest_objective_value = None
 
-        return x
+        self.run_counter = 0
+        def wrapped_objective(design_vector):
 
+            observation_windows = self.generate_observation_windows(design_vector)
+            objective_value = objective_function(observation_windows)
 
-    def objective_function(self, x, plot_results=False, show_directly=False):
+            # Initialize initial objective value
+            if self.initial_objective_value is None:
+                self.initial_objective_value = objective_value
 
-        print("Start of objective calculation ===============")
+            self.latest_objective_value = objective_value
 
-        x = self.get_adjusted_design_vector(x)
-        observation_windows = self.get_updated_observation_windows(x)
-        station_keeping_epochs = self.get_updated_skm_epochs(x)
-        target_point_epochs = [self.skm_to_od_duration]
+            # Save all intermediate function evaluations between iterations
+            if self.iteration not in self.intermediate_iteration_history:
+                self.intermediate_iteration_history[self.iteration] = {}
 
-        print("Objective, design vector: \n", x)
-        # print("Objective, observation windows: \n", observation_windows)
-        # print("Objective, station keeping windows: \n", station_keeping_epochs)
-        # print("Objective, target_point_epochs: \n", target_point_epochs)
+            self.intermediate_iteration_history[self.iteration][self.run_counter] = {
+                    'design_vector': design_vector.tolist(),
+                    'objective_value': objective_value,
+                    'reduction': (objective_value-self.initial_objective_value)/self.initial_objective_value*100
+                }
 
-        navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
-                                                                       [self.model_type, self.model_name, self.model_number],
-                                                                       [self.model_type_truth, self.model_name_truth, self.model_number_truth],
-                                                                       station_keeping_epochs=station_keeping_epochs,
-                                                                       target_point_epochs=target_point_epochs,
-                                                                       step_size=1e-2)
+            # Update the best objective value and arc lengths for the current iteration
+            if self.best_objective_value is None or objective_value < self.best_objective_value:
+                self.best_objective_value = objective_value.tolist()
+                self.best_design_vector = np.copy(design_vector).tolist()
 
-        start_time = time.time()
-        navigation_results = navigation_simulator.get_navigation_results()
-        run_time = time.time()-start_time
+            # print(self.iteration_history[self.iteration])
+            self.save_to_json()
 
-        if plot_results:
-            navigation_simulator.plot_navigation_results(navigation_results, show_directly=show_directly)
+            print(f"Function evaluation: \nDesign vector: {design_vector} \nObjective: {objective_value}")
 
-        delta_v = navigation_results[8][1]
-        objective_value = np.sum(np.linalg.norm(delta_v, axis=1))
-        print(f"Objective: \n", delta_v, objective_value, observation_windows[-1][-1]-observation_windows[0][0], run_time)
-        print("End of objective calculation ===============")
+            self.run_counter += 1
 
-        if objective_value > 9:
-            print("OUTLIER: ", x)
-
-        return objective_value
+            return objective_value
 
 
-    def optimize(self):
+        def callback_function(x):
 
-        # Initial guess for the design vector
-        x0 = self.initial_design_vector
-        print("Initial design vector: \n", x0)
+            print(f"Final result iteration {self.iteration}: ", x)
 
-        # Define a callback function to record iteration history
-        iterations = []
-        design_vectors = []
-        objective_values = []
-        def callback(xk):
-            self.xk = xk
-            print("Iteration:", callback.iteration, xk, self.objective_function(xk))
-            iterations.append(callback.iteration)
-            design_vectors.append(xk)
-            objective_values.append(self.objective_function(xk))
-            callback.iteration += 1
+            # Only save the final result of each iteration
+            self.iteration_history[self.iteration] = {
+                    'design_vector': self.best_design_vector,
+                    'objective_value': self.best_objective_value,
+                    'reduction': (self.best_objective_value-self.initial_objective_value)/self.initial_objective_value*100
+                }
 
-        callback.iteration = 0
-        callback(x0)
+            self.iteration += 1
+            self.run_counter = 0
 
-        print("Design vector bounds: ", self.design_vector_bounds)
+        # Define bounds for the design vector entries
+        lower_bounds = [self.arc_length - self.bounds_values[0]] * int(self.duration / (self.arc_length + self.arc_interval))
+        upper_bounds = [self.arc_length + self.bounds_values[1]] * int(self.duration / (self.arc_length + self.arc_interval))
+        self.bounds = list(zip(lower_bounds, upper_bounds))
 
-        # Minimize the objective function subject to constraints
-        start_time = time.time()
-        result = sp.optimize.minimize(self.objective_function, x0,
-                                        bounds=[(1-0.5/self.factor, 1+0.5/self.factor) for i, bound in enumerate(self.design_vector_bounds)],
-                                        method='Nelder-Mead',
-                                        options={
-                                                 'maxiter': self.maxiter,
-                                                 "return_all": True,
-                                                 'disp': True,
-                                                 "adaptive": True
-                                                 },
-                                        callback=callback)
-        run_time = time.time()-start_time
+        # Initialize the design vector with the maximum number of arcs
+        self.initial_guess = np.full(len(lower_bounds), self.arc_length).tolist()
 
-        # Extract optimized start times
-        x_optim = result.x
+        result = sp.optimize.minimize(
+            fun=wrapped_objective,
+            x0=self.initial_guess,
+            method=self.optimization_method,
+            bounds=self.bounds,
+            options=self.options,
+            callback=callback_function
+        )
 
-        result_dict =  {"threshold": self.threshold,
-                        "skm_to_od_duration": self.skm_to_od_duration,
-                        "duration": self.duration-self.mission_start_time,
-                        "factor": self.factor,
-                        "maxiter": self.maxiter,
-                        "initial_design_vector": list(self.initial_design_vector),
-                        "model":
-                        {"dynamic":
-                            {"model_type": self.model_type,
-                             "model_name": self.model_name,
-                             "model_number": self.model_number},
-                         "truth":
-                            {"model_type": self.model_type_truth,
-                             "model_name": self.model_name_truth,
-                             "model_number": self.model_number_truth}
-                        },
-                        "history": {"design_vector": {iteration: list(design_vectors[iteration]) for iteration in iterations},
-                                    "objective_value": {iteration: objective_values[iteration] for iteration in iterations}},
-                        "final_result": {"x_optim": list(x_optim),
-                                        "observation_windows": self.get_updated_observation_windows(x_optim),
-                                        "skm_epochs": self.get_updated_skm_epochs(x_optim),
-                                        "approx_annual_deltav": objective_values[-1]*365/(self.duration-self.mission_start_time),
-                                        "reduction_percentage": (objective_values[-1]-objective_values[0])/objective_values[0]*100,
-                                        "run_time": run_time}
-                        }
+        self.optimization_result = result.x.tolist()
 
-        return result_dict
+        print(f"Optimization Result: {result}")
+
+        self.save_to_json()
+
+    def get_optimization_result(self):
+        return self.optimization_result
+
+    def save_to_json(self, filename=f'{current_time}_optimization_results.json'):
+        folder = os.path.join(os.path.dirname(__file__), "optimization_results")
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+
+        file_path = os.path.join(folder, filename)
+        with open(file_path, 'w') as file:
+            json.dump(vars(self), file, indent=4)
+
+
+# Example usage:
+if __name__ == "__main__":
+
+    def test(observation_windows):
+        return observation_windows[-1][-1]
+
+    def maneuvre_cost(observation_windows, numruns=3, **kwargs):
+        cost_list = []
+        for run in range(numruns):
+            print(f"Run {run} of {numruns}")
+            navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
+                                        orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1)
+            navigation_results = navigation_simulator.perform_navigation(seed=0).navigation_results
+            delta_v = np.sum(np.linalg.norm(navigation_results[8][1], axis=1)[:-2])
+            cost_list.append(delta_v)
+
+        total_cost = np.mean(cost_list)
+
+        return total_cost
+
+    def overall_uncertainty(observation_windows):
+        navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows)
+        navigation_simulator = navigation_simulator.perform_navigation(seed=0).navigation_simulator
+
+        covariance_dict = navigation_simulator.full_propagated_covariance_dict
+        covariance_epochs = np.stack(list(covariance_dict.keys()))
+        covariance_history = np.stack(list(covariance_dict.values()))
+
+        beta_aves = []
+        for i in range(2):
+
+            beta_bar_1 = np.mean(3*np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history[:, 3*i+0:3*i+3, 3*i+0:3*i+3]))), axis=1))
+            beta_bar_2 = np.mean(3*np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history[:, 3*i+6:3*i+3+6, 3*i+6:3*i+3+6]))), axis=1))
+            beta_ave = 1/2*(beta_bar_1+beta_bar_2)
+
+            beta_aves.append(beta_ave)
+
+        return beta_aves[0]
+
+
+
+    duration = 28 # Example total duration
+    arc_length = 1  # Example arc length
+    arc_interval = 3  # Example arc interval
+
+    optimizer = OptimizationModel(duration, arc_length, arc_interval, max_iterations=30)
+    # optimizer.optimize(maneuvre_cost)
+    # # optimizer.optimize(overall_uncertainty)
+    # # optimizer.optimize(test)
+
+    # optimization_result = optimizer.get_optimization_result()
+    # print(f"Optimized Arc Lengths: {optimization_result}")
+
+    optimizer.save_to_json()
+
+    # optimization_result = np.array([0.17596644, 1.13618278, 1.15153068, 1.01679524, 1.17737341, 1.03086586, 1.38582027])
+    optimization_result = np.array([
+                1.0177113702623903,
+                0.9165243648479793,
+                0.9889733444398163,
+                0.9749791753436066,
+                1.0379529362765512,
+                1.0379529362765512,
+                1.0379529362765512
+            ])
+    # print(optimization_result)
+
+    # Evaluate the results related to the final result
+    observation_windows = optimizer.generate_observation_windows(optimization_result)
+    print(observation_windows)
+    # cost = overall_uncertainty(observation_windows
+    cost = maneuvre_cost(observation_windows, orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1)
+    print(cost)
+
+    # 0.05929281641011152

@@ -3,6 +3,18 @@ from tudatpy.kernel.astro import time_conversion
 from tudatpy.kernel.interface import spice
 from tudatpy.kernel import constants
 
+import sys
+import os
+import numpy as np
+
+file_directory = os.path.realpath(__file__)
+for _ in range(4):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
+
+from src import reference_data
+
+
 # Load spice kernels.
 spice.load_standard_kernels()
 
@@ -21,8 +33,9 @@ class DynamicModelBase:
         self.propagation_time = propagation_time
         self.simulation_start_epoch = time_conversion.julian_day_to_seconds_since_epoch(\
             time_conversion.modified_julian_day_to_julian_day(self.simulation_start_epoch_MJD))
-        self.simulation_end_epoch   = time_conversion.julian_day_to_seconds_since_epoch(\
-            time_conversion.modified_julian_day_to_julian_day(self.simulation_start_epoch_MJD+self.propagation_time))
+        # self.simulation_end_epoch   = time_conversion.julian_day_to_seconds_since_epoch(\
+        #     time_conversion.modified_julian_day_to_julian_day(self.simulation_start_epoch_MJD+self.propagation_time))
+        self.simulation_end_epoch = self.simulation_start_epoch + propagation_time*constants.JULIAN_DAY
 
         # Define constant environment settings
         self.global_frame_origin = self.name_primary
@@ -43,34 +56,11 @@ class DynamicModelBase:
         self.current_tolerance = 1e-18*constants.JULIAN_DAY
         self.initial_time_step = 1e-1*constants.JULIAN_DAY
 
+        # Initial state based on reference orbit
+        initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
+        self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
 
-    def set_environment_settings(self):
-        pass
-
-
-    def set_acceleration_settings(self):
-        pass
-
-
-    def set_initial_state(self):
-        pass
-
-
-    def set_integration_settings(self):
-        pass
-
-
-    def set_dependent_variables_to_save(self):
-        pass
-
-
-    def set_termination_settings(self, custom_initial_state=None, custom_propagation_time=None):
-        pass
-
-
-    def set_propagator_settings(self, custom_initial_state=None):
-        pass
-
-
-    def get_propagation_simulator(self, custom_initial_state=None):
-        pass
+        # Custom parameters
+        self.custom_initial_state = None
+        self.custom_propagation_time = None

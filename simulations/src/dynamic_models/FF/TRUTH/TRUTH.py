@@ -50,11 +50,12 @@ def read_coeffs(scaled=True):
 
 class HighFidelityDynamicModel(DynamicModelBase):
 
-    def __init__(self, simulation_start_epoch_MJD, propagation_time, custom_initial_state=None, custom_propagation_time=None):
+    def __init__(self, simulation_start_epoch_MJD, propagation_time, **kwargs):
         super().__init__(simulation_start_epoch_MJD, propagation_time)
 
-        self.custom_initial_state = custom_initial_state
-        self.custom_propagation_time = custom_propagation_time
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
         self.new_bodies_to_create = ["Sun", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
         for new_body in self.new_bodies_to_create:
@@ -191,7 +192,6 @@ class HighFidelityDynamicModel(DynamicModelBase):
             self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
                                                                                            self.current_coefficient_set)
 
-
     def set_dependent_variables_to_save(self):
 
         self.set_integration_settings()
@@ -245,9 +245,6 @@ class HighFidelityDynamicModel(DynamicModelBase):
     def set_propagator_settings(self):
 
         self.set_termination_settings()
-
-        if self.custom_initial_state is not None:
-            self.initial_state = self.custom_initial_state
 
         # Create propagation settings
         self.propagator_settings = propagation_setup.propagator.translational(

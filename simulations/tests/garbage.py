@@ -1,927 +1,3763 @@
-# # from datetime import datetime
-
-# # current_time = datetime.now()
-
-# # # Format the current time as a string
-# # current_time_string = datetime.now().strftime("%d%m_%H%M")
-
-# # print(current_time_string)  # Output: "2024-03-29 14:30:00"
-
-# # import numpy as np
-# # import matplotlib.pyplot as plt
-
-# # data = {"0": {
-# #    "threshold": 60393,
-# #    "skm_to_od_duration": 3,
-# #    "duration": 28,
-# #    "factor": 1,
-# #    "maxiter": 60,
-# #    "initial_design_vector": [
-# #       1.0,
-# #       1.0,
-# #       1.0,
-# #       1.0,
-# #       1.0,
-# #       1.0
-# #    ],
-# #    "model": {
-# #       "dynamic": {
-# #          "model_type": "HF",
-# #          "model_name": "PM",
-# #          "model_number": 0
-# #       },
-# #       "truth": {
-# #          "model_type": "HF",
-# #          "model_name": "PM",
-# #          "model_number": 0
-# #       }
-# #    },
-# #    "history": {
-# #       "design_vector": {
-# #          "0": [
-# #             1.0,
-# #             1.0,
-# #             1.0,
-# #             1.0,
-# #             1.0,
-# #             1.0
-# #          ],
-# #          "1": [
-# #             1.0,
-# #             1.05,
-# #             1.0,
-# #             1.0,
-# #             1.0,
-# #             1.0
-# #          ],
-# #          "2": [
-# #             1.0,
-# #             1.05,
-# #             1.0,
-# #             1.0,
-# #             1.0,
-# #             1.0
-# #          ],
-# #          "3": [
-# #             1.0,
-# #             1.05,
-# #             1.0,
-# #             1.0,
-# #             1.0,
-# #             1.0
-# #          ],
-# #          "4": [
-# #             1.0264060356652946,
-# #             1.036488340192044,
-# #             0.9503772290809329,
-# #             0.972633744855967,
-# #             1.036488340192044,
-# #             0.9911179698216734
-# #          ],
-# #          "5": [
-# #             1.0366750495351311,
-# #             1.0506782502667276,
-# #             0.9977461515012951,
-# #             0.9619913122999539,
-# #             1.0506782502667271,
-# #             0.9876638469745462
-# #          ],
-# #          "6": [
-# #             1.043660773256109,
-# #             1.060331250317533,
-# #             0.9973168470253517,
-# #             0.9547515622618501,
-# #             0.993664583650866,
-# #             0.9853141035411268
-# #          ],
-# #          "7": [
-# #             1.0125353519957996,
-# #             1.0755033954851052,
-# #             0.9914841910955305,
-# #             0.9433724533861707,
-# #             1.0366145065962165,
-# #             0.9754805331165639
-# #          ],
-# #          "8": [
-# #             1.0125353519957996,
-# #             1.0755033954851052,
-# #             0.9914841910955305,
-# #             0.9433724533861707,
-# #             1.0366145065962165,
-# #             0.9754805331165639
-# #          ],
-# #          "9": [
-# #             1.0125353519957996,
-# #             1.0755033954851052,
-# #             0.9914841910955305,
-# #             0.9433724533861707,
-# #             1.0366145065962165,
-# #             0.9754805331165639
-# #          ],
-# #          "10": [
-# #             1.0125353519957996,
-# #             1.0755033954851052,
-# #             0.9914841910955305,
-# #             0.9433724533861707,
-# #             1.0366145065962165,
-# #             0.9754805331165639
-# #          ],
-# #          "11": [
-# #             1.0125353519957996,
-# #             1.0755033954851052,
-# #             0.9914841910955305,
-# #             0.9433724533861707,
-# #             1.0366145065962165,
-# #             0.9754805331165639
-# #          ],
-# #          "12": [
-# #             1.0375942069431952,
-# #             1.1302848096141855,
-# #             0.9470117252078274,
-# #             0.9375744586329815,
-# #             0.9995882694526252,
-# #             0.95627266229523
-# #          ],
-# #          "13": [
-# #             1.0259206884157575,
-# #             1.144618304828476,
-# #             0.9280210282467143,
-# #             0.9405474739392266,
-# #             1.0779101471966797,
-# #             0.9481117597219408
-# #          ],
-# #          "14": [
-# #             1.0259206884157575,
-# #             1.144618304828476,
-# #             0.9280210282467143,
-# #             0.9405474739392266,
-# #             1.0779101471966797,
-# #             0.9481117597219408
-# #          ],
-# #          "15": [
-# #             1.0259206884157575,
-# #             1.144618304828476,
-# #             0.9280210282467143,
-# #             0.9405474739392266,
-# #             1.0779101471966797,
-# #             0.9481117597219408
-# #          ],
-# #          "16": [
-# #             1.0361611032534894,
-# #             1.1351281980479642,
-# #             0.9452168287760125,
-# #             0.8883591527110115,
-# #             1.0704332094331535,
-# #             0.9205547664829321
-# #          ],
-# #          "17": [
-# #             1.0361611032534894,
-# #             1.1351281980479642,
-# #             0.9452168287760125,
-# #             0.8883591527110115,
-# #             1.0704332094331535,
-# #             0.9205547664829321
-# #          ],
-# #          "18": [
-# #             1.0483542955251033,
-# #             1.213322381856245,
-# #             0.8610146015589191,
-# #             0.8828781130363894,
-# #             1.06073602129079,
-# #             0.9377225799188844
-# #          ],
-# #          "19": [
-# #             1.0191269678215402,
-# #             1.1725728855560504,
-# #             0.8868678968790591,
-# #             0.8693379716419665,
-# #             1.133884018752642,
-# #             0.9561191534231948
-# #          ],
-# #          "20": [
-# #             1.0191269678215402,
-# #             1.1725728855560504,
-# #             0.8868678968790591,
-# #             0.8693379716419665,
-# #             1.133884018752642,
-# #             0.9561191534231948
-# #          ],
-# #          "21": [
-# #             1.0061869596862527,
-# #             1.226958625841562,
-# #             0.8676509085567272,
-# #             0.8967041698411178,
-# #             1.121897140799983,
-# #             0.8751207701294725
-# #          ],
-# #          "22": [
-# #             1.0205138620224141,
-# #             1.2415924531567657,
-# #             0.8749120837596585,
-# #             0.8162529531512424,
-# #             1.0952677992859623,
-# #             0.9022209391107037
-# #          ],
-# #          "23": [
-# #             1.063285799725515,
-# #             1.2558994198133082,
-# #             0.836950214541686,
-# #             0.8080633240674115,
-# #             1.173856553218878,
-# #             0.8652314978746236
-# #          ],
-# #          "24": [
-# #             1.063285799725515,
-# #             1.2558994198133082,
-# #             0.836950214541686,
-# #             0.8080633240674115,
-# #             1.173856553218878,
-# #             0.8652314978746236
-# #          ],
-# #          "25": [
-# #             1.063285799725515,
-# #             1.2558994198133082,
-# #             0.836950214541686,
-# #             0.8080633240674115,
-# #             1.173856553218878,
-# #             0.8652314978746236
-# #          ],
-# #          "26": [
-# #             1.0133269721003904,
-# #             1.286619576435404,
-# #             0.7588490337573963,
-# #             0.7965950767460237,
-# #             1.2215624382124943,
-# #             0.8576901388903297
-# #          ],
-# #          "27": [
-# #             1.0133269721003904,
-# #             1.286619576435404,
-# #             0.7588490337573963,
-# #             0.7965950767460237,
-# #             1.2215624382124943,
-# #             0.8576901388903297
-# #          ],
-# #          "28": [
-# #             1.0534275291059467,
-# #             1.3582101763054988,
-# #             0.7644405066191522,
-# #             0.687172445661238,
-# #             1.2370075286190287,
-# #             0.8525441695677483
-# #          ],
-# #          "29": [
-# #             1.0534275291059467,
-# #             1.3582101763054988,
-# #             0.7644405066191522,
-# #             0.687172445661238,
-# #             1.2370075286190287,
-# #             0.8525441695677483
-# #          ],
-# #          "30": [
-# #             1.0448752041981177,
-# #             1.3218499152936882,
-# #             0.7723858246503772,
-# #             0.7038467160939619,
-# #             1.3031999925207958,
-# #             0.7677843666121356
-# #          ],
-# #          "31": [
-# #             1.0740470936794604,
-# #             1.3883944021514703,
-# #             0.6767920977052695,
-# #             0.6986957619505958,
-# #             1.27696600935364,
-# #             0.7829608040213523
-# #          ],
-# #          "32": [
-# #             1.0219978291109892,
-# #             1.4343994801356683,
-# #             0.6612017526075715,
-# #             0.6663932703904127,
-# #             1.3328373106239142,
-# #             0.7590845817505152
-# #          ],
-# #          "33": [
-# #             1.0219978291109892,
-# #             1.4343994801356683,
-# #             0.6612017526075715,
-# #             0.6663932703904127,
-# #             1.3328373106239142,
-# #             0.7590845817505152
-# #          ],
-# #          "34": [
-# #             1.0219978291109892,
-# #             1.4343994801356683,
-# #             0.6612017526075715,
-# #             0.6663932703904127,
-# #             1.3328373106239142,
-# #             0.7590845817505152
-# #          ],
-# #          "35": [
-# #             1.0219978291109892,
-# #             1.4343994801356683,
-# #             0.6612017526075715,
-# #             0.6663932703904127,
-# #             1.3328373106239142,
-# #             0.7590845817505152
-# #          ],
-# #          "36": [
-# #             1.0219978291109892,
-# #             1.4343994801356683,
-# #             0.6612017526075715,
-# #             0.6663932703904127,
-# #             1.3328373106239142,
-# #             0.7590845817505152
-# #          ],
-# #          "37": [
-# #             1.0840652184485102,
-# #             1.5,
-# #             0.5067978023141677,
-# #             0.5389376589851818,
-# #             1.4244789135246845,
-# #             0.7397629878043501
-# #          ],
-# #          "38": [
-# #             1.0840652184485102,
-# #             1.5,
-# #             0.5067978023141677,
-# #             0.5389376589851818,
-# #             1.4244789135246845,
-# #             0.7397629878043501
-# #          ],
-# #          "39": [
-# #             1.0840652184485102,
-# #             1.5,
-# #             0.5067978023141677,
-# #             0.5389376589851818,
-# #             1.4244789135246845,
-# #             0.7397629878043501
-# #          ],
-# #          "40": [
-# #             1.0505650707619365,
-# #             1.5,
-# #             0.5283019614036062,
-# #             0.5151770512634359,
-# #             1.4382483678561655,
-# #             0.6589102150787258
-# #          ],
-# #          "41": [
-# #             1.0505650707619365,
-# #             1.5,
-# #             0.5283019614036062,
-# #             0.5151770512634359,
-# #             1.4382483678561655,
-# #             0.6589102150787258
-# #          ],
-# #          "42": [
-# #             1.0172186693628593,
-# #             1.5,
-# #             0.5,
-# #             0.533582717909757,
-# #             1.5,
-# #             0.6996751997242181
-# #          ],
-# #          "43": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "44": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "45": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "46": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "47": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "48": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "49": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "50": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "51": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "52": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "53": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "54": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "55": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "56": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "57": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "58": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ],
-# #          "59": [
-# #             1.0696548772860786,
-# #             1.5,
-# #             0.5,
-# #             0.5,
-# #             1.5,
-# #             0.6872476257360807
-# #          ]
-# #       },
-# #       "objective_value": {
-# #          "0": 2.2463962616204514,
-# #          "1": 2.087376371321291,
-# #          "2": 2.0788247091575114,
-# #          "3": 2.112384285001497,
-# #          "4": 2.030556099309441,
-# #          "5": 1.9882453398525697,
-# #          "6": 1.9926368122806557,
-# #          "7": 1.9113406651607177,
-# #          "8": 1.8690626826718644,
-# #          "9": 1.8821283505368829,
-# #          "10": 1.8824048191889102,
-# #          "11": 1.876043169312066,
-# #          "12": 1.8256205833461294,
-# #          "13": 1.8083523856693013,
-# #          "14": 1.7789062096569401,
-# #          "15": 1.8080865426610764,
-# #          "16": 1.7308005291646573,
-# #          "17": 1.7413464856693281,
-# #          "18": 1.6764590308310647,
-# #          "19": 1.666387685614776,
-# #          "20": 1.6826001393443568,
-# #          "21": 1.644827745943528,
-# #          "22": 1.5777321116549634,
-# #          "23": 1.5373637186037494,
-# #          "24": 1.5423983056063961,
-# #          "25": 1.5582332220031359,
-# #          "26": 1.4755595653787996,
-# #          "27": 1.4875860479722096,
-# #          "28": 1.3932959799772324,
-# #          "29": 1.3930592132177437,
-# #          "30": 1.3744397981694862,
-# #          "31": 1.3966307473915986,
-# #          "32": 1.3414602468465557,
-# #          "33": 1.3459434567048076,
-# #          "34": 1.3416425263612948,
-# #          "35": 1.3511199935266855,
-# #          "36": 1.3520745707036053,
-# #          "37": 1.2840018863803586,
-# #          "38": 1.2484664482433272,
-# #          "39": 1.256719860876987,
-# #          "40": 1.2545224243826771,
-# #          "41": 1.2684238714343379,
-# #          "42": 1.2338323213089428,
-# #          "43": 1.2512560908981583,
-# #          "44": 1.261599629747322,
-# #          "45": 1.2404106323455186,
-# #          "46": 1.257593008996446,
-# #          "47": 1.2420976773923513,
-# #          "48": 1.2445197741969287,
-# #          "49": 1.2343623907538337,
-# #          "50": 1.2563751194369472,
-# #          "51": 1.2533295831355173,
-# #          "52": 1.2355247665516167,
-# #          "53": 1.252814639833546,
-# #          "54": 1.2429632606768946,
-# #          "55": 1.2468555843716753,
-# #          "56": 1.2661449357700019,
-# #          "57": 1.2548953530966265,
-# #          "58": 1.2495921570204127,
-# #          "59": 1.258026412406305
-# #       }
-# #    },
-# #    "final_result": {
-# #       "x_optim": [
-# #          1.0696548772860786,
-# #          1.5,
-# #          0.5,
-# #          0.5,
-# #          1.5,
-# #          0.6872476257360807
-# #       ],
-# #       "observation_windows": [
-# #          [
-# #             60390,
-# #             60393
-# #          ],
-# #          [
-# #             60396.0,
-# #             60397.06965487728
-# #          ],
-# #          [
-# #             60400.06965487728,
-# #             60401.56965487728
-# #          ],
-# #          [
-# #             60404.56965487728,
-# #             60405.06965487728
-# #          ],
-# #          [
-# #             60408.06965487728,
-# #             60408.56965487728
-# #          ],
-# #          [
-# #             60411.56965487728,
-# #             60413.06965487728
-# #          ],
-# #          [
-# #             60416.06965487728,
-# #             60416.75690250302
-# #          ]
-# #       ],
-# #       "skm_epochs": [
-# #          60393,
-# #          60397.06965487728,
-# #          60401.56965487728,
-# #          60405.06965487728,
-# #          60408.56965487728,
-# #          60413.06965487728,
-# #          60416.75690250302
-# #       ],
-# #       "approx_annual_deltav": 16.399272876010762,
-# #       "reduction_percentage": -43.998018786818136,
-# #       "run_time": 29590.47538471222
-# #    }
-# # }}
-
-
-
-# # print([list(item["history"]["objective_value"].values()) for item in data.values()])
-
-# # # Extracting objective values into a 2D array
-# # objective_values = np.array([list(item['history']['objective_value'].values()) for item in data.values()]).T
-# # # Extracting design vectors into a 3D array
-# # design_vectors = np.array([list(item['history']['design_vector'].values()) for item in data.values()])
-
-# # print("Objective Values:")
-# # print(objective_values)
-
-# # print("\nDesign Vectors:")
-# # print(design_vectors)
-
-
-# # # # Extract objective function values
-# # # iteration_numbers = []
-# # # objective_functions = []
-# # # states = []
-
-# # # for iteration, values in data["history"].items():
-# # #     iteration_numbers.append(int(iteration))
-# # #     objective_functions.append(values["objective_function"])
-# # #     states.append(values["design_vector"])
-
-# # # Plot
-# # plt.plot(objective_values, marker='*', linestyle='-')
-# # plt.xlabel('Iteration')
-# # plt.ylabel(r'||$\Delta V$||')
-# # plt.title('Objective Function Value vs. Iteration')
-# # plt.grid(True)
-# # # plt.show()
-
-
-# # plt.plot(design_vectors[0], marker='*', linestyle='-', label=["T1", "T2", "T3", "T4", "T5", "T6"])
-# # plt.xlabel('Iteration')
-# # plt.ylabel('States')
-# # plt.title('State Evolution vs. Iteration')
-# # plt.grid(True)
-# # plt.show()
-
-# # import matplotlib.pyplot as plt
-
-# # # Example data (mean and standard deviation)
-# # mean_values = [1, 2, 3, 4, 5]
-# # std_values = [0.1, 0.2, 0.1, 0.3, 0.2]
-
-# # # Create x-values (assuming you have 5 data points)
-# # x_values = range(len(mean_values))
-
-# # # Create the plot
-# # plt.errorbar(x_values, mean_values, yerr=std_values, fmt='o', capsize=5)
-
-# # # Add labels and title
-# # plt.xlabel('Data Point')
-# # plt.ylabel('Mean Value')
-# # plt.title('Mean Values with Error Bars')
-
-# # # Show the plot
-# # plt.show()
-
-# # import numpy as np
-
-# # # Define inertial states (position and velocity vectors) of the satellite in the Earth-centered inertial frame
-# # satellite_position_inertial = np.array([x_satellite, y_satellite, z_satellite])
-# # satellite_velocity_inertial = np.array([vx_satellite, vy_satellite, vz_satellite])
-
-# # # Define the position vector from the Earth to the Moon
-# # earth_to_moon_position = moon_position_inertial - earth_position_inertial
-
-# # # Calculate the velocity vector of the Moon relative to the Earth
-# # moon_velocity_relative_to_earth = moon_velocity_inertial - earth_velocity_inertial
-
-# # # Calculate the angular velocity vector of the Earth-Moon system
-# # angular_velocity_earth_moon = np.cross(earth_to_moon_position, moon_velocity_relative_to_earth) / np.linalg.norm(earth_to_moon_position)**2
-
-# # # Construct the rotation matrix for transforming states from the inertial frame to the rotating frame
-# # rotation_matrix = np.array([[1, 0, 0],
-# #                             [0, np.cos(theta), -np.sin(theta)],
-# #                             [0, np.sin(theta), np.cos(theta)]])
-
-# # # Transform the states from the inertial frame to the rotating frame
-# # satellite_position_rotating = np.dot(rotation_matrix, satellite_position_inertial)
-# # satellite_velocity_rotating = np.dot(rotation_matrix, satellite_velocity_inertial - np.cross(angular_velocity_earth_moon, satellite_position_inertial))
-
-# # # satellite_position_rotating and satellite_velocity_rotating now contain the satellite states in the rotating frame
-
-import numpy as np
-
-# Example values for position vector of the Moon relative to the Earth
-x_moon = -279077.269273
-y_moon = 252757.216883
-z_moon = 145049.670755
-
-# Example values for velocity vector of the Moon relative to the Earth
-vx_moon = -0.719984
-vy_moon = -0.583631
-vz_moon = -0.297165
-
-# Define the position vector of the Moon relative to the Earth
-moon_position = np.array([x_moon, y_moon, z_moon])
-moon_velocity = np.array([vx_moon, vy_moon, vz_moon])
-rotation_axis = np.cross(moon_position, moon_velocity)
-rotation_rate_magnitude = np.linalg.norm(rotation_axis) / np.linalg.norm(moon_position)**2
-rotation_axis_unit = rotation_axis / np.linalg.norm(rotation_axis)
-second_axis = np.cross(moon_position, rotation_axis)
-
-first_axis = moon_position/np.linalg.norm(moon_position)
-second_axis = second_axis/np.linalg.norm(second_axis)
-third_axis = rotation_axis/np.linalg.norm(rotation_axis)
-
-# print("Rotation Axis Vector:", rotation_axis_unit)
-# print("Magnitude of Rotation Rate:", rotation_rate_magnitude)
-
-# print("First axis:", moon_position/np.linalg.norm(moon_position))
-# print("Second axis:", second_axis/np.linalg.norm(second_axis))
-# print("Third axis:", rotation_axis/np.linalg.norm(rotation_axis))
-
-
-# Define the rotation matrix (DCM) using the rotating frame axes
-rotating_frame_axes = np.array([
-    first_axis, second_axis, third_axis    # Third axis
-])
-
-rotating_state = np.dot(rotating_frame_axes, moon_position)
-
-# Print the result
-print("State in rotating frame:", rotating_state)
-# print(second_axis/np.linalg.norm(second_axis), moon_velocity/np.linalg.norm(moon_velocity))
-
-
-# # # Example unit vector representing angular velocity
-# # angular_velocity_unit_vector = rotation_axis_unit
-# # azimuth_angle = np.arctan2(angular_velocity_unit_vector[1], angular_velocity_unit_vector[0])
-# # polar_angle = np.arcsin(angular_velocity_unit_vector[2])
-
-# # # Convert angles from radians to degrees for easier interpretation
-# # azimuth_angle_deg = np.degrees(azimuth_angle)
-# # polar_angle_deg = np.degrees(polar_angle)
-
-# # print("Azimuth Angle (Yaw) in degrees:", azimuth_angle_deg)
-# # print("Polar Angle (Pitch) in degrees:", polar_angle_deg)
-
-
-
-# # # Construct the transformation matrix (DCM) using the azimuth and polar angles
-# # cos_yaw = np.cos(azimuth_angle)
-# # sin_yaw = np.sin(azimuth_angle)
-# # cos_pitch = np.cos(polar_angle)
-# # sin_pitch = np.sin(polar_angle)
-
-# # # Define the elements of the transformation matrix (DCM)
-# # # Assuming z-y'-x'' sequence of rotations
-# # dcm = np.array([
-# #     [cos_yaw * cos_pitch, -sin_yaw, cos_yaw * sin_pitch],
-# #     [sin_yaw * cos_pitch, cos_yaw, sin_yaw * sin_pitch],
-# #     [-sin_pitch, 0, cos_pitch]
-# # ])
-
-# # print("Transformation Matrix (DCM):")
-# # print(dcm)
-
-
-# # x_inertial = -279077.269273
-# # y_inertial = 252757.216883
-# # z_inertial = 145049.670755
-
-# # # Define the inertial state vector (example values)
-# # inertial_state = np.array([x_inertial, y_inertial, z_inertial])
-
-# # # Calculate the state vector in the rotating Earth-Moon frame
-# # rotating_frame_state = np.dot(dcm, inertial_state)
-# # print(np.linalg.norm(rotating_frame_state))
-
-# # print("State Vector in Rotating Frame:")
-# # print(rotating_frame_state)
-
-
-
-
-
-
-
-# # # Define the unit vector of rotation and the plane of rotation
-# # rotation_axis = np.array([0, 0, 1])  # Example rotation axis
-# # rotation_plane = inertial_state  # Example rotation plane
-
-# # # Calculate the cross product to obtain a third orthogonal vector
-# # orthogonal_vector = np.cross(rotation_axis, rotation_plane)
-# # # orthogonal_vector /= np.linalg.norm(orthogonal_vector)  # Normalize
-
-# # # # Normalize the rotation axis
-# # # rotation_axis /= np.linalg.norm(rotation_axis)
-
-# # # Create the transformation matrix
-# # transformation_matrix = np.array([rotation_axis, orthogonal_vector, rotation_plane])
-
-# # # Define the vector you want to transform (example values)
-# # vector_to_transform = np.array([1.0, 0.0, 0.0])
-
-# # # Transform the vector to the desired frame
-# # transformed_vector = np.dot(transformation_matrix.T, vector_to_transform)
-
-# # print(transformation_matrix, transformed_vector)
-
-
-
-# import numpy as np
-
-# # Example rotation axis vector of moon rotation around earth (replace with your vector)
-# rotation_axis = np.array([0.02431277, -0.47725793, 0.87842686])
-
-# # Example position vector of moon w.r.t earth (replace with your vector)
-# moon_position = np.array([-279077.269273, 252757.216883, 145049.670755])
-
-# # Normalize the rotation axis vector
-# rotation_axis_normalized = rotation_axis / np.linalg.norm(rotation_axis)
-
-# # Take the cross product of the rotation axis vector and the position vector of the Moon
-# cross_product = np.cross(rotation_axis_normalized, moon_position)
-
-# # Normalize the result
-# cross_product_normalized = cross_product / np.linalg.norm(cross_product)
-
-# # Take another cross product to get the third vector orthogonal to the first two
-# third_vector = np.cross(rotation_axis_normalized, cross_product_normalized)
-
-# # Construct the rotation matrix with these vectors as columns
-# rotation_matrix = np.column_stack((rotation_axis_normalized, cross_product_normalized, third_vector))
-
-# print("Rotation matrix:")
-# print(rotation_matrix)
-
-# # Convert the moon_position from the inertial frame to the rotating frame
-# moon_position_rotating = np.dot(rotation_matrix, moon_position)
-
-# print("Moon position in rotating frame:")
-# print(moon_position_rotating)
-
-# import matplotlib.pyplot as plt
-# # Plot the moon position vector
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# ax.quiver(0, 0, 0, moon_position[0], moon_position[1], moon_position[2], color='blue', label='Moon Position')
-
-# # Plot the rotation axis vector
-# ax.quiver(0, 0, 0, rotation_axis[0], rotation_axis[1], rotation_axis[2], color='red', label='Rotation Axis')
-
-# # Set plot labels and legend
-# ax.set_xlabel('X')
-# ax.set_ylabel('Y')
-# ax.set_zlabel('Z')
-# ax.set_title('Moon Position and Rotation Axis')
-# ax.legend()
-
-# plt.show()
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-
-# Generate some random data
-np.random.seed(0)
-x = np.random.randn(100)
-y = np.random.randn(100)
-z = np.random.randn(100)
-
-# Create the 3D plot
-fig = plt.figure(figsize=(10, 8))
-ax = fig.add_subplot(111, projection='3d')
-
-# Plot the 3D scatter plot
-ax.scatter(x, y, z, c='b', marker='o')
-
-# Plot projections on each plane
-ax.plot([0]*len(x), y, z, c='r', linestyle='--')  # Projection on the yz-plane
-ax.plot(x, [0]*len(y), z, c='g', linestyle='--')  # Projection on the xz-plane
-ax.plot(x, y, [0]*len(z), c='m', linestyle='--')  # Projection on the xy-plane
-
-# Set labels and title
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
-ax.set_title('3D Scatter Plot with Projections')
-
-plt.show()
 
+
+# # # # # # # # # # # # # # # # import numpy as np
+# # # # # # # # # # # # # # # # import matplotlib.pyplot as plt
+
+# # # # # # # # # # # # # # # # def plot_histogram(data, bins=0.001):
+# # # # # # # # # # # # # # # #     # Create the histogram
+# # # # # # # # # # # # # # # #     plt.hist(data, bins=bins, alpha=0.7, color='blue', edgecolor='black')
+
+# # # # # # # # # # # # # # # #     # Add labels and title
+# # # # # # # # # # # # # # # #     plt.xlabel('Value')
+# # # # # # # # # # # # # # # #     plt.ylabel('Frequency')
+# # # # # # # # # # # # # # # #     plt.title('Histogram of Values')
+
+# # # # # # # # # # # # # # # #     # Show the plot
+# # # # # # # # # # # # # # # #     plt.show()
+
+# # # # # # # # # # # # # # # # # Example usage
+# # # # # # # # # # # # # # # # a = [
+# # # # # # # # # # # # # # # #     0.08643990560650572,
+# # # # # # # # # # # # # # # #     0.05650232019394765,
+# # # # # # # # # # # # # # # #     0.05810018225148894,
+# # # # # # # # # # # # # # # #     0.06707539941554538,
+# # # # # # # # # # # # # # # #     0.09367182813663866,
+# # # # # # # # # # # # # # # #     0.051002264758798536,
+# # # # # # # # # # # # # # # #     0.04768251637456261,
+# # # # # # # # # # # # # # # #     0.04283626700750028,
+# # # # # # # # # # # # # # # #     0.06359696460186497,
+# # # # # # # # # # # # # # # #     0.07267869187619705
+# # # # # # # # # # # # # # # #    ]
+
+# # # # # # # # # # # # # # # # plt.hist(a)
+# # # # # # # # # # # # # # # # plt.show()
+
+# # # # # # # # # # # # # # # # # Plot the histogram
+# # # # # # # # # # # # # # # # # plot_histogram(data, bins=7)
+
+
+
+# # # # # # # # # # # # # # # # # a = np.array([[1, 1, 0, 0],[2, 3, 0, 0],[0, 0, 2, 2], [0, 0, 2, 2]])
+# # # # # # # # # # # # # # # # # print(np.dot(a, a.T))
+
+# # # # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # # # # Define the matrix
+# # # # # # # # # # # # # # # # # matrix = np.array([[9.99065611e-01, -1.02163578e-03, -3.86551099e-03, 1.19965425e+02, -3.87153396e-02, -1.56808364e-01, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+# # # # # # # # # # # # # # # # #                    [-1.02131804e-03, 9.97331857e-01, 1.78967214e-03, -3.87089883e-02, 1.19890874e+02, 6.67192686e-02, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+# # # # # # # # # # # # # # # # #                    [-3.86527035e-03, 1.79011627e-03, 1.00361241e+00, -1.56803554e-01, 6.67281465e-02, 1.20143938e+02, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+# # # # # # # # # # # # # # # # #                    [-1.43412793e-05, -1.61201820e-05, -6.53515289e-05, 9.99207777e-01, -9.11281295e-04, -3.97222816e-03, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+# # # # # # # # # # # # # # # # #                    [-1.61069718e-05, -4.53761918e-05, 2.78029884e-05, -9.10964367e-04, 9.97219314e-01, 1.54561524e-03, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+# # # # # # # # # # # # # # # # #                    [-6.53415238e-05, 2.78214537e-05, 6.00456923e-05, -3.97198813e-03, 1.54605824e-03, 1.00358276e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00],
+# # # # # # # # # # # # # # # # #                    [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 1.00000026e+00, 2.74478752e-08, -6.69054605e-07, 1.20000010e+02, 1.10119318e-06, -2.67595277e-05],
+# # # # # # # # # # # # # # # # #                    [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 2.74478753e-08, 9.99999578e-01, -4.27999955e-08, 1.10119318e-06, 1.19999983e+02, -1.71436047e-06],
+# # # # # # # # # # # # # # # # #                    [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, -6.69054605e-07, -4.27999955e-08, 1.00000016e+00, -2.67595277e-05, -1.71436047e-06, 1.20000006e+02],
+# # # # # # # # # # # # # # # # #                    [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 4.35032387e-09, 4.58830554e-10, -1.11498034e-08, 1.00000026e+00, 2.76117832e-08, -6.68921711e-07],
+# # # # # # # # # # # # # # # # #                    [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 4.58830556e-10, -7.03901838e-09, -7.14316425e-10, 2.76117832e-08, 9.99999578e-01, -4.29179729e-08],
+# # # # # # # # # # # # # # # # #                    [0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, -1.11498034e-08, -7.14316423e-10, 2.68870103e-09, -6.68921711e-07, -4.29179729e-08, 1.00000016e+00]])
+
+
+
+# # # # # # # # # # # # # # # # # # Calculate the dot product of the matrix with its transpose
+# # # # # # # # # # # # # # # # # dot_product_1 = np.dot(matrix[:6, :6], matrix[:6, :6].T)
+# # # # # # # # # # # # # # # # # dot_product_2 = np.dot(matrix[6:, 6:], matrix[6:, 6:].T)
+# # # # # # # # # # # # # # # # # print(dot_product_1, dot_product_2)
+# # # # # # # # # # # # # # # # # # dot_product = np.block([[dot_product_1, np.zeros((3, 3))], [np.zeros((3, 3)), dot_product_2]])
+# # # # # # # # # # # # # # # # # # dot_product = np.dot(matrix, matrix.T)
+
+# # # # # # # # # # # # # # # # # print(dot_product)
+
+# # # # # # # # # # # # # # # # # eigs_1 = np.linalg.eigvals(dot_product_1[:3, :3])
+# # # # # # # # # # # # # # # # # eigs_2 = np.linalg.eigvals(dot_product_2[:3, :3])
+
+# # # # # # # # # # # # # # # # # m=0
+# # # # # # # # # # # # # # # # # print(matrix[0+3*m:3+3*m,0+3*m:3+3*m])
+# # # # # # # # # # # # # # # # # min_axis_stm_lpf = np.min(np.linalg.eigvals(matrix[0+3*m:3+3*m,0+3*m:3+3*m]), axis=0, keepdims=True)
+# # # # # # # # # # # # # # # # # min_axis_stm_lumio = np.min(np.linalg.eigvals(matrix[6+3*m:9+3*m,6+3*m:9+3*m]), axis=0, keepdims=True)
+# # # # # # # # # # # # # # # # # max_axis_stm_lpf = np.max(np.linalg.eigvals(matrix[0+3*m:3+3*m,0+3*m:3+3*m]), axis=0, keepdims=True)
+# # # # # # # # # # # # # # # # # max_axis_stm_lumio = np.max(np.linalg.eigvals(matrix[6+3*m:9+3*m,6+3*m:9+3*m]), axis=0, keepdims=True)
+
+# # # # # # # # # # # # # # # # # aspect_ratio_lpf = max_axis_stm_lpf/min_axis_stm_lpf
+# # # # # # # # # # # # # # # # # aspect_ratio_lumio = max_axis_stm_lumio/min_axis_stm_lumio
+
+# # # # # # # # # # # # # # # # # # Print the result
+
+# # # # # # # # # # # # # # # # # print(eigs_1, eigs_2)
+# # # # # # # # # # # # # # # # # print(aspect_ratio_lpf, aspect_ratio_lumio)
+
+
+
+# # # # # # # # # # # # # # # # # # # Generate random data for three heat maps
+# # # # # # # # # # # # # # # # # # data1 = np.random.rand(10, 10)
+# # # # # # # # # # # # # # # # # # data2 = np.random.rand(10, 10)
+# # # # # # # # # # # # # # # # # # data3 = np.random.rand(10, 10)
+
+# # # # # # # # # # # # # # # # # # # Create the plot with three subplots arranged horizontally
+# # # # # # # # # # # # # # # # # # fig, axs = plt.subplots(1, 3, figsize=(15, 5))  # Adjust the figure size as needed
+
+# # # # # # # # # # # # # # # # # # # Plot the first heat map
+# # # # # # # # # # # # # # # # # # im1 = axs[0].imshow(data1, cmap='hot', interpolation='nearest')
+# # # # # # # # # # # # # # # # # # axs[0].set_title('Heat Map 1')
+
+# # # # # # # # # # # # # # # # # # # Plot the second heat map
+# # # # # # # # # # # # # # # # # # im2 = axs[1].imshow(data2, cmap='hot', interpolation='nearest')
+# # # # # # # # # # # # # # # # # # axs[1].set_title('Heat Map 2')
+
+# # # # # # # # # # # # # # # # # # # Plot the third heat map
+# # # # # # # # # # # # # # # # # # im3 = axs[2].imshow(data3, cmap='hot', interpolation='nearest')
+# # # # # # # # # # # # # # # # # # axs[2].set_title('Heat Map 3')
+
+# # # # # # # # # # # # # # # # # # # Create a single colorbar for all heatmaps
+# # # # # # # # # # # # # # # # # # cbar = fig.colorbar(im3, ax=axs.ravel().tolist(), orientation='vertical')
+# # # # # # # # # # # # # # # # # # cbar.set_label('Colorbar Title')
+
+# # # # # # # # # # # # # # # # # # # Show the plot
+# # # # # # # # # # # # # # # # # # plt.show()
+
+
+
+# # # # # # # # # # # # # # # # # # import numpy as np
+# # # # # # # # # # # # # # # # # # import matplotlib.pyplot as plt
+
+# # # # # # # # # # # # # # # # # # # Provided data
+# # # # # # # # # # # # # # # # # # data = {
+# # # # # # # # # # # # # # # # # #        "inputs": {
+# # # # # # # # # # # # # # # # # #               "models": [
+# # # # # # # # # # # # # # # # # #                      "PM"
+# # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # #               "durations": [
+# # # # # # # # # # # # # # # # # #                      28
+# # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # #               "thresholds": [
+# # # # # # # # # # # # # # # # # #                      7
+# # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # #               "custom_station_keeping_errors": [
+# # # # # # # # # # # # # # # # # #                      1e-10,
+# # # # # # # # # # # # # # # # # #                      1e-05,
+# # # # # # # # # # # # # # # # # #                      0.001
+# # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # #               "custom_target_point_epochs": [
+# # # # # # # # # # # # # # # # # #                      2,
+# # # # # # # # # # # # # # # # # #                      3,
+# # # # # # # # # # # # # # # # # #                      3.9,
+# # # # # # # # # # # # # # # # # #                      4
+# # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # #               "arc_intervals": [
+# # # # # # # # # # # # # # # # # #                      1,
+# # # # # # # # # # # # # # # # # #                      1.5,
+# # # # # # # # # # # # # # # # # #                      2,
+# # # # # # # # # # # # # # # # # #                      2.5,
+# # # # # # # # # # # # # # # # # #                      3,
+# # # # # # # # # # # # # # # # # #                      3.5,
+# # # # # # # # # # # # # # # # # #                      4,
+# # # # # # # # # # # # # # # # # #                      4.5
+# # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # #               "arc_durations": [
+# # # # # # # # # # # # # # # # # #                      0.1,
+# # # # # # # # # # # # # # # # # #                      0.2,
+# # # # # # # # # # # # # # # # # #                      0.5,
+# # # # # # # # # # # # # # # # # #                      1,
+# # # # # # # # # # # # # # # # # #                      1.5,
+# # # # # # # # # # # # # # # # # #                      2.0,
+# # # # # # # # # # # # # # # # # #                      2.5,
+# # # # # # # # # # # # # # # # # #                      3
+# # # # # # # # # # # # # # # # # #               ]
+# # # # # # # # # # # # # # # # # #        },
+# # # # # # # # # # # # # # # # # #        "PM": {
+# # # # # # # # # # # # # # # # # #               "28": {
+# # # # # # # # # # # # # # # # # #                      "7": {
+# # # # # # # # # # # # # # # # # #                             "1e-10": {
+# # # # # # # # # # # # # # # # # #                                    "2": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 45,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 48,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 65,
+# # # # # # # # # # # # # # # # # #                                                  "1": 68,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 68,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 10,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 84,
+# # # # # # # # # # # # # # # # # #                                                  "3": 22
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 37,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 88,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 71,
+# # # # # # # # # # # # # # # # # #                                                  "1": 89,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 89,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 13,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 59,
+# # # # # # # # # # # # # # # # # #                                                  "3": 66
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 40,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 88,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 47,
+# # # # # # # # # # # # # # # # # #                                                  "1": 89,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 82,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 38,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 26,
+# # # # # # # # # # # # # # # # # #                                                  "3": 78
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 73,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 10,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 21,
+# # # # # # # # # # # # # # # # # #                                                  "1": 81,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 70,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 80,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 48,
+# # # # # # # # # # # # # # # # # #                                                  "3": 65
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 83,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 89,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 50,
+# # # # # # # # # # # # # # # # # #                                                  "1": 30,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 20,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 20,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 15,
+# # # # # # # # # # # # # # # # # #                                                  "3": 40
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 33,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 66,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 10,
+# # # # # # # # # # # # # # # # # #                                                  "1": 58,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 33,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 32,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 75,
+# # # # # # # # # # # # # # # # # #                                                  "3": 24
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 36,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 76,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 56,
+# # # # # # # # # # # # # # # # # #                                                  "1": 29,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 35,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 1,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 1,
+# # # # # # # # # # # # # # # # # #                                                  "3": 37
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 54,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 6,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 39,
+# # # # # # # # # # # # # # # # # #                                                  "1": 18,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 80,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 5,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 43,
+# # # # # # # # # # # # # # # # # #                                                  "3": 59
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "3": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.32,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.02,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.66,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.42,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.58,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.12,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.47000000000000003
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.8300000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.92,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.15,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.13,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.43,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.85
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.76,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.6900000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.07,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.6900000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.48,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.77,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.53
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.79,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.16,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.24,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.8,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.86
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.49,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.5,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.7000000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.42,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.65,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.96,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.7000000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.9500000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.51,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.35000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.49,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.9400000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.04
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.99,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.43,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.78,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.22,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.11,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.44
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.24,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.6,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.03,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.99,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.63,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.9500000000000001
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "3.9": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.68,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.8300000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.8200000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.51,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.28,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.15
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.42,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.66,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.11,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.87,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.44,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.12
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.03,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.81,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.33,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.55,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.39,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.2
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.43,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.5700000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.61,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.78,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.31,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.03
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.9500000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.99,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.41000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.73,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.2,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.96
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.73,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.27,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.67,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.53,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.68,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.62,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.15,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.97
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.05,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.68,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.12,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.87,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.78,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.76,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.5700000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.17
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.3,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.22,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.26,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.81,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.61,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.62,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.84
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "4": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.34,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.33,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.71,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.86,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.32,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.72,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.5700000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.8,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.42,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.19,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.41000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.55,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.8,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.12
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.39,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.9400000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.02,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.96,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.45,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.89,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.68
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.8300000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.77,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.87,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.62,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.7000000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.88
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.44,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.33,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.12,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.85,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.11,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.55,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.38,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.29
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.03,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.28,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.84,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.9,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.24,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.47000000000000003
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.3,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.68,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.4,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.1,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.74
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.42,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.24,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.91,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.51,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.32
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    }
+# # # # # # # # # # # # # # # # # #                             },
+# # # # # # # # # # # # # # # # # #                             "1e-05": {
+# # # # # # # # # # # # # # # # # #                                    "2": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 10,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 11,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 28,
+# # # # # # # # # # # # # # # # # #                                                  "1": 46,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 72,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 40,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 62,
+# # # # # # # # # # # # # # # # # #                                                  "3": 86
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 98,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 45,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 35,
+# # # # # # # # # # # # # # # # # #                                                  "1": 35,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 89,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 34,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 6,
+# # # # # # # # # # # # # # # # # #                                                  "3": 37
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 1,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 76,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 35,
+# # # # # # # # # # # # # # # # # #                                                  "1": 70,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 54,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 81,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 63,
+# # # # # # # # # # # # # # # # # #                                                  "3": 9
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 62,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 2,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 82,
+# # # # # # # # # # # # # # # # # #                                                  "1": 36,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 92,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 41,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 37,
+# # # # # # # # # # # # # # # # # #                                                  "3": 49
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 26,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 68,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 36,
+# # # # # # # # # # # # # # # # # #                                                  "1": 31,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 30,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 34,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 19,
+# # # # # # # # # # # # # # # # # #                                                  "3": 18
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 94,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 85,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 3,
+# # # # # # # # # # # # # # # # # #                                                  "1": 70,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 13,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 45,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 67,
+# # # # # # # # # # # # # # # # # #                                                  "3": 92
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 86,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 40,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 40,
+# # # # # # # # # # # # # # # # # #                                                  "1": 76,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 23,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 31,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 18,
+# # # # # # # # # # # # # # # # # #                                                  "3": 71
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 72,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 19,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 93,
+# # # # # # # # # # # # # # # # # #                                                  "1": 44,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 84,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 50,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 42,
+# # # # # # # # # # # # # # # # # #                                                  "3": 94
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "3": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.22,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.9,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.97,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.92,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.29
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.8200000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.87,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.64,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.17,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.9500000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.64,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.68,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.09,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.5700000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.92,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.9400000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.88,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.33,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.2,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.73,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.72,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.88,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.59
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.8200000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.56,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.65,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.76,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.93,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.26,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.33
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.43,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.15,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.87,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.29,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.8300000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.6900000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.23
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.84,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.08,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.73,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.62,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.06,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.09
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.8,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.8,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.12,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.05,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.4,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.93,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.46
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "3.9": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.27,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.75,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.53,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.5,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.92,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.19,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.35000000000000003
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.31,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.44,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.56,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.19,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.46
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.88,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.66,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.71,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.49,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.9500000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.6,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.81
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.27,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.5,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.45,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.71
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.39,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.4,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.09,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.08,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.81,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.23,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.8
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.9,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.09,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.07,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.8200000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.72,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.85,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.9,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.67
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.61,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.17,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.5700000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.24,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.05,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.5,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.88
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.31,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.55,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.26,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.98,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.58,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.24,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.28
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "4": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.3,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.34,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.87,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.08,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.1,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.55
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.84,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.8200000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.43,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.66
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.6900000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.81,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.48,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.11,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.9500000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.92
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.44,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.64,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.32,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.71,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.1,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.61,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.92
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.84,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.77,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.19,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.75,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.99,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.98,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.44
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.13,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.02,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.01,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.4,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.59
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.7000000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.07,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.99,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.41000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.61,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.34
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.29,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.6900000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.27,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.97,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.7000000000000001
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    }
+# # # # # # # # # # # # # # # # # #                             },
+# # # # # # # # # # # # # # # # # #                             "0.001": {
+# # # # # # # # # # # # # # # # # #                                    "2": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 34,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 8,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 95,
+# # # # # # # # # # # # # # # # # #                                                  "1": 73,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 85,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 8,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 68,
+# # # # # # # # # # # # # # # # # #                                                  "3": 86
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 92,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 68,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 85,
+# # # # # # # # # # # # # # # # # #                                                  "1": 72,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 84,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 96,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 1,
+# # # # # # # # # # # # # # # # # #                                                  "3": 6
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 92,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 31,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 74,
+# # # # # # # # # # # # # # # # # #                                                  "1": 84,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 8,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 22,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 93,
+# # # # # # # # # # # # # # # # # #                                                  "3": 9
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 44,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 47,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 1,
+# # # # # # # # # # # # # # # # # #                                                  "1": 52,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 39,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 90,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 75,
+# # # # # # # # # # # # # # # # # #                                                  "3": 99
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 88,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 97,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 84,
+# # # # # # # # # # # # # # # # # #                                                  "1": 27,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 79,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 33,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 71,
+# # # # # # # # # # # # # # # # # #                                                  "3": 98
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 45,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 60,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 58,
+# # # # # # # # # # # # # # # # # #                                                  "1": 51,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 46,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 5,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 58,
+# # # # # # # # # # # # # # # # # #                                                  "3": 94
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 92,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 18,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 36,
+# # # # # # # # # # # # # # # # # #                                                  "1": 67,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 21,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 46,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 58,
+# # # # # # # # # # # # # # # # # #                                                  "3": 80
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 37,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 63,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 5,
+# # # # # # # # # # # # # # # # # #                                                  "1": 78,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 31,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 88,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 99,
+# # # # # # # # # # # # # # # # # #                                                  "3": 36
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "3": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.91,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.56,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.27,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.23,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.77,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.8,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.99
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.91,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.52,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.81,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.62,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.61,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.48,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.01
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.11,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.76,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.14,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.72,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.9500000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.07,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.46,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.31
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.16,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.42,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.39,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.44,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.8300000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.08,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.93
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.66,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.42,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.67,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.93,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.79,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.92,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.32,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.9400000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.51,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.9400000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.34,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.13,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.97,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.81,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.67
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.73,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.11,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.91,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.28,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.5700000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.66,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.65,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.7000000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.89,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.35000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.8,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.61,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.38,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.44,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.84
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "3.9": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.89,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.71,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.07,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.29,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.07,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.67,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.93
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.93,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.7000000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.55,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.78,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.22,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.32,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.8200000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.36,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.09,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.26,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.22,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.46,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.87,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.17,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.26
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.38,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.02,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.06,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.71,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.13,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.91,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.75,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.55
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.79,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.63,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.73,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.72,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.46,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.06,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.48,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.6
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.43,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.68,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.11,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.58,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.92,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.9,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.79
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.8300000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.7000000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.05,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.18,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.7000000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.64,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.9500000000000001
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.7000000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.41000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.37,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.59,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.5,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.56
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # #                                    "4": {
+# # # # # # # # # # # # # # # # # #                                           "1": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.25,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.34,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.19,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.98,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.79,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.08,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.54,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.47000000000000003
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "1.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.34,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.8200000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.3,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.13,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.33,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.35000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.88
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.26,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.47000000000000003,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.53,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.65,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.77,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.74,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.19,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.05
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "2.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.08,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.49,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.77,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.38,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.49,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.8300000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.52
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.5,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.72,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.91,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.5,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.3,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.04,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.75,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.85
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "3.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.66,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.21,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.81,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.43,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.29,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.27,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.88,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.53
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.49,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.67,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.1,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.03,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.9,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.91,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.6900000000000001,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.11
+# # # # # # # # # # # # # # # # # #                                           },
+# # # # # # # # # # # # # # # # # #                                           "4.5": {
+# # # # # # # # # # # # # # # # # #                                                  "0.1": 0.13,
+# # # # # # # # # # # # # # # # # #                                                  "0.2": 0.98,
+# # # # # # # # # # # # # # # # # #                                                  "0.5": 0.38,
+# # # # # # # # # # # # # # # # # #                                                  "1": 0.4,
+# # # # # # # # # # # # # # # # # #                                                  "1.5": 0.33,
+# # # # # # # # # # # # # # # # # #                                                  "2.0": 0.34,
+# # # # # # # # # # # # # # # # # #                                                  "2.5": 0.27,
+# # # # # # # # # # # # # # # # # #                                                  "3": 0.9
+# # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # #                                    }
+# # # # # # # # # # # # # # # # # #                             }
+# # # # # # # # # # # # # # # # # #                      }
+# # # # # # # # # # # # # # # # # #               }
+# # # # # # # # # # # # # # # # # #        }
+# # # # # # # # # # # # # # # # # # }
+
+# # # # # # # # # # # # # # # # # # # data = {
+# # # # # # # # # # # # # # # # # # #        "inputs": {
+# # # # # # # # # # # # # # # # # # #               "models": [
+# # # # # # # # # # # # # # # # # # #                      "PM"
+# # # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # # #               "durations": [
+# # # # # # # # # # # # # # # # # # #                      28
+# # # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # # #               "thresholds": [
+# # # # # # # # # # # # # # # # # # #                      7
+# # # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # # #               "custom_station_keeping_errors": [
+# # # # # # # # # # # # # # # # # # #                      1e-10
+# # # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # # #               "custom_target_point_epochs": [
+# # # # # # # # # # # # # # # # # # #                      2,
+# # # # # # # # # # # # # # # # # # #                      3
+# # # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # # #               "arc_intervals": [
+# # # # # # # # # # # # # # # # # # #                      3
+# # # # # # # # # # # # # # # # # # #               ],
+# # # # # # # # # # # # # # # # # # #               "arc_durations": [
+# # # # # # # # # # # # # # # # # # #                      0.1,
+# # # # # # # # # # # # # # # # # # #                      3
+# # # # # # # # # # # # # # # # # # #               ]
+# # # # # # # # # # # # # # # # # # #        },
+# # # # # # # # # # # # # # # # # # #        "PM": {
+# # # # # # # # # # # # # # # # # # #               "28": {
+# # # # # # # # # # # # # # # # # # #                      "7": {
+# # # # # # # # # # # # # # # # # # #                             "1e-10": {
+# # # # # # # # # # # # # # # # # # #                                    "2": {
+# # # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # # #                                                  "0.1": 13.331476918133713,
+# # # # # # # # # # # # # # # # # # #                                                  "3": 545.1725490310805
+# # # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # # #                                    },
+# # # # # # # # # # # # # # # # # # #                                    "3": {
+# # # # # # # # # # # # # # # # # # #                                           "3": {
+# # # # # # # # # # # # # # # # # # #                                                  "0.1": 5.617927971530443,
+# # # # # # # # # # # # # # # # # # #                                                  "3": 228.01837194427765
+# # # # # # # # # # # # # # # # # # #                                           }
+# # # # # # # # # # # # # # # # # # #                                    }
+# # # # # # # # # # # # # # # # # # #                             }
+# # # # # # # # # # # # # # # # # # #                      }
+# # # # # # # # # # # # # # # # # # #               }
+# # # # # # # # # # # # # # # # # # #        }
+# # # # # # # # # # # # # # # # # # # }
+
+# # # # # # # # # # # # # # # # # # keys = data["inputs"].keys()
+# # # # # # # # # # # # # # # # # # values = data["inputs"].values()
+# # # # # # # # # # # # # # # # # # print(keys)
+# # # # # # # # # # # # # # # # # # print(values)
+
+
+# # # # # # # # # # # # # # # # # # # parameter1 = "arc_intervals"
+# # # # # # # # # # # # # # # # # # # parameter2 = "arc_durations"
+# # # # # # # # # # # # # # # # # # keys_list = ['PM', '28', '7', '0.001', '2']
+
+# # # # # # # # # # # # # # # # # # for i, (key, value) in enumerate(data['inputs'].items()):
+# # # # # # # # # # # # # # # # # #    if key == "arc_intervals":
+# # # # # # # # # # # # # # # # # #       parameters1 = value
+# # # # # # # # # # # # # # # # # #    if key == "arc_durations":
+# # # # # # # # # # # # # # # # # #       parameters2 = value
+
+# # # # # # # # # # # # # # # # # # print(parameters1, parameters2)
+
+# # # # # # # # # # # # # # # # # # # Create a matrix of values for the heatmap
+# # # # # # # # # # # # # # # # # # matrix = np.zeros((len(parameters1), len(parameters2)))
+
+# # # # # # # # # # # # # # # # # # for i, parameter1 in enumerate(parameters1):
+# # # # # # # # # # # # # # # # # #     for j, parameter2 in enumerate(parameters2):
+
+# # # # # # # # # # # # # # # # # #          current_dict = data
+# # # # # # # # # # # # # # # # # #          for key in keys_list:
+# # # # # # # # # # # # # # # # # #             if key in current_dict:
+# # # # # # # # # # # # # # # # # #                   current_dict = current_dict[key]
+
+# # # # # # # # # # # # # # # # # #          matrix[i, j] = current_dict[str(parameter1)][str(parameter2)]
+
+# # # # # # # # # # # # # # # # # # print(matrix)
+
+# # # # # # # # # # # # # # # # # # # Plot the heatmap
+# # # # # # # # # # # # # # # # # # # plt.figure(figsize=(10, 6))
+# # # # # # # # # # # # # # # # # # plt.imshow(matrix, cmap='viridis', aspect='auto')
+# # # # # # # # # # # # # # # # # # plt.colorbar(label='Value')
+# # # # # # # # # # # # # # # # # # plt.xticks(np.arange(len(parameters1)), parameters1)
+# # # # # # # # # # # # # # # # # # plt.yticks(np.arange(len(parameters2)), parameters2)
+# # # # # # # # # # # # # # # # # # plt.xlabel("Arc duration")
+# # # # # # # # # # # # # # # # # # plt.ylabel("SKM interval")
+# # # # # # # # # # # # # # # # # # plt.title('Heatmap of Values')
+# # # # # # # # # # # # # # # # # # plt.show()
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # data = {"0": {
+# # # # # # # # # # # # # # # # # # # # #    "threshold": 60393,
+# # # # # # # # # # # # # # # # # # # # #    "arc_interval": 3,
+# # # # # # # # # # # # # # # # # # # # #    "duration": 28,
+# # # # # # # # # # # # # # # # # # # # #    "factor": 1,
+# # # # # # # # # # # # # # # # # # # # #    "maxiter": 60,
+# # # # # # # # # # # # # # # # # # # # #    "initial_design_vector": [
+# # # # # # # # # # # # # # # # # # # # #       1.0,
+# # # # # # # # # # # # # # # # # # # # #       1.0,
+# # # # # # # # # # # # # # # # # # # # #       1.0,
+# # # # # # # # # # # # # # # # # # # # #       1.0,
+# # # # # # # # # # # # # # # # # # # # #       1.0,
+# # # # # # # # # # # # # # # # # # # # #       1.0
+# # # # # # # # # # # # # # # # # # # # #    ],
+# # # # # # # # # # # # # # # # # # # # #    "model": {
+# # # # # # # # # # # # # # # # # # # # #       "dynamic": {
+# # # # # # # # # # # # # # # # # # # # #          "model_type": "HF",
+# # # # # # # # # # # # # # # # # # # # #          "model_name": "PM",
+# # # # # # # # # # # # # # # # # # # # #          "model_number": 0
+# # # # # # # # # # # # # # # # # # # # #       },
+# # # # # # # # # # # # # # # # # # # # #       "truth": {
+# # # # # # # # # # # # # # # # # # # # #          "model_type": "HF",
+# # # # # # # # # # # # # # # # # # # # #          "model_name": "PM",
+# # # # # # # # # # # # # # # # # # # # #          "model_number": 0
+# # # # # # # # # # # # # # # # # # # # #       }
+# # # # # # # # # # # # # # # # # # # # #    },
+# # # # # # # # # # # # # # # # # # # # #    "history": {
+# # # # # # # # # # # # # # # # # # # # #       "design_vector": {
+# # # # # # # # # # # # # # # # # # # # #          "0": [
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "1": [
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.05,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "2": [
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.05,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "3": [
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.05,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0,
+# # # # # # # # # # # # # # # # # # # # #             1.0
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "4": [
+# # # # # # # # # # # # # # # # # # # # #             1.0264060356652946,
+# # # # # # # # # # # # # # # # # # # # #             1.036488340192044,
+# # # # # # # # # # # # # # # # # # # # #             0.9503772290809329,
+# # # # # # # # # # # # # # # # # # # # #             0.972633744855967,
+# # # # # # # # # # # # # # # # # # # # #             1.036488340192044,
+# # # # # # # # # # # # # # # # # # # # #             0.9911179698216734
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "5": [
+# # # # # # # # # # # # # # # # # # # # #             1.0366750495351311,
+# # # # # # # # # # # # # # # # # # # # #             1.0506782502667276,
+# # # # # # # # # # # # # # # # # # # # #             0.9977461515012951,
+# # # # # # # # # # # # # # # # # # # # #             0.9619913122999539,
+# # # # # # # # # # # # # # # # # # # # #             1.0506782502667271,
+# # # # # # # # # # # # # # # # # # # # #             0.9876638469745462
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "6": [
+# # # # # # # # # # # # # # # # # # # # #             1.043660773256109,
+# # # # # # # # # # # # # # # # # # # # #             1.060331250317533,
+# # # # # # # # # # # # # # # # # # # # #             0.9973168470253517,
+# # # # # # # # # # # # # # # # # # # # #             0.9547515622618501,
+# # # # # # # # # # # # # # # # # # # # #             0.993664583650866,
+# # # # # # # # # # # # # # # # # # # # #             0.9853141035411268
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "7": [
+# # # # # # # # # # # # # # # # # # # # #             1.0125353519957996,
+# # # # # # # # # # # # # # # # # # # # #             1.0755033954851052,
+# # # # # # # # # # # # # # # # # # # # #             0.9914841910955305,
+# # # # # # # # # # # # # # # # # # # # #             0.9433724533861707,
+# # # # # # # # # # # # # # # # # # # # #             1.0366145065962165,
+# # # # # # # # # # # # # # # # # # # # #             0.9754805331165639
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "8": [
+# # # # # # # # # # # # # # # # # # # # #             1.0125353519957996,
+# # # # # # # # # # # # # # # # # # # # #             1.0755033954851052,
+# # # # # # # # # # # # # # # # # # # # #             0.9914841910955305,
+# # # # # # # # # # # # # # # # # # # # #             0.9433724533861707,
+# # # # # # # # # # # # # # # # # # # # #             1.0366145065962165,
+# # # # # # # # # # # # # # # # # # # # #             0.9754805331165639
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "9": [
+# # # # # # # # # # # # # # # # # # # # #             1.0125353519957996,
+# # # # # # # # # # # # # # # # # # # # #             1.0755033954851052,
+# # # # # # # # # # # # # # # # # # # # #             0.9914841910955305,
+# # # # # # # # # # # # # # # # # # # # #             0.9433724533861707,
+# # # # # # # # # # # # # # # # # # # # #             1.0366145065962165,
+# # # # # # # # # # # # # # # # # # # # #             0.9754805331165639
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "10": [
+# # # # # # # # # # # # # # # # # # # # #             1.0125353519957996,
+# # # # # # # # # # # # # # # # # # # # #             1.0755033954851052,
+# # # # # # # # # # # # # # # # # # # # #             0.9914841910955305,
+# # # # # # # # # # # # # # # # # # # # #             0.9433724533861707,
+# # # # # # # # # # # # # # # # # # # # #             1.0366145065962165,
+# # # # # # # # # # # # # # # # # # # # #             0.9754805331165639
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "11": [
+# # # # # # # # # # # # # # # # # # # # #             1.0125353519957996,
+# # # # # # # # # # # # # # # # # # # # #             1.0755033954851052,
+# # # # # # # # # # # # # # # # # # # # #             0.9914841910955305,
+# # # # # # # # # # # # # # # # # # # # #             0.9433724533861707,
+# # # # # # # # # # # # # # # # # # # # #             1.0366145065962165,
+# # # # # # # # # # # # # # # # # # # # #             0.9754805331165639
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "12": [
+# # # # # # # # # # # # # # # # # # # # #             1.0375942069431952,
+# # # # # # # # # # # # # # # # # # # # #             1.1302848096141855,
+# # # # # # # # # # # # # # # # # # # # #             0.9470117252078274,
+# # # # # # # # # # # # # # # # # # # # #             0.9375744586329815,
+# # # # # # # # # # # # # # # # # # # # #             0.9995882694526252,
+# # # # # # # # # # # # # # # # # # # # #             0.95627266229523
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "13": [
+# # # # # # # # # # # # # # # # # # # # #             1.0259206884157575,
+# # # # # # # # # # # # # # # # # # # # #             1.144618304828476,
+# # # # # # # # # # # # # # # # # # # # #             0.9280210282467143,
+# # # # # # # # # # # # # # # # # # # # #             0.9405474739392266,
+# # # # # # # # # # # # # # # # # # # # #             1.0779101471966797,
+# # # # # # # # # # # # # # # # # # # # #             0.9481117597219408
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "14": [
+# # # # # # # # # # # # # # # # # # # # #             1.0259206884157575,
+# # # # # # # # # # # # # # # # # # # # #             1.144618304828476,
+# # # # # # # # # # # # # # # # # # # # #             0.9280210282467143,
+# # # # # # # # # # # # # # # # # # # # #             0.9405474739392266,
+# # # # # # # # # # # # # # # # # # # # #             1.0779101471966797,
+# # # # # # # # # # # # # # # # # # # # #             0.9481117597219408
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "15": [
+# # # # # # # # # # # # # # # # # # # # #             1.0259206884157575,
+# # # # # # # # # # # # # # # # # # # # #             1.144618304828476,
+# # # # # # # # # # # # # # # # # # # # #             0.9280210282467143,
+# # # # # # # # # # # # # # # # # # # # #             0.9405474739392266,
+# # # # # # # # # # # # # # # # # # # # #             1.0779101471966797,
+# # # # # # # # # # # # # # # # # # # # #             0.9481117597219408
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "16": [
+# # # # # # # # # # # # # # # # # # # # #             1.0361611032534894,
+# # # # # # # # # # # # # # # # # # # # #             1.1351281980479642,
+# # # # # # # # # # # # # # # # # # # # #             0.9452168287760125,
+# # # # # # # # # # # # # # # # # # # # #             0.8883591527110115,
+# # # # # # # # # # # # # # # # # # # # #             1.0704332094331535,
+# # # # # # # # # # # # # # # # # # # # #             0.9205547664829321
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "17": [
+# # # # # # # # # # # # # # # # # # # # #             1.0361611032534894,
+# # # # # # # # # # # # # # # # # # # # #             1.1351281980479642,
+# # # # # # # # # # # # # # # # # # # # #             0.9452168287760125,
+# # # # # # # # # # # # # # # # # # # # #             0.8883591527110115,
+# # # # # # # # # # # # # # # # # # # # #             1.0704332094331535,
+# # # # # # # # # # # # # # # # # # # # #             0.9205547664829321
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "18": [
+# # # # # # # # # # # # # # # # # # # # #             1.0483542955251033,
+# # # # # # # # # # # # # # # # # # # # #             1.213322381856245,
+# # # # # # # # # # # # # # # # # # # # #             0.8610146015589191,
+# # # # # # # # # # # # # # # # # # # # #             0.8828781130363894,
+# # # # # # # # # # # # # # # # # # # # #             1.06073602129079,
+# # # # # # # # # # # # # # # # # # # # #             0.9377225799188844
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "19": [
+# # # # # # # # # # # # # # # # # # # # #             1.0191269678215402,
+# # # # # # # # # # # # # # # # # # # # #             1.1725728855560504,
+# # # # # # # # # # # # # # # # # # # # #             0.8868678968790591,
+# # # # # # # # # # # # # # # # # # # # #             0.8693379716419665,
+# # # # # # # # # # # # # # # # # # # # #             1.133884018752642,
+# # # # # # # # # # # # # # # # # # # # #             0.9561191534231948
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "20": [
+# # # # # # # # # # # # # # # # # # # # #             1.0191269678215402,
+# # # # # # # # # # # # # # # # # # # # #             1.1725728855560504,
+# # # # # # # # # # # # # # # # # # # # #             0.8868678968790591,
+# # # # # # # # # # # # # # # # # # # # #             0.8693379716419665,
+# # # # # # # # # # # # # # # # # # # # #             1.133884018752642,
+# # # # # # # # # # # # # # # # # # # # #             0.9561191534231948
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "21": [
+# # # # # # # # # # # # # # # # # # # # #             1.0061869596862527,
+# # # # # # # # # # # # # # # # # # # # #             1.226958625841562,
+# # # # # # # # # # # # # # # # # # # # #             0.8676509085567272,
+# # # # # # # # # # # # # # # # # # # # #             0.8967041698411178,
+# # # # # # # # # # # # # # # # # # # # #             1.121897140799983,
+# # # # # # # # # # # # # # # # # # # # #             0.8751207701294725
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "22": [
+# # # # # # # # # # # # # # # # # # # # #             1.0205138620224141,
+# # # # # # # # # # # # # # # # # # # # #             1.2415924531567657,
+# # # # # # # # # # # # # # # # # # # # #             0.8749120837596585,
+# # # # # # # # # # # # # # # # # # # # #             0.8162529531512424,
+# # # # # # # # # # # # # # # # # # # # #             1.0952677992859623,
+# # # # # # # # # # # # # # # # # # # # #             0.9022209391107037
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "23": [
+# # # # # # # # # # # # # # # # # # # # #             1.063285799725515,
+# # # # # # # # # # # # # # # # # # # # #             1.2558994198133082,
+# # # # # # # # # # # # # # # # # # # # #             0.836950214541686,
+# # # # # # # # # # # # # # # # # # # # #             0.8080633240674115,
+# # # # # # # # # # # # # # # # # # # # #             1.173856553218878,
+# # # # # # # # # # # # # # # # # # # # #             0.8652314978746236
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "24": [
+# # # # # # # # # # # # # # # # # # # # #             1.063285799725515,
+# # # # # # # # # # # # # # # # # # # # #             1.2558994198133082,
+# # # # # # # # # # # # # # # # # # # # #             0.836950214541686,
+# # # # # # # # # # # # # # # # # # # # #             0.8080633240674115,
+# # # # # # # # # # # # # # # # # # # # #             1.173856553218878,
+# # # # # # # # # # # # # # # # # # # # #             0.8652314978746236
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "25": [
+# # # # # # # # # # # # # # # # # # # # #             1.063285799725515,
+# # # # # # # # # # # # # # # # # # # # #             1.2558994198133082,
+# # # # # # # # # # # # # # # # # # # # #             0.836950214541686,
+# # # # # # # # # # # # # # # # # # # # #             0.8080633240674115,
+# # # # # # # # # # # # # # # # # # # # #             1.173856553218878,
+# # # # # # # # # # # # # # # # # # # # #             0.8652314978746236
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "26": [
+# # # # # # # # # # # # # # # # # # # # #             1.0133269721003904,
+# # # # # # # # # # # # # # # # # # # # #             1.286619576435404,
+# # # # # # # # # # # # # # # # # # # # #             0.7588490337573963,
+# # # # # # # # # # # # # # # # # # # # #             0.7965950767460237,
+# # # # # # # # # # # # # # # # # # # # #             1.2215624382124943,
+# # # # # # # # # # # # # # # # # # # # #             0.8576901388903297
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "27": [
+# # # # # # # # # # # # # # # # # # # # #             1.0133269721003904,
+# # # # # # # # # # # # # # # # # # # # #             1.286619576435404,
+# # # # # # # # # # # # # # # # # # # # #             0.7588490337573963,
+# # # # # # # # # # # # # # # # # # # # #             0.7965950767460237,
+# # # # # # # # # # # # # # # # # # # # #             1.2215624382124943,
+# # # # # # # # # # # # # # # # # # # # #             0.8576901388903297
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "28": [
+# # # # # # # # # # # # # # # # # # # # #             1.0534275291059467,
+# # # # # # # # # # # # # # # # # # # # #             1.3582101763054988,
+# # # # # # # # # # # # # # # # # # # # #             0.7644405066191522,
+# # # # # # # # # # # # # # # # # # # # #             0.687172445661238,
+# # # # # # # # # # # # # # # # # # # # #             1.2370075286190287,
+# # # # # # # # # # # # # # # # # # # # #             0.8525441695677483
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "29": [
+# # # # # # # # # # # # # # # # # # # # #             1.0534275291059467,
+# # # # # # # # # # # # # # # # # # # # #             1.3582101763054988,
+# # # # # # # # # # # # # # # # # # # # #             0.7644405066191522,
+# # # # # # # # # # # # # # # # # # # # #             0.687172445661238,
+# # # # # # # # # # # # # # # # # # # # #             1.2370075286190287,
+# # # # # # # # # # # # # # # # # # # # #             0.8525441695677483
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "30": [
+# # # # # # # # # # # # # # # # # # # # #             1.0448752041981177,
+# # # # # # # # # # # # # # # # # # # # #             1.3218499152936882,
+# # # # # # # # # # # # # # # # # # # # #             0.7723858246503772,
+# # # # # # # # # # # # # # # # # # # # #             0.7038467160939619,
+# # # # # # # # # # # # # # # # # # # # #             1.3031999925207958,
+# # # # # # # # # # # # # # # # # # # # #             0.7677843666121356
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "31": [
+# # # # # # # # # # # # # # # # # # # # #             1.0740470936794604,
+# # # # # # # # # # # # # # # # # # # # #             1.3883944021514703,
+# # # # # # # # # # # # # # # # # # # # #             0.6767920977052695,
+# # # # # # # # # # # # # # # # # # # # #             0.6986957619505958,
+# # # # # # # # # # # # # # # # # # # # #             1.27696600935364,
+# # # # # # # # # # # # # # # # # # # # #             0.7829608040213523
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "32": [
+# # # # # # # # # # # # # # # # # # # # #             1.0219978291109892,
+# # # # # # # # # # # # # # # # # # # # #             1.4343994801356683,
+# # # # # # # # # # # # # # # # # # # # #             0.6612017526075715,
+# # # # # # # # # # # # # # # # # # # # #             0.6663932703904127,
+# # # # # # # # # # # # # # # # # # # # #             1.3328373106239142,
+# # # # # # # # # # # # # # # # # # # # #             0.7590845817505152
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "33": [
+# # # # # # # # # # # # # # # # # # # # #             1.0219978291109892,
+# # # # # # # # # # # # # # # # # # # # #             1.4343994801356683,
+# # # # # # # # # # # # # # # # # # # # #             0.6612017526075715,
+# # # # # # # # # # # # # # # # # # # # #             0.6663932703904127,
+# # # # # # # # # # # # # # # # # # # # #             1.3328373106239142,
+# # # # # # # # # # # # # # # # # # # # #             0.7590845817505152
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "34": [
+# # # # # # # # # # # # # # # # # # # # #             1.0219978291109892,
+# # # # # # # # # # # # # # # # # # # # #             1.4343994801356683,
+# # # # # # # # # # # # # # # # # # # # #             0.6612017526075715,
+# # # # # # # # # # # # # # # # # # # # #             0.6663932703904127,
+# # # # # # # # # # # # # # # # # # # # #             1.3328373106239142,
+# # # # # # # # # # # # # # # # # # # # #             0.7590845817505152
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "35": [
+# # # # # # # # # # # # # # # # # # # # #             1.0219978291109892,
+# # # # # # # # # # # # # # # # # # # # #             1.4343994801356683,
+# # # # # # # # # # # # # # # # # # # # #             0.6612017526075715,
+# # # # # # # # # # # # # # # # # # # # #             0.6663932703904127,
+# # # # # # # # # # # # # # # # # # # # #             1.3328373106239142,
+# # # # # # # # # # # # # # # # # # # # #             0.7590845817505152
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "36": [
+# # # # # # # # # # # # # # # # # # # # #             1.0219978291109892,
+# # # # # # # # # # # # # # # # # # # # #             1.4343994801356683,
+# # # # # # # # # # # # # # # # # # # # #             0.6612017526075715,
+# # # # # # # # # # # # # # # # # # # # #             0.6663932703904127,
+# # # # # # # # # # # # # # # # # # # # #             1.3328373106239142,
+# # # # # # # # # # # # # # # # # # # # #             0.7590845817505152
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "37": [
+# # # # # # # # # # # # # # # # # # # # #             1.0840652184485102,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5067978023141677,
+# # # # # # # # # # # # # # # # # # # # #             0.5389376589851818,
+# # # # # # # # # # # # # # # # # # # # #             1.4244789135246845,
+# # # # # # # # # # # # # # # # # # # # #             0.7397629878043501
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "38": [
+# # # # # # # # # # # # # # # # # # # # #             1.0840652184485102,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5067978023141677,
+# # # # # # # # # # # # # # # # # # # # #             0.5389376589851818,
+# # # # # # # # # # # # # # # # # # # # #             1.4244789135246845,
+# # # # # # # # # # # # # # # # # # # # #             0.7397629878043501
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "39": [
+# # # # # # # # # # # # # # # # # # # # #             1.0840652184485102,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5067978023141677,
+# # # # # # # # # # # # # # # # # # # # #             0.5389376589851818,
+# # # # # # # # # # # # # # # # # # # # #             1.4244789135246845,
+# # # # # # # # # # # # # # # # # # # # #             0.7397629878043501
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "40": [
+# # # # # # # # # # # # # # # # # # # # #             1.0505650707619365,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5283019614036062,
+# # # # # # # # # # # # # # # # # # # # #             0.5151770512634359,
+# # # # # # # # # # # # # # # # # # # # #             1.4382483678561655,
+# # # # # # # # # # # # # # # # # # # # #             0.6589102150787258
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "41": [
+# # # # # # # # # # # # # # # # # # # # #             1.0505650707619365,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5283019614036062,
+# # # # # # # # # # # # # # # # # # # # #             0.5151770512634359,
+# # # # # # # # # # # # # # # # # # # # #             1.4382483678561655,
+# # # # # # # # # # # # # # # # # # # # #             0.6589102150787258
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "42": [
+# # # # # # # # # # # # # # # # # # # # #             1.0172186693628593,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.533582717909757,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6996751997242181
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "43": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "44": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "45": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "46": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "47": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "48": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "49": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "50": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "51": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "52": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "53": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "54": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "55": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "56": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "57": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "58": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          "59": [
+# # # # # # # # # # # # # # # # # # # # #             1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             0.5,
+# # # # # # # # # # # # # # # # # # # # #             1.5,
+# # # # # # # # # # # # # # # # # # # # #             0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #          ]
+# # # # # # # # # # # # # # # # # # # # #       },
+# # # # # # # # # # # # # # # # # # # # #       "objective_value": {
+# # # # # # # # # # # # # # # # # # # # #          "0": 2.2463962616204514,
+# # # # # # # # # # # # # # # # # # # # #          "1": 2.087376371321291,
+# # # # # # # # # # # # # # # # # # # # #          "2": 2.0788247091575114,
+# # # # # # # # # # # # # # # # # # # # #          "3": 2.112384285001497,
+# # # # # # # # # # # # # # # # # # # # #          "4": 2.030556099309441,
+# # # # # # # # # # # # # # # # # # # # #          "5": 1.9882453398525697,
+# # # # # # # # # # # # # # # # # # # # #          "6": 1.9926368122806557,
+# # # # # # # # # # # # # # # # # # # # #          "7": 1.9113406651607177,
+# # # # # # # # # # # # # # # # # # # # #          "8": 1.8690626826718644,
+# # # # # # # # # # # # # # # # # # # # #          "9": 1.8821283505368829,
+# # # # # # # # # # # # # # # # # # # # #          "10": 1.8824048191889102,
+# # # # # # # # # # # # # # # # # # # # #          "11": 1.876043169312066,
+# # # # # # # # # # # # # # # # # # # # #          "12": 1.8256205833461294,
+# # # # # # # # # # # # # # # # # # # # #          "13": 1.8083523856693013,
+# # # # # # # # # # # # # # # # # # # # #          "14": 1.7789062096569401,
+# # # # # # # # # # # # # # # # # # # # #          "15": 1.8080865426610764,
+# # # # # # # # # # # # # # # # # # # # #          "16": 1.7308005291646573,
+# # # # # # # # # # # # # # # # # # # # #          "17": 1.7413464856693281,
+# # # # # # # # # # # # # # # # # # # # #          "18": 1.6764590308310647,
+# # # # # # # # # # # # # # # # # # # # #          "19": 1.666387685614776,
+# # # # # # # # # # # # # # # # # # # # #          "20": 1.6826001393443568,
+# # # # # # # # # # # # # # # # # # # # #          "21": 1.644827745943528,
+# # # # # # # # # # # # # # # # # # # # #          "22": 1.5777321116549634,
+# # # # # # # # # # # # # # # # # # # # #          "23": 1.5373637186037494,
+# # # # # # # # # # # # # # # # # # # # #          "24": 1.5423983056063961,
+# # # # # # # # # # # # # # # # # # # # #          "25": 1.5582332220031359,
+# # # # # # # # # # # # # # # # # # # # #          "26": 1.4755595653787996,
+# # # # # # # # # # # # # # # # # # # # #          "27": 1.4875860479722096,
+# # # # # # # # # # # # # # # # # # # # #          "28": 1.3932959799772324,
+# # # # # # # # # # # # # # # # # # # # #          "29": 1.3930592132177437,
+# # # # # # # # # # # # # # # # # # # # #          "30": 1.3744397981694862,
+# # # # # # # # # # # # # # # # # # # # #          "31": 1.3966307473915986,
+# # # # # # # # # # # # # # # # # # # # #          "32": 1.3414602468465557,
+# # # # # # # # # # # # # # # # # # # # #          "33": 1.3459434567048076,
+# # # # # # # # # # # # # # # # # # # # #          "34": 1.3416425263612948,
+# # # # # # # # # # # # # # # # # # # # #          "35": 1.3511199935266855,
+# # # # # # # # # # # # # # # # # # # # #          "36": 1.3520745707036053,
+# # # # # # # # # # # # # # # # # # # # #          "37": 1.2840018863803586,
+# # # # # # # # # # # # # # # # # # # # #          "38": 1.2484664482433272,
+# # # # # # # # # # # # # # # # # # # # #          "39": 1.256719860876987,
+# # # # # # # # # # # # # # # # # # # # #          "40": 1.2545224243826771,
+# # # # # # # # # # # # # # # # # # # # #          "41": 1.2684238714343379,
+# # # # # # # # # # # # # # # # # # # # #          "42": 1.2338323213089428,
+# # # # # # # # # # # # # # # # # # # # #          "43": 1.2512560908981583,
+# # # # # # # # # # # # # # # # # # # # #          "44": 1.261599629747322,
+# # # # # # # # # # # # # # # # # # # # #          "45": 1.2404106323455186,
+# # # # # # # # # # # # # # # # # # # # #          "46": 1.257593008996446,
+# # # # # # # # # # # # # # # # # # # # #          "47": 1.2420976773923513,
+# # # # # # # # # # # # # # # # # # # # #          "48": 1.2445197741969287,
+# # # # # # # # # # # # # # # # # # # # #          "49": 1.2343623907538337,
+# # # # # # # # # # # # # # # # # # # # #          "50": 1.2563751194369472,
+# # # # # # # # # # # # # # # # # # # # #          "51": 1.2533295831355173,
+# # # # # # # # # # # # # # # # # # # # #          "52": 1.2355247665516167,
+# # # # # # # # # # # # # # # # # # # # #          "53": 1.252814639833546,
+# # # # # # # # # # # # # # # # # # # # #          "54": 1.2429632606768946,
+# # # # # # # # # # # # # # # # # # # # #          "55": 1.2468555843716753,
+# # # # # # # # # # # # # # # # # # # # #          "56": 1.2661449357700019,
+# # # # # # # # # # # # # # # # # # # # #          "57": 1.2548953530966265,
+# # # # # # # # # # # # # # # # # # # # #          "58": 1.2495921570204127,
+# # # # # # # # # # # # # # # # # # # # #          "59": 1.258026412406305
+# # # # # # # # # # # # # # # # # # # # #       }
+# # # # # # # # # # # # # # # # # # # # #    },
+# # # # # # # # # # # # # # # # # # # # #    "final_result": {
+# # # # # # # # # # # # # # # # # # # # #       "x_optim": [
+# # # # # # # # # # # # # # # # # # # # #          1.0696548772860786,
+# # # # # # # # # # # # # # # # # # # # #          1.5,
+# # # # # # # # # # # # # # # # # # # # #          0.5,
+# # # # # # # # # # # # # # # # # # # # #          0.5,
+# # # # # # # # # # # # # # # # # # # # #          1.5,
+# # # # # # # # # # # # # # # # # # # # #          0.6872476257360807
+# # # # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # # # #       "observation_windows": [
+# # # # # # # # # # # # # # # # # # # # #          [
+# # # # # # # # # # # # # # # # # # # # #             60390,
+# # # # # # # # # # # # # # # # # # # # #             60393
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          [
+# # # # # # # # # # # # # # # # # # # # #             60396.0,
+# # # # # # # # # # # # # # # # # # # # #             60397.06965487728
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          [
+# # # # # # # # # # # # # # # # # # # # #             60400.06965487728,
+# # # # # # # # # # # # # # # # # # # # #             60401.56965487728
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          [
+# # # # # # # # # # # # # # # # # # # # #             60404.56965487728,
+# # # # # # # # # # # # # # # # # # # # #             60405.06965487728
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          [
+# # # # # # # # # # # # # # # # # # # # #             60408.06965487728,
+# # # # # # # # # # # # # # # # # # # # #             60408.56965487728
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          [
+# # # # # # # # # # # # # # # # # # # # #             60411.56965487728,
+# # # # # # # # # # # # # # # # # # # # #             60413.06965487728
+# # # # # # # # # # # # # # # # # # # # #          ],
+# # # # # # # # # # # # # # # # # # # # #          [
+# # # # # # # # # # # # # # # # # # # # #             60416.06965487728,
+# # # # # # # # # # # # # # # # # # # # #             60416.75690250302
+# # # # # # # # # # # # # # # # # # # # #          ]
+# # # # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # # # #       "skm_epochs": [
+# # # # # # # # # # # # # # # # # # # # #          60393,
+# # # # # # # # # # # # # # # # # # # # #          60397.06965487728,
+# # # # # # # # # # # # # # # # # # # # #          60401.56965487728,
+# # # # # # # # # # # # # # # # # # # # #          60405.06965487728,
+# # # # # # # # # # # # # # # # # # # # #          60408.56965487728,
+# # # # # # # # # # # # # # # # # # # # #          60413.06965487728,
+# # # # # # # # # # # # # # # # # # # # #          60416.75690250302
+# # # # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # # # #       "approx_annual_deltav": 16.399272876010762,
+# # # # # # # # # # # # # # # # # # # # #       "reduction_percentage": -43.998018786818136,
+# # # # # # # # # # # # # # # # # # # # #       "run_time": 29590.47538471222
+# # # # # # # # # # # # # # # # # # # # #    }
+# # # # # # # # # # # # # # # # # # # # # }}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # print([list(item["history"]["objective_value"].values()) for item in data.values()])
+
+# # # # # # # # # # # # # # # # # # # # # # Extracting objective values into a 2D array
+# # # # # # # # # # # # # # # # # # # # # objective_values = np.array([list(item['history']['objective_value'].values()) for item in data.values()]).T
+# # # # # # # # # # # # # # # # # # # # # # Extracting design vectors into a 3D array
+# # # # # # # # # # # # # # # # # # # # # design_vectors = np.array([list(item['history']['design_vector'].values()) for item in data.values()])
+
+# # # # # # # # # # # # # # # # # # # # # print("Objective Values:")
+# # # # # # # # # # # # # # # # # # # # # print(objective_values)
+
+# # # # # # # # # # # # # # # # # # # # # print("\nDesign Vectors:")
+# # # # # # # # # # # # # # # # # # # # # print(design_vectors)
+
+
+# # # # # # # # # # # # # # # # # # # # # # # Extract objective function values
+# # # # # # # # # # # # # # # # # # # # # # iteration_numbers = []
+# # # # # # # # # # # # # # # # # # # # # # objective_functions = []
+# # # # # # # # # # # # # # # # # # # # # # states = []
+
+# # # # # # # # # # # # # # # # # # # # # # for iteration, values in data["history"].items():
+# # # # # # # # # # # # # # # # # # # # # #     iteration_numbers.append(int(iteration))
+# # # # # # # # # # # # # # # # # # # # # #     objective_functions.append(values["objective_function"])
+# # # # # # # # # # # # # # # # # # # # # #     states.append(values["design_vector"])
+
+# # # # # # # # # # # # # # # # # # # # # # Plot
+# # # # # # # # # # # # # # # # # # # # # plt.plot(objective_values, marker='*', linestyle='-')
+# # # # # # # # # # # # # # # # # # # # # plt.xlabel('Iteration')
+# # # # # # # # # # # # # # # # # # # # # plt.ylabel(r'||$\Delta V$||')
+# # # # # # # # # # # # # # # # # # # # # plt.title('Objective Function Value vs. Iteration')
+# # # # # # # # # # # # # # # # # # # # # plt.grid(True)
+# # # # # # # # # # # # # # # # # # # # # # plt.show()
+
+
+# # # # # # # # # # # # # # # # # # # # # plt.plot(design_vectors[0], marker='*', linestyle='-', label=["T1", "T2", "T3", "T4", "T5", "T6"])
+# # # # # # # # # # # # # # # # # # # # # plt.xlabel('Iteration')
+# # # # # # # # # # # # # # # # # # # # # plt.ylabel('States')
+# # # # # # # # # # # # # # # # # # # # # plt.title('State Evolution vs. Iteration')
+# # # # # # # # # # # # # # # # # # # # # plt.grid(True)
+# # # # # # # # # # # # # # # # # # # # # plt.show()
+
+# # # # # # # # # # # # # # # # # # # # # import matplotlib.pyplot as plt
+
+# # # # # # # # # # # # # # # # # # # # # # Example data (mean and standard deviation)
+# # # # # # # # # # # # # # # # # # # # # mean_values = [1, 2, 3, 4, 5]
+# # # # # # # # # # # # # # # # # # # # # std_values = [0.1, 0.2, 0.1, 0.3, 0.2]
+
+# # # # # # # # # # # # # # # # # # # # # # Create x-values (assuming you have 5 data points)
+# # # # # # # # # # # # # # # # # # # # # x_values = range(len(mean_values))
+
+# # # # # # # # # # # # # # # # # # # # # # Create the plot
+# # # # # # # # # # # # # # # # # # # # # plt.errorbar(x_values, mean_values, yerr=std_values, fmt='o', capsize=5)
+
+# # # # # # # # # # # # # # # # # # # # # # Add labels and title
+# # # # # # # # # # # # # # # # # # # # # plt.xlabel('Data Point')
+# # # # # # # # # # # # # # # # # # # # # plt.ylabel('Mean Value')
+# # # # # # # # # # # # # # # # # # # # # plt.title('Mean Values with Error Bars')
+
+# # # # # # # # # # # # # # # # # # # # # # Show the plot
+# # # # # # # # # # # # # # # # # # # # # plt.show()
+
+# # # # # # # # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # # # # # # # # Define inertial states (position and velocity vectors) of the satellite in the Earth-centered inertial frame
+# # # # # # # # # # # # # # # # # # # # # satellite_position_inertial = np.array([x_satellite, y_satellite, z_satellite])
+# # # # # # # # # # # # # # # # # # # # # satellite_velocity_inertial = np.array([vx_satellite, vy_satellite, vz_satellite])
+
+# # # # # # # # # # # # # # # # # # # # # # Define the position vector from the Earth to the Moon
+# # # # # # # # # # # # # # # # # # # # # earth_to_moon_position = moon_position_inertial - earth_position_inertial
+
+# # # # # # # # # # # # # # # # # # # # # # Calculate the velocity vector of the Moon relative to the Earth
+# # # # # # # # # # # # # # # # # # # # # moon_velocity_relative_to_earth = moon_velocity_inertial - earth_velocity_inertial
+
+# # # # # # # # # # # # # # # # # # # # # # Calculate the angular velocity vector of the Earth-Moon system
+# # # # # # # # # # # # # # # # # # # # # angular_velocity_earth_moon = np.cross(earth_to_moon_position, moon_velocity_relative_to_earth) / np.linalg.norm(earth_to_moon_position)**2
+
+# # # # # # # # # # # # # # # # # # # # # # Construct the rotation matrix for transforming states from the inertial frame to the rotating frame
+# # # # # # # # # # # # # # # # # # # # # rotation_matrix = np.array([[1, 0, 0],
+# # # # # # # # # # # # # # # # # # # # #                             [0, np.cos(theta), -np.sin(theta)],
+# # # # # # # # # # # # # # # # # # # # #                             [0, np.sin(theta), np.cos(theta)]])
+
+# # # # # # # # # # # # # # # # # # # # # # Transform the states from the inertial frame to the rotating frame
+# # # # # # # # # # # # # # # # # # # # # satellite_position_rotating = np.dot(rotation_matrix, satellite_position_inertial)
+# # # # # # # # # # # # # # # # # # # # # satellite_velocity_rotating = np.dot(rotation_matrix, satellite_velocity_inertial - np.cross(angular_velocity_earth_moon, satellite_position_inertial))
+
+# # # # # # # # # # # # # # # # # # # # # # satellite_position_rotating and satellite_velocity_rotating now contain the satellite states in the rotating frame
+
+# # # # # # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # # # # # # Example values for position vector of the Moon relative to the Earth
+# # # # # # # # # # # # # # # # # # # x_moon = -279077.269273
+# # # # # # # # # # # # # # # # # # # y_moon = 252757.216883
+# # # # # # # # # # # # # # # # # # # z_moon = 145049.670755
+
+# # # # # # # # # # # # # # # # # # # # Example values for velocity vector of the Moon relative to the Earth
+# # # # # # # # # # # # # # # # # # # vx_moon = -0.719984
+# # # # # # # # # # # # # # # # # # # vy_moon = -0.583631
+# # # # # # # # # # # # # # # # # # # vz_moon = -0.297165
+
+# # # # # # # # # # # # # # # # # # # # Define the position vector of the Moon relative to the Earth
+# # # # # # # # # # # # # # # # # # # moon_position = np.array([x_moon, y_moon, z_moon])
+# # # # # # # # # # # # # # # # # # # moon_velocity = np.array([vx_moon, vy_moon, vz_moon])
+# # # # # # # # # # # # # # # # # # # rotation_axis = np.cross(moon_position, moon_velocity)
+# # # # # # # # # # # # # # # # # # # rotation_rate_magnitude = np.linalg.norm(rotation_axis) / np.linalg.norm(moon_position)**2
+# # # # # # # # # # # # # # # # # # # rotation_axis_unit = rotation_axis / np.linalg.norm(rotation_axis)
+# # # # # # # # # # # # # # # # # # # second_axis = np.cross(moon_position, rotation_axis)
+
+# # # # # # # # # # # # # # # # # # # first_axis = moon_position/np.linalg.norm(moon_position)
+# # # # # # # # # # # # # # # # # # # second_axis = second_axis/np.linalg.norm(second_axis)
+# # # # # # # # # # # # # # # # # # # third_axis = rotation_axis/np.linalg.norm(rotation_axis)
+
+# # # # # # # # # # # # # # # # # # # # print("Rotation Axis Vector:", rotation_axis_unit)
+# # # # # # # # # # # # # # # # # # # # print("Magnitude of Rotation Rate:", rotation_rate_magnitude)
+
+# # # # # # # # # # # # # # # # # # # # print("First axis:", moon_position/np.linalg.norm(moon_position))
+# # # # # # # # # # # # # # # # # # # # print("Second axis:", second_axis/np.linalg.norm(second_axis))
+# # # # # # # # # # # # # # # # # # # # print("Third axis:", rotation_axis/np.linalg.norm(rotation_axis))
+
+
+# # # # # # # # # # # # # # # # # # # # Define the rotation matrix (DCM) using the rotating frame axes
+# # # # # # # # # # # # # # # # # # # rotating_frame_axes = np.array([
+# # # # # # # # # # # # # # # # # # #     first_axis, second_axis, third_axis    # Third axis
+# # # # # # # # # # # # # # # # # # # ])
+
+# # # # # # # # # # # # # # # # # # # rotating_state = np.dot(rotating_frame_axes, moon_position)
+
+# # # # # # # # # # # # # # # # # # # # Print the result
+# # # # # # # # # # # # # # # # # # # print("State in rotating frame:", rotating_state)
+# # # # # # # # # # # # # # # # # # # # print(second_axis/np.linalg.norm(second_axis), moon_velocity/np.linalg.norm(moon_velocity))
+
+
+# # # # # # # # # # # # # # # # # # # # # # Example unit vector representing angular velocity
+# # # # # # # # # # # # # # # # # # # # # angular_velocity_unit_vector = rotation_axis_unit
+# # # # # # # # # # # # # # # # # # # # # azimuth_angle = np.arctan2(angular_velocity_unit_vector[1], angular_velocity_unit_vector[0])
+# # # # # # # # # # # # # # # # # # # # # polar_angle = np.arcsin(angular_velocity_unit_vector[2])
+
+# # # # # # # # # # # # # # # # # # # # # # Convert angles from radians to degrees for easier interpretation
+# # # # # # # # # # # # # # # # # # # # # azimuth_angle_deg = np.degrees(azimuth_angle)
+# # # # # # # # # # # # # # # # # # # # # polar_angle_deg = np.degrees(polar_angle)
+
+# # # # # # # # # # # # # # # # # # # # # print("Azimuth Angle (Yaw) in degrees:", azimuth_angle_deg)
+# # # # # # # # # # # # # # # # # # # # # print("Polar Angle (Pitch) in degrees:", polar_angle_deg)
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # Construct the transformation matrix (DCM) using the azimuth and polar angles
+# # # # # # # # # # # # # # # # # # # # # cos_yaw = np.cos(azimuth_angle)
+# # # # # # # # # # # # # # # # # # # # # sin_yaw = np.sin(azimuth_angle)
+# # # # # # # # # # # # # # # # # # # # # cos_pitch = np.cos(polar_angle)
+# # # # # # # # # # # # # # # # # # # # # sin_pitch = np.sin(polar_angle)
+
+# # # # # # # # # # # # # # # # # # # # # # Define the elements of the transformation matrix (DCM)
+# # # # # # # # # # # # # # # # # # # # # # Assuming z-y'-x'' sequence of rotations
+# # # # # # # # # # # # # # # # # # # # # dcm = np.array([
+# # # # # # # # # # # # # # # # # # # # #     [cos_yaw * cos_pitch, -sin_yaw, cos_yaw * sin_pitch],
+# # # # # # # # # # # # # # # # # # # # #     [sin_yaw * cos_pitch, cos_yaw, sin_yaw * sin_pitch],
+# # # # # # # # # # # # # # # # # # # # #     [-sin_pitch, 0, cos_pitch]
+# # # # # # # # # # # # # # # # # # # # # ])
+
+# # # # # # # # # # # # # # # # # # # # # print("Transformation Matrix (DCM):")
+# # # # # # # # # # # # # # # # # # # # # print(dcm)
+
+
+# # # # # # # # # # # # # # # # # # # # # x_inertial = -279077.269273
+# # # # # # # # # # # # # # # # # # # # # y_inertial = 252757.216883
+# # # # # # # # # # # # # # # # # # # # # z_inertial = 145049.670755
+
+# # # # # # # # # # # # # # # # # # # # # # Define the inertial state vector (example values)
+# # # # # # # # # # # # # # # # # # # # # inertial_state = np.array([x_inertial, y_inertial, z_inertial])
+
+# # # # # # # # # # # # # # # # # # # # # # Calculate the state vector in the rotating Earth-Moon frame
+# # # # # # # # # # # # # # # # # # # # # rotating_frame_state = np.dot(dcm, inertial_state)
+# # # # # # # # # # # # # # # # # # # # # print(np.linalg.norm(rotating_frame_state))
+
+# # # # # # # # # # # # # # # # # # # # # print("State Vector in Rotating Frame:")
+# # # # # # # # # # # # # # # # # # # # # print(rotating_frame_state)
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # Define the unit vector of rotation and the plane of rotation
+# # # # # # # # # # # # # # # # # # # # # rotation_axis = np.array([0, 0, 1])  # Example rotation axis
+# # # # # # # # # # # # # # # # # # # # # rotation_plane = inertial_state  # Example rotation plane
+
+# # # # # # # # # # # # # # # # # # # # # # Calculate the cross product to obtain a third orthogonal vector
+# # # # # # # # # # # # # # # # # # # # # orthogonal_vector = np.cross(rotation_axis, rotation_plane)
+# # # # # # # # # # # # # # # # # # # # # # orthogonal_vector /= np.linalg.norm(orthogonal_vector)  # Normalize
+
+# # # # # # # # # # # # # # # # # # # # # # # Normalize the rotation axis
+# # # # # # # # # # # # # # # # # # # # # # rotation_axis /= np.linalg.norm(rotation_axis)
+
+# # # # # # # # # # # # # # # # # # # # # # Create the transformation matrix
+# # # # # # # # # # # # # # # # # # # # # transformation_matrix = np.array([rotation_axis, orthogonal_vector, rotation_plane])
+
+# # # # # # # # # # # # # # # # # # # # # # Define the vector you want to transform (example values)
+# # # # # # # # # # # # # # # # # # # # # vector_to_transform = np.array([1.0, 0.0, 0.0])
+
+# # # # # # # # # # # # # # # # # # # # # # Transform the vector to the desired frame
+# # # # # # # # # # # # # # # # # # # # # transformed_vector = np.dot(transformation_matrix.T, vector_to_transform)
+
+# # # # # # # # # # # # # # # # # # # # # print(transformation_matrix, transformed_vector)
+
+
+
+# # # # # # # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # # # # # # # Example rotation axis vector of moon rotation around earth (replace with your vector)
+# # # # # # # # # # # # # # # # # # # # rotation_axis = np.array([0.02431277, -0.47725793, 0.87842686])
+
+# # # # # # # # # # # # # # # # # # # # # Example position vector of moon w.r.t earth (replace with your vector)
+# # # # # # # # # # # # # # # # # # # # moon_position = np.array([-279077.269273, 252757.216883, 145049.670755])
+
+# # # # # # # # # # # # # # # # # # # # # Normalize the rotation axis vector
+# # # # # # # # # # # # # # # # # # # # rotation_axis_normalized = rotation_axis / np.linalg.norm(rotation_axis)
+
+# # # # # # # # # # # # # # # # # # # # # Take the cross product of the rotation axis vector and the position vector of the Moon
+# # # # # # # # # # # # # # # # # # # # cross_product = np.cross(rotation_axis_normalized, moon_position)
+
+# # # # # # # # # # # # # # # # # # # # # Normalize the result
+# # # # # # # # # # # # # # # # # # # # cross_product_normalized = cross_product / np.linalg.norm(cross_product)
+
+# # # # # # # # # # # # # # # # # # # # # Take another cross product to get the third vector orthogonal to the first two
+# # # # # # # # # # # # # # # # # # # # third_vector = np.cross(rotation_axis_normalized, cross_product_normalized)
+
+# # # # # # # # # # # # # # # # # # # # # Construct the rotation matrix with these vectors as columns
+# # # # # # # # # # # # # # # # # # # # rotation_matrix = np.column_stack((rotation_axis_normalized, cross_product_normalized, third_vector))
+
+# # # # # # # # # # # # # # # # # # # # print("Rotation matrix:")
+# # # # # # # # # # # # # # # # # # # # print(rotation_matrix)
+
+# # # # # # # # # # # # # # # # # # # # # Convert the moon_position from the inertial frame to the rotating frame
+# # # # # # # # # # # # # # # # # # # # moon_position_rotating = np.dot(rotation_matrix, moon_position)
+
+# # # # # # # # # # # # # # # # # # # # print("Moon position in rotating frame:")
+# # # # # # # # # # # # # # # # # # # # print(moon_position_rotating)
+
+# # # # # # # # # # # # # # # # # # # # import matplotlib.pyplot as plt
+# # # # # # # # # # # # # # # # # # # # # Plot the moon position vector
+# # # # # # # # # # # # # # # # # # # # fig = plt.figure()
+# # # # # # # # # # # # # # # # # # # # ax = fig.add_subplot(111, projection='3d')
+# # # # # # # # # # # # # # # # # # # # ax.quiver(0, 0, 0, moon_position[0], moon_position[1], moon_position[2], color='blue', label='Moon Position')
+
+# # # # # # # # # # # # # # # # # # # # # Plot the rotation axis vector
+# # # # # # # # # # # # # # # # # # # # ax.quiver(0, 0, 0, rotation_axis[0], rotation_axis[1], rotation_axis[2], color='red', label='Rotation Axis')
+
+# # # # # # # # # # # # # # # # # # # # # Set plot labels and legend
+# # # # # # # # # # # # # # # # # # # # ax.set_xlabel('X')
+# # # # # # # # # # # # # # # # # # # # ax.set_ylabel('Y')
+# # # # # # # # # # # # # # # # # # # # ax.set_zlabel('Z')
+# # # # # # # # # # # # # # # # # # # # ax.set_title('Moon Position and Rotation Axis')
+# # # # # # # # # # # # # # # # # # # # ax.legend()
+
+# # # # # # # # # # # # # # # # # # # # plt.show()
+
+# # # # # # # # # # # # # # # # # # # # # Define the starting and ending keys
+# # # # # # # # # # # # # # # # # # # # start_key = 60390
+# # # # # # # # # # # # # # # # # # # # end_key = 60418
+
+# # # # # # # # # # # # # # # # # # # # # Define the step size for each key range
+# # # # # # # # # # # # # # # # # # # # arc_interval = 3
+# # # # # # # # # # # # # # # # # # # # threshold = 3
+# # # # # # # # # # # # # # # # # # # # arc_duration = 1
+
+# # # # # # # # # # # # # # # # # # # # # Generate the list of tuples representing the ranges of keys
+# # # # # # # # # # # # # # # # # # # # key_ranges = []
+# # # # # # # # # # # # # # # # # # # # last_key = start_key + threshold
+# # # # # # # # # # # # # # # # # # # # for key in range(start_key, end_key, threshold):
+# # # # # # # # # # # # # # # # # # # #     if key == start_key:
+# # # # # # # # # # # # # # # # # # # #         key_ranges.append((key, key + threshold))
+# # # # # # # # # # # # # # # # # # # #     else:
+# # # # # # # # # # # # # # # # # # # #         key_ranges.append((last_key+arc_interval, last_key + arc_interval + arc_duration))
+# # # # # # # # # # # # # # # # # # # #         last_key += arc_interval + arc_duration
+
+# # # # # # # # # # # # # # # # # # # # print(key_ranges)
+
+
+
+# # # # # # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # # # # # # means = {}
+# # # # # # # # # # # # # # # # # # # # # for num_run in range(100):
+
+# # # # # # # # # # # # # # # # # # # # #     # Generate random variations
+# # # # # # # # # # # # # # # # # # # # #     design_vector = np.random.normal(loc=1, scale=0.3, size=(1,10))
+# # # # # # # # # # # # # # # # # # # # #     print(design_vector)
+# # # # # # # # # # # # # # # # # # # # #     means[num_run] = design_vector
+
+# # # # # # # # # # # # # # # # # # # # # print(means)
+
+
+# # # # # # # # # # # # # # # # # # # # dynamic_model_list = ["HF", "PM", 0]
+# # # # # # # # # # # # # # # # # # # # truth_model_list = ["HF", "PM", 0]
+# # # # # # # # # # # # # # # # # # # # duration = 28
+# # # # # # # # # # # # # # # # # # # # arc_interval = 3
+# # # # # # # # # # # # # # # # # # # # threshold = 3
+# # # # # # # # # # # # # # # # # # # # arc_duration = 1
+# # # # # # # # # # # # # # # # # # # # num_runs = 3
+# # # # # # # # # # # # # # # # # # # # mean = arc_duration
+# # # # # # # # # # # # # # # # # # # # std_dev = 0.3
+# # # # # # # # # # # # # # # # # # # # factors = [0.2, 0.5, 1.3]
+
+
+# # # # # # # # # # # # # # # # # # # # np.random.seed(0)
+# # # # # # # # # # # # # # # # # # # # for i in range(10):
+
+# # # # # # # # # # # # # # # # # # # #     # Generate a vector with OD durations
+# # # # # # # # # # # # # # # # # # # #     arc_duration = np.random.normal(loc=1, scale=0.5, size=(20))
+# # # # # # # # # # # # # # # # # # # #     start_epoch = 60390
+# # # # # # # # # # # # # # # # # # # #     epoch = start_epoch + threshold + arc_interval + arc_duration[0]
+# # # # # # # # # # # # # # # # # # # #     skm_epochs = []
+# # # # # # # # # # # # # # # # # # # #     i = 1
+# # # # # # # # # # # # # # # # # # # #     while True:
+# # # # # # # # # # # # # # # # # # # #         if epoch < start_epoch+duration:
+# # # # # # # # # # # # # # # # # # # #             skm_epochs.append(epoch)
+# # # # # # # # # # # # # # # # # # # #             epoch += arc_interval+arc_duration[i]
+# # # # # # # # # # # # # # # # # # # #         else:
+# # # # # # # # # # # # # # # # # # # #             design_vector = np.ones(np.shape(skm_epochs))
+# # # # # # # # # # # # # # # # # # # #             break
+# # # # # # # # # # # # # # # # # # # #         i += 1
+
+# # # # # # # # # # # # # # # # # # # #     # Extract observation windows
+# # # # # # # # # # # # # # # # # # # #     observation_windows = [(start_epoch, start_epoch+threshold)]
+# # # # # # # # # # # # # # # # # # # #     for i, skm_epoch in enumerate(skm_epochs):
+# # # # # # # # # # # # # # # # # # # #         observation_windows.append((skm_epoch-arc_duration[i], skm_epoch))
+
+# # # # # # # # # # # # # # # # # # # import matplotlib.pyplot as plt
+# # # # # # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # # # # # data = {
+# # # # # # # # # # # # # # # # # # #   "PM": {
+# # # # # # # # # # # # # # # # # # #     "0": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.5292157037902991,
+# # # # # # # # # # # # # # # # # # #         1.120047162510167,
+# # # # # # # # # # # # # # # # # # #         1.2936213952317217,
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.881389078096338
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "1": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.629279735186108
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "2": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.6301105788313834
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "3": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.620106701960488
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "4": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.6272855136957003
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "5": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.6252055059217634
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "6": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.6212312688083137
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "7": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.621432219529683
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "8": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.624500887958655
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "9": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       3.620730602657655
+# # # # # # # # # # # # # # # # # # #     ]
+# # # # # # # # # # # # # # # # # # #   },
+# # # # # # # # # # # # # # # # # # #   "PMSRP": {
+# # # # # # # # # # # # # # # # # # #     "0": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.5292157037902991,
+# # # # # # # # # # # # # # # # # # #         1.120047162510167,
+# # # # # # # # # # # # # # # # # # #         1.2936213952317217,
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.30727913371425425
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "1": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.3032678512529212
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "2": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.3048521601479422
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "3": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.30142743380698
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "4": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.3005647548033069
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "5": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.29966621542917526
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "6": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.2979504188953162
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "7": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.30132144828734964
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "8": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.29843010496775163
+# # # # # # # # # # # # # # # # # # #     ],
+# # # # # # # # # # # # # # # # # # #     "9": [
+# # # # # # # # # # # # # # # # # # #       [
+# # # # # # # # # # # # # # # # # # #         1.6722679597604373,
+# # # # # # # # # # # # # # # # # # #         1.5602673970449903,
+# # # # # # # # # # # # # # # # # # #         0.7068166360370767,
+# # # # # # # # # # # # # # # # # # #         1.2850265252576767,
+# # # # # # # # # # # # # # # # # # #         0.9545928375106907
+# # # # # # # # # # # # # # # # # # #       ],
+# # # # # # # # # # # # # # # # # # #       0.3030935095215229
+# # # # # # # # # # # # # # # # # # #     ]
+# # # # # # # # # # # # # # # # # # #   }
+# # # # # # # # # # # # # # # # # # # }
+
+# # # # # # # # # # # # # # # # # # # # Extracting the second value from each subkey and calculating mean and standard deviation
+# # # # # # # # # # # # # # # # # # # means_PM = []
+# # # # # # # # # # # # # # # # # # # stds_PM = []
+# # # # # # # # # # # # # # # # # # # means_PMSRP = []
+# # # # # # # # # # # # # # # # # # # stds_PMSRP = []
+
+# # # # # # # # # # # # # # # # # # # for i in range(10):
+# # # # # # # # # # # # # # # # # # #     means_PM.append(np.mean([data["PM"][str(i)][1] for i in range(10)]))
+# # # # # # # # # # # # # # # # # # #     stds_PM.append(np.std([data["PM"][str(i)][1] for i in range(10)]))
+# # # # # # # # # # # # # # # # # # #     means_PMSRP.append(np.mean([data["PMSRP"][str(i)][1] for i in range(10)]))
+# # # # # # # # # # # # # # # # # # #     stds_PMSRP.append(np.std([data["PMSRP"][str(i)][1] for i in range(10)]))
+
+# # # # # # # # # # # # # # # # # # # # Creating the bar chart
+# # # # # # # # # # # # # # # # # # # fig, ax = plt.subplots()
+# # # # # # # # # # # # # # # # # # # bar_width = 0.35
+# # # # # # # # # # # # # # # # # # # index = np.arange(2)
+
+# # # # # # # # # # # # # # # # # # # bar1 = ax.bar(index, [means_PM[0], means_PMSRP[0]], bar_width, label='Iteration 0', yerr=[stds_PM[0], stds_PMSRP[0]])
+
+# # # # # # # # # # # # # # # # # # # bar2 = ax.bar(index + bar_width, [means_PM[1], means_PMSRP[1]], bar_width, label='Iteration 1', yerr=[stds_PM[1], stds_PMSRP[1]])
+
+# # # # # # # # # # # # # # # # # # # ax.set_xlabel('Keys')
+# # # # # # # # # # # # # # # # # # # ax.set_ylabel('Values')
+# # # # # # # # # # # # # # # # # # # ax.set_title('Mean and Standard Deviation of Each Key')
+# # # # # # # # # # # # # # # # # # # ax.set_xticks(index + bar_width / 2)
+# # # # # # # # # # # # # # # # # # # ax.set_xticklabels(('PM', 'PMSRP'))
+# # # # # # # # # # # # # # # # # # # ax.legend()
+
+# # # # # # # # # # # # # # # # # # # plt.show()
+
+# # # # # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # # # # # Example state histories (replace these with your actual data)
+# # # # # # # # # # # # # # # # # # state_history = np.array([[1, 2, 3, 4, 5, 6, 7, 8, 9],
+# # # # # # # # # # # # # # # # # #                           [2, 3, 4, 5, 6, 7, 8, 9, 10],
+# # # # # # # # # # # # # # # # # #                           [3, 4, 5, 6, 7, 8, 9, 10, 11]])
+
+# # # # # # # # # # # # # # # # # # dependent_variables_history = np.array([[1, 2, 3],
+# # # # # # # # # # # # # # # # # #                                         [2, 3, 4],
+# # # # # # # # # # # # # # # # # #                                         [3, 4, 5]])
+
+# # # # # # # # # # # # # # # # # # # Calculate the vectors
+# # # # # # # # # # # # # # # # # # states_history_LPF_moon = state_history[:, 0:3] - dependent_variables_history[:, 0:3]
+# # # # # # # # # # # # # # # # # # states_history_LUMIO_moon = state_history[:, 6:9] - dependent_variables_history[:, 0:3]
+
+# # # # # # # # # # # # # # # # # # # Calculate the dot product between the vectors
+# # # # # # # # # # # # # # # # # # dot_product = np.dot(states_history_LPF_moon, states_history_LUMIO_moon)
+
+# # # # # # # # # # # # # # # # # # print(dot_product)
+
+# # # # # # # # # # # # # # # # # # # Calculate the magnitudes of the vectors
+# # # # # # # # # # # # # # # # # # magnitude_LPF_moon = np.linalg.norm(states_history_LPF_moon, axis=1)
+# # # # # # # # # # # # # # # # # # magnitude_LUMIO_moon = np.linalg.norm(states_history_LUMIO_moon, axis=1)
+
+# # # # # # # # # # # # # # # # # # # Calculate the cosine of the angle
+# # # # # # # # # # # # # # # # # # cosine_angle = dot_product / (magnitude_LPF_moon * magnitude_LUMIO_moon)
+
+# # # # # # # # # # # # # # # # # # # Calculate the angle in radians
+# # # # # # # # # # # # # # # # # # angle_rad = np.arccos(cosine_angle)
+
+# # # # # # # # # # # # # # # # # # # Convert radians to degrees
+# # # # # # # # # # # # # # # # # # angle_deg = np.degrees(angle_rad)
+
+# # # # # # # # # # # # # # # # # # print("Angle between vectors in degrees:", angle_deg)
+
+
+# # # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # def calculate_mean_2d_arrays(arrays):
+# # # # # # # # # # # # # # #     # Convert list of 2D arrays to a 3D numpy array
+# # # # # # # # # # # # # # #     array_3d = np.array(arrays)
+
+# # # # # # # # # # # # # # #     # Compute the mean along the third axis
+# # # # # # # # # # # # # # #     mean_2d_array = np.mean(array_3d, axis=0)
+
+# # # # # # # # # # # # # # #     # Return the 2D array with mean values
+# # # # # # # # # # # # # # #     return mean_2d_array
+
+# # # # # # # # # # # # # # # # Example usage
+# # # # # # # # # # # # # # # # Define a list of 2D arrays
+# # # # # # # # # # # # # # # arrays = [
+# # # # # # # # # # # # # # #     np.array([[1, 2, 3], [4, 5, 6]]),
+# # # # # # # # # # # # # # #     np.array([[7, 8, 9], [10, 11, 12]]),
+# # # # # # # # # # # # # # #     np.array([[13, 14, 15], [16, 17, 18]])
+# # # # # # # # # # # # # # # ]
+
+# # # # # # # # # # # # # # # # Calculate the mean 2D array
+# # # # # # # # # # # # # # # mean_2d_array = calculate_mean_2d_arrays(arrays)
+
+# # # # # # # # # # # # # # # # Print the resulting 2D array
+# # # # # # # # # # # # # # # print(mean_2d_array)
+
+# # # # # # # # # # # # # # import matplotlib.pyplot as plt
+# # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # Data provided as a dictionary
+# # # # # # # # # # # # # data = {
+# # # # # # # # # # # # #     "Perilune": [
+# # # # # # # # # # # # #         [2, 0.3778039043114838, 0.4211835253141808, 0.3994937148128323, 0.021689810501348494, [0.3778039043114838, 0.4211835253141808]],
+# # # # # # # # # # # # #         [2, 0.09083856750049994, 0.10827929458741031, 0.19955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]],
+# # # # # # # # # # # # #         [2, 0.09083856750049994, 0.10827929458741031, 0.13955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]],
+# # # # # # # # # # # # #         [2, 0.09083856750049994, 0.10827929458741031, 0.3955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]],
+# # # # # # # # # # # # #         [2, 0.09083856750049994, 0.10827929458741031, 0.13955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]],
+# # # # # # # # # # # # #         [2, 0.09083856750049994, 0.10827929458741031, 0.3955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]],
+# # # # # # # # # # # # #     ],
+# # # # # # # # # # # # #     "Apolune": [
+# # # # # # # # # # # # #         # [2, 0.08883281899878671, 0.11457963466987121, 0.10170622683432896, 0.01287340783554225, [0.11457963466987121, 0.08883281899878671]],
+# # # # # # # # # # # # #         #         [2, 0.09083856750049994, 0.10827929458741031, 0.19955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]],
+# # # # # # # # # # # # #         # [2, 0.09083856750049994, 0.10827929458741031, 0.13955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]],
+# # # # # # # # # # # # #         # [2, 0.09083856750049994, 0.10827929458741031, 0.3955893104395513, 0.008720363543455185, [0.10827929458741031, 0.09083856750049994]]
+# # # # # # # # # # # # #         # 1: [2, 54.62163844999466, 166.46335513646886, 110.54249679323176, 55.9208583432371, [54.62163844999466, 166.46335513646886]]
+# # # # # # # # # # # # #     ],
+# # # # # # # # # # # # #     "Test": [
+# # # # # # # # # # # # #         [2, 0.08883281899878671, 0.11457963466987121, 0.20170622683432896, 0.04287340783554225, [0.11457963466987121, 0.08883281899878671]],
+# # # # # # # # # # # # #     ]
+# # # # # # # # # # # # # }
+
+# # # # # # # # # # # # # # data = {'Perilune': [(2, 0.05814317770798695, 0.1205483052045687, 0.08934574145627783, 0.031202563748290876, [0.1205483052045687, 0.05814317770798695]), (2, 0.1012622924286862, 0.11448173439033428, 0.10787201340951025, 0.0066097209808240395, [0.1012622924286862, 0.11448173439033428])], 'Apolune': [], 'Random': [], 'Continuous': [], 'Constant': []}
+# # # # # # # # # # # # # # data = {'Perilune': [[2, 0.05814317770798695, 0.1205483052045687, 0.08934574145627783, 0.031202563748290876, [0.1205483052045687, 0.05814317770798695]], [2, 0.1012622924286862, 0.11448173439033428, 0.10787201340951025, 0.0066097209808240395, [0.1012622924286862, 0.11448173439033428]]], 'Apolune': [], 'Random': [], 'Continuous': [], 'Constant': []}
+
+# # # # # # # # # # # # # # data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+
+# # # # # # # # # # # # # print(data)
+
+# # # # # # # # # # # # # from matplotlib import pyplot as plt
+# # # # # # # # # # # # # import numpy as np
+# # # # # # # # # # # # # from collections import defaultdict
+
+
+# # # # # # # # # # # # # def bar_plot(ax, data, group_stretch=0.8, bar_stretch=0.95,
+# # # # # # # # # # # # #              legend=True, x_labels=True, label_fontsize=8,
+# # # # # # # # # # # # #              colors=None, barlabel_offset=1,
+# # # # # # # # # # # # #              bar_labeler=lambda k, i, s: str(round(s, 3))):
+
+# # # # # # # # # # # # #     std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
+# # # # # # # # # # # # #     data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+
+
+# # # # # # # # # # # # #     print(std_data)
+# # # # # # # # # # # # #     print(data)
+
+# # # # # # # # # # # # #     sorted_data = list(data.items())
+# # # # # # # # # # # # #     sorted_k, sorted_v  = zip(*sorted_data)
+
+# # # # # # # # # # # # #     print(sorted_k, sorted_v)
+# # # # # # # # # # # # #     max_n_bars = max(len(v) for v in data.values())
+# # # # # # # # # # # # #     group_centers = np.cumsum([max_n_bars
+# # # # # # # # # # # # #                                for _ in sorted_data]) - (max_n_bars / 2)
+# # # # # # # # # # # # #     bar_offset = (1 - bar_stretch) / 2
+# # # # # # # # # # # # #     bars = defaultdict(list)
+
+# # # # # # # # # # # # #     if colors is None:
+# # # # # # # # # # # # #         color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+# # # # # # # # # # # # #         # colors = {g_name: [f"C{i}" for _ in values]
+# # # # # # # # # # # # #         #           for i, (g_name, values) in enumerate(data.items())}
+# # # # # # # # # # # # #         colors = {g_name: color_cycle[i]
+# # # # # # # # # # # # #                 for i, (g_name, values) in enumerate(data.items())}
+
+# # # # # # # # # # # # #     ax.grid(alpha=0.5)
+# # # # # # # # # # # # #     ax.set_xticks(group_centers)
+# # # # # # # # # # # # #     ax.set_xlabel("Tracking window scenario")
+# # # # # # # # # # # # #     ax.set_ylabel(r'||$\Delta V$|| [m/s]')
+# # # # # # # # # # # # #     ax.set_title(f'Station keeping costs, simulation of {28} [days]')
+
+# # # # # # # # # # # # #     for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
+# # # # # # # # # # # # #                                                          group_centers)):
+
+# # # # # # # # # # # # #         n_bars = len(vals)
+# # # # # # # # # # # # #         group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
+# # # # # # # # # # # # #         for val_i, val in enumerate(vals):
+
+# # # # # # # # # # # # #             bar = ax.bar(group_beg + val_i + bar_offset,
+# # # # # # # # # # # # #                          height=val, width=bar_stretch,
+# # # # # # # # # # # # #                          color=colors[g_name],
+# # # # # # # # # # # # #                          yerr=std_data[g_name][val_i],
+# # # # # # # # # # # # #                          capsize=4)[0]
+# # # # # # # # # # # # #             bars[g_name].append(bar)
+# # # # # # # # # # # # #             if bar_labeler is not None:
+# # # # # # # # # # # # #                 x_pos = bar.get_x() + (bar.get_width() / 2.0)
+# # # # # # # # # # # # #                 y_pos = val + barlabel_offset
+# # # # # # # # # # # # #                 barlbl = bar_labeler(g_name, val_i, val)
+# # # # # # # # # # # # #                 ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
+# # # # # # # # # # # # #                         fontsize=label_fontsize)
+
+# # # # # # # # # # # # #     # if legend:
+# # # # # # # # # # # # #     #     ax.legend([bars[k][0] for k in sorted_k if len(bars[k]) !=0], sorted_k, title="Details", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+# # # # # # # # # # # # #         # ax.legend(title="Details", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+# # # # # # # # # # # # #     if x_labels:
+# # # # # # # # # # # # #         ax.set_xticklabels(sorted_k)
+# # # # # # # # # # # # #     else:
+# # # # # # # # # # # # #         ax.set_xticklabels()
+
+# # # # # # # # # # # # #     plt.tight_layout()
+
+# # # # # # # # # # # # #     return bars, group_centers
+
+
+# # # # # # # # # # # # # fig, ax = plt.subplots(figsize=(10, 3))
+# # # # # # # # # # # # # bar_plot(ax, data, group_stretch=0.8, bar_stretch=0.95, legend=True,
+# # # # # # # # # # # # #          x_labels=True, label_fontsize=8, barlabel_offset=0.05,
+# # # # # # # # # # # # #          bar_labeler=None)
+# # # # # # # # # # # # # plt.show()
+
+
+# # # # # # # # # # # # # # subkeys = ["0.2", "0.5", "1", "1.5", "1.8"]
+# # # # # # # # # # # # # # values = {subkey: [data[model][key][subkey][1] for key in data] for subkey in subkeys}
+# # # # # # # # # # # # # # print(values)
+
+# # # # # # # # # # # # # # # Plotting
+# # # # # # # # # # # # # # fig = plt.figure(figsize=(10, 3))
+# # # # # # # # # # # # # # for i, subkey in enumerate(subkeys):
+# # # # # # # # # # # # # #     plt.bar([j + i * 0.1 for j in range(len(values[subkey]))], values[subkey], width=0.1, label=subkey)
+
+# # # # # # # # # # # # # # plt.xlabel('Arc separation interval [days]')
+# # # # # # # # # # # # # # plt.ylabel(r'||$\Delta V$|| [m/s]')
+# # # # # # # # # # # # # # plt.title(f'Station keeping costs, simulation of {28} [days]')
+# # # # # # # # # # # # # # plt.xticks([i + 0.2 for i in range(len(data[model]))], data[model].keys())
+# # # # # # # # # # # # # # plt.yscale('log')
+# # # # # # # # # # # # # # plt.legend(title='Arc durations', bbox_to_anchor=(1.05, 1), loc='upper left')
+# # # # # # # # # # # # # # plt.tight_layout()
+# # # # # # # # # # # # # # plt.grid(alpha=0.3)
+# # # # # # # # # # # # # # plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# # # # # # # # # # # # # # window_types = list(data.keys())
+
+# # # # # # # # # # # # # # means = [[subvalues[3] for index, subvalues in enumerate(values)] for key, values in data.items()]
+# # # # # # # # # # # # # # std = [[subvalues[4] for index, subvalues in enumerate(values)] for key, values in data.items()]
+# # # # # # # # # # # # # # print(means)
+# # # # # # # # # # # # # # print(std)
+
+# # # # # # # # # # # # # # # # Given data: List of lists, each inner list contains values for a specific category
+# # # # # # # # # # # # # # # data = [
+# # # # # # # # # # # # # # #     [0.3994937148128323, 0.19955893104395514],  # Values for "bar1"
+# # # # # # # # # # # # # # #     [0.10170622683432896]  # Values for "bar2"
+# # # # # # # # # # # # # # # ]
+
+# # # # # # # # # # # # # # # Define x-axis labels for each category
+# # # # # # # # # # # # # # category_labels = window_types
+
+# # # # # # # # # # # # # # # Calculate the number of categories and bars per category
+# # # # # # # # # # # # # # num_categories = len(means)
+# # # # # # # # # # # # # # max_bars_per_category = max(len(category) for category in means)
+
+# # # # # # # # # # # # # # print(max_bars_per_category)
+
+# # # # # # # # # # # # # # # Calculate the width of each bar
+# # # # # # # # # # # # # # bar_width = 0.3
+
+# # # # # # # # # # # # # # # Calculate the x positions for each category
+# # # # # # # # # # # # # # x_positions = np.arange(num_categories)
+
+# # # # # # # # # # # # # # # Create a figure and axis for the plot
+# # # # # # # # # # # # # # fig, ax = plt.subplots(figsize=(8, 6))
+
+# # # # # # # # # # # # # # # Plot bars for each category and sub-category
+# # # # # # # # # # # # # # for bar_idx in range(max_bars_per_category):
+
+# # # # # # # # # # # # # #     bar_values = []
+# # # # # # # # # # # # # #     std_values = []
+
+# # # # # # # # # # # # # #     # Collect values for each category at the current bar index
+# # # # # # # # # # # # # #     for i, category in enumerate(means):
+# # # # # # # # # # # # # #         if len(category) > bar_idx:
+# # # # # # # # # # # # # #             bar_values.append(category[bar_idx])
+# # # # # # # # # # # # # #             std_values.append(std[i][bar_idx])
+# # # # # # # # # # # # # #         else:
+# # # # # # # # # # # # # #             bar_values.append(0)
+# # # # # # # # # # # # # #             std_values.append(0)
+
+# # # # # # # # # # # # # #     print(bar_values)
+# # # # # # # # # # # # # #     print(std_values)
+
+# # # # # # # # # # # # # #     # Plot the bars for the current bar index across categories
+# # # # # # # # # # # # # #     ax.bar(
+# # # # # # # # # # # # # #         x_positions + bar_width * bar_idx,  # Offset for the current bar index
+# # # # # # # # # # # # # #         bar_values,
+# # # # # # # # # # # # # #         yerr=std_values,
+# # # # # # # # # # # # # #         width=bar_width,
+# # # # # # # # # # # # # #         label=f'Value {bar_idx + 1}' if bar_idx == 0 else None,  # Add a label only for the first set of bars
+# # # # # # # # # # # # # #         alpha=0.7
+# # # # # # # # # # # # # #     )
+
+# # # # # # # # # # # # # # # Set x-axis ticks and labels
+# # # # # # # # # # # # # # ax.set_xticks(x_positions + bar_width * (max_bars_per_category - 1) / 2)
+# # # # # # # # # # # # # # ax.set_xticklabels(category_labels)
+
+# # # # # # # # # # # # # # # Add labels and title
+# # # # # # # # # # # # # # ax.set_xlabel('Category')
+# # # # # # # # # # # # # # ax.set_ylabel('Value')
+# # # # # # # # # # # # # # ax.set_title('Grouped Bar Chart')
+
+# # # # # # # # # # # # # # # Add legend for the first set of bars
+# # # # # # # # # # # # # # ax.legend(loc='best')
+
+# # # # # # # # # # # # # # # Show the plot
+# # # # # # # # # # # # # # plt.show()
+
+
+# # # # # # # # # # # # # # # Import necessary libraries
+# # # # # # # # # # # # # # import matplotlib.pyplot as plt
+# # # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # # Define example data
+# # # # # # # # # # # # # # data = {
+# # # # # # # # # # # # # #     "Group A": [5, 8, 12],
+# # # # # # # # # # # # # #     "Group B": [3, 7],
+# # # # # # # # # # # # # #     "Group C": [9, 2, 6, 4]
+# # # # # # # # # # # # # # }
+
+# # # # # # # # # # # # # # # Calculate the number of groups and maximum number of bars in a group
+# # # # # # # # # # # # # # groups = list(data.keys())
+# # # # # # # # # # # # # # num_groups = len(groups)
+# # # # # # # # # # # # # # max_bars_per_group = max(len(data[group]) for group in groups)
+
+# # # # # # # # # # # # # # # Define the bar width and the spacing between groups
+# # # # # # # # # # # # # # bar_width = 0.30
+# # # # # # # # # # # # # # group_spacing = 0.5  # Adjust this value to increase or decrease spacing between groups
+
+# # # # # # # # # # # # # # # Calculate positions for each group
+# # # # # # # # # # # # # # group_positions = np.arange(num_groups)
+
+# # # # # # # # # # # # # # # Calculate x-positions for each bar within each group
+# # # # # # # # # # # # # # bar_positions = []
+# # # # # # # # # # # # # # current_position = 0
+# # # # # # # # # # # # # # for group in groups:
+# # # # # # # # # # # # # #     num_bars = len(data[group])
+# # # # # # # # # # # # # #     bar_positions.append(current_position + np.arange(num_bars) * bar_width)
+# # # # # # # # # # # # # #     current_position += num_bars * bar_width + group_spacing
+
+# # # # # # # # # # # # # # # Create a figure and axis
+# # # # # # # # # # # # # # fig, ax = plt.subplots()
+
+# # # # # # # # # # # # # # # Plot each group as a separate set of bars
+# # # # # # # # # # # # # # for i, group in enumerate(groups):
+# # # # # # # # # # # # # #     values = data[group]
+# # # # # # # # # # # # # #     ax.bar(bar_positions[i], values, width=bar_width, label=group)
+
+# # # # # # # # # # # # # # # Set labels and title
+# # # # # # # # # # # # # # ax.set_xlabel('Index')
+# # # # # # # # # # # # # # ax.set_ylabel('Value')
+# # # # # # # # # # # # # # ax.set_title('Bar Chart with Different Groups and Spacing Between Groups')
+# # # # # # # # # # # # # # ax.set_xticks(group_positions + bar_width * (max_bars_per_group - 1) / 2)
+# # # # # # # # # # # # # # ax.set_xticklabels(groups)
+# # # # # # # # # # # # # # # ax.set_xticks([bp[0] + bar_width / 2 for bp in bar_positions])  # Set x-tick positions
+# # # # # # # # # # # # # # # ax.set_xticklabels(groups)  # Set x-tick labels as group names
+
+# # # # # # # # # # # # # # # Add a legend
+# # # # # # # # # # # # # # ax.legend()
+
+# # # # # # # # # # # # # # # Display the bar chart
+# # # # # # # # # # # # # # plt.show()
+
+# # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # # Example usage
+# # # # # # # # # # # # # # Create a 3D array where each 2D slice is a 3x3 square matrix
+# # # # # # # # # # # # # array_3d = np.array([
+# # # # # # # # # # # # #     [[4, 1, 2], [3, 5, 1], [6, 2, 7]],
+# # # # # # # # # # # # #     [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+# # # # # # # # # # # # #     [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+# # # # # # # # # # # # # ])
+
+# # # # # # # # # # # # # array_3d_2 = np.array([
+# # # # # # # # # # # # #     [[4, 1, 2], [3, 5, 1], [6, 2, 7]],
+# # # # # # # # # # # # #     [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+# # # # # # # # # # # # #     [[9, 8, 7], [6, 5, 4], [3, 2, 1]]
+# # # # # # # # # # # # # ])*8
+
+# # # # # # # # # # # # # # Calculate the eigenvalues for each 2D matrix in the 3D array
+# # # # # # # # # # # # # beta_1 = np.max(np.sqrt(np.abs(np.linalg.eigvals(array_3d))), axis=1)
+# # # # # # # # # # # # # beta_2 = np.max(np.sqrt(np.abs(np.linalg.eigvals(array_3d_2))), axis=1)
+
+# # # # # # # # # # # # # beta_bar_1 = np.mean(np.max(np.sqrt(np.abs(np.linalg.eigvals(array_3d))), axis=1))
+# # # # # # # # # # # # # beta_bar_2 = np.mean(np.max(np.sqrt(np.abs(np.linalg.eigvals(array_3d_2))), axis=1))
+
+# # # # # # # # # # # # # beta_ave = 1/2*(beta_bar_1+beta_bar_2)
+
+# # # # # # # # # # # # # # Print the eigenvalues
+# # # # # # # # # # # # # print("Eigenvalues for each 2D matrix:")
+# # # # # # # # # # # # # print(beta_ave)
+
+
+# # # # # # # # # # # # # def get_results_iterable(navigation_outputs):
+# # # # # # # # # # # # #     """
+# # # # # # # # # # # # #     A generator function that yields structured results from the navigation outputs.
+
+# # # # # # # # # # # # #     Parameters:
+# # # # # # # # # # # # #     navigation_outputs (dict): A dictionary containing navigation outputs.
+
+# # # # # # # # # # # # #     Yields:
+# # # # # # # # # # # # #     tuple: A tuple containing (window_type, window_case, run, navigation_output).
+# # # # # # # # # # # # #     """
+# # # # # # # # # # # # #     # Iterate through each window type in the navigation outputs
+# # # # # # # # # # # # #     for window_type, navigation_output_type in navigation_outputs.items():
+# # # # # # # # # # # # #         # Iterate through each window case and its navigation output list
+# # # # # # # # # # # # #         for window_case, navigation_output_case in enumerate(navigation_output_type):
+# # # # # # # # # # # # #             # Iterate through each run and its navigation output
+# # # # # # # # # # # # #             for window_run, navigation_output in navigation_output_case.items():
+# # # # # # # # # # # # #                 # Yield the structured results as a tuple
+# # # # # # # # # # # # #                 yield window_type, window_case, window_run, navigation_output
+
+# # # # # # # # # # # # # # Example usage
+# # # # # # # # # # # # # # Define a sample navigation_outputs dictionary
+# # # # # # # # # # # # # navigation_outputs = {
+# # # # # # # # # # # # #     "perilune": [
+# # # # # # # # # # # # #         {0: "OutputA1", 1: "OutputA2"},  # Case 0 with two runs
+# # # # # # # # # # # # #         {0: "OutputB1", 1: "OutputB2"}   # Case 1 with two runs
+# # # # # # # # # # # # #     ],
+# # # # # # # # # # # # #     "apolune": [
+# # # # # # # # # # # # #         {0: "OutputC1", 1: "OutputC2"},  # Case 0 with two runs
+# # # # # # # # # # # # #         {0: "OutputD1", 1: "OutputD2"}   # Case 1 with two runs
+# # # # # # # # # # # # #     ]
+# # # # # # # # # # # # # }
+
+
+# # # # # # # # # # # # # def test_function(window_case):
+
+# # # # # # # # # # # # #     return window_case**2+1
+
+# # # # # # # # # # # # # import copy
+
+# # # # # # # # # # # # # # Use the generator function to iterate through the results
+# # # # # # # # # # # # # manipulated_outputs = navigation_outputs.copy()
+# # # # # # # # # # # # # for window_type, window_case, window_run, navigation_output in get_results_iterable(navigation_outputs):
+
+# # # # # # # # # # # # #     print(f"Results for {window_type} - Case {window_case}, Run {window_run}: {navigation_output}")
+
+# # # # # # # # # # # # #     manipulated_output = test_function(window_case)
+# # # # # # # # # # # # #     print(manipulated_output)
+
+# # # # # # # # # # # # #     # Store the manipulated output in the corresponding dictionary for the current window_type and window_case
+# # # # # # # # # # # # #     manipulated_outputs[window_type][window_case][window_run] = manipulated_output
+
+# # # # # # # # # # # # # print(manipulated_outputs)
+
+
+# # # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # # def calculate_perilune_stats(data_dict):
+
+# # # # # # # # # # # # #     # Initialize a dictionary to store mean and std_dev of sums for each key
+# # # # # # # # # # # # #     stats_dict = {}
+
+# # # # # # # # # # # # #     # Iterate through each key in the data_dict
+# # # # # # # # # # # # #     for key, run_list in data_dict.items():
+
+# # # # # # # # # # # # #         # Initialize a list to store the sums of the values for each run in the current key
+# # # # # # # # # # # # #         run_sums = []
+
+# # # # # # # # # # # # #         # Iterate through each run dictionary in the run list for the current key
+# # # # # # # # # # # # #         for run_dict in run_list:
+# # # # # # # # # # # # #             # Iterate through each run and its corresponding list of values
+# # # # # # # # # # # # #             for run, values in run_dict.items():
+
+# # # # # # # # # # # # #                 print(key, run, values)
+
+# # # # # # # # # # # # #                 # Add the sum to the list of run sums for the current key
+# # # # # # # # # # # # #                 run_sums.append(sum(values))
+
+# # # # # # # # # # # # #         # Calculate the mean and standard deviation of the run sums
+# # # # # # # # # # # # #         mean_sum = np.mean(run_sums)
+# # # # # # # # # # # # #         std_dev_sum = np.std(run_sums)
+
+# # # # # # # # # # # # #         # Store the mean and std_dev in the stats_dict for the current key
+# # # # # # # # # # # # #         stats_dict[key] = {'mean': mean_sum, 'std': std_dev_sum}
+
+# # # # # # # # # # # # #     return stats_dict
+
+# # # # # # # # # # # # # # Example usage
+# # # # # # # # # # # # # data_dict = {
+# # # # # # # # # # # # #     'Perilune': [{0: [0.02812196, 0.03226646, 0.00934693], 1: [0.02812196, 0.03226646, 0.00934693]}],
+# # # # # # # # # # # # #     'Apolune': [],
+# # # # # # # # # # # # #     'Random': [],
+# # # # # # # # # # # # #     'Continuous': [],
+# # # # # # # # # # # # #     'Constant': []
+# # # # # # # # # # # # # }
+
+# # # # # # # # # # # # # # Calculate mean and standard deviation for 'Perilune' key in the dictionary
+# # # # # # # # # # # # # perilune_stats = calculate_perilune_stats(data_dict)
+
+# # # # # # # # # # # # # # Print the results
+# # # # # # # # # # # # # print("Mean and standard deviation for 'Perilune' key:")
+# # # # # # # # # # # # # for run, stats in perilune_stats.items():
+# # # # # # # # # # # # #     print(f"Run {run}: Mean = {stats['mean']:.4f}, Std Dev = {stats['std']:.4f}")
+
+
+# # # # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # # def calculate_mean_and_std(outputs):
+# # # # # # # # # # # #     """
+# # # # # # # # # # # #     Calculate the mean and standard deviation of each run in the navigation outputs.
+
+# # # # # # # # # # # #     Parameters:
+# # # # # # # # # # # #     outputs (dict): A dictionary containing navigation outputs.
+
+# # # # # # # # # # # #     Returns:
+# # # # # # # # # # # #     dict: A dictionary with keys as (window_type, run_key) and values as a tuple of mean and standard deviation of the run values.
+# # # # # # # # # # # #     """
+# # # # # # # # # # # #     # Initialize a dictionary to store mean and standard deviation for each run
+# # # # # # # # # # # #     stats_dict = {}
+
+# # # # # # # # # # # #     # Iterate through each window type in the navigation outputs
+# # # # # # # # # # # #     for window_type, output_type in outputs.items():
+# # # # # # # # # # # #         # Iterate through each list of runs in the output type
+# # # # # # # # # # # #         for case, run_dict in enumerate(output_type):
+# # # # # # # # # # # #             # Iterate through each run in the list of runs
+# # # # # # # # # # # #             for run_key, values in run_dict.items():
+# # # # # # # # # # # #                 # Calculate the mean and standard deviation of the list of values
+# # # # # # # # # # # #                 mean_value = np.mean(values)
+# # # # # # # # # # # #                 std_dev_value = np.std(values)
+
+# # # # # # # # # # # #                 # Store the mean and standard deviation in the dictionary
+# # # # # # # # # # # #                 stats_dict[window_type][case] = (mean_value, std_dev_value)
+
+# # # # # # # # # # # #     return stats_dict
+
+# # # # # # # # # # # # # Example usage
+# # # # # # # # # # # # navigation_outputs = {
+# # # # # # # # # # # #     'Perilune': [{0: [0.02812196, 0.03226646, 0.00934693], 1: [0.02812196, 0.03226646, 0.00934693]}],
+# # # # # # # # # # # #     'Apolune': [{0: [0.05, 0.1, 0.15], 1: [0.2, 0.3, 0.4]}],
+# # # # # # # # # # # # }
+
+# # # # # # # # # # # # # Calculate mean and standard deviation for each run
+# # # # # # # # # # # # stats = calculate_mean_and_std(navigation_outputs)
+
+# # # # # # # # # # # # print(stats)
+
+# # # # # # # # # # # # # Print the results
+# # # # # # # # # # # # print("Mean and standard deviation for each run:")
+# # # # # # # # # # # # for key, values in stats.items():
+# # # # # # # # # # # #     window_type, run_key = key
+# # # # # # # # # # # #     mean_value, std_dev_value = values
+# # # # # # # # # # # #     print(f"{window_type} - Run {run_key}: Mean = {mean_value:.4f}, Std Dev = {std_dev_value:.4f}")
+
+
+
+# # # # # # # # # # # import matplotlib.pyplot as plt
+# # # # # # # # # # # import numpy as np
+# # # # # # # # # # # import matplotlib.colors as mcolors
+
+# # # # # # # # # # # # Define the base color
+# # # # # # # # # # # base_color = 'blue'
+
+# # # # # # # # # # # # Method 1: Adjusting the lightness of the base color
+# # # # # # # # # # # num_shades = 5
+# # # # # # # # # # # shades1 = [mcolors.to_rgb(base_color)[:-1] + (l,) for l in np.linspace(0.3, 0.9, num_shades)]
+
+# # # # # # # # # # # # Method 2: Creating a colormap with different shades
+# # # # # # # # # # # cmap = mcolors.ListedColormap([base_color] * num_shades)
+
+# # # # # # # # # # # # Plotting example data using different shades
+# # # # # # # # # # # x = np.linspace(0, 10, 100)
+# # # # # # # # # # # for i, shade in enumerate(shades1):
+# # # # # # # # # # #     plt.plot(x, np.sin(x) + i, color=shade, label=f'Shade {i+1}')
+
+# # # # # # # # # # # # Adding legend
+# # # # # # # # # # # plt.legend()
+
+# # # # # # # # # # # # Show plot
+# # # # # # # # # # # plt.show()
+
+
+
+
+# # # # # # # # # # import matplotlib.pyplot as plt
+# # # # # # # # # # import numpy as np
+
+# # # # # # # # # # size = 1
+# # # # # # # # # # fig, axs = plt.subplots(size, 4, figsize=(14, 7), sharex=True)
+# # # # # # # # # # # axs.reshape((size, 4))
+# # # # # # # # # # axs = np.array([axs])
+# # # # # # # # # # print(axs.shape, axs[0][1])
+
+# # # # # # # # # # # # Sample data
+# # # # # # # # # # # data = {"type_1":
+# # # # # # # # # # #     {
+# # # # # # # # # # #     'key1': [10, 20, 30],
+# # # # # # # # # # #     'key2': [15, 25, 35],
+# # # # # # # # # # #     'key3': [12, 22, 32],
+# # # # # # # # # # #     'key4': [10, 20, 30],
+# # # # # # # # # # #     'key5': [15, 25, 35],
+# # # # # # # # # # #     'key6': [12, 22, 32]
+# # # # # # # # # # #     },
+# # # # # # # # # # #     "type_2":
+# # # # # # # # # # #     {
+# # # # # # # # # # #     'key1': [100, 20, 30],
+# # # # # # # # # # #     'key2': [150, 25, 35],
+# # # # # # # # # # #     'key3': [12, 22, 32],
+# # # # # # # # # # #     'key4': [10, 20, 30],
+# # # # # # # # # # #     'key5': [15, 25, 35],
+# # # # # # # # # # #     'key6': [12, 22, 32]
+# # # # # # # # # # #     }
+# # # # # # # # # # # }
+
+# # # # # # # # # # # # Step 1: Calculate the sum of the first entry of each key's value
+# # # # # # # # # # # stats_types = {}
+# # # # # # # # # # # for type_key, type_value in data.items():
+
+# # # # # # # # # # #     print(type_key)
+
+# # # # # # # # # # #     runs = len(list(data[type_key].values())[0])
+# # # # # # # # # # #     print(runs, list(data[type_key].values()))
+# # # # # # # # # # #     sums = {}
+# # # # # # # # # # #     for run in range(runs):
+# # # # # # # # # # #         value_list = []
+# # # # # # # # # # #         for key, value in data[type_key].items():
+# # # # # # # # # # #             value_list.append(value[run])
+# # # # # # # # # # #         sums[run] = value_list
+
+# # # # # # # # # # #     for key, value in sums.items():
+# # # # # # # # # # #         sums[key] = np.sum(value)
+
+# # # # # # # # # # #     # Extract values from the dictionary
+# # # # # # # # # # #     all_values = list(sums.values())
+# # # # # # # # # # #     stats_types[type_key] = [np.mean(all_values), np.std(all_values)]
+
+# # # # # # # # # # # plt.barh(list(stats_types.keys()), [stats[0] for stats in stats_types.values()],
+# # # # # # # # # # #         color="green",
+# # # # # # # # # # #         # width=0.2,
+# # # # # # # # # # #         xerr=[stats[1] for stats in stats_types.values()],
+# # # # # # # # # # #         capsize=4
+# # # # # # # # # # #         )
+
+# # # # # # # # # # # plt.show()
+
+
+# # # # # # # # # # # sums = {run: np.sum(value[0]) for key, value in data.items() for run in range(3)}
+# # # # # # # # # # # # print(sums)
+
+# # # # # # # # # # # # Step 2: Calculate the sum of each entry of each key's value
+# # # # # # # # # # # for i in range(len(next(iter(data.values())))):
+# # # # # # # # # # #     sums = {key: sums[key] + value[i] for key, value in data.items()}
+
+# # # # # # # # # # # # Step 3: Calculate the standard deviation of the sum values
+# # # # # # # # # # # std_dev = np.std(list(sums.values()))
+
+# # # # # # # # # # # # Display the horizontal bar chart of the sums with error bars
+# # # # # # # # # # # plt.barh(list(sums.keys()), list(sums.values()), xerr=std_dev, color='skyblue', capsize=5)
+# # # # # # # # # # # plt.xlabel('Sum of Entries')
+# # # # # # # # # # # plt.ylabel('Keys')
+# # # # # # # # # # # plt.title('Sum of Entries for Each Key with Error Bars')
+# # # # # # # # # # # plt.show()
+
+# # # # # # # # # # # print("Standard Deviation of the sum values:", std_dev)
+
+
+# # # # # # # # # # # import itertools
+
+# # # # # # # # # # # # Define the function to evaluate
+# # # # # # # # # # # def evaluate_function(param1, param2, param3):
+# # # # # # # # # # #     # Example function, replace with your actual function
+# # # # # # # # # # #     result = param1 + param2 + ord(param3)
+# # # # # # # # # # #     return result
+
+# # # # # # # # # # # # Define the dictionary with parameters
+# # # # # # # # # # # params = {
+# # # # # # # # # # #     'param1': [1, 2, 3, 4],
+# # # # # # # # # # #     'param2': [6, 7, 8, 9],
+# # # # # # # # # # #     'param3': ['a', 'b', 'c']
+# # # # # # # # # # # }
+
+# # # # # # # # # # # # Initialize a nested dictionary to store the results
+# # # # # # # # # # # results = {}
+
+# # # # # # # # # # # # Use itertools.product to generate all combinations
+# # # # # # # # # # # combinations = list(itertools.product(*params.values()))
+
+# # # # # # # # # # # # Evaluate the function for each combination and store the results in a nested dictionary
+# # # # # # # # # # # for combination in combinations:
+# # # # # # # # # # #     param_values = dict(zip(params.keys(), combination))
+# # # # # # # # # # #     result = evaluate_function(**param_values)
+# # # # # # # # # # #     nested_dict = results
+# # # # # # # # # # #     for key in combination[:-1]:
+# # # # # # # # # # #         nested_dict = nested_dict.setdefault(key, {})
+# # # # # # # # # # #     nested_dict[combination[-1]] = result
+
+# # # # # # # # # # # # Print the results
+# # # # # # # # # # # print(results)
+
+# # # # # # # # # # # import numpy as np
+# # # # # # # # # # # import matplotlib.pyplot as plt
+
+# # # # # # # # # # # params = {
+# # # # # # # # # # #     'param1': [1, 2, 3, 4],
+# # # # # # # # # # #     'param2': [6, 7, 8, 9],
+# # # # # # # # # # #     'param3': ['a', 'b', 'c']
+# # # # # # # # # # # }
+
+
+# # # # # # # # # # # # Results dictionary
+# # # # # # # # # # # results = {
+# # # # # # # # # # #     1: {6: {'a': 1, 'b': 105, 'c': 106},
+# # # # # # # # # # #         7: {'a': 105, 'b': 106, 'c': 107},
+# # # # # # # # # # #         8: {'a': 106, 'b': 107, 'c': 108},
+# # # # # # # # # # #         9: {'a': 107, 'b': 108, 'c': 109}},
+# # # # # # # # # # #     2: {6: {'a': 105, 'b': 106, 'c': 107},
+# # # # # # # # # # #         7: {'a': 106, 'b': 107, 'c': 108},
+# # # # # # # # # # #         8: {'a': 107, 'b': 108, 'c': 109},
+# # # # # # # # # # #         9: {'a': 108, 'b': 109, 'c': 110}},
+# # # # # # # # # # #     3: {6: {'a': 106, 'b': 107, 'c': 108},
+# # # # # # # # # # #         7: {'a': 107, 'b': 108, 'c': 109},
+# # # # # # # # # # #         8: {'a': 1, 'b': 1, 'c': 110},
+# # # # # # # # # # #         9: {'a': 109, 'b': 110, 'c': 111}},
+# # # # # # # # # # #     4: {6: {'a': 107, 'b': 108, 'c': 109},
+# # # # # # # # # # #         7: {'a': 108, 'b': 109, 'c': 110},
+# # # # # # # # # # #         8: {'a': 109, 'b': 110, 'c': 111},
+# # # # # # # # # # #         9: {'a': 110, 'b': 111, 'c': 112}}
+# # # # # # # # # # # }
+
+# # # # # # # # # # # # Calculate mean and std for each param1 value
+# # # # # # # # # # # means = []
+# # # # # # # # # # # stds = []
+# # # # # # # # # # # for param1, param1_dict in results.items():
+# # # # # # # # # # #     values = [[param2_dict[param3] for param2_dict in param1_dict.values()] for param3 in params["param3"]]
+# # # # # # # # # # #     print(values)
+# # # # # # # # # # #     means.append(np.mean(values, axis=0))
+# # # # # # # # # # #     stds.append(np.std(values, axis=0))
+
+# # # # # # # # # # # print(means)
+# # # # # # # # # # # print(stds)
+# # # # # # # # # # # print(np.shape(means), np.shape(stds))
+
+# # # # # # # # # # # # Plotting
+# # # # # # # # # # # num_rows = len(results)
+# # # # # # # # # # # fig, axs = plt.subplots(num_rows, 1, figsize=(6, 3 * num_rows), sharex=True)
+
+# # # # # # # # # # # x = np.arange(4)
+# # # # # # # # # # # for i, (mean, std) in enumerate(zip(means, stds)):
+# # # # # # # # # # #     axs[i].bar(x, mean, yerr=std, capsize=5)
+# # # # # # # # # # #     axs[i].set_title(f'param1={i+1}')
+# # # # # # # # # # #     # axs[i].set_xticks(x)
+# # # # # # # # # # #     # axs[i].set_xticklabels(['a', 'b', 'c'])
+# # # # # # # # # # #     axs[i].set_ylabel('Function Value')
+
+# # # # # # # # # # # plt.tight_layout()
+# # # # # # # # # # # # plt.show()
+
+
+# # # # # # # # # # # dictionary = {1: {0.1: {0: [865.9134487725748, 878.8612612050827], 1: [865.9141184678767, 878.8608760863057], 2: [865.914021056374, 878.8621484174705], 3: [865.9134305590724, 878.8606956137924], 4: [865.9099798678741, 878.8582314859939]}}, 10: {0.1: {0: [470.93431489477996, 480.37530468110714], 1: [343.08732068801146, 356.6880129438216], 2: [714.0800670213582, 721.9864948105408], 3: [1330.3483229558508, 1324.2126321155401], 4: [729.9305711975047, 739.3111394025381]}}}
+
+# # # # # # # # # # import numpy as np
+
+# # # # # # # # # # # Define the input data
+# # # # # # # # # # data = {
+# # # # # # # # # #     'Constant1': [
+# # # # # # # # # #         [0.00324455, 0.00520949, 0.00699034, 0.00325083, 0.003136, 0.00601077,
+# # # # # # # # # #          0.01033551, 0.00229602, 0.00421649, 0.00309361],
+# # # # # # # # # #         [0.00571848, 0.01475815, 0.01944513, 0.01748424, 0.00942408, 0.01279119,
+# # # # # # # # # #          0.01506213, 0.00457555, 0.00287953, 0.00171816],
+# # # # # # # # # #         [0.00286263, 0.00471696, 0.02988989, 0.04149627, 0.01996084, 0.03426615,
+# # # # # # # # # #          0.02636424, 0.00815229, 0.00106559, 0.00163815]
+# # # # # # # # # #     ],
+# # # # # # # # # #     'Constant2': [
+# # # # # # # # # #         [0.00739513, 0.00713877, 0.00935752, 0.00433437, 0.00050449, 0.00679635,
+# # # # # # # # # #          0.004383, 0.0048521],
+# # # # # # # # # #         [0.00667236, 0.00659485, 0.00866772, 0.00479065, 0.00045819, 0.00670342,
+# # # # # # # # # #          0.00442421, 0.00485712],
+# # # # # # # # # #         [0.00754405, 0.00755517, 0.00925027, 0.00439038, 0.00051286, 0.00664314,
+# # # # # # # # # #          0.004492, 0.00491643]
+# # # # # # # # # #     ],
+# # # # # # # # # #     'Constant3': [
+# # # # # # # # # #         [0.00279302, 0.00498072, 0.00515724, 0.00596545, 0.00694139, 0.0069622,
+# # # # # # # # # #          0.00596383],
+# # # # # # # # # #         [0.00332492, 0.00358563, 0.0060111, 0.0065761, 0.00704942, 0.00693448,
+# # # # # # # # # #          0.00589724],
+# # # # # # # # # #         [0.00281192, 0.00470469, 0.00520401, 0.00623519, 0.0068344, 0.00696783,
+# # # # # # # # # #          0.00596098]
+# # # # # # # # # #     ]
+# # # # # # # # # # }
+
+# # # # # # # # # # # Function to calculate the sum of the last 5 entries
+# # # # # # # # # # def sum_last_5_entries(objectives, n):
+# # # # # # # # # #     return np.sum(objectives[-n:])
+
+# # # # # # # # # # # Calculate the sums for each constant
+# # # # # # # # # # n = 5
+# # # # # # # # # # results_sums = {}
+# # # # # # # # # # for constant, runs in data.items():
+# # # # # # # # # #     sums = [sum_last_5_entries(run, n) for run in runs]
+# # # # # # # # # #     results_sums[constant] = sums
+
+# # # # # # # # # # # Print the results
+# # # # # # # # # # for constant, sum_values in results_sums.items():
+# # # # # # # # # #     print(f'{constant} {sum_values}')
+
+# # # # # # # # # import matplotlib.pyplot as plt
+
+# # # # # # # # # # Data
+# # # # # # # # # categories = ['A', 'B', 'C', 'D']
+# # # # # # # # # values = [10, 20, 30, 40]
+
+# # # # # # # # # # Plotting the bar chart
+# # # # # # # # # plt.bar(categories, values)
+
+# # # # # # # # # # Adding text next to each bar
+# # # # # # # # # for i, value in enumerate(values):
+# # # # # # # # #     plt.text(i, value + 1, str(value), ha='center', va='bottom')
+
+# # # # # # # # # # Adding labels and title
+# # # # # # # # # plt.xlabel('Categories')
+# # # # # # # # # plt.ylabel('Values')
+# # # # # # # # # plt.title('Bar Chart with Text Next to Bars')
+
+# # # # # # # # # # Display the plot
+# # # # # # # # # plt.show()
+
+
+# # # # # # # # # Given dictionaries
+# # # # # # # # dict1 = {
+# # # # # # # #     'Constant': {
+# # # # # # # #         'arc_interval': [
+# # # # # # # #             {0: '<src.NavigationSimulator.NavigationResults object at 0x00000189CC956290>',
+# # # # # # # #              1: '<src.NavigationSimulator.NavigationResults object at 0x00000189DD963D00>'},
+# # # # # # # #             {0: '<src.NavigationSimulator.NavigationResults object at 0x00000189DD9AC790>',
+# # # # # # # #              1: '<src.NavigationSimulator.NavigationResults object at 0x00000189DD9ACA90>'}
+# # # # # # # #         ]
+# # # # # # # #     }
+# # # # # # # # }
+
+# # # # # # # # dict2 = {
+# # # # # # # #     'Constant': {
+# # # # # # # #         'arc_duration': [
+# # # # # # # #             {0: '<src.NavigationSimulator.NavigationResults object at 0x00000189CC924524>',
+# # # # # # # #              1: '<src.NavigationSimulator.NavigationResults object at 0x00000189DD9623452>'},
+# # # # # # # #             {0: '<src.NavigationSimulator.NavigationResults object at 0x00000189DD9AC23452>',
+# # # # # # # #              1: '<src.NavigationSimulator.NavigationResults object at 0x00000189DD9ACA2345>'}
+# # # # # # # #         ]
+# # # # # # # #     }
+# # # # # # # # }
+
+# # # # # # # # # List of dictionaries to merge
+# # # # # # # # dicts = [dict1, dict2]
+
+# # # # # # # # # Initialize an empty dictionary to hold the merged results
+# # # # # # # # merged_dict = {}
+
+# # # # # # # # # Iterate over each dictionary in the list
+# # # # # # # # for d in dicts:
+# # # # # # # #     for key, value in d.items():
+# # # # # # # #         if key not in merged_dict:
+# # # # # # # #             merged_dict[key] = {}
+# # # # # # # #         for sub_key, sub_value in value.items():
+# # # # # # # #             if sub_key not in merged_dict[key]:
+# # # # # # # #                 merged_dict[key][sub_key] = sub_value
+# # # # # # # #             else:
+# # # # # # # #                 # If the sub_key already exists, extend the list
+# # # # # # # #                 if isinstance(merged_dict[key][sub_key], list) and isinstance(sub_value, list):
+# # # # # # # #                     merged_dict[key][sub_key].extend(sub_value)
+# # # # # # # #                 else:
+# # # # # # # #                     # Handle other cases if needed
+# # # # # # # #                     pass
+
+# # # # # # # # # Display the merged dictionary
+# # # # # # # # print(merged_dict)
+
+# # # # # # # # a = "test"
+
+# # # # # # # # print(f"{a}")
+
+
+
+# # # # # # # data = {
+# # # # # # #     'Key1': {'Subkey1': [1, 2], 'Subkey2': [3, 4]},
+# # # # # # #     'Key2': {'Subkey3': [5, 6], 'Subkey4': [7, 8], 'Subkey5': [55, 534]},
+# # # # # # #     'Key3': {'Subkey6': [54, 35354], 'Subkey7': [345, 345]},
+# # # # # # # }
+
+# # # # # # # # Initialize the LaTeX table string
+# # # # # # # latex_table = """
+# # # # # # # \\begin{table}[]
+# # # # # # # \\centering
+# # # # # # # \\begin{tabular}{|c|c|c|c|}
+# # # # # # # \\hline
+# # # # # # # Type & Value & Mean & Std Dev \\\\ \\hline
+# # # # # # # """
+
+# # # # # # # # Iterate through the dictionary to populate the table
+# # # # # # # for main_key, sub_dict in data.items():
+# # # # # # #     first_row = True
+# # # # # # #     for sub_key, values in sub_dict.items():
+# # # # # # #         if first_row:
+# # # # # # #             latex_table += f"{main_key} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+# # # # # # #             first_row = False
+# # # # # # #         else:
+# # # # # # #             latex_table += f" & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+
+# # # # # # # # End the LaTeX table
+# # # # # # # latex_table += """
+# # # # # # # \\end{tabular}
+# # # # # # # \\caption{}
+# # # # # # # \\label{tab:my-table}
+# # # # # # # \\end{table}
+# # # # # # # """
+
+# # # # # # # # Write the LaTeX table to a .tex file
+# # # # # # # with open('data_table.tex', 'w') as f:
+# # # # # # #     f.write(latex_table)
+
+# # # # # # # print("LaTeX table code has been written to data_table.tex")
+
+
+# # # # # # data = {
+# # # # # #     'Key1': {'Subkey1': [1, 2], 'Subkey2': [3, 4]},
+# # # # # #     'Key2': {'Subkey3': [5, 6], 'Subkey4': [7, 8], 'Subkey5': [55, 534]},
+# # # # # #     'Key3': {'Subkey6': [54, 35354], 'Subkey7': [345, 345]},
+# # # # # # }
+
+# # # # # # # Initialize the LaTeX table string
+# # # # # # latex_table = """
+# # # # # # \\begin{table}[h]
+# # # # # # \\centering
+# # # # # # \\begin{tabular}{cccc}
+# # # # # # \\multicolumn{4}{c}{\\textbf{Statistical results of Monte Carlo sensitivity analysis.}} \\\\ \\hline
+# # # # # # Main Key                  & Sub Key & Value 1 & Value 2 \\\\ \\hline
+# # # # # # """
+
+# # # # # # # Iterate through the dictionary to populate the table
+# # # # # # for main_key, sub_dict in data.items():
+# # # # # #     first_row = True
+# # # # # #     for sub_key, values in sub_dict.items():
+# # # # # #         if first_row:
+# # # # # #             latex_table += f"\\multicolumn{{1}}{{c|}}{{{main_key}}} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+# # # # # #             first_row = False
+# # # # # #         else:
+# # # # # #             latex_table += f"\\multicolumn{{1}}{{c|}}{{}} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+
+# # # # # # # End the LaTeX table
+# # # # # # latex_table += """
+# # # # # # \\end{tabular}
+# # # # # # \\caption{Statistical results of Monte Carlo sensitivity analysis.}
+# # # # # # \\label{tab:ResultsSensitivityAnalysis}
+# # # # # # \\end{table}
+# # # # # # """
+
+# # # # # # # Write the LaTeX table to a .tex file
+# # # # # # with open('latex_table.tex', 'w') as f:
+# # # # # #     f.write(latex_table)
+
+# # # # # # print("LaTeX table code has been written to latex_table.tex")
+
+
+# # # # # # data = {
+# # # # # #     'Key1': {'Subkey1': [1, 2], 'Subkey2': [3, 4]},
+# # # # # #     'Key2': {'Subkey3': [5, 6], 'Subkey4': [7, 8], 'Subkey5': [55, 534]},
+# # # # # #     'Key3': {'Subkey6': [54, 35354], 'Subkey7': [345, 345]},
+# # # # # # }
+
+# # # # # # # Initialize the LaTeX table string
+# # # # # # latex_table = """
+# # # # # # \\begin{table}[h]
+# # # # # # \\centering
+# # # # # # \\begin{tabular}{cccc}
+# # # # # # \\hline
+# # # # # # Type & Value & Mean & Std Dev \\\\ \\hline
+# # # # # # """
+
+# # # # # # # Iterate through the dictionary to populate the table
+# # # # # # for main_key, sub_dict in data.items():
+# # # # # #     first_row = True
+# # # # # #     for sub_key, values in sub_dict.items():
+# # # # # #         if first_row:
+# # # # # #             latex_table += f"{main_key} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+# # # # # #             first_row = False
+# # # # # #         else:
+# # # # # #             latex_table += f" & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+
+# # # # # # # End the LaTeX table
+# # # # # # latex_table += """
+# # # # # # \\end{tabular}
+# # # # # # \\caption{}
+# # # # # # \\label{tab:ResultsSensitivityAnalysis}
+# # # # # # \\end{table}
+# # # # # # """
+
+# # # # # # # Write the LaTeX table to a .tex file
+# # # # # # with open('latex_table.tex', 'w') as f:
+# # # # # #     f.write(latex_table)
+
+# # # # # # print("LaTeX table code has been written to latex_table.tex")
+# # # # # data = {
+# # # # #     'Key1': {'Subkey1': [1, 2], 'Subkey2': [3, 4]},
+# # # # #     'Key2': {'Subkey3': [5, 6], 'Subkey4': [7, 8], 'Subkey5': [55, 534]},
+# # # # #     'Key3': {'Subkey6': [54, 35354], 'Subkey7': [345, 345]},
+# # # # # }
+
+# # # # # # Initialize the LaTeX table string
+# # # # # latex_table = """
+# # # # # \\begin{table}[]
+# # # # # \\centering
+# # # # # \\begin{tabular}{cccc}
+# # # # # \\textbf{Type}             & \\textbf{Value} & \\textbf{Mean} & \\textbf{Std Dev} \\\\ \\hline
+# # # # # """
+
+# # # # # # Iterate through the dictionary to populate the table
+# # # # # for main_key, sub_dict in data.items():
+# # # # #     first_row = True
+# # # # #     for sub_key, values in sub_dict.items():
+# # # # #         if first_row:
+# # # # #             latex_table += f"\\multicolumn{{1}}{{c|}}{{{main_key}}} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+# # # # #             first_row = False
+# # # # #         else:
+# # # # #             latex_table += f"\\multicolumn{{1}}{{c|}}{{}} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+
+# # # # # # End the LaTeX table
+# # # # # latex_table += """
+# # # # # \\end{tabular}
+# # # # # \\caption{Statistical results of Monte Carlo sensitivity analysis.}
+# # # # # \\label{tab:ResultsSensitivityAnalysis}
+# # # # # \\end{table}
+# # # # # """
+
+# # # # # # Write the LaTeX table to a .tex file
+# # # # # with open('latex_table.tex', 'w') as f:
+# # # # #     f.write(latex_table)
+
+# # # # # print("LaTeX table code has been written to latex_table.tex")
+
+
+# # # # data = {
+# # # #     'Key1': {'Subkey1': [1, 2], 'Subkey2': [3, 4]},
+# # # #     'Key2': {'Subkey3': [5, 6], 'Subkey4': [7, 8], 'Subkey5': [55, 534]},
+# # # #     'Key3': {'Subkey6': [54, 35354], 'Subkey7': [345, 345]},
+# # # # }
+
+# # # # # Initialize the LaTeX table string
+# # # # latex_table = """
+# # # # \\begin{table}[]
+# # # # \\centering
+# # # # \\begin{tabular}{cccc}
+# # # # \\textbf{Type} & \\textbf{Value} & \\textbf{Mean} & \\textbf{Std Dev} \\\\ \\hline
+# # # # """
+
+# # # # # Iterate through the dictionary to populate the table
+# # # # for main_key, sub_dict in data.items():
+# # # #     first_row = True
+# # # #     for sub_key, values in sub_dict.items():
+# # # #         if first_row:
+# # # #             latex_table += f"\\textit{{{main_key}}} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+# # # #             first_row = False
+# # # #         else:
+# # # #             latex_table += f" & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+
+# # # # # End the LaTeX table
+# # # # latex_table += """
+# # # # \\end{tabular}
+# # # # \\caption{Statistical results of Monte Carlo sensitivity analysis.}
+# # # # \\label{tab:ResultsSensitivityAnalysis}
+# # # # \\end{table}
+# # # # """
+
+# # # # # Write the LaTeX table to a .tex file
+# # # # with open('latex_table.tex', 'w') as f:
+# # # #     f.write(latex_table)
+
+# # # # print("LaTeX table code has been written to latex_table.tex")
+
+
+# # # data = {
+# # #     'Key1': {'Subkey1': [1, 2], 'Subkey2': [3, 4]},
+# # #     'Key2': {'Subkey3': [5, 6], 'Subkey4': [7, 8], 'Subkey5': [55, 534]},
+# # #     'Key3': {'Subkey6': [54, 35354], 'Subkey7': [345, 345]},
+# # # }
+
+# # # # Initialize the LaTeX table string
+# # # latex_table = """
+# # # \\begin{table}[]
+# # # \\centering
+# # # \\begin{tabular}{cccc}
+# # # \\textbf{Type} & \\textbf{Value} & \\textbf{Mean} & \\textbf{Std Dev} \\\\ \\hline
+# # # """
+
+# # # # Iterate through the dictionary to populate the table
+# # # for idx, (main_key, sub_dict) in enumerate(data.items()):
+# # #     first_row = True
+# # #     for sub_key, values in sub_dict.items():
+# # #         if first_row:
+# # #             if idx == 0:
+# # #                 latex_table += f"\\textit{{{main_key}}} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+# # #             else:
+# # #                 latex_table += f"{main_key} & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+# # #             first_row = False
+# # #         else:
+# # #             latex_table += f" & {sub_key} & {values[0]} & {values[1]} \\\\ \\hline\n"
+
+# # # # End the LaTeX table
+# # # latex_table += """
+# # # \\end{tabular}
+# # # \\caption{Statistical results of Monte Carlo sensitivity analysis.}
+# # # \\label{tab:ResultsSensitivityAnalysis}
+# # # \\end{table}
+# # # """
+
+# # # # Write the LaTeX table to a .tex file
+# # # with open('latex_table.tex', 'w') as f:
+# # #     f.write(latex_table)
+
+# # # print("LaTeX table code has been written to latex_table.tex")
+
+# # def generate_sensitivity_analysis_table(data, title="", caption="Statistical results of Monte Carlo sensitivity analysis.")
+
+
+# #     # Initialize the LaTeX table string
+# #     latex_table = """
+# #     \\begin{table}[]
+# #     \\centering
+# #     \\begin{tabular}{cccc}
+# #     \\textbf{Type} & \\textbf{Value} & \\textbf{Mean} & \\textbf{Std Dev} \\\\ \\hline
+# #     """
+
+# #     # Iterate through the dictionary to populate the table
+# #     for main_key, sub_dict in data.items():
+# #         sub_keys = list(sub_dict.keys())
+# #         for idx, (sub_key, values) in enumerate(sub_dict.items()):
+# #             if idx == 0:
+# #                 latex_table += f"\\textit{{{main_key}}} & {sub_key} & {values[0]} & {values[1]} \\\\"
+# #                 if len(sub_keys) == 1:
+# #                     latex_table += " \\hline\n"
+# #                 else:
+# #                     latex_table += "\n"
+# #             else:
+# #                 latex_table += f" & {sub_key} & {values[0]} & {values[1]} \\\\"
+# #                 if idx == len(sub_keys) - 1:
+# #                     latex_table += " \\hline\n"
+
+# #     # End the LaTeX table
+# #     latex_table += """
+# #     \\end{tabular}
+# #     \\caption{f{caption}}
+# #     \\label{tab:ResultsSensitivityAnalysis}
+# #     \\end{table}
+# #     """
+
+# #     # Write the LaTeX table to a .tex file
+# #     with open('latex_table.tex', 'w') as f:
+# #         f.write(latex_table)
+
+# #     print("LaTeX table code has been written to latex_table.tex")
+
+
+# # data = {
+# #     'Key1': {'Subkey1': [1, 2], 'Subkey2': [3, 4]},
+# #     'Key2': {'Subkey3': [5, 6], 'Subkey4': [7, 8], 'Subkey5': [55, 534]},
+# #     'Key3': {'Subkey6': [54, 35354], 'Subkey7': [345, 345]},
+# # }
+
+
+
+# # generate_sensitivity_analysis_table(data, title="", caption="Statistical results of Monte Carlo sensitivity analysis.")
+
+# import os
+
+# def generate_latex_table(data, caption="Statistical results", label="tab:Results", file_name="latex_table.tex", decimals=2):
+#     # Define the path to the tables folder
+#     tables_folder = os.path.join(os.path.dirname(__file__), "tables")
+
+#     # Create the tables folder if it doesn't exist
+#     if not os.path.exists(tables_folder):
+#         os.makedirs(tables_folder)
+
+#     # Define the file path for the LaTeX table
+#     file_path = os.path.join(tables_folder, file_name)
+
+#     # Initialize the LaTeX table string
+#     latex_table = f"""
+# \\begin{{table}}[]
+# \\centering
+# \\begin{{tabular}}{{cccc}}
+# \\textbf{{Type}} & \\textbf{{Value}} & \\textbf{{\\mu_{{\\Delta V}}}} & \\textbf{{\\sigma_{{\\Delta V}}}} \\\\ \\hline
+# """
+
+#     # Iterate through the dictionary to populate the table
+#     for main_key, sub_dict in data.items():
+#         main_key_formatted = main_key.replace('_', '\\_')  # Replace underscores in main key with LaTeX friendly format
+#         for idx, (sub_key, values) in enumerate(sub_dict.items()):
+#             mean = round(values[0], decimals)
+#             std_dev = round(values[1], decimals)
+#             sub_key_formatted = sub_key.replace('_', '\\_')  # Replace underscores in subkey with LaTeX friendly format
+#             if idx == 0:
+#                 latex_table += f"\\textit{{{main_key_formatted}}} & {sub_key_formatted} & {mean} & {std_dev} \\\\"
+#                 latex_table += "\n"  # No hline here
+#             else:
+#                 latex_table += f" & {sub_key_formatted} & {mean} & {std_dev} \\\\"
+#                 latex_table += "\n"  # No hline here
+
+#     # End the LaTeX table
+#     latex_table += f"""
+# \\end{{tabular}}
+# \\caption{{{caption}}}
+# \\label{{{label}}}
+# \\end{{table}}
+# """
+
+#     # Write the LaTeX table to a .tex file
+#     with open(file_path, 'w') as f:
+#         f.write(latex_table)
+
+#     print(f"LaTeX table code has been written to {file_path}")
+
+# # Example usage:
+# data = {
+#     'Key_1': {'Subkey_1': [1.12345, 2.6789], 'Subkey_2': [3.4567, 4.1234]},
+#     'Key_2': {'Subkey_3': [5.9876, 6.5432], 'Subkey_4': [7.9876, 8.1234], 'Subkey_5': [55.5678, 534.2345]},
+#     'Key_3': {'Subkey_6': [54.3456, 35354.6789], 'Subkey_7': [345.6789, 345.1234]}
+# }
+
+# import os
+# import re
+
+# def escape_tex_symbols(string):
+#     escape_chars = {'%': '\\%', '&': '\\&', '_': '\\_', '#': '\\#', '$': '\\$', '{': '\\{', '}': '\\}'}
+#     return re.sub(r'[%&_#${}]', lambda match: escape_chars[match.group(0)], string)
+
+# def generate_latex_table(data, caption="Statistical results", label="tab:Results", file_name="latex_table.tex", decimals=2):
+#     # Define the path to the tables folder
+#     tables_folder = os.path.join(os.path.dirname(__file__), "tables")
+
+#     # Create the tables folder if it doesn't exist
+#     if not os.path.exists(tables_folder):
+#         os.makedirs(tables_folder)
+
+#     # Define the file path for the LaTeX table
+#     file_path = os.path.join(tables_folder, file_name)
+
+#     # Initialize the LaTeX table string
+#     latex_table = f"""
+# \\begin{{table}}[]
+# \\centering
+# \\begin{{tabular}}{{cccc}}
+# Type & Value & $\\mu_{{\\Delta V}}$ & $\\sigma_{{\\Delta V}}$ \\\\ \\hline
+# """
+
+#     # Iterate through the dictionary to populate the table
+#     for main_key, sub_dict in data.items():
+#         main_key_formatted = escape_tex_symbols(main_key)  # Escape special TeX symbols in main key
+#         for idx, (sub_key, values) in enumerate(sub_dict.items()):
+#             mean = round(values[0], decimals)
+#             std_dev = round(values[1], decimals)
+#             sub_key_formatted = escape_tex_symbols(sub_key)  # Escape special TeX symbols in subkey
+#             if idx == 0:
+#                 latex_table += f"\\textit{{{main_key_formatted}}} & {sub_key_formatted} & {mean} & {std_dev} \\\\"
+#                 latex_table += "\n"  # No hline here
+#             else:
+#                 latex_table += f" & {sub_key_formatted} & {mean} & {std_dev} \\\\"
+#                 latex_table += "\n"  # No hline here
+
+#     # End the LaTeX table
+#     latex_table += f"""
+# \\end{{tabular}}
+# \\caption{{{escape_tex_symbols(caption)}}}
+# \\label{{{escape_tex_symbols(label)}}}
+# \\end{{table}}
+# """
+
+#     # Write the LaTeX table to a .tex file
+#     with open(file_path, 'w') as f:
+#         f.write(latex_table)
+
+#     print(f"LaTeX table code has been written to {file_path}")
+
+# # Example usage:
+# data = {'threshold': {'0.1': [0.010351758295254247, 0.0032810140816962085], '0.2': [0.014478242955400036, 0.0016795217283869755]}, 'arc_interval': {'1':
+# [0.006979072333549882, 0.0003338806647041519], '2': [0.005028950111908362, 5.677821811200844e-05]}}
+
+# generate_latex_table(data, caption="Statistical results of Monte Carlo sensitivity analysis", label="tab:ResultsSensitivityAnalysis", decimals=2)
+
+
+import os
+import re
+
+def escape_tex_symbols(string):
+    escape_chars = {'%': '\\%', '&': '\\&', '_': '\\_', '#': '\\#', '$': '\\$', '{': '\\{', '}': '\\}'}
+    return re.sub(r'[%&_#${}]', lambda match: escape_chars[match.group(0)], string)
+
+def generate_latex_table(data, caption="Statistical results", label="tab:Results", file_name="latex_table.tex", decimals=4):
+    # Define the path to the tables folder
+    tables_folder = os.path.join(os.path.dirname(__file__), "tables")
+
+    # Create the tables folder if it doesn't exist
+    if not os.path.exists(tables_folder):
+        os.makedirs(tables_folder)
+
+    # Define the file path for the LaTeX table
+    file_path = os.path.join(tables_folder, file_name)
+
+    # Initialize the LaTeX table string
+    latex_table = f"""
+\\begin{{table}}[]
+\\centering
+\\begin{{tabular}}{{l l l l}}
+\\rowcolor[HTML]{{EFEFEF}} \\textbf{{Type}} & \\textbf{{Value}} & \\textbf{{$\\mu_{{\\Delta V}}$}} & \\textbf{{$\\sigma_{{\\Delta V}}$}} \\\\
+"""
+
+    # Iterate through the dictionary to populate the table
+    for main_key, sub_dict in data.items():
+        main_key_formatted = escape_tex_symbols(main_key)  # Escape special TeX symbols in main key
+        for idx, (sub_key, values) in enumerate(sub_dict.items()):
+            mean = round(values[0], decimals)
+            std_dev = round(values[1], decimals)
+            sub_key_formatted = escape_tex_symbols(sub_key)  # Escape special TeX symbols in subkey
+            if idx == 0:
+                latex_table += f"\\textit{{{main_key_formatted}}} & {sub_key_formatted} & {mean} & {std_dev} \\\\"
+                latex_table += "\n"  # No hline here
+            else:
+                latex_table += f" & {sub_key_formatted} & {mean} & {std_dev} \\\\"
+                latex_table += "\n"  # No hline here
+
+    # End the LaTeX table
+    latex_table += f"""
+\\end{{tabular}}
+\\caption{{{escape_tex_symbols(caption)}}}
+\\label{{{escape_tex_symbols(label)}}}
+\\end{{table}}
+"""
+
+    # Write the LaTeX table to a .tex file
+    with open(file_path, 'w') as f:
+        f.write(latex_table)
+
+    print(f"LaTeX table code has been written to {file_path}")
+
+# Example usage:
+data = {'threshold': {'0.1': [0.010351758295254247, 0.0032810140816962085], '0.2': [0.014478242955400036, 0.0016795217283869755]}, 'arc_interval': {'1':
+[0.006979072333549882, 0.0003338806647041519], '2': [0.005028950111908362, 5.677821811200844e-05]}}
+
+generate_latex_table(data, caption="Statistical results of Monte Carlo sensitivity analysis", label="tab:ResultsSensitivityAnalysis", decimals=4)

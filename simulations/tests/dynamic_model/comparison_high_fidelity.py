@@ -28,12 +28,12 @@ from src.dynamic_models.HF.PM import *
 from src.dynamic_models.HF.PMSRP import *
 from src.dynamic_models.HF.SH import *
 from src.dynamic_models.HF.SHSRP import *
-from src.estimation_models import EstimationModel
+from src import EstimationModel
 
 
 
 
-def comparison_HF(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
+def comparison_high_fidelity(simulation_start_epoch_MJD, propagation_time, durations, step_size=0.001):
 
 
     custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["FF"]}
