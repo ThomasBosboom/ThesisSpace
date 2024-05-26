@@ -149,10 +149,10 @@ if __name__ == "__main__":
             navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows,
                                         orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1)
             navigation_results = navigation_simulator.perform_navigation(seed=0).navigation_results
-            delta_v = np.sum(np.linalg.norm(navigation_results[8][1], axis=1))
+            delta_v = np.sum(np.linalg.norm(navigation_results[8][1], axis=1)[:-2])
             cost_list.append(delta_v)
 
-        total_cost = np.mean(cost_list[:-3])
+        total_cost = np.mean(cost_list)
 
         return total_cost
 
@@ -182,26 +182,32 @@ if __name__ == "__main__":
     arc_interval = 3  # Example arc interval
 
     optimizer = OptimizationModel(duration, arc_length, arc_interval, max_iterations=30)
-    optimizer.optimize(maneuvre_cost)
-    # optimizer.optimize(overall_uncertainty)
-    # optimizer.optimize(test)
+    # optimizer.optimize(maneuvre_cost)
+    # # optimizer.optimize(overall_uncertainty)
+    # # optimizer.optimize(test)
 
-    optimization_result = optimizer.get_optimization_result()
-    print(f"Optimized Arc Lengths: {optimization_result}")
+    # optimization_result = optimizer.get_optimization_result()
+    # print(f"Optimized Arc Lengths: {optimization_result}")
 
     optimizer.save_to_json()
 
     # optimization_result = np.array([0.17596644, 1.13618278, 1.15153068, 1.01679524, 1.17737341, 1.03086586, 1.38582027])
-    # optimization_result = np.array([
-    #             0.9722679469593052,
-    #             0.7466316110349054,
-    #             1.207399786617894
-    #         ])
+    optimization_result = np.array([
+                1.0177113702623903,
+                0.9165243648479793,
+                0.9889733444398163,
+                0.9749791753436066,
+                1.0379529362765512,
+                1.0379529362765512,
+                1.0379529362765512
+            ])
     # print(optimization_result)
 
     # Evaluate the results related to the final result
-    observation_windows = optimizer.generate_observation_windows(optimization_result, )
+    observation_windows = optimizer.generate_observation_windows(optimization_result)
     print(observation_windows)
     # cost = overall_uncertainty(observation_windows
-    # cost = maneuvre_cost(observation_windows, orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*5)
+    cost = maneuvre_cost(observation_windows, orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1)
     print(cost)
+
+    # 0.05929281641011152
