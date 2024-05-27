@@ -38,7 +38,6 @@ class EstimationModel:
         self.margin = 120
         self.redirect_out = True
 
-        # Flexible initialization using optional parameters and default values
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
@@ -212,10 +211,10 @@ initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 
 apriori_covariance = np.diag([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2
 mission_start_epoch = 60390
 # propagation_time = 1
-numruns = 10
+num_runs = 10
 # noise_range = 1
 
-print(f"Runs: {numruns}, start epoch: {mission_start_epoch}")
+print(f"Runs: {num_runs}, start epoch: {mission_start_epoch}")
 print("========================================================")
 
 # for noise_range in [0.01, 0.1, 1, 10]:
@@ -228,7 +227,7 @@ for noise_range in [0.1, 1.0, 10]:
             truth_model.initial_state += orbit_insertion_error
             est_error_0_list = []
             delta_v_list = []
-            for run in range(numruns):
+            for run in range(num_runs):
 
                 dynamic_model.initial_state = truth_model.initial_state + initial_estimation_error
                 od_error = dynamic_model.initial_state-truth_model.initial_state
@@ -361,7 +360,7 @@ for noise_range in [0.1, 1.0, 10]:
 #         for noise_range in params["noise_range"]:
 
 #             dict2 = {}
-#             for run in range(numruns):
+#             for run in range(num_runs):
 
 #                 truth_model.initial_state = dynamic_model.initial_state + initial_estimation_error
 #                 od_error = dynamic_model.initial_state-truth_model.initial_state
@@ -448,7 +447,7 @@ for noise_range in [0.1, 1.0, 10]:
 # means = []
 # stds = []
 # for param1, param1_dict in dictionary.items():
-#     values = [[param2_dict[run][0] for param2_dict in param1_dict.values()] for run in range(numruns)]
+#     values = [[param2_dict[run][0] for param2_dict in param1_dict.values()] for run in range(num_runs)]
 #     print(values)
 #     means.append(np.mean(values, axis=0))
 #     stds.append(np.std(values, axis=0))

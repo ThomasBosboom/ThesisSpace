@@ -27,7 +27,7 @@ from tests import utils
 ###### Sensitivity analysis #####################################
 #################################################################
 
-numruns = 2
+num_runs = 5
 
 default_window_inputs = {
     "duration": 28,
@@ -38,7 +38,7 @@ default_window_inputs = {
 
 sensitivity_settings = {
     # "threshold": [0.1, 0.2, 0.5, 1, 2],
-    # "arc_duration": [0.1, 0.2, 0.5, 1.0, 2.0],
+    "arc_duration": [0.1, 0.2, 0.5, 1.0, 2.0],
     # "arc_interval": [0.5, 1, 2, 3],
     # "mission_start_epoch": [60390, 60395, 60400],
     # "noise_range": [1, 5, 10, 50],
@@ -47,11 +47,10 @@ sensitivity_settings = {
     # "station_keeping_error": [0.00, 0.01, 0.02]
 }
 
-navigation_outputs_sensitivity = comparison_helper_functions.generate_navigation_outputs_sensitivity_analysis(numruns, sensitivity_settings, default_window_inputs, redirect_out=False)
+navigation_outputs_sensitivity = comparison_helper_functions.generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, redirect_out=True)
 
 
-print(navigation_outputs_sensitivity)
-
+# print(navigation_outputs_sensitivity)
 
 
 #################################################################
@@ -104,13 +103,13 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
 
                     if run_index==0:
 
-                        alpha = 0.05
+                        alpha = 0.2
                         for j in range(3):
                             axs[j].axvspan(
                                 xmin=start_epoch-navigation_simulator.mission_start_epoch,
                                 xmax=end_epoch-navigation_simulator.mission_start_epoch,
-                                # color=shades[index],
-                                color="lightgray",
+                                color=shades[index],
+                                # color="lightgray",
                                 alpha=alpha,
                                 # label=f"Observation window" if window_index==0 and case_index==0 else None
                                 )
@@ -256,7 +255,7 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
         plt.tight_layout()
         utils.save_figure_to_folder(figs=[fig], labels=[f"{current_time}_sensitivity_analysis_{sensitivity_type}"], custom_sub_folder_name=file_name)
 
-    print(sensitivity_statistics)
+    # print(sensitivity_statistics)
 
 print("Plotting done...")
 

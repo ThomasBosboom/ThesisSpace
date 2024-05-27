@@ -26,64 +26,41 @@ from tests import utils
 ###### Define the observation windows ###########################
 #################################################################
 
-numruns = 1
-duration = 14
+num_runs = 2
+duration = 28
+mission_start_epoch = 60390
 
 # Collect a series of observation window sets to compare
 observation_windows_settings = {
     "Perilune": [
-        (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8), numruns),
+        (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, mission_start_epoch=mission_start_epoch), num_runs),
     ],
     # "Apolune": [
-    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, apolune=True), numruns),
+    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, apolune=True), num_runs),
     # ],
     # "Random": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), numruns),
+    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
     # ],
     # "Constant": [
-    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), numruns),
+    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
     # ]
 }
 
-
-
 observation_windows_settings = {
     # "Random1": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=0), numruns),
+    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=0), num_runs),
     # ],
     # "Random2": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=1), numruns),
+    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=1), num_runs),
     # ],
     # "Random3": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=2), numruns),
+    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=2), num_runs),
     # ],
     "Constant": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), numruns),
+        (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
     ]
 }
 
-# observation_windows_settings = {
-#     # "Perilune": [
-#     #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7), 1),
-#     # ],
-#     # "Apolune": [
-#     #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(15, margin=0.05, threshold=0.1, pass_interval=7, apolune=True), 1),
-#     # ],
-#     "Constant": [
-#         (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=0.1), 2),
-#     ],
-#     "Constant2": [
-#         (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=0.5), 2),
-#     ],
-#     "Constant3": [
-#         (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=1), 2),
-#     ],
-#     "Constant4": [
-#         (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=1.5), 2),
-#     ]
-
-# }
-# }
 
 print(observation_windows_settings)
 
@@ -95,8 +72,9 @@ print(observation_windows_settings)
 
 auxilary_settings = {
     "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-    "initial_estimation_error": np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
-    "apriori_covariance": np.diag([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2
+    "initial_estimation_error": np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1,
+    "apriori_covariance": np.diag([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1**2,
+    "mission_start_epoch": mission_start_epoch
 }
 
 # Run the navigation routine using given settings
@@ -121,7 +99,7 @@ utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_objective_value_r
 
 print("Plotting results...")
 
-detailed_results = [["Random3", "Constant"], [0], [0]]
+detailed_results = [["Random3", "Constant"], [0, 1], [0]]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
     for case_index, window_case in enumerate(navigation_outputs_cases):
         for run_index, (run, navigation_output) in enumerate(window_case.items()):
@@ -134,14 +112,14 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         plot_navigation_results = PlotNavigationResults.PlotNavigationResults(navigation_output)
                         plot_navigation_results.plot_estimation_error_history()
                         # plot_navigation_results.plot_uncertainty_history()
-                        plot_navigation_results.plot_dispersion_history()
+                        # plot_navigation_results.plot_dispersion_history()
                         # plot_navigation_results.plot_dispersion_to_estimation_error_history()
                         # plot_navigation_results.plot_full_state_history()
                         # plot_navigation_results.plot_formal_error_history()
                         plot_navigation_results.plot_observations()
                         # plot_navigation_results.plot_observability()
                         plot_navigation_results.plot_od_error_dispersion_relation()
-                        plot_navigation_results.plot_correlation_history()
+                        # plot_navigation_results.plot_correlation_history()
 
 
 ############################################################

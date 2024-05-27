@@ -38,7 +38,6 @@ class EstimationModel:
         self.margin = 120
         self.redirect_out = True
 
-        # Flexible initialization using optional parameters and default values
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)

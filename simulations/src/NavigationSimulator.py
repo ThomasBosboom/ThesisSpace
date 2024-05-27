@@ -5,6 +5,7 @@ import numpy as np
 import time
 from matplotlib import pyplot as plt
 import copy
+
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
 for _ in range(2):
@@ -19,35 +20,12 @@ from tudatpy.kernel import constants
 
 class NavigationSimulator(NavigationSimulatorBase):
 
-    def __init__(self, observation_windows, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__()
 
-        # Flexible initialization using optional parameters and default values
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-
-        # Adjusting decimals based on the step size used
-        num_str = "{:.15f}".format(self.step_size).rstrip('0')
-        self.decimal_places = len(num_str) - num_str.index('.') - 1
-
-        # Update mission start epoch based on given observation window
-        self.mission_start_epoch = observation_windows[0][0]
-
-        # Rounding values
-        self.observation_windows = observation_windows
-        self.observation_windows = [(np.round(tup[0], self.decimal_places), np.round(tup[1], self.decimal_places)) for tup in observation_windows]
-        self.initial_station_keeping_epochs = [np.round(observation_window[1], self.decimal_places) for observation_window in observation_windows]
-        self.batch_start_times = np.array([t[0] for t in self.observation_windows])
-        self.station_keeping_epochs = []
-
-        # Managing the time vector to define all arcs
-        self.times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
-        self.times = list(set(self.times))
-        self.times = sorted(self.times)
-
-        self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
-        self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
 
 
     def get_Gamma(self, delta_t):
@@ -74,12 +52,31 @@ class NavigationSimulator(NavigationSimulatorBase):
         return result
 
 
-    def perform_navigation(self, seed=0):
-
-        # print(self.noise_range, self.observation_step_size_range)
-        # print(vars(self))
+    def perform_navigation(self, observation_windows, seed=0):
 
         np.random.seed(seed)
+
+        # Adjusting decimals based on the step size used
+        num_str = "{:.15f}".format(self.step_size).rstrip('0')
+        self.decimal_places = len(num_str) - num_str.index('.') - 1
+
+        # Update mission start epoch based on given observation window
+        self.mission_start_epoch = observation_windows[0][0]
+
+        # Rounding values
+        self.observation_windows = observation_windows
+        self.observation_windows = [(np.round(tup[0], self.decimal_places), np.round(tup[1], self.decimal_places)) for tup in observation_windows]
+        self.initial_station_keeping_epochs = [np.round(observation_window[1], self.decimal_places) for observation_window in observation_windows]
+        self.batch_start_times = np.array([t[0] for t in self.observation_windows])
+        self.station_keeping_epochs = []
+
+        # Managing the time vector to define all arcs
+        self.times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
+        self.times = list(set(self.times))
+        self.times = sorted(self.times)
+
+        self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
+        self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
 
         print("=========================")
         # print("Start navigation simulation")
@@ -98,7 +95,6 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.full_dependent_variables_history_estimated = dict()
         self.full_state_transition_matrix_history_estimated = dict()
         self.estimation_arc_results_dict = dict()
-        self.full_od_dispersion_relation_dict = dict()
         for t, time in enumerate(self.times):
 
             navigation_arc_duration = self.navigation_arc_durations[navigation_arc]
@@ -310,9 +306,6 @@ class NavigationSimulator(NavigationSimulatorBase):
 
                     # print(dynamic_model.custom_initial_state[0:3], parameter_history[:, best_iteration], truth_model.custom_initial_state[0:3])
                     # print("Final residuals: ", np.sqrt(np.mean(final_residuals**2)), "Dispersion: ", np.linalg.norm(dispersion[:3]), "xhat0: ", np.linalg.norm(parameter_history[:, best_iteration][6:9]-truth_model.custom_initial_state[6:9]),  "Estimation error: xhatf", np.linalg.norm(self.initial_estimation_error[6:9]))
-
-                    # self.full_od_dispersion_relation_dict.update({estimation_arc: [np.linalg.norm(dispersion[:3]), np.linalg.norm(dispersion[3:]), np.linalg.norm(self.initial_estimation_error[6:9]), np.linalg.norm(self.initial_estimation_error[9:12]), ratio]})
-                    # self.full_od_dispersion_relation_dict.update({estimation_arc: [np.linalg.norm(dispersion[:3]), np.linalg.norm(dispersion[3:]), np.linalg.norm(self.initial_estimation_error[6:9]), np.linalg.norm(self.initial_estimation_error[9:12]), ratio]})
 
                     # Generate random noise to simulate station-keeping errors
                     if self.model_type == "HF":

@@ -116,6 +116,7 @@ def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_siz
 def generate_navigation_outputs(observation_windows_settings, seed=0, **kwargs):
 
     np.random.seed(seed)
+    navigation_simulator = NavigationSimulator.NavigationSimulator(**kwargs)
 
     # Run the navigation routine using given settings
     navigation_outputs = {}
@@ -127,8 +128,7 @@ def generate_navigation_outputs(observation_windows_settings, seed=0, **kwargs):
             navigation_output_per_run = {}
             for run in range(num_runs):
 
-                navigation_simulator = NavigationSimulator.NavigationSimulator(observation_windows, **kwargs)
-                navigation_output_per_run[run] = navigation_simulator.perform_navigation()
+                navigation_output_per_run[run] = navigation_simulator.perform_navigation(observation_windows)
 
             navigation_output_per_type.append(navigation_output_per_run)
 
@@ -137,11 +137,11 @@ def generate_navigation_outputs(observation_windows_settings, seed=0, **kwargs):
     return navigation_outputs
 
 
-def generate_navigation_outputs_sensitivity_analysis(numruns, sensitivity_settings, default_window_inputs, **kwargs):
+def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, **kwargs):
 
     observation_windows_settings = {
         "Constant": [
-            (get_constant_arc_observation_windows(**default_window_inputs), numruns),
+            (get_constant_arc_observation_windows(**default_window_inputs), num_runs),
         ]
     }
 
@@ -156,13 +156,10 @@ def generate_navigation_outputs_sensitivity_analysis(numruns, sensitivity_settin
 
                 window_inputs = copy.deepcopy(default_window_inputs)
                 window_inputs[arg_name] = arg_value
-                # print(settings)
-
                 observation_windows_sensitivity_settings = {}
                 for window_type in observation_windows_settings.keys():
 
-                    observation_windows_sensitivity_settings[window_type] = [(get_constant_arc_observation_windows(**window_inputs), numruns)]
-                    # print(observation_windows_sensitivity_settings[window_type])
+                    observation_windows_sensitivity_settings[window_type] = [(get_constant_arc_observation_windows(**window_inputs), num_runs)]
 
                 navigation_outputs = generate_navigation_outputs(observation_windows_sensitivity_settings, **{arg_name: arg_value}, **kwargs)
 
@@ -227,195 +224,6 @@ def generate_objective_value_results(navigation_outputs):
     return objective_value_results
 
 
-# def generate_objective_value_results(navigation_outputs):
-
-#     # Get objective value history
-#     orbit_determination_error_results = {}
-#     for window_type in navigation_outputs.keys():
-
-#         orbit_determination_error_results_per_window_case = {}
-#         for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
-
-#             orbit_determination_errors_per_run = {}
-#             objective_values = []
-#             delta_v_per_skm_list = []
-#             for run, navigation_output in navigation_output_list.items():
-
-#                 print(f"Results for {window_type} window_case {window_case} run {run}:")
-
-#                 # Extracting the relevant objects
-#                 navigation_results = navigation_output.navigation_results
-#                 navigation_simulator = navigation_output.navigation_simulator
-
-#                 # Extracting the relevant results from objects
-#                 delta_v = navigation_results[8][1]
-#                 delta_v_per_skm = np.linalg.norm(delta_v, axis=1)
-#                 objective_value = np.sum(delta_v_per_skm)
-
-#                 delta_v_per_skm_list.append(delta_v_per_skm.tolist())
-#                 objective_values.append(objective_value)
-
-#                 print("Objective: ", delta_v_per_skm, objective_value)
-
-#                 orbit_determination_errors_per_run[run] = delta_v_per_skm.tolist()
-
-#             orbit_determination_error_results_per_window_case[window_case] = {orbit_determination_errors_per_run, (len(objective_values),
-#                                                         min(objective_values),
-#                                                         max(objective_values),
-#                                                         np.mean(objective_values),
-#                                                         np.std(objective_values),
-#                                                         objective_values)}
-
-#         orbit_determination_error_results[window_type] = orbit_determination_error_results_per_window_case
-
-#     return orbit_determination_error_results
-
-
-
-
-
-
-
-
-
-
-def generate_orbit_determination_error_results(navigation_outputs):
-
-    # Get objective value history
-    orbit_determination_error_results = {}
-    for window_type in navigation_outputs.keys():
-
-        orbit_determination_error_results_per_window_case = {}
-        for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
-
-            orbit_determination_errors_per_run = {}
-            for run, navigation_output in navigation_output_list.items():
-
-                print(f"Results for {window_type} window_case {window_case} run {run}:")
-
-                # Extracting the relevant objects
-                navigation_results = navigation_output.navigation_results
-                navigation_simulator = navigation_output.navigation_simulator
-
-                full_estimation_error_dict = navigation_simulator.full_estimation_error_dict
-                epochs = list(full_estimation_error_dict.keys())
-
-                orbit_determination_errors_per_window = {}
-                for window_index, (start_epoch, end_epoch) in enumerate(navigation_simulator.observation_windows):
-
-                    # Calculate the absolute difference between each value and the target
-                    differences = [abs(epoch - end_epoch) for epoch in epochs]
-                    closest_index = differences.index(min(differences))
-                    end_epoch = epochs[closest_index]
-
-                    orbit_determination_error = full_estimation_error_dict[end_epoch]
-                    orbit_determination_errors_per_window[window_index] = orbit_determination_error.tolist()
-
-                orbit_determination_errors_per_run[run] = orbit_determination_errors_per_window
-
-            orbit_determination_error_results_per_window_case[window_case] = orbit_determination_errors_per_run
-
-        orbit_determination_error_results[window_type] = orbit_determination_error_results_per_window_case
-
-    return orbit_determination_error_results
-
-
-
-def generate_reference_orbit_deviation_results(navigation_outputs):
-
-    # Get objective value history
-    orbit_determination_error_results = {}
-    for window_type in navigation_outputs.keys():
-
-        orbit_determination_error_results_per_window_case = {}
-        for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
-
-            orbit_determination_errors_per_run = {}
-            for run, navigation_output in navigation_output_list.items():
-
-                print(f"Results for {window_type} window_case {window_case} run {run}:")
-
-                # Extracting the relevant objects
-                navigation_results = navigation_output.navigation_results
-                navigation_simulator = navigation_output.navigation_simulator
-
-                full_reference_state_deviation_dict = navigation_simulator.full_reference_state_deviation_dict
-                epochs = list(full_reference_state_deviation_dict.keys())
-
-                orbit_determination_errors_per_window = {}
-                for window_index, (start_epoch, end_epoch) in enumerate(navigation_simulator.observation_windows):
-
-                    # Calculate the absolute difference between each value and the target
-                    differences = [abs(epoch - end_epoch) for epoch in epochs]
-                    closest_index = differences.index(min(differences))
-                    end_epoch = epochs[closest_index]
-
-                    reference_state_deviation = full_reference_state_deviation_dict[end_epoch]
-                    orbit_determination_errors_per_window[window_index] = reference_state_deviation.tolist()
-
-                orbit_determination_errors_per_run[run] = orbit_determination_errors_per_window
-
-            orbit_determination_error_results_per_window_case[window_case] = orbit_determination_errors_per_run
-
-        orbit_determination_error_results[window_type] = orbit_determination_error_results_per_window_case
-
-    return orbit_determination_error_results
-
-
-
-def generate_global_uncertainty_results(navigation_outputs):
-
-    # Get objective value history
-    orbit_determination_error_results = {}
-    for window_type in navigation_outputs.keys():
-
-        orbit_determination_error_results_per_window_case = {}
-        for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
-
-            orbit_determination_errors_per_run = {}
-            for run, navigation_output in navigation_output_list.items():
-
-                print(f"Results for {window_type} window_case {window_case} run {run}:")
-
-                # Extracting the relevant objects
-                navigation_results = navigation_output.navigation_results
-                navigation_simulator = navigation_output.navigation_simulator
-
-                # Extracting the relevant results from objects
-                covariance_dict = navigation_simulator.full_propagated_covariance_dict
-
-                covariance_epochs = np.stack(list(covariance_dict.keys()))
-                covariance_history = np.stack(list(covariance_dict.values()))
-
-                covariance_history_lpf = covariance_history[:, :6, :6]
-                covariance_history_lumio = covariance_history[:, 6:, 6:]
-
-                # beta_lpf = 3*np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history_lpf))), axis=1)
-                # beta_lumio = 3*np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history_lumio))), axis=1)
-
-                beta_aves = []
-                for i in range(2):
-
-                    beta_1 = np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history[:, 3*i+0:3*i+3, 3*i+0:3*i+3]))), axis=1)
-                    beta_2 = np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history[:, 3*i+6:3*i+3+6, 3*i+6:3*i+3+6]))), axis=1)
-
-                    beta_bar_1 = np.mean(beta_1)
-                    beta_bar_2 = np.mean(beta_2)
-
-                    beta_ave = 1/2*(beta_bar_1+beta_bar_2)
-
-                    beta_aves.append(beta_ave)
-
-                orbit_determination_errors_per_run[run] = beta_aves
-
-            orbit_determination_error_results_per_window_case[window_case] = orbit_determination_errors_per_run
-
-        orbit_determination_error_results[window_type] = orbit_determination_error_results_per_window_case
-
-    return orbit_determination_error_results
-
-
-
 #################################################################
 ###### Plotting bar chart  ######################################
 #################################################################
@@ -452,8 +260,6 @@ def bar_plot(ax, data, group_stretch=0.8, bar_stretch=0.95,
 
     for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
                                                          group_centers)):
-
-        print(g_name, vals)
 
         n_bars = len(vals)
         group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)

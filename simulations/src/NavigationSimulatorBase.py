@@ -18,7 +18,7 @@ class NavigationSimulatorBase():
         self.delta_v_min = 0.00
         self.include_station_keeping = True
         self.station_keeping_error = 0.00
-        self.state_noise_compensation_lpf = 1e-21 # 1e-21
+        self.state_noise_compensation_lpf = 1e-20 # 1e-21
         self.state_noise_compensation_lumio = 1e-18 # 1e-18
         # self.apriori_covariance = np.diag([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2
         self.initial_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])

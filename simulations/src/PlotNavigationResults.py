@@ -345,7 +345,7 @@ class PlotNavigationResults():
     def plot_dispersion_history(self):
 
         # Plot how the deviation from the reference orbit
-        fig, ax = plt.subplots(2, 1, figsize=(11, 4), sharex=True)
+        fig, ax = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
         full_reference_state_deviation_epochs = self.navigation_results[1][0]
         full_reference_state_deviation_history = self.navigation_results[1][1]
         relative_epochs = full_reference_state_deviation_epochs - self.mission_start_epoch
@@ -780,7 +780,7 @@ class PlotNavigationResults():
         full_estimation_error_history = np.stack(list(full_estimation_error_dict.values()))
         full_reference_state_deviation_history = np.stack(list(full_reference_state_deviation_dict.values()))
 
-        print(len(full_estimation_error_history), len(full_reference_state_deviation_history))
+        # print(len(full_estimation_error_history), len(full_reference_state_deviation_history))
 
         relative_epochs = epochs - self.mission_start_epoch
         od_error = np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1)

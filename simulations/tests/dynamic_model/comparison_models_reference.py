@@ -127,117 +127,117 @@ def comparison_models_reference(simulation_start_epoch_MJD, propagation_time, st
 # comparison_models_reference(60390, 5, step_size=0.001)
 
 
-import FrameConverter2
+# import FrameConverter2
 
-def continuities_reference(simulation_start_epoch_MJD, propagation_time, step_size=0.001):
+# def continuities_reference(simulation_start_epoch_MJD, propagation_time, step_size=0.001):
 
-    # Get the reference orbit states
-    reference_state_history = list()
-    for body in ["LPF", "LUMIO"]:
-        reference_state_history.append(reference_data.get_reference_state_history(simulation_start_epoch_MJD,
-                                                                                propagation_time,
-                                                                                satellite=body,
-                                                                                step_size=step_size,
-                                                                                get_full_history=True,
-                                                                                interpolation_kind="cubic",
-                                                                                get_epoch_in_array=False,
-                                                                                get_dict=False))
+#     # Get the reference orbit states
+#     reference_state_history = list()
+#     for body in ["LPF", "LUMIO"]:
+#         reference_state_history.append(reference_data.get_reference_state_history(simulation_start_epoch_MJD,
+#                                                                                 propagation_time,
+#                                                                                 satellite=body,
+#                                                                                 step_size=step_size,
+#                                                                                 get_full_history=True,
+#                                                                                 interpolation_kind="cubic",
+#                                                                                 get_epoch_in_array=False,
+#                                                                                 get_dict=False))
 
-    reference_state_history = np.concatenate(reference_state_history, axis=1)
+#     reference_state_history = np.concatenate(reference_state_history, axis=1)
 
-    reference_state_history_moon = list()
-    reference_state_history_moon.append(reference_data.get_reference_state_history(simulation_start_epoch_MJD,
-                                                                                propagation_time,
-                                                                                body="moon",
-                                                                                step_size=step_size,
-                                                                                get_full_history=True,
-                                                                                interpolation_kind="cubic",
-                                                                                get_epoch_in_array=True,
-                                                                                get_dict=False))
+#     reference_state_history_moon = list()
+#     reference_state_history_moon.append(reference_data.get_reference_state_history(simulation_start_epoch_MJD,
+#                                                                                 propagation_time,
+#                                                                                 body="moon",
+#                                                                                 step_size=step_size,
+#                                                                                 get_full_history=True,
+#                                                                                 interpolation_kind="cubic",
+#                                                                                 get_epoch_in_array=True,
+#                                                                                 get_dict=False))
 
-    reference_state_history_moon = np.concatenate(reference_state_history_moon, axis=1)
+#     reference_state_history_moon = np.concatenate(reference_state_history_moon, axis=1)
 
-    reference_state_history = reference_state_history
-    epochs = reference_state_history_moon[:, 0]
-    reference_state_history_moon = reference_state_history_moon[:, 1:]
+#     reference_state_history = reference_state_history
+#     epochs = reference_state_history_moon[:, 0]
+#     reference_state_history_moon = reference_state_history_moon[:, 1:]
 
-    # Get example model
-    dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD,
-                                                            propagation_time,
-                                                            custom_model_dict={"HF": ["PM"]},
-                                                            get_only_first=True)
+#     # Get example model
+#     dynamic_model_objects = utils.get_dynamic_model_objects(simulation_start_epoch_MJD,
+#                                                             propagation_time,
+#                                                             custom_model_dict={"HF": ["PM"]},
+#                                                             get_only_first=True)
 
-    for i, (model_types, model_names) in enumerate(dynamic_model_objects.items()):
-        for j, (model_name, dynamic_models) in enumerate(model_names.items()):
-            for k, dynamic_model in enumerate(dynamic_models):
+#     for i, (model_types, model_names) in enumerate(dynamic_model_objects.items()):
+#         for j, (model_name, dynamic_models) in enumerate(model_names.items()):
+#             for k, dynamic_model in enumerate(dynamic_models):
 
-                epochs, state_history, dependent_variables_history = \
-                    Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(dynamic_model,
-                                                                                        solve_variational_equations=False)
-
-
-                frame_converter = FrameConverter2.FrameConverter(state_history, dependent_variables_history[:, :6], epochs)
-                synodic_state_history, synodic_state_history_moon = frame_converter.InertialToSynodicHistoryConverter()
+#                 epochs, state_history, dependent_variables_history = \
+#                     Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(dynamic_model,
+#                                                                                         solve_variational_equations=False)
 
 
-
-    frame_converter = FrameConverter2.FrameConverter(reference_state_history, reference_state_history_moon, epochs)
-    synodic_state_history_ref, synodic_state_history_ref_moon = frame_converter.InertialToSynodicHistoryConverter()
-
-    # Get difference between epochs
-    diff_reference_state_history = np.diff(reference_state_history, 3, axis=0)
-
-    fig, ax = plt.subplots(2, 3, figsize=(12, 5))
-
-    ax[1][0].plot(synodic_state_history_ref[:, 0], synodic_state_history_ref[:, 2], color="red", lw=0.1)
-    ax[1][1].plot(synodic_state_history_ref[:, 1], synodic_state_history_ref[:, 2], color="red", lw=0.1)
-    ax[1][2].plot(synodic_state_history_ref[:, 0], synodic_state_history_ref[:, 1], color="red", lw=0.1)
-
-    ax[1][0].plot(synodic_state_history[:, 6], synodic_state_history[:, 8], color="darkblue", lw=0.3)
-    ax[1][1].plot(synodic_state_history[:, 7], synodic_state_history[:, 8], color="darkblue", lw=0.3)
-    ax[1][2].plot(synodic_state_history[:, 6], synodic_state_history[:, 7], color="darkblue", lw=0.3, label="LUMIO\nuncorrected")
-
-    for i in range(2):
-
-        axes_labels = ['X [-]', 'Y [-]', 'Z [-]']
-        for j in range(3):
-            ax[i][j].grid(alpha=0.3)
-            ax[i][0].set_xlabel(axes_labels[0])
-            ax[i][0].set_ylabel(axes_labels[2])
-            ax[i][1].set_xlabel(axes_labels[1])
-            ax[i][1].set_ylabel(axes_labels[2])
-            ax[i][2].set_xlabel(axes_labels[0])
-            ax[i][2].set_ylabel(axes_labels[1])
-
-        lw = 0.3
-        if i == 0:
-            label="LPF"
-            color="red"
-        else:
-            label="LUMIO"
-            color="blue"
-
-        ax[i][0].plot(synodic_state_history_ref[:, 6*i+0], synodic_state_history_ref[:, 6*i+2], color=color, lw=lw)
-        ax[i][1].plot(synodic_state_history_ref[:, 6*i+1], synodic_state_history_ref[:, 6*i+2], color=color, lw=lw)
-        ax[i][2].plot(synodic_state_history_ref[:, 6*i+0], synodic_state_history_ref[:, 6*i+1], color=color, lw=lw, label=label)
-        ax[i][0].scatter(synodic_state_history_ref[0, 6*i+0], synodic_state_history_ref[0, 6*i+2], color=color, lw=lw, s=80, marker="X")
-        ax[i][1].scatter(synodic_state_history_ref[0, 6*i+1], synodic_state_history_ref[0, 6*i+2], color=color, lw=lw, s=80, marker="X")
-        ax[i][2].scatter(synodic_state_history_ref[0, 6*i+0], synodic_state_history_ref[0, 6*i+1], color=color, lw=lw, s=80, marker="X", label="Start")
-        ax[i][0].scatter(synodic_state_history_ref_moon[:, 0], synodic_state_history_ref_moon[:, 2], s=50, color="darkgray")
-        ax[i][1].scatter(synodic_state_history_ref_moon[:, 1], synodic_state_history_ref_moon[:, 2], s=50, color="darkgray")
-        ax[i][2].scatter(synodic_state_history_ref_moon[:, 0], synodic_state_history_ref_moon[:, 1], s=50, color="darkgray", label="Moon")
-
-        ax[i][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
-
-    fig.suptitle("Reference and uncorrected orbit history, synodic frame")
-    plt.tight_layout()
-
-    utils.save_figure_to_folder([fig], [])
-
-    plt.show()
+#                 frame_converter = FrameConverter2.FrameConverter(state_history, dependent_variables_history[:, :6], epochs)
+#                 synodic_state_history, synodic_state_history_moon = frame_converter.InertialToSynodicHistoryConverter()
 
 
 
-continuities_reference(60390, 30, step_size=0.01)
+#     frame_converter = FrameConverter2.FrameConverter(reference_state_history, reference_state_history_moon, epochs)
+#     synodic_state_history_ref, synodic_state_history_ref_moon = frame_converter.InertialToSynodicHistoryConverter()
+
+#     # Get difference between epochs
+#     diff_reference_state_history = np.diff(reference_state_history, 3, axis=0)
+
+#     fig, ax = plt.subplots(2, 3, figsize=(12, 5))
+
+#     ax[1][0].plot(synodic_state_history_ref[:, 0], synodic_state_history_ref[:, 2], color="red", lw=0.1)
+#     ax[1][1].plot(synodic_state_history_ref[:, 1], synodic_state_history_ref[:, 2], color="red", lw=0.1)
+#     ax[1][2].plot(synodic_state_history_ref[:, 0], synodic_state_history_ref[:, 1], color="red", lw=0.1)
+
+#     ax[1][0].plot(synodic_state_history[:, 6], synodic_state_history[:, 8], color="darkblue", lw=0.3)
+#     ax[1][1].plot(synodic_state_history[:, 7], synodic_state_history[:, 8], color="darkblue", lw=0.3)
+#     ax[1][2].plot(synodic_state_history[:, 6], synodic_state_history[:, 7], color="darkblue", lw=0.3, label="LUMIO\nuncorrected")
+
+#     for i in range(2):
+
+#         axes_labels = ['X [-]', 'Y [-]', 'Z [-]']
+#         for j in range(3):
+#             ax[i][j].grid(alpha=0.3)
+#             ax[i][0].set_xlabel(axes_labels[0])
+#             ax[i][0].set_ylabel(axes_labels[2])
+#             ax[i][1].set_xlabel(axes_labels[1])
+#             ax[i][1].set_ylabel(axes_labels[2])
+#             ax[i][2].set_xlabel(axes_labels[0])
+#             ax[i][2].set_ylabel(axes_labels[1])
+
+#         lw = 0.3
+#         if i == 0:
+#             label="LPF"
+#             color="red"
+#         else:
+#             label="LUMIO"
+#             color="blue"
+
+#         ax[i][0].plot(synodic_state_history_ref[:, 6*i+0], synodic_state_history_ref[:, 6*i+2], color=color, lw=lw)
+#         ax[i][1].plot(synodic_state_history_ref[:, 6*i+1], synodic_state_history_ref[:, 6*i+2], color=color, lw=lw)
+#         ax[i][2].plot(synodic_state_history_ref[:, 6*i+0], synodic_state_history_ref[:, 6*i+1], color=color, lw=lw, label=label)
+#         ax[i][0].scatter(synodic_state_history_ref[0, 6*i+0], synodic_state_history_ref[0, 6*i+2], color=color, lw=lw, s=80, marker="X")
+#         ax[i][1].scatter(synodic_state_history_ref[0, 6*i+1], synodic_state_history_ref[0, 6*i+2], color=color, lw=lw, s=80, marker="X")
+#         ax[i][2].scatter(synodic_state_history_ref[0, 6*i+0], synodic_state_history_ref[0, 6*i+1], color=color, lw=lw, s=80, marker="X", label="Start")
+#         ax[i][0].scatter(synodic_state_history_ref_moon[:, 0], synodic_state_history_ref_moon[:, 2], s=50, color="darkgray")
+#         ax[i][1].scatter(synodic_state_history_ref_moon[:, 1], synodic_state_history_ref_moon[:, 2], s=50, color="darkgray")
+#         ax[i][2].scatter(synodic_state_history_ref_moon[:, 0], synodic_state_history_ref_moon[:, 1], s=50, color="darkgray", label="Moon")
+
+#         ax[i][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+#     fig.suptitle("Reference and uncorrected orbit history, synodic frame")
+#     plt.tight_layout()
+
+#     utils.save_figure_to_folder([fig], [])
+
+#     plt.show()
+
+
+
+# continuities_reference(60390, 30, step_size=0.01)
 
 
