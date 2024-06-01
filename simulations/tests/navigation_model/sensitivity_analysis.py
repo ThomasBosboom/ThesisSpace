@@ -27,7 +27,7 @@ from tests import utils
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 5
+num_runs = 3
 
 default_window_inputs = {
     "duration": 28,
@@ -38,16 +38,20 @@ default_window_inputs = {
 
 sensitivity_settings = {
     # "threshold": [0.1, 0.2, 0.5, 1, 2],
-    "arc_duration": [0.1, 0.2, 0.5, 1.0, 2.0],
+    "arc_duration": [0.1, 0.5, 1.0, 2.0],
     # "arc_interval": [0.5, 1, 2, 3],
     # "mission_start_epoch": [60390, 60395, 60400],
     # "noise_range": [1, 5, 10, 50],
     # "target_point_epochs": [[1], [2], [3], [2, 3], [1, 2, 3]],
     # "delta_v_min": [0.00, 0.01, 0.02],
-    # "station_keeping_error": [0.00, 0.01, 0.02]
+    # "station_keeping_error": [0.00, 0.01, 0.02],
 }
 
-navigation_outputs_sensitivity = comparison_helper_functions.generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, redirect_out=True)
+auxilary_settings = {
+    "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*10
+}
+
+navigation_outputs_sensitivity = comparison_helper_functions.generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, **auxilary_settings)
 
 
 # print(navigation_outputs_sensitivity)
@@ -232,12 +236,14 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
         # axs[0].set_title("3D RSS estimation error")
         axs[0].set_ylabel(r"||$\hat{\mathbf{r}}-\mathbf{r}_{true}$|| [m]")
         # axs[0].set_xlabel(f"Time since MJD start epoch [days]", fontsize="small")
+        axs[0].set_yscale("log")
 
 
         axs[1].grid(alpha=0.5, linestyle='--', zorder=0)
         # axs[1].set_title("Dispersion from reference orbit")
         axs[1].set_ylabel(r"||$\mathbf{r}_{true}-\mathbf{r}_{ref}$|| [m]")
         # axs[1].set_xlabel(f"Time since MJD start epoch [days]", fontsize="small")
+        axs[1].set_yscale("log")
 
 
         axs[2].set_ylabel(r"$||\Delta V||$ [m/s]")
@@ -245,6 +251,7 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
         # axs[2].set_title("Station keeping costs")
         axs[2].set_xlabel(f"Time since MJD start epoch [days]", fontsize="small")
         # axs[2].set_yscale("log")
+        axs[3].set_yscale("log")
 
         axs[3].grid(alpha=0.5, linestyle='--', zorder=0)
         # axs[3].set_title("Parameter sensitivity")

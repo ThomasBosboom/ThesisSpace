@@ -10,7 +10,7 @@ from tudatpy.kernel.numerical_simulation import estimation, estimation_setup
 from tudatpy.kernel.numerical_simulation.estimation_setup import observation
 
 file_directory = os.path.realpath(__file__)
-for _ in range(2):
+for _ in range(4):
     file_directory = os.path.dirname(file_directory)
     sys.path.append(file_directory)
 
@@ -24,19 +24,20 @@ class EstimationModel:
 
         # Setting up initial state error properties
         self.apriori_covariance = None
-        self.initial_estimation_error = None
+        # self.initial_estimation_error = None
 
         # Defining basis for observations
         self.bias_range = 0
-        self.noise_range = 2.98
-        self.observation_step_size_range = 600
+        self.noise_range = 1
+        self.observation_step_size_range = 300
         self.total_observation_count = None
         self.retransmission_delay = 0.5e-10
         self.integration_time = 0.5e-10
         self.time_drift_bias = 6.9e-20
-        self.maximum_iterations = 4
+        self.maximum_iterations = 10
         self.margin = 120
         self.redirect_out = True
+        self.seed = 0
 
         for key, value in kwargs.items():
             if hasattr(self, key):
@@ -83,6 +84,8 @@ class EstimationModel:
         self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.observation_step_size_range)
         if self.total_observation_count is not None:
             self.observation_times_range = np.linspace(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.total_observation_count)
+            # print((self.observation_times_range[-1]-self.observation_times_range[0])/len(self.observation_times_range))
+        # print(len(self.observation_times_range), self.observation_times_range[0], self.observation_times_range[-1])
 
         # Define observation simulation times for each link
         self.observation_simulation_settings = list()
@@ -92,14 +95,29 @@ class EstimationModel:
                                                                                                 self.observation_times_range,
                                                                                                 reference_link_end_type = observation.transmitter)])
 
+        # # Add noise levels to observations
+        # observation.add_gaussian_noise_to_observable(
+        #     self.observation_simulation_settings,
+        #     self.noise_range,
+        #     observation.n_way_range_type)
+
         # Add noise levels to observations
-        observation.add_gaussian_noise_to_observable(
+        # seed = int(self.dynamic_model.simulation_start_epoch)
+        save_noise = []
+        rng = np.random.default_rng(seed=self.seed)
+        print("seed used for estimation: ", self.seed)
+        def range_noise_function(time):
+            noise = rng.normal(loc=0, scale=self.noise_range, size=1)
+            save_noise.append(noise)
+            return noise
+
+        observation.add_noise_function_to_observable(
             self.observation_simulation_settings,
-            self.noise_range,
+            range_noise_function,
             observation.n_way_range_type)
 
         # Provide ancillary settings for n-way observables
-        # observation.two_way_range_ancilliary_settings(retransmission_delay = self.retransmission_delay)
+        observation.two_way_range_ancilliary_settings(retransmission_delay=self.retransmission_delay)
 
         # Create viability settings
         viability_setting_list = [observation.body_occultation_viability([self.dynamic_model.name_ELO, self.dynamic_model.name_LPO], self.dynamic_model.name_secondary)]
@@ -151,16 +169,6 @@ class EstimationModel:
         # Create the parameters that will be estimated
         self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.dynamic_model.bodies)
 
-        # self.set_simulated_observations()
-        # self.truth_model.set_propagator_settings()
-        # self.dynamic_model.set_propagator_settings()
-
-        # # Setup parameters settings to propagate the state transition matrix
-        # self.parameter_settings = estimation_setup.parameter.initial_states(self.truth_model.propagator_settings, self.truth_model.bodies)
-
-        # # Create the parameters that will be estimated
-        # self.parameters_to_estimate = estimation_setup.create_parameter_set(self.parameter_settings, self.truth_model.bodies)
-
 
     def set_estimator_settings(self):
 
@@ -173,40 +181,11 @@ class EstimationModel:
             self.observation_settings_list,
             self.dynamic_model.propagator_settings)
 
-        # # Save the true parameters to later analyse the error
-        # self.truth_parameters = self.parameters_to_estimate.parameter_vector
-
-        # # Perturb the initial state estimate from the truth
-        # self.perturbed_parameters = self.truth_parameters.copy()
-        # if self.initial_estimation_error is not None:
-        #     self.perturbed_parameters += self.initial_estimation_error
-        # self.parameters_to_estimate.parameter_vector[:12] = self.perturbed_parameters
-
-        # print("Truth at start of arc: ", self.truth_parameters)
-        # print("Estimate at start of arc: ", self.parameters_to_estimate.parameter_vector)
-
-
-        # print("Dynamic model initial state: \n", self.dynamic_model.initial_state)
-        # print("Truth model initial state: \n", self.truth_model.initial_state)
-        # print("DIFFERENCE: \n", self.dynamic_model.initial_state-self.truth_model.initial_state)
-
-        # # # Save the true parameters to later analyse the error
+        # Save the true parameters to later analyse the error
         self.truth_parameters = self.parameters_to_estimate.parameter_vector
 
-        # # Perturb the initial state estimate from the truth
-        # self.perturbed_parameters = self.truth_parameters.copy()
-        # if self.initial_estimation_error is not None:
-        #     self.perturbed_parameters += self.initial_estimation_error
-        # self.parameters_to_estimate.parameter_vector = self.perturbed_parameters
-
-        # print("Truth at start of arc: ", self.truth_parameters)
-        # print("Estimate at start of arc: ", self.parameters_to_estimate.parameter_vector)
-
-
         # Create input object for the estimation
-        convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=self.maximum_iterations,
-                                                                        # minimum_residual_change = 1.5*self.noise_range
-                                                                        )
+        convergence_checker = estimation.estimation_convergence_checker(maximum_iterations=self.maximum_iterations)
         if self.apriori_covariance is None:
             self.estimation_input = estimation.EstimationInput(observations_and_times=self.simulated_observations,
                                                                convergence_checker=convergence_checker)
@@ -228,22 +207,9 @@ class EstimationModel:
 
         self.set_estimator_settings()
 
-        # print(self.observation_times_range[0], self.observation_times_range[-1], \
-        #     (self.observation_times_range[-1], self.observation_times_range[0]),\
-        # self.observation_times_range)
-
-        # od_error = self.parameters_to_estimate.parameter_vector-self.truth_parameters
-        # print("Estimation error before estimation: \n", od_error)
         # Run the estimation
         with util.redirect_std(redirect_out=self.redirect_out):
             self.estimation_output = self.estimator.perform_estimation(self.estimation_input)
-
-        # print(self.noise_range)
-        # print(self.estimation_output.formal_errors)
-
-        # od_error = self.estimation_output.parameter_history[:, self.estimation_output.best_iteration]-self.truth_model.initial_state
-        # print("Estimation error after estimation: \n", od_error)
-        # print("LUMIO pos 3D OD error: \n", np.linalg.norm(od_error[6:9]))
 
         return self
 

@@ -14,7 +14,7 @@ for _ in range(5):
     sys.path.append(file_directory)
 
 # Define current time
-current_time = datetime.now().strftime("%d%m%H%M")
+current_time = datetime.now().strftime("%Y%m%d%H%M")
 
 # from tests import utils, helper_functions
 import comparison_helper_functions
@@ -26,25 +26,25 @@ from tests import utils
 ###### Define the observation windows ###########################
 #################################################################
 
-num_runs = 2
-duration = 28
+num_runs = 10
+duration = 14
 mission_start_epoch = 60390
 
 # Collect a series of observation window sets to compare
-observation_windows_settings = {
-    "Perilune": [
-        (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, mission_start_epoch=mission_start_epoch), num_runs),
-    ],
-    # "Apolune": [
-    #     (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, apolune=True), num_runs),
-    # ],
-    # "Random": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
-    # ],
-    # "Constant": [
-    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
-    # ]
-}
+# observation_windows_settings = {
+#     "Perilune": [
+#         (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, mission_start_epoch=mission_start_epoch), num_runs),
+#     ],
+#     "Apolune": [
+#         (comparison_helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, apolune=True), num_runs),
+#     ],
+#     "Random": [
+#         (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
+#     ],
+#     "Constant": [
+#         (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
+#     ]
+# }
 
 observation_windows_settings = {
     # "Random1": [
@@ -56,28 +56,55 @@ observation_windows_settings = {
     # "Random3": [
     #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=2), num_runs),
     # ],
-    "Constant": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
-    ]
+    # "Constant1": [
+    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
+    # ],
+    # "Constant2": [
+    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=0.51, arc_duration=0.5, mission_start_epoch=mission_start_epoch), num_runs),
+    # ],
+    # "Constant3": [
+    #     (comparison_helper_functions.get_constant_arc_observation_windows(18, arc_interval=3, threshold=1, arc_duration=0.2, mission_start_epoch=mission_start_epoch), num_runs),
+    # ],
+    "0.3": [
+        ([(60390, 60390.3)], num_runs),
+    ],
+    "0.7": [
+        ([(60390, 60390.7)], num_runs),
+    ],
+    "1": [
+        ([(60390, 60391)], num_runs),
+    ],
+    "1.1": [
+        ([(60390, 60391.1)], num_runs),
+    ],
+    "1.2": [
+        ([(60390, 60391.2)], num_runs),
+    ],
+    "1.4": [
+        ([(60390, 60391.4)], num_runs),
+    ],
+    "1.5": [
+        ([(60390, 60391.5)], num_runs),
+    ],
+}
+
+
+num_runs=1
+observation_windows_settings = {
+    "test1": [([(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)], num_runs)]
 }
 
 
 print(observation_windows_settings)
 
 
-
 #################################################################
 ###### Post processing of the navigation results ################
 #################################################################
 
-auxilary_settings = {
-    "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-    "initial_estimation_error": np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1,
-    "apriori_covariance": np.diag([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1**2,
-    "mission_start_epoch": mission_start_epoch
-}
-
 # Run the navigation routine using given settings
+# auxilary_settings = {"noise_range": 2.97, "mission_start_epoch": mission_start_epoch}
+auxilary_settings = {"noise_range": 2.97}
 navigation_outputs = comparison_helper_functions.generate_navigation_outputs(observation_windows_settings, **auxilary_settings)
 
 
@@ -85,12 +112,11 @@ navigation_outputs = comparison_helper_functions.generate_navigation_outputs(obs
 ###### Total maneuvre cost #################################
 ############################################################
 
-### Bar chart of the total station-keeping costs
+# Bar chart of the total station-keeping costs
 fig, ax = plt.subplots(figsize=(10, 4))
 objective_value_results = comparison_helper_functions.generate_objective_value_results(navigation_outputs)
 comparison_helper_functions.bar_plot(ax, objective_value_results, bar_labeler=None)
 utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_objective_value_results"], custom_sub_folder_name=file_name)
-# plt.show()
 
 
 ############################################################
@@ -99,7 +125,7 @@ utils.save_figure_to_folder(figs=[fig], labels=[current_time+"_objective_value_r
 
 print("Plotting results...")
 
-detailed_results = [["Random3", "Constant"], [0, 1], [0]]
+detailed_results = [["Constant1", "Constant2", "Constant3", "test1"], [0], [0, 1]]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
     for case_index, window_case in enumerate(navigation_outputs_cases):
         for run_index, (run, navigation_output) in enumerate(window_case.items()):
@@ -118,8 +144,9 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         # plot_navigation_results.plot_formal_error_history()
                         plot_navigation_results.plot_observations()
                         # plot_navigation_results.plot_observability()
-                        plot_navigation_results.plot_od_error_dispersion_relation()
+                        # plot_navigation_results.plot_od_error_dispersion_relation()
                         # plot_navigation_results.plot_correlation_history()
+                        plot_navigation_results.plot_condition_numbers()
 
 
 ############################################################
@@ -176,6 +203,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                                 alpha=0.2,
                                 label=f"Tracking arc" if k==0 and j==1 and window_index==0 and case_index==0 else None
                                 )
+
 
 
 
@@ -285,12 +313,12 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                 axs_twin.plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 6:9], axis=1),
                                 color=color,
                                 ls=line_style,
-                                alpha=0.3)
+                                alpha=0.7)
 
-            axs_twin.plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
-                            color=color,
-                            ls='--',
-                            alpha=0.2)
+            # axs_twin.plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
+            #                 color=color,
+            #                 ls='--',
+            #                 alpha=0.2)
 
         # Plot the station keeping costs standard deviations
         for delta_v_runs_dict_index, (end_epoch, delta_v_runs) in enumerate(delta_v_runs_dict.items()):
@@ -430,11 +458,11 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         color=colors[i],
                         alpha=1)
 
-                rss_values = np.mean(np.sqrt(np.sum(np.square(mean_full_estimation_error_histories[:, 3*k+6*j:3*k+6*j+3]), axis=1)))
+                rss_values = np.sqrt(np.sum(np.square(mean_full_estimation_error_histories[-1, 3*k+6*j:3*k+6*j+3])))
                 if type_index == 0:
-                    axs[type_index][n].set_title(titles[n]+f"\nMean RSS: {np.round(rss_values, 2)} "+units[n], fontsize="small")
+                    axs[type_index][n].set_title(titles[n]+f"\nFinal RSS: {np.round(rss_values, 3)} "+units[n], fontsize="small")
                 else:
-                    axs[type_index][n].set_title(f"Mean RSS: {np.round(rss_values, 1)} "+units[n], fontsize="small")
+                    axs[type_index][n].set_title(f"Final RSS: {np.round(rss_values, 3)} "+units[n], fontsize="small")
                 n += 1
 
 
@@ -442,7 +470,7 @@ axs[0][-1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
 # fig.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
 fig.suptitle(f"Estimaton error history \nModel: on-board: {navigation_simulator.model_name}{navigation_simulator.model_number}, truth: {navigation_simulator.model_name_truth}{navigation_simulator.model_number_truth}")
-# fig4.suptitle("Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
+# fig.suptitle(r"Estimation error history \nRange-only, $1\sigma_{\rho}$ = ", navigation_simulator.noise_range, "[$m$], $t_{obs}$ = ", navigation_simulator.observation_step_size_range, "[$s$]")
 plt.tight_layout()
 
 

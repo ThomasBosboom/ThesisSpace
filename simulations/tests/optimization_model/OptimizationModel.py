@@ -12,7 +12,7 @@ for _ in range(3):
     sys.path.append(file_directory)
 
 # Define current time
-current_time = datetime.now().strftime("%d%m%H%M")
+current_time = datetime.now().strftime("%Y%m%d%H%M")
 
 # Own
 from src import NavigationSimulator
@@ -87,7 +87,7 @@ class OptimizationModel:
             # print(self.iteration_history[self.iteration])
             self.save_to_json()
 
-            print(f"Function evaluation: \nDesign vector: {design_vector} \nObjective: {objective_value}")
+            print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value}")
 
             self.run_counter += 1
 
@@ -115,6 +115,7 @@ class OptimizationModel:
 
         # Initialize the design vector with the maximum number of arcs
         self.initial_guess = np.full(len(self.bounds), self.arc_length).tolist()
+        print("Initial observation windows: ", self.generate_observation_windows(self.initial_guess))
 
         result = sp.optimize.minimize(
             fun=wrapped_objective,
@@ -144,6 +145,7 @@ class OptimizationModel:
 class ObjectiveFunctions():
 
     def __init__(self, navigation_simulator, **kwargs):
+
         self.navigation_simulator = navigation_simulator
         self.num_runs = 2
         self.seed = 0
@@ -156,12 +158,25 @@ class ObjectiveFunctions():
         return observation_windows[-1][-1]
 
     def station_keeping_cost(self, observation_windows):
+
         cost_list = []
         for run in range(self.num_runs):
+
             print(f"Run {run+1} of {self.num_runs}")
-            navigation_results = self.navigation_simulator.perform_navigation(observation_windows, seed=self.seed).navigation_results
-            delta_v = np.sum(np.linalg.norm(navigation_results[8][1], axis=1)[::])
+
+            # Extracting the relevant objects
+            navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=self.seed)
+            navigation_results = navigation_output.navigation_results
+            navigation_simulator = navigation_output.navigation_simulator
+
+            delta_v_dict = navigation_simulator.delta_v_dict
+            delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+            delta_v_history = np.stack(list(delta_v_dict.values()))
+            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+0)
+            # delta_v = np.sum(np.linalg.norm(navigation_results[8][1], axis=1)[::])
             cost_list.append(delta_v)
+
+            self.navigation_simulator.__init__()
 
         total_cost = np.mean(cost_list)
 
@@ -191,17 +206,12 @@ class ObjectiveFunctions():
 # Example usage:
 if __name__ == "__main__":
 
-    auxilary_settings = {
-        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-        "initial_estimation_error": np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*2,
-        "apriori_covariance": np.diag([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*2**2,
-    }
-
+    auxilary_settings = {"step_size": 0.01}
     navigation_simulator = NavigationSimulator.NavigationSimulator(**auxilary_settings)
 
-    optimization_model = OptimizationModel(duration=28, arc_length=1, arc_interval=3, max_iterations=40)
+    optimization_model = OptimizationModel(duration=28, arc_length=1, arc_interval=3, max_iterations=100, optimization_method="Nelder-Mead")
 
-    objective_functions = ObjectiveFunctions(navigation_simulator, num_runs=4)
+    objective_functions = ObjectiveFunctions(navigation_simulator, num_runs=1)
     # optimization_model.optimize(objective_functions.test)
     optimization_model.optimize(objective_functions.station_keeping_cost)
     # optimization_model.optimize(objective_functions.overall_uncertainty)

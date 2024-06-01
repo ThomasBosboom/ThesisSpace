@@ -52,7 +52,7 @@ def get_random_arc_observation_windows(duration=28, arc_interval_vars=[3.5, 0.1]
     return observation_windows
 
 
-def get_constant_arc_observation_windows(duration=28, arc_interval=3.5, threshold=0.5, arc_duration=0.5, mission_start_epoch=60390):
+def get_constant_arc_observation_windows(duration=28, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=60390):
 
     # threshold=arc_duration
     # Generate a vector with OD durations
@@ -76,6 +76,29 @@ def get_constant_arc_observation_windows(duration=28, arc_interval=3.5, threshol
     return observation_windows
 
 
+def get_constant_arc_with_subarcs_observation_windows(duration=28, arc_interval=3.5, threshold=[1, 0.1], arc_duration=[0.5, 0.1], mission_start_epoch=60390):
+
+    threshold_subarcs = np.linspace(0, threshold[0], int(threshold[0]/threshold[1]+1))
+    arc_subarcs = np.linspace(0, arc_duration[0], int(arc_duration[0]/arc_duration[1]+1))
+
+    # Extract threshold observation windows
+    threshold_observation_windows = [(threshold_subarcs[i], threshold_subarcs[i + 1]) for i in range(len(threshold_subarcs) - 1)]
+    arc_observation_windows = [(arc_subarcs[i], arc_subarcs[i + 1]) for i in range(len(arc_subarcs) - 1)]
+    print(threshold_observation_windows, arc_observation_windows)
+
+    observation_windows = threshold_observation_windows
+    while observation_windows[-1][-1]+arc_interval+arc_subarcs[-1]<duration:
+        off_set = observation_windows[-1][-1]+arc_interval
+        observation_windows.extend([(tup[0] + off_set, tup[1] + off_set) for tup in arc_observation_windows])
+
+    observation_windows = mission_start_epoch + np.array(observation_windows)
+    observation_windows = [tuple(window) for window in observation_windows]
+
+    return observation_windows
+
+# print(get_constant_arc_with_subarcs_observation_windows(duration=28, arc_interval=3.5, threshold=[1, 0.1], arc_duration=[0.5, 0.1], mission_start_epoch=60390))
+
+
 def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_size=0.01, mission_start_epoch=60390, margin=0.05,  apolune=False, pass_interval=7, threshold=0):
 
     ### Constant arc, around perilune
@@ -92,7 +115,6 @@ def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_siz
     else:
         indices = np.arange(0, total_indices, period)
 
-
     if pass_interval == 0:
         pass_interval = None
 
@@ -108,15 +130,14 @@ def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_siz
 
     return observation_windows
 
+# print(get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_size=0.01, mission_start_epoch=60390, margin=0.05,  apolune=False, pass_interval=7, threshold=0))
+
 
 #################################################################
 ###### Generate NavigationOutput objects ########################
 #################################################################
 
-def generate_navigation_outputs(observation_windows_settings, seed=0, **kwargs):
-
-    np.random.seed(seed)
-    navigation_simulator = NavigationSimulator.NavigationSimulator(**kwargs)
+def generate_navigation_outputs(observation_windows_settings, **kwargs):
 
     # Run the navigation routine using given settings
     navigation_outputs = {}
@@ -128,7 +149,8 @@ def generate_navigation_outputs(observation_windows_settings, seed=0, **kwargs):
             navigation_output_per_run = {}
             for run in range(num_runs):
 
-                navigation_output_per_run[run] = navigation_simulator.perform_navigation(observation_windows)
+                navigation_simulator = NavigationSimulator.NavigationSimulator(**kwargs)
+                navigation_output_per_run[run] = navigation_simulator.perform_navigation(observation_windows, seed=run)
 
             navigation_output_per_type.append(navigation_output_per_run)
 
@@ -151,6 +173,10 @@ def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_setti
         for arg_index, arg_value in enumerate(arg_values):
 
             print("Input: \n", {arg_name: arg_value})
+
+            for key, value in kwargs.items():
+                if key==arg_name:
+                    kwargs.pop(key)
 
             if arg_name in ["threshold", "arc_interval", "arc_duration", "mission_start_epoch"]:
 
@@ -256,7 +282,7 @@ def bar_plot(ax, data, group_stretch=0.8, bar_stretch=0.95,
     ax.set_xticks(group_centers)
     ax.set_xlabel("Tracking window scenario")
     ax.set_ylabel(r'||$\Delta V$|| [m/s]')
-    ax.set_title(f'Station keeping costs, simulation of {28} [days]')
+    ax.set_title(f'Station keeping costs')
 
     for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
                                                          group_centers)):

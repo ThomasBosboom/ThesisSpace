@@ -54,7 +54,7 @@ class NavigationSimulator(NavigationSimulatorBase):
 
     def perform_navigation(self, observation_windows, seed=0):
 
-        np.random.seed(seed)
+        self.seed = seed
 
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(self.step_size).rstrip('0')
@@ -74,6 +74,8 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
         self.times = list(set(self.times))
         self.times = sorted(self.times)
+
+        # print(self.decimal_places, self.times, self.seed)
 
         self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
@@ -153,12 +155,13 @@ class NavigationSimulator(NavigationSimulatorBase):
                 # print("length: \n", epochs[0], epochs[-1], len(state_history_estimated))
 
             # Save the propagated histories of the uncertainties
-            propagated_covariance_initial = dict()
-            propagated_formal_errors_initial = dict()
-            for i in range(len(epochs)):
-                propagated_covariance = state_transition_matrix_history_estimated[i] @ self.apriori_covariance @ state_transition_matrix_history_estimated[i].T
-                propagated_covariance_initial.update({epochs[i]: propagated_covariance})
-                propagated_formal_errors_initial.update({epochs[i]: np.sqrt(np.diagonal(propagated_covariance))})
+            if self.apriori_covariance is not None:
+                propagated_covariance_initial = dict()
+                propagated_formal_errors_initial = dict()
+                for i in range(len(epochs)):
+                    propagated_covariance = state_transition_matrix_history_estimated[i] @ self.apriori_covariance @ state_transition_matrix_history_estimated[i].T
+                    propagated_covariance_initial.update({epochs[i]: propagated_covariance})
+                    propagated_formal_errors_initial.update({epochs[i]: np.sqrt(np.diagonal(propagated_covariance))})
 
 
             ##############################################################
@@ -187,13 +190,13 @@ class NavigationSimulator(NavigationSimulatorBase):
                     self.maximum_iterations = self.maximum_iterations_first_arc
 
                 estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self))
-                # print(vars(estimation_model))
+                # print("Inputs EstimationModel: ", vars(estimation_model))
                 estimation_model_result = estimation_model.get_estimation_results()
                 estimation_output = estimation_model_result.estimation_output
                 parameter_history = estimation_output.parameter_history
                 final_covariance = estimation_output.covariance
                 best_iteration = estimation_output.best_iteration
-                final_residuals = estimation_output.final_residuals
+                residual_history = estimation_output.residual_history
 
                 dynamic_model.custom_initial_state = parameter_history[:, best_iteration]
                 epochs_final, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
@@ -226,13 +229,13 @@ class NavigationSimulator(NavigationSimulatorBase):
                 # print("difference best and best and truth after: ", np.linalg.norm(state_history_final[-1,:] - state_history_truth[-1,:]))
                 # print("difference best and final and truth after: ", np.linalg.norm(state_history_final_test[-1,:] - state_history_truth[-1,:]))
 
-
-                propagated_covariance_final = dict()
-                propagated_formal_errors_final = dict()
-                for i in range(len(epochs_final)):
-                    propagated_covariance = state_transition_history_matrix_final[i] @ final_covariance @ state_transition_history_matrix_final[i].T
-                    propagated_covariance_final.update({epochs_final[i]: propagated_covariance})
-                    propagated_formal_errors_final.update({epochs_final[i]: np.sqrt(np.diagonal(propagated_covariance))})
+                if self.apriori_covariance is not None:
+                    propagated_covariance_final = dict()
+                    propagated_formal_errors_final = dict()
+                    for i in range(len(epochs_final)):
+                        propagated_covariance = state_transition_history_matrix_final[i] @ final_covariance @ state_transition_history_matrix_final[i].T
+                        propagated_covariance_final.update({epochs_final[i]: propagated_covariance})
+                        propagated_formal_errors_final.update({epochs_final[i]: np.sqrt(np.diagonal(propagated_covariance))})
 
                 # Save the results relevant to the estimation arc
                 self.full_state_history_final_dict.update(dict(zip(epochs_final, state_history_final)))
@@ -327,13 +330,19 @@ class NavigationSimulator(NavigationSimulatorBase):
                             self.delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
 
                             # print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
-                            print(f"Correction at {self.times[navigation_arc+1]}: ", np.linalg.norm(delta_v), " m/s")
+                            print(f"Correction at {self.times[navigation_arc+1]}: ", \
+                                np.sqrt(np.mean(residual_history[:, best_iteration]**2)), "m   ", \
+                                np.linalg.norm(delta_v), "m/s   ", \
+                                np.linalg.norm(self.initial_estimation_error[6:9]), "m   ", \
+                                np.linalg.norm(dispersion[:3]), "m"
+                            )
 
 
             if navigation_arc < len(self.times)-2:
                 navigation_arc += 1
 
             else:
+                # self.__init__()
                 break
 
         # print("End navigation simulation")

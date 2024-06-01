@@ -42,7 +42,7 @@ class StationKeeping:
                                                                                                             custom_initial_state=self.dynamic_model.custom_initial_state,
                                                                                                             custom_propagation_time=self.dynamic_model.propagation_time)
 
-
+        # print("state_history", state_history)
         # epochs, reference_state_history, dependent_variables_history_reference, state_transition_matrix_history_reference = \
         #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(self.dynamic_model,
         #                                                                                                     custom_initial_state=reference_state_history[0, :],
@@ -65,8 +65,8 @@ class StationKeeping:
         # print(R_i.T + R_i, Q.T + Q)
         Phi = state_transition_matrix_history
 
-        final_sum = np.empty((3,))
-        total_sum = np.empty((3,3))
+        final_sum = np.zeros((3,))
+        total_sum = np.zeros((3,3))
         for target_point_epoch in target_point_epochs:
 
             # Define the indexes
@@ -76,8 +76,6 @@ class StationKeeping:
             dr_tc = state_deviation_history[i_tc,6:9]
             dv_tc = state_deviation_history[i_tc,9:12]
             dr_ti = state_deviation_history[i_ti,6:9]
-            # print(f"Difference estimated and reference orbit at {epochs[0]}: \n",
-            # np.linalg.norm(dr_tc), np.linalg.norm(dv_tc))
 
             # Define the STMs at the right epochs
             Phi_tcti = Phi[i_ti] @ np.linalg.inv(Phi[i_tc])
@@ -88,24 +86,26 @@ class StationKeeping:
             Phi_tcti_rv = Phi_tcti[6:9,9:12]
 
             # Calculate the TPM equations using the STMs for a given target point
-            total_sum = np.add(total_sum, Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tvti_rv)
+            total_sum += Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tvti_rv
 
             alpha_i = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rr
             beta_i  = Phi_tvti_rv.T @ (R_i.T + R_i) @ Phi_tcti_rv
 
-            final_sum = np.add(final_sum, alpha_i @ dr_tc + beta_i @ dv_tc)
+            final_sum += alpha_i @ dr_tc + beta_i @ dv_tc
 
         A = -np.linalg.inv(np.add((Q.T+Q), total_sum))
 
         delta_v = A @ final_sum
+
+        # print("A", A, "final_sum", final_sum)
 
         # delta_v = -np.linalg.inv(Phi_tcti_rv) @ Phi_tcti_rr @ dr_tc - dv_tc
         return delta_v, np.concatenate((dr_tc, dv_tc))
 
 
 
-# dynamic_models = utils.get_dynamic_model_objects(60391,
-#                                                         1,
+# dynamic_models = utils.get_dynamic_model_objects(60390,
+#                                                         4,
 #                                                         custom_model_dict=None,
 #                                                         get_only_first=False,
 #                                                         custom_initial_state=None)
@@ -120,16 +120,15 @@ class StationKeeping:
 # import time
 
 # # lists = [[7, [21]], [7, [21, 28]]]
-# lists = [[4, [7]]]
-# for i, list1 in enumerate(lists):
-#     print(list1)
-#     start_time = time.time()
-#     station_keeping = StationKeeping(dynamic_model, custom_initial_state=None, custom_propagation_time=max(list1[1]), step_size=0.01)
-#     delta_v = station_keeping.get_corrected_state_vector(cut_off_epoch=list1[0], correction_epoch=list1[0], target_point_epochs=list1[1])
-#     print("delta_v:", delta_v)
-#     lists[i].extend([delta_v, time.time()-start_time])
-# print(lists)
-# plt.show()
+# lists = [[1, [4]]]
+# cost_list = []
+# for _ in range(2):
+#     for i, list1 in enumerate(lists):
+#         station_keeping = StationKeeping(dynamic_model, step_size=0.01)
+#         delta_v, dispersion = station_keeping.get_corrected_state_vector(cut_off_epoch=list1[0], correction_epoch=list1[0], target_point_epochs=list1[1])
+#         # print("delta_v:", delta_v)
+#         cost_list.extend([np.linalg.norm(delta_v), dispersion])
+# print(cost_list)
 
 
 
@@ -138,4 +137,4 @@ class StationKeeping:
 
 
 
-#
+

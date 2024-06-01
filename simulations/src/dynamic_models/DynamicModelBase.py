@@ -54,7 +54,7 @@ class DynamicModelBase:
         self.use_variable_step_size_integrator = True
         self.current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkf_45
         self.current_tolerance = 1e-18*constants.JULIAN_DAY
-        self.initial_time_step = 1e-1*constants.JULIAN_DAY
+        self.initial_time_step = 1e-3*constants.JULIAN_DAY
 
         # Initial state based on reference orbit
         initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)

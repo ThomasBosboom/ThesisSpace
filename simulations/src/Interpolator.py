@@ -40,7 +40,6 @@ class Interpolator:
 
         self.simulation_start_epoch = dynamic_model.simulation_start_epoch
         self.simulation_end_epoch = dynamic_model.simulation_end_epoch
-        # print("Interpolator:", self.simulation_start_epoch, self.simulation_end_epoch)
 
         # Define updated time vector that is the same for all dynamic models irrespective of their own time vector
         interp_epochs = np.arange(self.simulation_start_epoch, self.simulation_end_epoch+self.step_size, self.step_size)
