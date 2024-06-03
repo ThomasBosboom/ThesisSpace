@@ -35,7 +35,7 @@ class EstimationModel:
         self.integration_time = 0.5e-10
         self.time_drift_bias = 6.9e-20
         self.maximum_iterations = 10
-        self.margin = 120
+        self.margin = 0
         self.redirect_out = True
         self.seed = 0
 
@@ -105,7 +105,7 @@ class EstimationModel:
         # seed = int(self.dynamic_model.simulation_start_epoch)
         save_noise = []
         rng = np.random.default_rng(seed=self.seed)
-        print("seed used for estimation: ", self.seed)
+        # print("seed used for estimation: ", self.seed, self.margin, self.observation_times_range[0])
         def range_noise_function(time):
             noise = rng.normal(loc=0, scale=self.noise_range, size=1)
             save_noise.append(noise)

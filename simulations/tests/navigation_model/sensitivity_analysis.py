@@ -27,7 +27,7 @@ from tests import utils
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 3
+num_runs = 1
 
 default_window_inputs = {
     "duration": 28,
@@ -38,7 +38,8 @@ default_window_inputs = {
 
 sensitivity_settings = {
     # "threshold": [0.1, 0.2, 0.5, 1, 2],
-    "arc_duration": [0.1, 0.5, 1.0, 2.0],
+    # "arc_duration": [0.1, 0.5, 1.0, 2.0],
+    "arc_duration": [0.1, 0.2]
     # "arc_interval": [0.5, 1, 2, 3],
     # "mission_start_epoch": [60390, 60395, 60400],
     # "noise_range": [1, 5, 10, 50],
@@ -48,7 +49,7 @@ sensitivity_settings = {
 }
 
 auxilary_settings = {
-    "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*10
+    "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
 }
 
 navigation_outputs_sensitivity = comparison_helper_functions.generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, **auxilary_settings)
@@ -203,30 +204,57 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
 
             delta_v_runs_dict_sensitivity_case[str(sensitivity_settings[sensitivity_type][index])] = delta_v_runs_dict
 
+        print("DELTA V DICT: ", delta_v_runs_dict_sensitivity_case)
+
         stats_types = {}
+        stats_types_14 = {}
         for index, (type_key, type_value) in enumerate(delta_v_runs_dict_sensitivity_case.items()):
 
             runs = len(list(type_value.values())[0])
             sums = {}
+            sums_14 = {}
             for run in range(runs):
                 value_list = []
+                value_list_14 = []
                 for key, value in delta_v_runs_dict_sensitivity_case[type_key].items():
                     value_list.append(value[run])
+                    if key >= navigation_simulator.mission_start_epoch + 14:
+                        value_list_14.append(value[run])
                 sums[run] = value_list
+                sums_14[run] = value_list_14
 
             for key, value in sums.items():
                 sums[key] = np.sum(value)
+            for key, value in sums_14.items():
+                sums_14[key] = np.sum(value)
 
             all_values = list(sums.values())
             stats_types[type_key] = [np.mean(all_values), np.std(all_values)]
+
+            all_values_14 = list(sums_14.values())
+            stats_types_14[type_key] = [np.mean(all_values_14), np.std(all_values_14)]
 
             axs[3].barh(type_key, np.mean(all_values),
                 color=shades[index],
                 # width=0.2,
                 xerr=np.std(all_values),
                 capsize=4,
-                label=f"{sensitivity_settings[sensitivity_type][index]}"
+                label=f"{sensitivity_settings[sensitivity_type][index]}",
+                # left=np.mean(all_values)
                 )
+
+            axs[3].barh(type_key, np.mean(all_values_14),
+                # color=shades[index],
+                color="white", hatch='/', edgecolor='black', alpha=0.6, height=0.6,
+                # width=0.2,
+                xerr=np.std(all_values_14),
+                capsize=4,
+                label=f"Last 14 days" if type_key==list(delta_v_runs_dict_sensitivity_case.keys())[-1] else None,
+                )
+
+
+
+
 
         sensitivity_statistics[sensitivity_type] = stats_types
 
@@ -243,7 +271,7 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
         # axs[1].set_title("Dispersion from reference orbit")
         axs[1].set_ylabel(r"||$\mathbf{r}_{true}-\mathbf{r}_{ref}$|| [m]")
         # axs[1].set_xlabel(f"Time since MJD start epoch [days]", fontsize="small")
-        axs[1].set_yscale("log")
+        # axs[1].set_yscale("log")
 
 
         axs[2].set_ylabel(r"$||\Delta V||$ [m/s]")
@@ -251,7 +279,7 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
         # axs[2].set_title("Station keeping costs")
         axs[2].set_xlabel(f"Time since MJD start epoch [days]", fontsize="small")
         # axs[2].set_yscale("log")
-        axs[3].set_yscale("log")
+        # axs[3].set_yscale("log")
 
         axs[3].grid(alpha=0.5, linestyle='--', zorder=0)
         # axs[3].set_title("Parameter sensitivity")

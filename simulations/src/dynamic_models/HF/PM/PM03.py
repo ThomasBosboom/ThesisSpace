@@ -85,8 +85,8 @@ class HighFidelityDynamicModel(DynamicModelBase):
                                                                                             self.current_coefficient_set,
                                                                                             np.finfo(float).eps,
                                                                                             np.inf,
-                                                                                            self.current_tolerance,
-                                                                                            self.current_tolerance)
+                                                                                            self.relative_error_tolerance,
+                                                                                            self.absolute_error_tolerance)
         else:
             self.integrator_settings = propagation_setup.integrator.runge_kutta_fixed_step(self.initial_time_step,
                                                                                            self.current_coefficient_set)

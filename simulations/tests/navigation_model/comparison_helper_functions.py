@@ -54,7 +54,7 @@ def get_random_arc_observation_windows(duration=28, arc_interval_vars=[3.5, 0.1]
 
 def get_constant_arc_observation_windows(duration=28, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=60390):
 
-    # threshold=arc_duration
+    threshold=arc_duration
     # Generate a vector with OD durations
     epoch = mission_start_epoch + threshold + arc_interval + arc_duration
     skm_epochs = []
@@ -84,7 +84,6 @@ def get_constant_arc_with_subarcs_observation_windows(duration=28, arc_interval=
     # Extract threshold observation windows
     threshold_observation_windows = [(threshold_subarcs[i], threshold_subarcs[i + 1]) for i in range(len(threshold_subarcs) - 1)]
     arc_observation_windows = [(arc_subarcs[i], arc_subarcs[i + 1]) for i in range(len(arc_subarcs) - 1)]
-    print(threshold_observation_windows, arc_observation_windows)
 
     observation_windows = threshold_observation_windows
     while observation_windows[-1][-1]+arc_interval+arc_subarcs[-1]<duration:
@@ -208,7 +207,7 @@ def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_setti
     return navigation_outputs_sensitivity
 
 
-def generate_objective_value_results(navigation_outputs):
+def generate_objective_value_results(navigation_outputs, evaluation_threshold=14):
 
     # Get objective value history
     objective_value_results = {}
@@ -228,14 +227,16 @@ def generate_objective_value_results(navigation_outputs):
                 navigation_simulator = navigation_output.navigation_simulator
 
                 # Extracting the relevant results from objects
-                delta_v = navigation_results[8][1]
-                delta_v_per_skm = np.linalg.norm(delta_v, axis=1)
-                objective_value = np.sum(delta_v_per_skm)
+                delta_v_dict = navigation_simulator.delta_v_dict
+                delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+                delta_v_history = np.stack(list(delta_v_dict.values()))
+                delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
 
+                delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
                 delta_v_per_skm_list.append(delta_v_per_skm.tolist())
-                objective_values.append(objective_value)
+                objective_values.append(delta_v)
 
-                print("Objective: ", delta_v_per_skm, objective_value)
+                print("Objective: ", delta_v_per_skm, delta_v)
 
             objective_value_results_per_window_case.append((len(objective_values),
                                                         min(objective_values),
@@ -255,58 +256,72 @@ def generate_objective_value_results(navigation_outputs):
 #################################################################
 
 
-def bar_plot(ax, data, group_stretch=0.8, bar_stretch=0.95,
+def bar_plot(ax, navigation_outputs, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
              legend=True, x_labels=True, label_fontsize=8,
              colors=None, barlabel_offset=1,
              bar_labeler=lambda k, i, s: str(round(s, 3))):
 
-    std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
-    data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+    for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
+        data = generate_objective_value_results(navigation_outputs, evaluation_threshold=evaluation_threshold)
+        std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
+        data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
 
-    sorted_data = list(data.items())
-    sorted_k, sorted_v  = zip(*sorted_data)
-    max_n_bars = max(len(v) for v in data.values())
-    group_centers = np.cumsum([max_n_bars
-                               for _ in sorted_data]) - (max_n_bars / 2)
-    bar_offset = (1 - bar_stretch) / 2
-    bars = defaultdict(list)
+        print(std_data, data)
 
-    if colors is None:
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-        # colors = {g_name: [f"C{i}" for _ in values]
-        #           for i, (g_name, values) in enumerate(data.items())}
-        colors = {g_name: color_cycle[i]
-                for i, (g_name, values) in enumerate(data.items())}
+        sorted_data = list(data.items())
+        sorted_k, sorted_v  = zip(*sorted_data)
+        max_n_bars = max(len(v) for v in data.values())
+        group_centers = np.cumsum([max_n_bars
+                                for _ in sorted_data]) - (max_n_bars / 2)
+        bar_offset = (1 - bar_stretch) / 2
+        bars = defaultdict(list)
 
-    ax.grid(alpha=0.5)
-    ax.set_xticks(group_centers)
-    ax.set_xlabel("Tracking window scenario")
-    ax.set_ylabel(r'||$\Delta V$|| [m/s]')
-    ax.set_title(f'Station keeping costs')
+        if colors is None:
+            color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+            # colors = {g_name: [f"C{i}" for _ in values]
+            #           for i, (g_name, values) in enumerate(data.items())}
+            colors = {g_name: color_cycle[i]
+                    for i, (g_name, values) in enumerate(data.items())}
 
-    for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
-                                                         group_centers)):
+        ax.grid(alpha=0.5)
+        ax.set_xticks(group_centers)
+        ax.set_xlabel("Tracking window scenario")
+        ax.set_ylabel(r'||$\Delta V$|| [m/s]')
+        ax.set_title(title)
 
-        n_bars = len(vals)
-        group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
-        for val_i, val in enumerate(vals):
+        for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
+                                                            group_centers)):
 
-            bar = ax.bar(group_beg + val_i + bar_offset,
-                         height=val, width=bar_stretch,
-                         color=colors[g_name],
-                         yerr=std_data[g_name][val_i],
-                         capsize=4)[0]
-            bars[g_name].append(bar)
-            if bar_labeler is not None:
-                x_pos = bar.get_x() + (bar.get_width() / 2.0)
-                y_pos = val + barlabel_offset
-                barlbl = bar_labeler(g_name, val_i, val)
-                ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
-                        fontsize=label_fontsize)
+            n_bars = len(vals)
+            group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
+            for val_i, val in enumerate(vals):
 
-    # if legend:
-    #     ax.legend([bars[k][0] for k in sorted_k if len(bars[k]) !=0], sorted_k, title="Details", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
-        # ax.legend(title="Details", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+                if threshold_index == 0:
+                    bar = ax.bar(group_beg + val_i + bar_offset,
+                                height=val, width=bar_stretch,
+                                color=colors[g_name],
+                                yerr=std_data[g_name][val_i],
+                                capsize=4)[0]
+
+                else:
+                    bar = ax.bar(group_beg + val_i + bar_offset,
+                                height=val, width=0.8,
+                                color="white", hatch='/', edgecolor='black', alpha=0.6,
+                                yerr=std_data[g_name][val_i],
+                                label=f"Last {evaluation_threshold} days" if g_i == 0 else None,
+                                capsize=4)[0]
+
+                bars[g_name].append(bar)
+                if bar_labeler is not None:
+                    x_pos = bar.get_x() + (bar.get_width() / 2.0)
+                    y_pos = val + barlabel_offset
+                    barlbl = bar_labeler(g_name, val_i, val)
+                    ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
+                            fontsize=label_fontsize)
+
+    if legend:
+        # ax.legend([bars[k][0] for k in sorted_k if len(bars[k]) !=0], sorted_k, title="Details", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+        ax.legend(title="Details", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
     if x_labels:
         ax.set_xticklabels(sorted_k)

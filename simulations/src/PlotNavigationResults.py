@@ -50,7 +50,6 @@ class PlotNavigationResults():
 
     def plot_full_state_history(self):
 
-        # Plot the trajectory over time
         fig1_3d = plt.figure()
         ax_3d = fig1_3d.add_subplot(111, projection='3d')
         fig1_3d2 = plt.figure()
@@ -59,20 +58,22 @@ class PlotNavigationResults():
 
         state_history_reference = self.navigation_results[4][1]
         state_history_truth = self.navigation_results[5][1]
-        state_history_initial = self.navigation_results[6][1]
+        state_history_estimated = self.navigation_results[6][1]
         epochs = self.navigation_results[9][0]
         dependent_variables_history = self.navigation_results[9][1]
         delta_v_dict = self.navigation_simulator.delta_v_dict
+        full_state_history_truth_dict = self.navigation_simulator.full_state_history_truth_dict
+        full_state_history_reference_dict = self.navigation_simulator.full_state_history_reference_dict
 
         moon_data_dict = {epoch: state for epoch, state in zip(epochs, dependent_variables_history[:, :6])}
-        satellite_data_dict = {epoch: state for epoch, state in zip(epochs, state_history_initial[:, :])}
+        full_state_history_estimated_dict = {epoch: state for epoch, state in zip(epochs, state_history_estimated[:, :])}
 
         G = 6.67430e-11
         m1 = 5.972e24
         m2 = 7.34767309e22
         mu = m2/(m2 + m1)
 
-        # Create the Direct Cosine Matrix based on rotation axis of Moon around Earth
+        # Create the transformation based on rotation axis of Moon around Earth
         transformation_matrix_dict = {}
         for epoch, moon_state in moon_data_dict.items():
 
@@ -102,24 +103,42 @@ class PlotNavigationResults():
 
 
         # Generate the synodic states of the satellites
-        synodic_satellite_states_dict = {}
-        for epoch, state in satellite_data_dict.items():
+        synodic_full_state_history_estimated_dict = {}
+        synodic_full_state_history_truth_dict = {}
+        synodic_full_state_history_reference_dict = {}
+        synodic_dictionaries = [synodic_full_state_history_estimated_dict, synodic_full_state_history_truth_dict, synodic_full_state_history_reference_dict]
+        inertial_dictionaries = [full_state_history_estimated_dict, full_state_history_truth_dict, full_state_history_reference_dict]
+        for index, dictionary in enumerate(inertial_dictionaries):
+            for epoch, state in dictionary.items():
 
-            transformation_matrix = transformation_matrix_dict[epoch]
-            synodic_state = np.concatenate((np.dot(transformation_matrix, state[0:6]), np.dot(transformation_matrix, state[6:12])))
+                transformation_matrix = transformation_matrix_dict[epoch]
+                synodic_state = np.concatenate((np.dot(transformation_matrix, state[0:6]), np.dot(transformation_matrix, state[6:12])))
 
-            LU = np.linalg.norm((moon_data_dict[epoch][0:3]))
-            TU = np.sqrt(LU**3/(G*(m1+m2)))
-            synodic_state[0:3] = synodic_state[0:3]/LU
-            synodic_state[6:9] = synodic_state[6:9]/LU
-            synodic_state[3:6] = synodic_state[3:6]/(LU/TU)
-            synodic_state[9:12] = synodic_state[9:12]/(LU/TU)
-            synodic_state = (1-mu)*synodic_state
+                LU = np.linalg.norm((moon_data_dict[epoch][0:3]))
+                TU = np.sqrt(LU**3/(G*(m1+m2)))
+                synodic_state[0:3] = synodic_state[0:3]/LU
+                synodic_state[6:9] = synodic_state[6:9]/LU
+                synodic_state[3:6] = synodic_state[3:6]/(LU/TU)
+                synodic_state[9:12] = synodic_state[9:12]/(LU/TU)
+                synodic_state = (1-mu)*synodic_state
 
-            synodic_satellite_states_dict.update({epoch: synodic_state})
+                synodic_dictionaries[index].update({epoch: synodic_state})
 
-        synodic_states = np.stack(list(synodic_satellite_states_dict.values()))
 
+        inertial_states = np.stack(list(full_state_history_estimated_dict.values()))
+        inertial_states_truth = np.stack(list(full_state_history_truth_dict.values()))
+        inertial_states_reference = np.stack(list(full_state_history_reference_dict.values()))
+
+        synodic_states_estimated = np.stack(list(synodic_full_state_history_estimated_dict.values()))
+        synodic_states_truth = np.stack(list(synodic_full_state_history_truth_dict.values()))
+        synodic_states_reference = np.stack(list(synodic_full_state_history_reference_dict.values()))
+
+        # print("Initial state estimated inertial: \n", inertial_states[0, :])
+        # print("Initial state truth inertial: \n", inertial_states_truth[0, :])
+        # print("Initial state estimated synodic: \n", synodic_states_estimated[0, :])
+        # print("Initial state truth synodic: \n", synodic_states_truth[0, :])
+        # print("Initial state reference inertial: \n", inertial_states_reference[0, :])
+        # print("Initial state reference synodic: \n", synodic_states_reference[0, :])
 
         # Generate the synodic states of station keeping maneuvre vectors
         def closest_key(dictionary, value):
@@ -150,15 +169,10 @@ class PlotNavigationResults():
 
         synodic_delta_v_history = np.stack(list(synodic_delta_v_dict.values()))
 
-        # Draw arrows
-        start_positions = [3, 5, 7]  # X positions to start arrows
-        arrow_lengths = [0.5, 0.7, 0.6]  # Lengths of arrows
-        arrow_angles = [30, 45, 60]  # Angles of arrows in degrees
-
         # for start, length, angle in zip(start_positions, arrow_lengths, arrow_angles):
         arrow_plot_dict = {}
         for index, (epoch, delta_v) in enumerate(synodic_delta_v_dict.items()):
-            arrow_plot_dict[epoch] = np.concatenate((synodic_satellite_states_dict[epoch][6:9], delta_v))
+            arrow_plot_dict[epoch] = np.concatenate((synodic_full_state_history_estimated_dict[epoch][6:9], delta_v))
 
         arrow_plot_data = np.stack(list(arrow_plot_dict.values()))
         scale=None
@@ -171,13 +185,11 @@ class PlotNavigationResults():
                         angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
             ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
                         angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
-
-
-
-
+            ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
+                        alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 else None)
 
         # Generate the synodic states of the moon
-        synodic_moon_states_dict = {}
+        synodic_full_state_history_moon_dict = {}
         for epoch, state in moon_data_dict.items():
 
             transformation_matrix = transformation_matrix_dict[epoch]
@@ -187,10 +199,10 @@ class PlotNavigationResults():
             synodic_state[0:3] = synodic_state[0:3]/LU
             synodic_state[3:6] = synodic_state[3:6]/(LU/TU)
             synodic_state = (1-mu)*synodic_state
-            synodic_moon_states_dict.update({epoch: synodic_state})
+            synodic_full_state_history_moon_dict.update({epoch: synodic_state})
 
-        synodic_states = np.stack(list(synodic_satellite_states_dict.values()))
-        synodic_moon_states = np.stack(list(synodic_moon_states_dict.values()))
+        synodic_states_estimated = np.stack(list(synodic_full_state_history_estimated_dict.values()))
+        synodic_moon_states = np.stack(list(synodic_full_state_history_moon_dict.values()))
 
         color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
         for i in range(2):
@@ -202,40 +214,32 @@ class PlotNavigationResults():
             ax[i][0].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 2], s=50, color="darkgray")
             ax[i][1].scatter(synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray")
             ax[i][2].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], s=50, color="darkgray", label="Moon" if i==0 else None)
-            ax[i][0].plot(synodic_states[:, 6*i+0], synodic_states[:, 6*i+2], lw=0.5, color=color)
-            ax[i][1].plot(synodic_states[:, 6*i+1], synodic_states[:, 6*i+2], lw=0.5, color=color)
-            ax[i][2].plot(synodic_states[:, 6*i+0], synodic_states[:, 6*i+1], lw=0.5, color=color, label="LPF" if i==0 else None)
-            ax[1][0].plot(synodic_states[:, 6*i+0], synodic_states[:, 6*i+2], lw=0.1, color=color)
-            ax[1][1].plot(synodic_states[:, 6*i+1], synodic_states[:, 6*i+2], lw=0.1, color=color)
-            ax[1][2].plot(synodic_states[:, 6*i+0], synodic_states[:, 6*i+1], lw=0.1, color=color, label="LUMIO" if i==1 else None)
-
+            ax[i][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
+            ax[i][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
+            ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.5, color=color, label="LPF" if i==0 else None)
+            ax[1][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
+            ax[1][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
+            ax[1][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.1, color=color, label="LUMIO" if i==1 else None)
 
         ax_3d.scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray", label="Moon")
-        ax_3d.plot(synodic_states[:, 0], synodic_states[:, 1], synodic_states[:, 2], lw=0.2, color="gray")
-        ax_3d.plot(synodic_states[:, 6], synodic_states[:, 7], synodic_states[:, 8], lw=0.7, color="black")
+        ax_3d.plot(synodic_states_estimated[:, 0], synodic_states_estimated[:, 1], synodic_states_estimated[:, 2], lw=0.2, color="gray")
+        ax_3d.plot(synodic_states_estimated[:, 6], synodic_states_estimated[:, 7], synodic_states_estimated[:, 8], lw=0.7, color="black")
         # ax_3d.scatter(-mu, 0, 0, label="Earth", color="darkblue", s=50)
-
-
-        # print("INITIAL SYNODIC STATES: ", synodic_states[0, :])
-        # print("INITIAL STATES: ", state_history_reference[0, :])
-        # print("INITIAL STATES: ", state_history_initial[0, :])
-
-
 
         # ax_3d2.plot(state_history_reference[:,0], state_history_reference[:,1], state_history_reference[:,2], label="LPF ref", color="green")
         # ax_3d2.plot(state_history_reference[:,6], state_history_reference[:,7], state_history_reference[:,8], label="LUMIO ref", color="green")
-        ax_3d2.plot(state_history_initial[:,0], state_history_initial[:,1], state_history_initial[:,2], lw=0.5, label="LPF", color="gray")
-        ax_3d2.plot(state_history_initial[:,6], state_history_initial[:,7], state_history_initial[:,8], lw=0.5, label="LUMIO", color="black")
-        ax_3d2.scatter(0, 0, 0, label="Earth", color="darkblue", s=50)
         # ax_3d2.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth", color="black", ls="--")
         # ax_3d2.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth", color="black", ls="--")
+        ax_3d2.plot(state_history_estimated[:,0], state_history_estimated[:,1], state_history_estimated[:,2], lw=0.5, label="LPF", color="gray")
+        ax_3d2.plot(state_history_estimated[:,6], state_history_estimated[:,7], state_history_estimated[:,8], lw=0.5, label="LUMIO", color="black")
+        ax_3d2.scatter(0, 0, 0, label="Earth", color="darkblue", s=50)
 
 
         for num, (start, end) in enumerate(self.navigation_simulator.observation_windows):
-            synodic_states_window_dict = {key: value for key, value in synodic_satellite_states_dict.items() if key >= start and key <= end}
+            synodic_states_window_dict = {key: value for key, value in synodic_full_state_history_estimated_dict.items() if key >= start and key <= end}
             synodic_states_window = np.stack(list(synodic_states_window_dict.values()))
 
-            inertial_states_window_dict = {key: value for key, value in satellite_data_dict.items() if key >= start and key <= end}
+            inertial_states_window_dict = {key: value for key, value in full_state_history_estimated_dict.items() if key >= start and key <= end}
             inertial_states_window = np.stack(list(inertial_states_window_dict.values()))
 
             # print(np.shape(synodic_states_window))
@@ -279,23 +283,20 @@ class PlotNavigationResults():
         ax_3d.set_xlabel('X [-]')
         ax_3d.set_ylabel('Y [-]')
         ax_3d.set_zlabel('Z [-]')
-        # ax_3d.set_title("Tracking arcs in synodic frame")
         ax_3d.legend()
 
         ax_3d2.set_xlabel('X [m]')
         ax_3d2.set_ylabel('Y [m]')
         ax_3d2.set_zlabel('Z [m]')
-        # ax_3d2.set_title("Tracking arcs in inertial frame")
 
         ax_3d2.legend()
-        # ax_3d2.set_zlim([-4.5e8, 4.5e8])
 
         ax[0][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
         ax[1][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
-        fig.suptitle(f"Observation windows for {28} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
-        fig1_3d.suptitle(f"Observation windows for {28} days, synodic frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
-        fig1_3d2.suptitle(f"Observation windows for {28} days, inertial frame \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Tracking arcs, synodic frame ")
+        fig1_3d.suptitle(f"Tracking arcs, synodic frame ")
+        fig1_3d2.suptitle(f"Tracking arcs, inertial frame ")
         plt.tight_layout()
         plt.legend()
 
@@ -327,7 +328,7 @@ class PlotNavigationResults():
                         xmax=gap[1]-self.mission_start_epoch,
                         color="gray",
                         alpha=0.1,
-                        label="Observation window" if i == 0 else None)
+                        label="Tracking arc" if i == 0 else None)
 
                 for i, epoch in enumerate(self.station_keeping_epochs):
                     station_keeping_epoch = epoch - self.mission_start_epoch
@@ -346,7 +347,7 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig.suptitle(f"Formal error history \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Formal error history ")
         plt.tight_layout()
 
 
@@ -375,7 +376,7 @@ class PlotNavigationResults():
                         xmax=gap[1]-self.mission_start_epoch,
                         color="gray",
                         alpha=0.1,
-                        label="Observation window" if i == 0 else None)
+                        label="Tracking arc" if i == 0 else None)
 
                 for i, epoch in enumerate(self.station_keeping_epochs):
                     station_keeping_epoch = epoch - self.mission_start_epoch
@@ -394,7 +395,7 @@ class PlotNavigationResults():
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
 
-        fig.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty ")
         plt.tight_layout()
 
 
@@ -421,7 +422,7 @@ class PlotNavigationResults():
                     xmax=gap[1]-self.mission_start_epoch,
                     color="gray",
                     alpha=0.1,
-                    label="Observation window" if i == 0 else None)
+                    label="Tracking arc" if i == 0 else None)
 
             for i, epoch in enumerate(self.station_keeping_epochs):
                 station_keeping_epoch = epoch - self.mission_start_epoch
@@ -438,7 +439,7 @@ class PlotNavigationResults():
             ax[j].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
         plt.tight_layout()
-        fig.suptitle(f"Deviation from reference orbit LUMIO \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Deviation from reference orbit LUMIO ")
 
 
     def plot_estimation_error_history(self):
@@ -479,7 +480,7 @@ class PlotNavigationResults():
                         xmax=gap[1]-self.mission_start_epoch,
                         color="gray",
                         alpha=0.1,
-                        label="Observation window" if i == 0 else None)
+                        label="Tracking arc" if i == 0 else None)
                 for i, epoch in enumerate(self.station_keeping_epochs):
                     station_keeping_epoch = epoch - self.mission_start_epoch
                     ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.2, label="SKM" if i==0 else None)
@@ -497,7 +498,7 @@ class PlotNavigationResults():
                 ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
                 ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
 
-        fig.suptitle(f"Estimaton error history | range-only \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Estimaton error history | range-only ")
         # fig4.suptitle("Estimation error history: range-only, $1\sigma_{\rho}$ = 102.44 [$m$], $f_{obs}$ = $1/600$ [$s^{-1}$]")
         plt.tight_layout()
 
@@ -529,7 +530,7 @@ class PlotNavigationResults():
                     xmax=gap[1]-self.mission_start_epoch,
                     color="gray",
                     alpha=0.1,
-                    label="Observation window" if i == 0 else None)
+                    label="Tracking arc" if i == 0 else None)
 
             for i, epoch in enumerate(self.station_keeping_epochs):
                 station_keeping_epoch = epoch - self.mission_start_epoch
@@ -546,7 +547,7 @@ class PlotNavigationResults():
             ax[j].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
         plt.tight_layout()
-        fig.suptitle(f"Deviation from reference orbit LUMIO \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Deviation from reference orbit LUMIO ")
 
 
 
@@ -662,7 +663,7 @@ class PlotNavigationResults():
                     xmax=gap[1]-self.mission_start_epoch,
                     color="gray",
                     alpha=0.1,
-                    label="Observation window" if i == 0 else None)
+                    label="Tracking arc" if i == 0 else None)
             for i, epoch in enumerate(self.station_keeping_epochs):
                 station_keeping_epoch = epoch - self.mission_start_epoch
                 ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
@@ -680,14 +681,14 @@ class PlotNavigationResults():
         ax[-1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, fontsize="small")
 
 
-        fig.suptitle(f"Intersatellite range observations \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
+        fig.suptitle(f"Intersatellite range observations ")
         plt.tight_layout()
         # plt.show()
 
 
-    def plot_condition_numbers(self):
+    def plot_observability_metrics(self):
 
-        fig, ax = plt.subplots(1, 1, figsize=(8, 2.5), sharex=True)
+        fig, ax = plt.subplots(5, 1, figsize=(8, 6.5), sharex=True)
         arc_nums = len(self.navigation_results[-1].keys())
 
         for arc_num in range(arc_nums):
@@ -698,131 +699,90 @@ class PlotNavigationResults():
             state_transition_interface = estimator.state_transition_interface
             observation_times_range = estimation_model.observation_times_range
             weighted_design_matrix = estimation_output.weighted_design_matrix
+            normalized_design_matrix = estimation_output.normalized_design_matrix
+            residual_history = estimation_output.residual_history
+            best_iteration = estimation_output.best_iteration
+            apriori_covariance = estimation_model.apriori_covariance
 
+            state_transition_matrix_history = {}
             information_matrix_history = {}
-            information_matrix = self.navigation_output.navigation_simulator.apriori_covariance
+            information_vector_history = {}
             for index, epoch in enumerate(observation_times_range):
                 state_transition_matrix = state_transition_interface.full_state_transition_sensitivity_at_epoch(epoch)
-                information_matrix_history[epoch] = np.outer(weighted_design_matrix[index], weighted_design_matrix[index]) + np.linalg.inv(estimation_model.apriori_covariance)
+                state_transition_matrix_history[epoch] = np.outer(state_transition_matrix, state_transition_matrix)
+                information_matrix_history[epoch] = np.outer(weighted_design_matrix[index], weighted_design_matrix[index])
+                information_vector_history[epoch] = np.dot(weighted_design_matrix[index].T, residual_history[index, best_iteration])
+
+                # print(np.linalg.cond(information_vector_history[epoch][0:3]))
+                # print(np.dot(np.linalg.inv(information_matrix_history[epoch])))
+            # information_matrix_history = {}
+            # state_transition_matrix_history = {}
+            # for index, epoch in enumerate(observation_times_range):
+            #     state_transition_matrix = state_transition_interface.full_state_transition_sensitivity_at_epoch(epoch)
+            #     state_transition_matrix_history[epoch] = np.dot(state_transition_matrix, state_transition_matrix.T)
+            #     information_matrix_history[epoch] = np.outer(weighted_design_matrix[index], weighted_design_matrix[index])
 
             total_information_matrix_history = {}
-            total_information_matrix = np.zeros_like(next(iter(information_matrix_history.values())))
+            total_information_matrix = np.linalg.inv(apriori_covariance)*0
             for epoch, information_matrix in information_matrix_history.items():
                 total_information_matrix += information_matrix
-                total_information_matrix_history[epoch] = total_information_matrix
+                total_information_matrix_history[epoch] = total_information_matrix.copy()
 
-            epochs = utils.convert_epochs_to_MJD(np.stack(list(information_matrix_history.keys()))) - self.mission_start_epoch
-            information_matrix_history_array = np.stack(list(information_matrix_history.values()))
+            dilution_of_precision_history = {}
+            for epoch, information_matrix in total_information_matrix_history.items():
+                dilution_of_precisions = []
+                for i in range(2):
+                    for j in range(2):
+                        dilution_of_precisions.append(np.sqrt(np.trace(np.linalg.inv(information_matrix[0+3*i+j:3+3*i+j,0+3*i+j:3+3*i+j]))))
+                dilution_of_precision_history[epoch] = dilution_of_precisions
 
-            lpf_line, = ax.plot(epochs, np.linalg.cond(information_matrix_history_array[:, 0:3, 0:3]), color="red", label="LPF")
-            lumio_line, = ax.plot(epochs, np.linalg.cond(information_matrix_history_array[:, 6:9, 6:9]), color="blue", label="LUMIO")
-            ax.set_yscale("log")
-            ax.grid(alpha=0.5, linestyle='--')
-            ax.set_ylabel(r"$\lambda_{max}/\lambda_{min}$ [-]")
-            ax.set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
-            handles=[lpf_line, lumio_line]
-            labels=[handle.get_label() for handle in handles]
-            ax.legend(handles=handles, labels=labels, loc="upper right")
+            epochs = utils.convert_epochs_to_MJD(np.stack(list(total_information_matrix_history.keys()))) - self.mission_start_epoch
+            information_matrix_history = np.stack(list(information_matrix_history.values()))
+            information_vector_history = np.stack(list(information_vector_history.values()))
+            total_information_matrix_history = np.stack(list(total_information_matrix_history.values()))
 
-            # Condition number of information matrix
-            condition_numbers = [np.linalg.cond(total_information_matrix[0:6, 0:6]), np.linalg.cond(total_information_matrix[6:12, 6:12])]
+            state_transition_matrix_history = np.stack(list(state_transition_matrix_history.values()))
+            dilution_of_precision_history = np.stack(list(dilution_of_precision_history.values()))
+
+            # print(information_vector_history[0, :])
+            # print(information_vector_history[-1, :])
 
 
-    def plot_observability(self):
 
-        fig, ax = plt.subplots(5, 1, figsize=(8, 11), sharex=True)
-        arc_nums = len(self.navigation_results[-1].keys())
+            for m in range(2):
+                observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
+                observability_lumio = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]]))
+                observability_lpf_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1, keepdims=True))
+                observability_lumio_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1, keepdims=True))
 
-        for arc_num in range(arc_nums):
+                ax[m].plot(epochs, observability_lpf_total, label="LPF" if m == 0 and arc_num == 0 else None, color="red")
+                ax[m].plot(epochs, observability_lumio_total, label="LUMIO" if m == 0 and arc_num == 0 else None, color="blue")
 
-            estimation_model = self.navigation_results[-1][arc_num]
-            estimation_output = estimation_model.estimation_output
-            estimator = estimation_model.estimator
-            state_transition_interface = estimator.state_transition_interface
+            ax[2].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 0:3, 0:3]), color="red", label="LPF" if arc_num == 0 else None)
+            ax[2].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 6:9, 6:9]), color="blue", label="LUMIO" if arc_num == 0 else None)
 
-            # Generate information and covariance histories based on all the combinations of observables and link definitions
-            total_information_dict = dict()
-            total_covariance_dict = dict()
-            total_single_information_dict = dict()
-            state_transition_matrix_dict = dict()
-            len_obs_list = []
-            for i, (observable_type, observation_sets) in enumerate(estimation_model.sorted_observation_sets.items()):
-                total_information_dict[observable_type] = dict()
-                total_covariance_dict[observable_type] = dict()
-                total_single_information_dict[observable_type] = dict()
-                for j, observation_set in enumerate(observation_sets.values()):
-                    total_information_dict[observable_type][j] = list()
-                    total_covariance_dict[observable_type][j] = list()
-                    total_single_information_dict[observable_type][j] = list()
-                    for k, single_observation_set in enumerate(observation_set):
+            ax[3].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 3:6, 3:6]), color="red", label="LPF" if arc_num == 0 else None)
+            ax[3].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 9:12, 9:12]), color="blue", label="LUMIO" if arc_num == 0 else None)
+            # ax[2].plot(epochs, np.linalg.cond(total_information_matrix_history[:, :, :]), color="blue", label="LUMIO" if arc_num == 0 else None)
 
-                        epochs = single_observation_set.observation_times
-                        len_obs_list.append(len(epochs))
+            # ax[3].plot(epochs, np.linalg.cond(state_transition_matrix_history[:, 0:3, 0:3]), color="red", label="LPF" if arc_num == 0 else None)
+            # ax[3].plot(epochs, np.linalg.cond(state_transition_matrix_history[:, 6:9, 6:9]), color="blue", label="LUMIO" if arc_num == 0 else None)
+            # # ax[3].plot(epochs, np.linalg.cond(state_transition_matrix_history[:, :, :]), color="blue", label="LUMIO" if arc_num == 0 else None)
+            # ax[3].set_yscale("log")
+            # ax[3].grid(alpha=0.5, linestyle='--')
+            # ax[3].set_ylabel(r"$\lambda_{max}/\lambda_{min}$ [-]")
+            # ax[3].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
+            # ax[3].legend(loc="upper right")
 
-                        weighted_design_matrix_history = np.stack([estimation_model.estimation_output.weighted_design_matrix[sum(len_obs_list[:-1]):sum(len_obs_list), :]], axis=1)
+            ax[4].plot(epochs, dilution_of_precision_history[:, 0], color="red", label="LPF" if arc_num == 0 else None)
+            ax[4].plot(epochs, dilution_of_precision_history[:, 2], color="blue", label="LUMIO" if arc_num == 0 else None)
+            # ax[3].plot(epochs, np.linalg.cond(state_transition_matrix_history[:, :, :]), color="blue", label="LUMIO" if arc_num == 0 else None)
 
-                        information_dict = dict()
-                        single_information_dict = dict()
-                        information_vector_dict = dict()
-                        total_information = 0
-                        total_information_vector = 0
-                        for index, weighted_design_matrix in enumerate(weighted_design_matrix_history):
-
-                            epoch = epochs[index]
-
-                            state_transition_matrix = state_transition_interface.full_state_transition_sensitivity_at_epoch(epoch)
-                            # weighted_design_matrix = np.dot(weighted_design_matrix, np.linalg.inv(state_transition_matrix))
-                            state_transition_matrix_product = np.dot(state_transition_matrix, state_transition_matrix.T)
-                            weighted_design_matrix_product = np.dot(weighted_design_matrix.T, weighted_design_matrix)
-
-                            # Calculate the information matrix
-                            current_information = total_information + weighted_design_matrix_product
-                            single_information_dict[epoch] = weighted_design_matrix_product
-                            state_transition_matrix_dict[epoch] = state_transition_matrix_product
-                            information_dict[epoch] = current_information
-                            total_information = current_information
-
-                        covariance_dict = dict()
-                        for key in information_dict:
-                            if estimation_model.apriori_covariance is not None:
-                                information_dict[key] = information_dict[key] + np.linalg.inv(estimation_model.apriori_covariance)
-                            covariance_dict[key] = np.linalg.inv(information_dict[key])
-
-                        total_information_dict[observable_type][j].append(information_dict)
-                        total_covariance_dict[observable_type][j].append(covariance_dict)
-                        total_single_information_dict[observable_type][j].append(single_information_dict)
-
-            for i, (observable_type, information_sets) in enumerate(total_single_information_dict.items()):
-                for j, information_set in enumerate(information_sets.values()):
-                    for k, single_information_set in enumerate(information_set):
-
-                        information_dict = total_single_information_dict[observable_type][j][k]
-                        epochs = utils.convert_epochs_to_MJD(np.array(list(information_dict.keys())))
-                        epochs = epochs - self.mission_start_epoch
-                        information_matrix_history = np.array(list(information_dict.values()))
-                        state_transition_matrix_product_history = np.array(list(state_transition_matrix_dict.values()))
-
-                        for m in range(2):
-                            observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
-                            observability_lumio = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]]))
-                            observability_lpf_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1, keepdims=True))
-                            observability_lumio_total = np.sqrt(np.max(np.linalg.eigvals(information_matrix_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1, keepdims=True))
-
-                            ax[m].plot(epochs, observability_lpf_total, label="LPF" if m == 0 and arc_num == 0 else None, color="darkred")
-                            ax[m].plot(epochs, observability_lumio_total, label="LUMIO" if m == 0 and arc_num == 0 else None, color="darkblue")
-
-                            min_axis_stm_lpf = np.min(np.linalg.eigvals(state_transition_matrix_product_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1)
-                            max_axis_stm_lpf = np.max(np.linalg.eigvals(state_transition_matrix_product_history[:,0+3*m:3+3*m,0+3*m:3+3*m]), axis=1)
-                            min_axis_stm_lumio = np.min(np.linalg.eigvals(state_transition_matrix_product_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1)
-                            max_axis_stm_lumio = np.max(np.linalg.eigvals(state_transition_matrix_product_history[:,6+3*m:9+3*m,6+3*m:9+3*m]), axis=1)
-
-                            aspect_ratio_lpf = max_axis_stm_lpf/min_axis_stm_lpf
-                            aspect_ratio_lumio = max_axis_stm_lumio/min_axis_stm_lumio
-
-                            if m == 0:
-                                ax[2].plot(epochs, aspect_ratio_lpf, label="LPF" if m == 0 and arc_num == 0 else None, color="darkred")
-                                ax[3].plot(epochs, aspect_ratio_lumio, label="LUMIO" if m == 0 and arc_num == 0 else None, color="darkblue")
-                            ax[2].set_yscale("log")
+        ax[0].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{r, j})}$')
+        ax[1].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{v, j})}$')
+        ax[2].set_ylabel(r"$cond\left(\mathbf{\Lambda}_{rr, j}\right)$")
+        ax[3].set_ylabel(r"$cond\left(\mathbf{\Lambda}_{vv, j}\right)$")
+        ax[4].set_ylabel(r"$GDOP_{j}$ [-]")
 
         for j in range(len(ax)):
             for i, gap in enumerate(self.observation_windows):
@@ -831,41 +791,32 @@ class PlotNavigationResults():
                     xmax=gap[1]-self.mission_start_epoch,
                     color="gray",
                     alpha=0.1,
-                    label="Observation window" if i == 0 else None)
+                    label="Tracking arc" if i == 0 else None)
             for i, epoch in enumerate(self.station_keeping_epochs):
                 station_keeping_epoch = epoch - self.mission_start_epoch
                 ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
 
             ax[j].grid(alpha=0.5, linestyle='--')
-            ax[0].set_yscale("log")
-            ax[1].set_yscale("log")
-
-            # Set y-axis tick label format to scientific notation with one decimal place
-            ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-            # ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-
-        ax[0].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{r}, j})}$')
-        ax[1].set_ylabel(r'$\sqrt{\max \operatorname{eig}(\delta \mathbf{\Lambda}_{\mathbf{v}, j})}$')
-        ax[2].set_ylabel('Aspect ratio \n $\operatorname{eig} \mathbf{\Phi}_{rr}\mathbf{\Phi}_{rr}^T$')
-        ax[3].set_ylabel('Aspect ratio \n $\operatorname{eig} \mathbf{\Phi}_{rr}\mathbf{\Phi}_{rr}^T$')
-        ax[4].set_ylabel(r'$||\mathbf{v}_{LPF}||$')
-        ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
-        ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
+            ax[j].set_yscale("log")
 
         # Plot the history of observation angle with respect to the large covariance axis
-        state_history = self.navigation_results[6][1]
-        epochs = self.navigation_results[9][0]
-        dependent_variables_history = self.navigation_results[9][1]
-        moon_state_history = dependent_variables_history[:,0:6]
+        # state_history = self.navigation_results[6][1]
+        # epochs = self.navigation_results[9][0]
+        # dependent_variables_history = self.navigation_results[9][1]
+        # moon_state_history = dependent_variables_history[:,0:6]
 
-        state_history_moon_lpf = state_history[:, 0:6] - moon_state_history
-        state_history_moon_lumio = state_history[:, 6:12] - moon_state_history
+        # state_history_moon_lpf = state_history[:, 0:6] - moon_state_history
+        # state_history_moon_lumio = state_history[:, 6:12] - moon_state_history
 
-        ax[4].plot(epochs-self.mission_start_epoch, np.linalg.norm(state_history_moon_lpf[:, 3:6], axis=1), color="green")
+        # ax[4].plot(epochs-self.mission_start_epoch, np.linalg.norm(state_history_moon_lpf[:, 3:6], axis=1), color="green")
+        # # ax[4].set_ylabel(r'$||\mathbf{v}_{LPF}||$')
 
-        fig.suptitle(f"Intersatellite range observability \n Model: on-board: {self.navigation_simulator.model_name}{self.navigation_simulator.model_number}, truth: {self.navigation_simulator.model_name_truth}{self.navigation_simulator.model_number_truth}")
-        # plt.tight_layout()
-        # plt.show()
+        ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]", fontsize="small")
+        # ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left')
+        ax[0].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        plt.tight_layout()
+        # plt.suptitle("Observability metrics")
 
 
     def plot_od_error_dispersion_relation(self):

@@ -1,5 +1,5 @@
 from tudatpy.kernel.numerical_simulation import propagation_setup
-from tudatpy.kernel.astro import time_conversion
+from tudatpy.kernel.astro import time_conversion, element_conversion
 from tudatpy.kernel.interface import spice
 from tudatpy.kernel import constants
 
@@ -53,14 +53,40 @@ class DynamicModelBase:
         # Define integrator settings
         self.use_variable_step_size_integrator = True
         self.current_coefficient_set = propagation_setup.integrator.CoefficientSets.rkf_45
-        self.current_tolerance = 1e-18*constants.JULIAN_DAY
-        self.initial_time_step = 1e-3*constants.JULIAN_DAY
+        self.current_tolerance = 1e-12
+        self.relative_error_tolerance = 1e-10
+        self.absolute_error_tolerance = 1e-10
+        self.initial_time_step = 1e1
 
         # Initial state based on reference orbit
-        initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        # initial_state_LPF_old = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        initial_state_LPF = self.calculate_initial_state()
         initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
         self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
 
         # Custom parameters
         self.custom_initial_state = None
         self.custom_propagation_time = None
+
+
+    def calculate_initial_state(self):
+
+        initial_state_moon_centered = element_conversion.keplerian_to_cartesian_elementwise(
+            gravitational_parameter=self.gravitational_parameter_secondary,
+            semi_major_axis=5.737e6,
+            eccentricity=0.61,
+            inclination=np.deg2rad(57.82),
+            argument_of_periapsis=np.deg2rad(90),
+            longitude_of_ascending_node=np.deg2rad(61.552),
+            true_anomaly=np.deg2rad(180),
+        )
+
+        moon_state_earth_centered = spice.get_body_cartesian_state_at_epoch(
+            self.name_secondary,
+            self.global_frame_origin,
+            self.global_frame_orientation,
+            "None",
+            self.simulation_start_epoch
+        )
+
+        return initial_state_moon_centered + moon_state_earth_centered
