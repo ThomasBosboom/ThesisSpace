@@ -313,8 +313,9 @@ class NavigationSimulator(NavigationSimulatorBase):
                     # Generate random noise to simulate station-keeping errors
                     if self.model_type == "HF":
 
+                        rng = np.random.default_rng(seed=self.seed)
                         delta_v_noise_sigma = np.abs(self.station_keeping_error*delta_v)
-                        delta_v_noise = np.random.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
+                        delta_v_noise = rng.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
 
                         od_update = np.linalg.norm(state_history_estimated[0, 6:9]-state_history_truth[0, 6:9])-np.linalg.norm(self.initial_estimation_error[6:9])
 

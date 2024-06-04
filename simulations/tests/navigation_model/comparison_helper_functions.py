@@ -231,8 +231,8 @@ def generate_objective_value_results(navigation_outputs, evaluation_threshold=14
                 delta_v_epochs = np.stack(list(delta_v_dict.keys()))
                 delta_v_history = np.stack(list(delta_v_dict.values()))
                 delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
-
                 delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
+
                 delta_v_per_skm_list.append(delta_v_per_skm.tolist())
                 objective_values.append(delta_v)
 
@@ -262,11 +262,10 @@ def bar_plot(ax, navigation_outputs, evaluation_threshold=14, title="", group_st
              bar_labeler=lambda k, i, s: str(round(s, 3))):
 
     for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
+
         data = generate_objective_value_results(navigation_outputs, evaluation_threshold=evaluation_threshold)
         std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
         data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
-
-        print(std_data, data)
 
         sorted_data = list(data.items())
         sorted_k, sorted_v  = zip(*sorted_data)

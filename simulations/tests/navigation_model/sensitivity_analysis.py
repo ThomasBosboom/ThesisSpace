@@ -15,7 +15,7 @@ for _ in range(5):
     sys.path.append(file_directory)
 
 # Define current time
-current_time = datetime.now().strftime("%d%m%H%M")
+current_time = datetime.now().strftime("%Y%m%d%H%M")
 
 # from tests import utils, helper_functions
 import comparison_helper_functions
@@ -27,7 +27,7 @@ from tests import utils
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 1
+num_runs = 2
 
 default_window_inputs = {
     "duration": 28,
@@ -37,15 +37,14 @@ default_window_inputs = {
 }
 
 sensitivity_settings = {
-    # "threshold": [0.1, 0.2, 0.5, 1, 2],
-    # "arc_duration": [0.1, 0.5, 1.0, 2.0],
-    "arc_duration": [0.1, 0.2]
-    # "arc_interval": [0.5, 1, 2, 3],
-    # "mission_start_epoch": [60390, 60395, 60400],
+    # "threshold": [0.1, 0.5, 1.0, 2.0],
+    "arc_duration": [0.1, 0.5, 1.0, 2.0],
+    "arc_interval": [0.5, 1, 2, 3],
+    "mission_start_epoch": [60390, 60395, 60400],
     # "noise_range": [1, 5, 10, 50],
-    # "target_point_epochs": [[1], [2], [3], [2, 3], [1, 2, 3]],
+    # "target_point_epochs": [[1], [2], [3]],
     # "delta_v_min": [0.00, 0.01, 0.02],
-    # "station_keeping_error": [0.00, 0.01, 0.02],
+    # "station_keeping_error": [0.00, 0.01, 0.05, 0.10],
 }
 
 auxilary_settings = {
@@ -158,12 +157,13 @@ for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate
                 axs[0].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
                                 color=shades[index],
                                 # ls='--',
-                                alpha=0.2)
+                                alpha=0.1
+                                )
 
                 axs[1].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1),
                                 color=shades[index],
                                 # ls='--',
-                                alpha=0.2
+                                alpha=0.1
                                 )
 
             # mean_full_propagated_formal_errors_histories = np.mean(np.array(full_propagated_formal_errors_histories), axis=0)

@@ -26,7 +26,7 @@ from tests import utils
 ###### Define the observation windows ###########################
 #################################################################
 
-num_runs = 1
+num_runs = 10
 duration = 28
 mission_start_epoch = 60390.0
 
@@ -56,55 +56,58 @@ observation_windows_settings = {
     "Constant (1.0d)": [
         (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
     ],
-    "Constant (1.5d)": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=1.5, mission_start_epoch=mission_start_epoch), num_runs),
+    # "Constant (1.5d)": [
+    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=1.5, mission_start_epoch=mission_start_epoch), num_runs),
+    # ],
+    "Constant (2.0d)": [
+        (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=2.0, mission_start_epoch=mission_start_epoch), num_runs),
     ]
 }
 
-observation_windows_settings = {
-    # "Random1": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=0), num_runs),
-    # ],
-    # "Random2": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=1), num_runs),
-    # ],
-    # "Random3": [
-    #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=2), num_runs),
-    # ],
-    # "Constant1": [
-    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
-    # ],
-    # "Constant2": [
-    #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=0.51, arc_duration=0.5, mission_start_epoch=mission_start_epoch), num_runs),
-    # ],
-    "Constant3": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=2, mission_start_epoch=mission_start_epoch), 2),
-    ],
-    "Constant4": [
-        (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=0.2, mission_start_epoch=mission_start_epoch), 2),
-    ],
-    # "0.3": [
-    #     ([(60390, 60390.3)], num_runs),
-    # ],
-    # "0.7": [
-    #     ([(60390, 60390.7)], num_runs),
-    # ],
-    # "1": [
-    #     ([(60390, 60391)], num_runs),
-    # ],
-    # "1.1": [
-    #     ([(60390, 60391.1)], num_runs),
-    # ],
-    # "1.2": [
-    #     ([(60390, 60391.2)], num_runs),
-    # ],
-    # "1.4": [
-    #     ([(60390, 60391.4)], num_runs),
-    # ],
-    # "1.5": [
-    #     ([(60390, 60391.5)], num_runs),
-    # ],
-}
+# observation_windows_settings = {
+#     # "Random1": [
+#     #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=0), num_runs),
+#     # ],
+#     # "Random2": [
+#     #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=1), num_runs),
+#     # ],
+#     # "Random3": [
+#     #     (comparison_helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.001], threshold_vars=[1, 0.3], arc_duration_vars=[1, 0.3], seed=2), num_runs),
+#     # ],
+#     # "Constant1": [
+#     #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
+#     # ],
+#     # "Constant2": [
+#     #     (comparison_helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=0.51, arc_duration=0.5, mission_start_epoch=mission_start_epoch), num_runs),
+#     # ],
+#     "Constant3": [
+#         (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=2, mission_start_epoch=mission_start_epoch), 2),
+#     ],
+#     "Constant4": [
+#         (comparison_helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, threshold=1, arc_duration=0.2, mission_start_epoch=mission_start_epoch), 2),
+#     ],
+#     # "0.3": [
+#     #     ([(60390, 60390.3)], num_runs),
+#     # ],
+#     # "0.7": [
+#     #     ([(60390, 60390.7)], num_runs),
+#     # ],
+#     # "1": [
+#     #     ([(60390, 60391)], num_runs),
+#     # ],
+#     # "1.1": [
+#     #     ([(60390, 60391.1)], num_runs),
+#     # ],
+#     # "1.2": [
+#     #     ([(60390, 60391.2)], num_runs),
+#     # ],
+#     # "1.4": [
+#     #     ([(60390, 60391.4)], num_runs),
+#     # ],
+#     # "1.5": [
+#     #     ([(60390, 60391.5)], num_runs),
+#     # ],
+# }
 
 
 print(observation_windows_settings)

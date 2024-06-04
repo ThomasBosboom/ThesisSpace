@@ -319,11 +319,11 @@ if __name__ == "__main__":
 
         navigation_simulator = NavigationSimulator.NavigationSimulator(
             # step_size=0.01,
-            noise_range=1,
-            margin=0,
-            orbit_insertion_error=np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-            initial_estimation_error=np.array([5e1, 5e1, 5e1, 1e-4, 1e-4, 1e-4, 5e3, 5e3, 5e3, 1e-2, 1e-2, 1e-2]),
-            apriori_covariance=np.diag([5e1, 5e1, 5e1, 1e-4, 1e-4, 1e-4, 5e3, 5e3, 5e3, 1e-2, 1e-2, 1e-2])**2
+            # noise_range=1,
+            # margin=0,
+            # orbit_insertion_error=np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
+            # initial_estimation_error=np.array([5e1, 5e1, 5e1, 1e-4, 1e-4, 1e-4, 5e3, 5e3, 5e3, 1e-2, 1e-2, 1e-2]),
+            # apriori_covariance=np.diag([5e1, 5e1, 5e1, 1e-4, 1e-4, 1e-4, 5e3, 5e3, 5e3, 1e-2, 1e-2, 1e-2])**2
         )
 
         optimization_model = OptimizationModel(
@@ -336,15 +336,7 @@ if __name__ == "__main__":
             # optimization_method="SLSQP",
             design_vector_type="arc_lengths",
             initial_simplex_perturbation = 0.5,
-            # custom_initial_guess=[
-            #     1.040490947711151,
-            #     0.9538405713564609,
-            #     0.8859841586644288,
-            #     0.9072086724071291,
-            #     1.1999818267271218,
-            #     1.1999818267271218,
-            #     0.9125301696794629
-            # ]
+            # custom_initial_guess=[]
         )
 
         objective_functions = ObjectiveFunctions(
