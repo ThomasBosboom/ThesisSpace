@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 from tudatpy.kernel import constants
-from scipy.interpolate import CubicSpline, interp1d
+from scipy.interpolate import interp1d
 from tudatpy.kernel.astro import time_conversion
 from pathlib import Path
 from dynamic_models import TraditionalLowFidelity
@@ -50,28 +50,6 @@ def read_textfiles(data_type, satellite="LUMIO"):
             state_fixed_Moon_Earth_centered  = np.loadtxt(fname=file_paths[1], delimiter=',', skiprows=1, usecols=tuple(range(0,8,1)), unpack=False)
 
             return np.stack([state_fixed_LPF_Earth_centered, state_fixed_Moon_Earth_centered])
-
-
-
-# states_LUMIO = read_textfiles("state", satellite="LUMIO")
-
-# pos = states_LUMIO[0, :, 2:5]
-# vel = states_LUMIO[0, :, 5:8]
-# # print(states_LUMIO[0, :, 2:], np.shape(states_LUMIO[0, :, 2:]))
-
-# import matplotlib.pyplot as plt
-
-# # fig1_3d = plt.figure()
-# # ax_3d = fig1_3d.add_subplot(111, projection='3d')
-# # ax_3d.plot(pos[:,0], pos[:,1], pos[:,2], linewidth=0.4)
-# # # ax_3d.plot(vel[:,0], vel[:,1], vel[:,2], linewidth=0.4)
-# # ax_3d.set_box_aspect([1,1,1])
-# # # plt.show()
-
-# # plt.plot(pos)
-# plt.plot(np.diff(vel[:,:]))
-
-# plt.show()
 
 
 def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, custom_dynamic_model=None, step_size=0.001, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
@@ -126,21 +104,6 @@ def get_reference_state_history(simulation_start_epoch_MJD, propagation_time, cu
         return {user_start_epoch: interpolated_states[0]}
 
 
-# epoch1 = 60397.0
-# step_size = 0.001
-# ref1 = np.concatenate((get_reference_state_history(epoch1, step_size, satellite="LPF", get_dict=False, get_full_history=False, get_epoch_in_array=True),
-# get_reference_state_history(epoch1, step_size, satellite="LUMIO", get_dict=False, get_full_history=False, get_epoch_in_array=True)))
-
-# # print(ref1)
-
-# epoch2 = 60397.01
-# ref2 = np.concatenate((get_reference_state_history(epoch2, step_size, satellite="LPF", get_dict=False, get_full_history=False, get_epoch_in_array=True),
-# get_reference_state_history(epoch2, step_size, satellite="LUMIO", get_dict=False, get_full_history=False, get_epoch_in_array=True)))
-
-# print("diff: ", ref1-ref2)
-
-
-
 def get_state_history_richardson(dc_corrected=False):
 
     # Specify the file path
@@ -177,9 +140,6 @@ def get_state_history_richardson(dc_corrected=False):
 def get_synodic_state_history_erdem():
 
     # Specify the file path
-    # root_dir = Path(__file__).resolve().parent.parent
-    # file_path = root_dir / "reference" / "Erdem.txt"
-
     orbit_files = reference_folder_path / "Halo_orbit_files"
     file_path = orbit_files / "Erdem.txt"
 

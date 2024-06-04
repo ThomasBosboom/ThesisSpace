@@ -29,7 +29,7 @@ class NavigationSimulatorBase():
 
         # Estimation settings
         self.bias_range = 0
-        self.noise_range = 1
+        self.noise_range = 2.98
         self.observation_step_size_range = 300
         self.total_observation_count = None
         self.retransmission_delay = 0
