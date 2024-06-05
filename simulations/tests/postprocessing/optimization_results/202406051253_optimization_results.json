@@ -1,0 +1,221 @@
+{
+    "duration": 28,
+    "arc_length": 1,
+    "arc_interval": 3,
+    "mission_start_epoch": 60390,
+    "optimization_method": "Nelder-Mead",
+    "max_iterations": 100,
+    "bounds": [
+        -0.9,
+        0.9
+    ],
+    "design_vector_type": "arc_lengths",
+    "custom_initial_guess": null,
+    "initial_simplex_perturbation": 0.1,
+    "iteration": 0,
+    "iteration_history": {
+        "0": {
+            "design_vector": [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            "objective_value": 0.020257989892507,
+            "reduction": 0.0
+        }
+    },
+    "intermediate_iteration_history": {
+        "0": {
+            "0": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "objective_value": 0.020257989892507,
+                "reduction": 0.0
+            },
+            "1": {
+                "design_vector": [
+                    1.1,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "objective_value": 0.05421927005122505,
+                "reduction": 167.6438794713764
+            },
+            "2": {
+                "design_vector": [
+                    1.0,
+                    1.1,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "objective_value": 0.054181845056884816,
+                "reduction": 167.45913757675203
+            },
+            "3": {
+                "design_vector": [
+                    1.0,
+                    1.0,
+                    1.1,
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "objective_value": 0.05416079863431644,
+                "reduction": 167.35524561767784
+            }
+        }
+    },
+    "initial_objective_value": 0.020257989892507,
+    "best_objective_value": 0.020257989892507,
+    "latest_objective_value": 0.05416079863431644,
+    "run_counter": 3,
+    "options": {
+        "maxiter": 100,
+        "disp": false,
+        "adaptive": true,
+        "initial_simplex": [
+            [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            [
+                1.1,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            [
+                1.0,
+                1.1,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            [
+                1.0,
+                1.0,
+                1.1,
+                1.0,
+                1.0,
+                1.0,
+                1.0
+            ],
+            [
+                1.0,
+                1.0,
+                1.0,
+                1.1,
+                1.0,
+                1.0,
+                1.0
+            ],
+            [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.1,
+                1.0,
+                1.0
+            ],
+            [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.1,
+                1.0
+            ],
+            [
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.0,
+                1.1
+            ]
+        ]
+    },
+    "save_json": true,
+    "current_time": "202406051253",
+    "file_name": "optimization_analysis",
+    "initial_guess": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "bounds_vector": [
+        [
+            0.09999999999999998,
+            1.9
+        ],
+        [
+            0.09999999999999998,
+            1.9
+        ],
+        [
+            0.09999999999999998,
+            1.9
+        ],
+        [
+            0.09999999999999998,
+            1.9
+        ],
+        [
+            0.09999999999999998,
+            1.9
+        ],
+        [
+            0.09999999999999998,
+            1.9
+        ],
+        [
+            0.09999999999999998,
+            1.9
+        ]
+    ],
+    "best_design_vector": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ]
+}

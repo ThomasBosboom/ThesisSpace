@@ -26,17 +26,12 @@ run_optimization = True
 if __name__ == "__main__":
 
     if not run_optimization:
-        current_time = str(202406041632)
+        current_time = str(202406050012)
 
     else:
 
         navigation_simulator = NavigationSimulator.NavigationSimulator(
-            # step_size=0.01,
-            # noise_range=1,
-            # margin=0,
-            # orbit_insertion_error=np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-            # initial_estimation_error=np.array([5e1, 5e1, 5e1, 1e-4, 1e-4, 1e-4, 5e3, 5e3, 5e3, 1e-2, 1e-2, 1e-2]),
-            # apriori_covariance=np.diag([5e1, 5e1, 5e1, 1e-4, 1e-4, 1e-4, 5e3, 5e3, 5e3, 1e-2, 1e-2, 1e-2])**2
+            orbit_insertion_error=np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1
         )
 
         optimization_model = OptimizationModel.OptimizationModel(
@@ -48,14 +43,13 @@ if __name__ == "__main__":
             bounds=(-0.9, 0.9),
             optimization_method="Nelder-Mead",
             design_vector_type="arc_lengths",
-            initial_simplex_perturbation = 0.3,
-            # custom_initial_guess=[]
+            initial_simplex_perturbation = 0.1
         )
 
         objective_functions = ObjectiveFunctions.ObjectiveFunctions(
             navigation_simulator,
             evaluation_threshold=14,
-            num_runs=1
+            num_runs=10
         )
 
         # Chose the objective function to optimize
@@ -64,10 +58,10 @@ if __name__ == "__main__":
         # optimization_results = optimization_model.optimize(objective_functions.overall_uncertainty)
 
         # Compare before and after optimization
-        observation_windows = optimization_model.generate_observation_windows(optimization_results.final_solution)
-        cost_initial = objective_functions.station_keeping_cost(observation_windows)
-        observation_windows = optimization_model.generate_observation_windows(optimization_results.initial_guess)
-        cost_optimized = objective_functions.station_keeping_cost(observation_windows)
+        # observation_windows = optimization_model.generate_observation_windows(optimization_results.final_solution)
+        # cost_initial = objective_functions.station_keeping_cost(observation_windows)
+        # observation_windows = optimization_model.generate_observation_windows(optimization_results.initial_guess)
+        # cost_optimized = objective_functions.station_keeping_cost(observation_windows)
 
     plot_optimization_results = ProcessOptimizationResults.PlotOptimizationResults(time_tag=current_time)
     plot_optimization_results.plot_iteration_history()

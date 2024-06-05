@@ -130,6 +130,10 @@ class HighFidelityDynamicModel(DynamicModelBase):
                     propagation_setup.acceleration.radiation_pressure_type, body_to_propagate, "Sun") \
                         for body_to_propagate in self.bodies_to_propagate])
 
+        self.dependent_variables_to_save.extend([
+            propagation_setup.dependent_variable.total_acceleration(body_to_propagate) \
+                for body_to_propagate in self.bodies_to_propagate])
+
 
     def set_termination_settings(self):
 

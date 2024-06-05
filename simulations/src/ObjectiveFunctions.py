@@ -48,7 +48,7 @@ class ObjectiveFunctions():
 
             print(f"Run {run+1} of {self.num_runs}")
 
-            navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=self.seed)
+            navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=run)
             navigation_results = navigation_output.navigation_results
             navigation_simulator = navigation_output.navigation_simulator
 

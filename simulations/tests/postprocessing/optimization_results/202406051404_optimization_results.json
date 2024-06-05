@@ -1,0 +1,464 @@
+{
+    "duration": 8,
+    "arc_length": 1,
+    "arc_interval": 3,
+    "mission_start_epoch": 60390,
+    "optimization_method": "Nelder-Mead",
+    "max_iterations": 100,
+    "bounds": [
+        -0.9,
+        0.9
+    ],
+    "design_vector_type": "arc_lengths",
+    "custom_initial_guess": null,
+    "initial_simplex_perturbation": 0.1,
+    "iteration": 11,
+    "iteration_history": {
+        "0": {
+            "design_vector": [
+                1.0,
+                1.0
+            ],
+            "objective_value": 0.009446133063095042,
+            "reduction": 0.0
+        },
+        "1": {
+            "design_vector": [
+                1.0,
+                1.0
+            ],
+            "objective_value": 0.009446133063095042,
+            "reduction": 0.0
+        },
+        "2": {
+            "design_vector": [
+                0.975,
+                1.0625
+            ],
+            "objective_value": 0.009305769449457357,
+            "reduction": -1.4859372898955827
+        },
+        "3": {
+            "design_vector": [
+                0.975,
+                1.0625
+            ],
+            "objective_value": 0.009305769449457357,
+            "reduction": -1.4859372898955827
+        },
+        "4": {
+            "design_vector": [
+                0.9812500000000001,
+                0.996875
+            ],
+            "objective_value": 0.009220970148537466,
+            "reduction": -2.3836517340334975
+        },
+        "5": {
+            "design_vector": [
+                0.978125,
+                1.0296875
+            ],
+            "objective_value": 0.009184076551280604,
+            "reduction": -2.7742199910168837
+        },
+        "6": {
+            "design_vector": [
+                0.978125,
+                1.0296875
+            ],
+            "objective_value": 0.009184076551280604,
+            "reduction": -2.7742199910168837
+        },
+        "7": {
+            "design_vector": [
+                0.978125,
+                1.0296875
+            ],
+            "objective_value": 0.009184076551280604,
+            "reduction": -2.7742199910168837
+        },
+        "8": {
+            "design_vector": [
+                0.978125,
+                1.0296875
+            ],
+            "objective_value": 0.009184076551280604,
+            "reduction": -2.7742199910168837
+        },
+        "9": {
+            "design_vector": [
+                0.978125,
+                1.0296875
+            ],
+            "objective_value": 0.009184076551280604,
+            "reduction": -2.7742199910168837
+        },
+        "10": {
+            "design_vector": [
+                0.978125,
+                1.0296875
+            ],
+            "objective_value": 0.009184076551280604,
+            "reduction": -2.7742199910168837
+        },
+        "11": {
+            "design_vector": [
+                0.978125,
+                1.0296875
+            ],
+            "objective_value": 0.009184076551280604,
+            "reduction": -2.7742199910168837
+        }
+    },
+    "intermediate_iteration_history": {
+        "0": {
+            "0": {
+                "design_vector": [
+                    1.0,
+                    1.0
+                ],
+                "objective_value": 0.009446133063095042,
+                "reduction": 0.0
+            },
+            "1": {
+                "design_vector": [
+                    1.1,
+                    1.0
+                ],
+                "objective_value": 0.015719802269674156,
+                "reduction": 66.41521101464916
+            },
+            "2": {
+                "design_vector": [
+                    1.0,
+                    1.1
+                ],
+                "objective_value": 0.009644544710594274,
+                "reduction": 2.100453658380101
+            },
+            "3": {
+                "design_vector": [
+                    0.8999999999999999,
+                    1.1
+                ],
+                "objective_value": 0.013644689426128334,
+                "reduction": 44.447355706183835
+            },
+            "4": {
+                "design_vector": [
+                    0.95,
+                    1.0750000000000002
+                ],
+                "objective_value": 0.010649868670980764,
+                "reduction": 12.74315743643903
+            }
+        },
+        "1": {
+            "0": {
+                "design_vector": [
+                    1.05,
+                    1.025
+                ],
+                "objective_value": 0.011688718952513706,
+                "reduction": 23.740782333251154
+            },
+            "1": {
+                "design_vector": [
+                    0.975,
+                    1.0625
+                ],
+                "objective_value": 0.009305769449457357,
+                "reduction": -1.4859372898955827
+            }
+        },
+        "2": {
+            "0": {
+                "design_vector": [
+                    0.9750000000000001,
+                    0.9624999999999999
+                ],
+                "objective_value": 0.009853188080800362,
+                "reduction": 4.30922383780128
+            },
+            "1": {
+                "design_vector": [
+                    0.99375,
+                    1.065625
+                ],
+                "objective_value": 0.009562295952557092,
+                "reduction": 1.2297401347847352
+            }
+        },
+        "3": {
+            "0": {
+                "design_vector": [
+                    0.9812500000000001,
+                    0.996875
+                ],
+                "objective_value": 0.009220970148537466,
+                "reduction": -2.3836517340334975
+            },
+            "1": {
+                "design_vector": [
+                    0.9750000000000003,
+                    0.9624999999999999
+                ],
+                "objective_value": 0.009853188080800362,
+                "reduction": 4.30922383780128
+            }
+        },
+        "4": {
+            "0": {
+                "design_vector": [
+                    0.95625,
+                    1.0593750000000002
+                ],
+                "objective_value": 0.010678756881427758,
+                "reduction": 13.048977926728938
+            },
+            "1": {
+                "design_vector": [
+                    0.9890625,
+                    1.01484375
+                ],
+                "objective_value": 0.009451485342990468,
+                "reduction": 0.056661068181827326
+            },
+            "2": {
+                "design_vector": [
+                    0.978125,
+                    1.0296875
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            },
+            "3": {
+                "design_vector": [
+                    0.9906250000000001,
+                    0.9984375
+                ],
+                "objective_value": 0.009442832216726054,
+                "reduction": -0.03494389023466432
+            }
+        },
+        "5": {
+            "0": {
+                "design_vector": [
+                    0.96875,
+                    1.0281249999999997
+                ],
+                "objective_value": 0.010065223242241695,
+                "reduction": 6.553900680960843
+            },
+            "1": {
+                "design_vector": [
+                    0.9851562500000001,
+                    1.005859375
+                ],
+                "objective_value": 0.009442832216726054,
+                "reduction": -0.03494389023466432
+            },
+            "2": {
+                "design_vector": [
+                    0.9796875,
+                    1.01328125
+                ],
+                "objective_value": 0.00939877396438004,
+                "reduction": -0.5013596399570985
+            },
+            "3": {
+                "design_vector": [
+                    0.984375,
+                    1.0140625
+                ],
+                "objective_value": 0.009663083283292023,
+                "reduction": 2.2967093386031214
+            }
+        },
+        "6": {
+            "0": {
+                "design_vector": [
+                    0.9734375000000002,
+                    1.02890625
+                ],
+                "objective_value": 0.010065223242241695,
+                "reduction": 6.553900680960843
+            },
+            "1": {
+                "design_vector": [
+                    0.981640625,
+                    1.0177734375
+                ],
+                "objective_value": 0.009663083283292023,
+                "reduction": 2.2967093386031214
+            },
+            "2": {
+                "design_vector": [
+                    0.9789062500000001,
+                    1.021484375
+                ],
+                "objective_value": 0.009663083283292023,
+                "reduction": 2.2967093386031214
+            },
+            "3": {
+                "design_vector": [
+                    0.98125,
+                    1.021875
+                ],
+                "objective_value": 0.009663083283292023,
+                "reduction": 2.2967093386031214
+            }
+        },
+        "7": {
+            "0": {
+                "design_vector": [
+                    0.97578125,
+                    1.029296875
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            }
+        },
+        "8": {
+            "0": {
+                "design_vector": [
+                    0.9750000000000001,
+                    1.0375
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            },
+            "1": {
+                "design_vector": [
+                    0.9759765625000001,
+                    1.0334960937500002
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            }
+        },
+        "9": {
+            "0": {
+                "design_vector": [
+                    0.9779296875000001,
+                    1.02548828125
+                ],
+                "objective_value": 0.009663083283292023,
+                "reduction": 2.2967093386031214
+            },
+            "1": {
+                "design_vector": [
+                    0.9764648437500001,
+                    1.031494140625
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            },
+            "2": {
+                "design_vector": [
+                    0.9769531250000001,
+                    1.0294921875
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            },
+            "3": {
+                "design_vector": [
+                    0.97705078125,
+                    1.0315917968750001
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            }
+        },
+        "10": {
+            "0": {
+                "design_vector": [
+                    0.97802734375,
+                    1.0275878906250002
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            },
+            "1": {
+                "design_vector": [
+                    0.977294921875,
+                    1.0305908203125003
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            },
+            "2": {
+                "design_vector": [
+                    0.9775390625,
+                    1.0295898437500002
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            },
+            "3": {
+                "design_vector": [
+                    0.977587890625,
+                    1.0306396484375
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            }
+        },
+        "11": {
+            "0": {
+                "design_vector": [
+                    0.978076171875,
+                    1.0286376953125003
+                ],
+                "objective_value": 0.009184076551280604,
+                "reduction": -2.7742199910168837
+            }
+        }
+    },
+    "initial_objective_value": 0.009446133063095042,
+    "best_objective_value": 0.009184076551280604,
+    "latest_objective_value": 0.009184076551280604,
+    "run_counter": 0,
+    "options": {
+        "maxiter": 100,
+        "disp": false,
+        "adaptive": true,
+        "initial_simplex": [
+            [
+                1.0,
+                1.0
+            ],
+            [
+                1.1,
+                1.0
+            ],
+            [
+                1.0,
+                1.1
+            ]
+        ]
+    },
+    "save_json": true,
+    "current_time": "202406051404",
+    "file_name": "optimization_analysis",
+    "initial_guess": [
+        1.0,
+        1.0
+    ],
+    "bounds_vector": [
+        [
+            0.09999999999999998,
+            1.9
+        ],
+        [
+            0.09999999999999998,
+            1.9
+        ]
+    ],
+    "best_design_vector": [
+        0.978125,
+        1.0296875
+    ]
+}

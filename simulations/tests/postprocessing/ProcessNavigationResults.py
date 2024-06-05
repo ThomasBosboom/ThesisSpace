@@ -562,8 +562,8 @@ class PlotSingleNavigationResults():
         # ax[2].plot(np.stack(list(angles_dict.keys()))-self.mission_start_epoch, np.stack(list(angles_dict.values())), label="angles in degrees", color=color)
         # plt.show()
 
-        ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, np.stack(list(angle_to_range_dict.values())), label=["Azimuth", "Elevation"])
-        ax[2].legend(loc='upper left', fontsize="small")
+        # ax[2].plot(np.stack(list(angle_to_range_dict.keys()))-self.mission_start_epoch, np.stack(list(angle_to_range_dict.values())), label=["Azimuth", "Elevation"])
+        # ax[2].legend(loc='upper left', fontsize="small")
 
         states_history_LPF_moon = state_history[:, 0:3]-dependent_variables_history[:, 0:3]
         states_history_LUMIO_moon = state_history[:, 6:9]-dependent_variables_history[:, 0:3]
@@ -573,6 +573,35 @@ class PlotSingleNavigationResults():
             cosine_angle = np.dot(relative_state_history[i,:3], states_history_LUMIO_moon[i])/(np.linalg.norm(relative_state_history[i,:3])*np.linalg.norm(states_history_LUMIO_moon[i]))
             angle = np.arccos(cosine_angle)
             angle_deg.append(np.degrees(angle))
+
+        total_accelerations = dependent_variables_history[:, -6:]
+
+        observation_angles = []
+        for epoch, dependent_variables in enumerate(dependent_variables_history):
+            observation_angle_satellites = []
+            for i in reversed(range(2)):
+
+                length = np.shape(dependent_variables_history)[1]
+                if i == 0:
+                    # total_acceleration = dependent_variables[length-1-3-i*3:length-1-i*3]
+                    total_acceleration = dependent_variables[-6:-3]
+                else:
+                    total_acceleration = dependent_variables[-3:]
+                relative_position = dependent_variables[6:9]*(-1+2*i)
+                dot_product = np.dot(total_acceleration, relative_position)
+                abs_total_acceleration = np.linalg.norm(total_acceleration)
+                abs_relative_position = np.linalg.norm(relative_position)
+                observation_angle = np.arccos(dot_product/(abs_total_acceleration*abs_relative_position))
+                observation_angle_satellites.append(np.degrees(observation_angle))
+            observation_angles.append(observation_angle_satellites)
+
+        observation_angles = np.array(observation_angles)
+
+        ax[2].plot(epochs-self.mission_start_epoch, observation_angles[:, 0])
+        ax[2].plot(epochs-self.mission_start_epoch, observation_angles[:, 1])
+
+
+
 
         # angle_deg = []
         # for i in range(len(epochs)):
@@ -607,13 +636,14 @@ class PlotSingleNavigationResults():
 
         ax[0].set_ylabel("Range [m]")
         ax[1].set_ylabel("Observation \n residual [m]")
-        ax[2].set_ylabel("Angles obs. \n in ECIJ2000 [deg]")
+        # ax[2].set_ylabel("Angles obs. \n in ECIJ2000 [deg]")
+        ax[2].set_ylabel(r"$\angle \boldsymbol{a}_{j}, \boldsymbol{\rho}$  [deg]")
         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
         ax[-1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, fontsize="small")
 
         sigma_rho = r"$\sigma_{\rho}$"
         f_obs = r"$\Delta t_{obs}$"
-        fig.suptitle(f"{sigma_rho} = {estimation_model.noise_range} [m], {f_obs} = {estimation_model.observation_step_size_range} [s]")
+        fig.suptitle(f"{sigma_rho} = {estimation_model.noise_range} [m]    {f_obs} = {estimation_model.observation_step_size_range} [s]")
         plt.tight_layout()
         # plt.show()
 

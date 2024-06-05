@@ -40,7 +40,7 @@ sensitivity_settings = {
     # "orbit_insertion_error": [np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
     # "arc_duration": [0.1, 0.5, 1.0, 2.0],
     # "arc_interval": [1.0, 2.0, 3.0, 4.0],
-    "mission_start_epoch": [60390, 60305, 60400],
+    "mission_start_epoch": [60390, 60395, 60400],
     # "noise_range": [1, 5, 10, 50],
     # "target_point_epochs": [[2], [3], [4]],
     # "delta_v_min": [0.00, 0.01, 0.02, 0.03],

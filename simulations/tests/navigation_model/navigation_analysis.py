@@ -23,7 +23,7 @@ from tests.postprocessing import ProcessNavigationResults
 ###### Define the observation windows ###########################
 #################################################################
 
-num_runs = 5
+num_runs = 1
 duration = 28
 mission_start_epoch = 60390.0
 
@@ -62,9 +62,8 @@ print(observation_windows_settings)
 
 observation_windows_settings = {
     "0.1 day": [
-        ([(60390, 60391)], 1),
-    ]
-
+        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.1, mission_start_epoch=mission_start_epoch), num_runs),
+    ],
 }
 
 
@@ -105,15 +104,15 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                             }
                         )
 
-                        process_single_navigation_results.plot_estimation_error_history()
-                        process_single_navigation_results.plot_uncertainty_history()
-                        process_single_navigation_results.plot_dispersion_history()
-                        process_single_navigation_results.plot_full_state_history()
-                        process_single_navigation_results.plot_formal_error_history()
+                        # process_single_navigation_results.plot_estimation_error_history()
+                        # process_single_navigation_results.plot_uncertainty_history()
+                        # process_single_navigation_results.plot_dispersion_history()
+                        # process_single_navigation_results.plot_full_state_history()
+                        # process_single_navigation_results.plot_formal_error_history()
                         process_single_navigation_results.plot_observations()
-                        process_single_navigation_results.plot_dispersion_to_estimation_error_history()
-                        process_single_navigation_results.plot_correlation_history()
-                        process_single_navigation_results.plot_observability_metrics()
+                        # process_single_navigation_results.plot_dispersion_to_estimation_error_history()
+                        # process_single_navigation_results.plot_correlation_history()
+                        # process_single_navigation_results.plot_observability_metrics()
 
 # plt.show()
 

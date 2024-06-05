@@ -191,7 +191,7 @@ class PlotSensitivityResults():
                             value_list.append(value[run])
                             if key >= navigation_simulator.mission_start_epoch + evaluation_threshold:
                                 value_list_14.append(value[run])
-                                print("Appending: ", value[run])
+                                print("type_key", type_key, "value[run]", value[run])
                         sums[run] = value_list
                         sums_14[run] = value_list_14
 
