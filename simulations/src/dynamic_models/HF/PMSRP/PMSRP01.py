@@ -189,45 +189,20 @@ class HighFidelityDynamicModel(DynamicModelBase):
             return dynamics_simulator
 
 
-# from src import Interpolator
 
+# from tudatpy.kernel.astro import time_conversion, element_conversion
+# test = HighFidelityDynamicModel(60390, 80)
+# dynamics_simulator = test.get_propagation_simulator(solve_variational_equations=False)
 
-# start = 60390
-# prop = 0.2
-# step_size = 0.01
-# custom_initial_state = np.array([-2.80124257e+08,  2.53325273e+08,  1.46944225e+08 ,-1.61474900e+03,
-#                                 -2.23501800e+03, -2.97164000e+02, -3.10468779e+08, 2.49476676e+08,
-#                                 1.74974583e+08, -9.93404005e+02, -7.66335485e+02, -5.24989115e+02])
-# model = HighFidelityDynamicModel(start, prop, custom_initial_state=custom_initial_state)
-# _, state_history, _, _ = \
-#     Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(model, solve_variational_equations=True)
+# state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.state_history.items()], dtype=object)
+# moon_state_history = np.array([(time_conversion.julian_day_to_modified_julian_day(time_conversion.seconds_since_epoch_to_julian_day(key)), key, *value/1000) for key, value in dynamics_simulator.dependent_variable_history.items()], dtype=object)
 
+# header = "epoch (MJD), epoch (seconds TDB), x [km], y [km], z [km], vx [km/s], vy [km/s], vz [km/s]"
+# np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/LPF_states_J2000_Earth_centered.txt", state_history[:,:8], delimiter=',', fmt='%f', header=header)
+# np.savetxt("C:/Users/thoma/OneDrive/Documenten/GitHub/ThesisSpace/simulations/reference/DataLPF/TextFiles/Moon_states_J2000_Earth_centered.txt", moon_state_history[:,:8], delimiter=',', fmt='%f', header=header)
 
-# custom_initial_state = np.array([
-#     -2.80124837e+08, 2.53324810e+08, 1.46943682e+08, -1.61474821e+03,
-#     -2.23501636e+03, -2.97163878e+02, -3.10468232e+08, 2.49475875e+08,
-#     1.74975213e+08, -9.93403510e+02, -7.66335369e+02, -5.24989596e+02
-# ])
-# model_estimated = HighFidelityDynamicModel(start, prop, custom_initial_state=custom_initial_state)
-# _, state_history_estimated, _, _ = \
-#     Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(model_estimated, solve_variational_equations=True)
-
-# custom_initial_state = np.array([-2.80124257e+08,  2.53325273e+08,  1.46944225e+08 ,-1.61474900e+03,
-#                                 -2.23501800e+03, -2.97164000e+02, -3.10468779e+08, 2.49476676e+08,
-#                                 1.74974583e+08, -9.93404005e+02, -7.66335485e+02, -5.24989115e+02])
-# model_truth = HighFidelityDynamicModel(start, prop, custom_initial_state=custom_initial_state)
-# _, state_history_truth, _, _ = \
-#     Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size).get_propagation_results(model_truth, solve_variational_equations=True)
-
-# print("initial states: \n", state_history[0,:], state_history_estimated[0,:]-state_history_truth[0,:])
-
-# ax = plt.figure()
-# # plt.plot(states[:,0], states[:,1], states[:,2])
-# # plt.plot(states[:,6], states[:,7], states[:,8])
-# plt.plot(state_history[:,6:9]-state_history_truth[:,6:9], color="red")
-# plt.plot(state_history_estimated[:,6:9]-state_history_truth[:,6:9], color="blue")
-# # plt.plot(states[:,6], states[:,7])
-# # plt.plot(dep_var[:,:6])
-# # plt.plot(dep_var[:,-8:-6])
+# ax = plt.figure().add_subplot(projection='3d')
+# plt.plot(moon_state_history[:,2], moon_state_history[:,3], moon_state_history[:,4])
+# plt.plot(state_history[:,2], state_history[:,3], state_history[:,4])
 # plt.legend()
 # plt.show()

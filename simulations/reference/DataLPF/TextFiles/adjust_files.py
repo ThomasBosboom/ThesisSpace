@@ -12,7 +12,7 @@ step_size = 0.01
 
 for body in ["LPF", "Moon"]:
 
-    original_file = f"365days\{body}_states_J2000_Earth_centered.txt"
+    original_file = f"{body}_states_J2000_Earth_centered.txt"
     new_file = f"{body}_states_J2000_Earth_centered.txt"
 
     # Load the data from the provided text file
@@ -30,7 +30,7 @@ for body in ["LPF", "Moon"]:
     # Define the range of epochs from the minimum to maximum with a step of 0.01
     new_epoch_mjd = np.arange(epoch_mjd.min(), epoch_mjd.max(), step_size)
 
-    f = interp1d(epoch_mjd, filtered_data, axis=0, kind='cubic')
+    f = interp1d(epoch_mjd, filtered_data, axis=0, kind='cubic', fill_value='extrapolate')
     interpolated_data = f(new_epoch_mjd)
 
     # Combine the interpolated epoch column with other interpolated columns

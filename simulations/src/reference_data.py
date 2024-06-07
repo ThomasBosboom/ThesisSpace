@@ -48,6 +48,7 @@ def read_textfiles(data_type, satellite="LUMIO"):
 
             state_fixed_LPF_Earth_centered   = np.loadtxt(fname=file_paths[0], delimiter=',', skiprows=1, usecols=tuple(range(0,8,1)), unpack=False)
             state_fixed_Moon_Earth_centered  = np.loadtxt(fname=file_paths[1], delimiter=',', skiprows=1, usecols=tuple(range(0,8,1)), unpack=False)
+            # print("first: ", state_fixed_LPF_Earth_centered[0, :])
 
             return np.stack([state_fixed_LPF_Earth_centered, state_fixed_Moon_Earth_centered])
 

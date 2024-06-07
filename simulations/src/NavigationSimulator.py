@@ -80,7 +80,7 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
 
-        print("=========================")
+        # print("=========================")
         # print("Start navigation simulation")
 
         estimation_arc = 0
@@ -330,13 +330,13 @@ class NavigationSimulator(NavigationSimulatorBase):
                             self.station_keeping_epochs.append(self.times[navigation_arc+1])
                             self.delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
 
-                            # print(f"Correction at {self.times[navigation_arc+1]}: \n", delta_v, np.linalg.norm(delta_v))
-                            print(f"Correction at {self.times[navigation_arc+1]}: ", \
-                                np.sqrt(np.mean(residual_history[:, best_iteration]**2)), "m   ", \
-                                np.linalg.norm(delta_v), "m/s   ", \
-                                np.linalg.norm(self.initial_estimation_error[6:9]), "m   ", \
-                                np.linalg.norm(dispersion[:3]), "m"
-                            )
+                            if self.show_corrections_in_terminal:
+                                print(f"Correction at {self.times[navigation_arc+1]}: ", \
+                                    np.sqrt(np.mean(residual_history[:, best_iteration]**2)), "m   ", \
+                                    np.linalg.norm(delta_v), "m/s   ", \
+                                    np.linalg.norm(self.initial_estimation_error[6:9]), "m   ", \
+                                    np.linalg.norm(dispersion[:3]), "m"
+                                )
 
 
             if navigation_arc < len(self.times)-2:
@@ -347,7 +347,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                 break
 
         # print("End navigation simulation")
-        print("=========================")
+        # print("=========================")
 
         self.navigation_result_dicts = [self.full_estimation_error_dict, self.full_reference_state_deviation_dict, self.full_propagated_covariance_dict, self.full_propagated_formal_errors_dict,\
                         self.full_state_history_reference_dict, self.full_state_history_truth_dict, self.full_state_history_estimated_dict, self.full_state_history_final_dict, self.delta_v_dict,\

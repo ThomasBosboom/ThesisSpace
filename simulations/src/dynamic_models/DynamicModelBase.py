@@ -60,7 +60,10 @@ class DynamicModelBase:
 
         # Initial state based on reference orbit
         # initial_state_LPF_old = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
-        initial_state_LPF = self.calculate_initial_state()
+        # initial_state_LPF = self.calculate_initial_state()
+        # print(initial_state_LPF)
+        initial_state_LPF = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_ELO)
+        # print(initial_state_LPF)
         initial_state_LUMIO = reference_data.get_reference_state_history(self.simulation_start_epoch_MJD, self.propagation_time, satellite=self.name_LPO)
         self.initial_state = np.concatenate((initial_state_LPF, initial_state_LUMIO))
 
@@ -89,4 +92,6 @@ class DynamicModelBase:
             self.simulation_start_epoch
         )
 
+        # print(initial_state_moon_centered + moon_state_earth_centered)
         return initial_state_moon_centered + moon_state_earth_centered
+

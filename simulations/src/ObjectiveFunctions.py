@@ -46,7 +46,7 @@ class ObjectiveFunctions():
         cost_list = []
         for run in range(self.num_runs):
 
-            print(f"Run {run+1} of {self.num_runs}")
+            print(f"Run {run+1} of {self.num_runs}, seed {run}")
 
             navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=run)
             navigation_results = navigation_output.navigation_results

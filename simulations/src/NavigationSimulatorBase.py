@@ -39,3 +39,4 @@ class NavigationSimulatorBase():
         self.maximum_iterations_first_arc = 10
         self.margin = 0
         self.redirect_out = True
+        self.show_corrections_in_terminal = True

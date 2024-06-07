@@ -36,7 +36,7 @@ class PlotSingleNavigationResults():
             setattr(self, key, value)
 
 
-    def plot_full_state_history(self):
+    def plot_full_state_history(self, step_size=0.005):
 
         fig1_3d = plt.figure()
         ax_3d = fig1_3d.add_subplot(111, projection='3d')
@@ -50,11 +50,40 @@ class PlotSingleNavigationResults():
         epochs = self.navigation_results[9][0]
         dependent_variables_history = self.navigation_results[9][1]
         delta_v_dict = self.navigation_simulator.delta_v_dict
+
         full_state_history_truth_dict = self.navigation_simulator.full_state_history_truth_dict
         full_state_history_reference_dict = self.navigation_simulator.full_state_history_reference_dict
+        full_state_history_estimated_dict = self.navigation_simulator.full_state_history_estimated_dict
+        full_dependent_variables_history_estimated = self.navigation_simulator.full_dependent_variables_history_estimated
+        moon_data_dict = {epoch: state[:6] for epoch, state in full_dependent_variables_history_estimated.items()}
 
-        moon_data_dict = {epoch: state for epoch, state in zip(epochs, dependent_variables_history[:, :6])}
-        full_state_history_estimated_dict = {epoch: state for epoch, state in zip(epochs, state_history_estimated[:, :])}
+        # Determine the range of keys
+        all_keys = set(full_state_history_truth_dict.keys()).union(full_state_history_reference_dict.keys()).union(full_state_history_estimated_dict.keys()).union(moon_data_dict.keys())
+        min_key = min(all_keys)
+        max_key = max(all_keys)
+
+        # Generate new keys with the smaller dt
+        new_keys = np.arange(min_key, max_key + step_size, step_size)
+
+        def interpolate_dict(original_dict, new_keys):
+            original_keys = list(original_dict.keys())
+            original_values = np.array(list(original_dict.values()))
+
+            num_dims = original_values.shape[1]
+            new_values = []
+            for dim in range(num_dims):
+
+                interpolation_function = interp1d(original_keys, original_values[:, dim], kind='cubic', fill_value='extrapolate')
+                new_values.append(interpolation_function(new_keys))
+
+            new_values = np.vstack(new_values).T
+            return {k: v for k, v in zip(new_keys, new_values)}
+
+        # Interpolate each dictionary
+        full_state_history_truth_dict = interpolate_dict(full_state_history_truth_dict, new_keys)
+        full_state_history_reference_dict = interpolate_dict(full_state_history_reference_dict, new_keys)
+        full_state_history_estimated_dict = interpolate_dict(full_state_history_estimated_dict, new_keys)
+        moon_data_dict = interpolate_dict(moon_data_dict, new_keys)
 
         G = 6.67430e-11
         m1 = 5.972e24
@@ -222,16 +251,12 @@ class PlotSingleNavigationResults():
         ax_3d2.plot(state_history_estimated[:,6], state_history_estimated[:,7], state_history_estimated[:,8], lw=0.5, label="LUMIO", color="black")
         ax_3d2.scatter(0, 0, 0, label="Earth", color="darkblue", s=50)
 
-
         for num, (start, end) in enumerate(self.navigation_simulator.observation_windows):
             synodic_states_window_dict = {key: value for key, value in synodic_full_state_history_estimated_dict.items() if key >= start and key <= end}
             synodic_states_window = np.stack(list(synodic_states_window_dict.values()))
 
             inertial_states_window_dict = {key: value for key, value in full_state_history_estimated_dict.items() if key >= start and key <= end}
             inertial_states_window = np.stack(list(inertial_states_window_dict.values()))
-
-            # print(np.shape(synodic_states_window))
-            # print(np.shape(synodic_states_window), color_cycle[num%10])
 
             for i in range(2):
                 linewidth=2
@@ -268,15 +293,18 @@ class PlotSingleNavigationResults():
                 ax[i][2].set_xlabel(axes_labels[0])
                 ax[i][2].set_ylabel(axes_labels[1])
 
+        elev = 20
+        azim = -50
         ax_3d.set_xlabel('X [-]')
         ax_3d.set_ylabel('Y [-]')
         ax_3d.set_zlabel('Z [-]')
+        ax_3d.view_init(elev=elev, azim=azim)
         ax_3d.legend()
 
         ax_3d2.set_xlabel('X [m]')
         ax_3d2.set_ylabel('Y [m]')
         ax_3d2.set_zlabel('Z [m]')
-
+        ax_3d2.view_init(elev=elev, azim=azim)
         ax_3d2.legend()
 
         ax[0][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
@@ -1064,7 +1092,7 @@ class PlotMultipleNavigationResults():
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs"], custom_sub_folder_name=self.file_name)
 
 
-    def plot_monte_carlo_estimation_error_history(self, save_figure=True):
+    def plot_monte_carlo_estimation_error_history(self, save_figure=True, evaluation_threshold=14):
 
         self.save_figure = save_figure
 
@@ -1163,7 +1191,8 @@ class PlotMultipleNavigationResults():
 
                             n += 1
 
-                mean_full_estimation_error_histories = np.mean(np.array(full_estimation_error_histories), axis=0)
+                full_estimation_error_histories = np.array(full_estimation_error_histories)
+                mean_full_estimation_error_histories = np.mean(full_estimation_error_histories, axis=0)
                 # print("Mean: \n", mean_full_estimation_error_histories[-1, :])
 
                 n=0
@@ -1177,7 +1206,13 @@ class PlotMultipleNavigationResults():
                                 color=colors[i],
                                 alpha=1)
 
-                        rss_values = np.sqrt(np.sum(np.square(mean_full_estimation_error_histories[-1, 3*k+6*j:3*k+6*j+3])))
+                        index_length = int(evaluation_threshold/navigation_simulator.step_size)
+                        if len(mean_full_estimation_error_histories)<index_length:
+                            index_length=len(mean_full_estimation_error_histories)
+
+                        # rss_values = np.sqrt(np.sum(np.square(mean_full_estimation_error_histories[-1, 3*k+6*j:3*k+6*j+3])))
+                        rss_values = np.sqrt(np.mean(np.sum(np.square(mean_full_estimation_error_histories[-index_length:, 3*k+6*j:3*k+6*j+3]), axis=1)))
+
                         if type_index == 0:
                             axs[type_index][n].set_title(titles[n]+f"\nMean RSS: {np.round(rss_values, 3)} "+units[n], fontsize="small")
                         else:
@@ -1288,7 +1323,7 @@ class PlotMultipleNavigationResults():
                                     height=val, width=0.8,
                                     color="white", hatch='/', edgecolor='black', alpha=0.6,
                                     yerr=std_data[g_name][val_i],
-                                    label=f"Last {evaluation_threshold} days" if g_i == 0 else None,
+                                    label=f"After {evaluation_threshold} days" if g_i == 0 else None,
                                     capsize=4)[0]
 
                     bars[g_name].append(bar)
