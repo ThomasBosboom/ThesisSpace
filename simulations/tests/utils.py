@@ -217,7 +217,7 @@ def get_estimation_model_results(dynamic_model_objects,
                                  apriori_covariance=None,
                                  initial_estimation_error=None,
                                  custom_range_noise=None,
-                                 custom_observation_step_size_range=None):
+                                 custom_observation_interval=None):
 
 
     if custom_estimation_model_objects is None:
@@ -251,9 +251,9 @@ def get_estimation_model_results(dynamic_model_objects,
 
                 # Adjust the attributes if wanted
                 if custom_range_noise is not None:
-                    estimation_model.noise_range = custom_range_noise
-                if custom_observation_step_size_range is not None:
-                    estimation_model.observation_step_size_range = custom_observation_step_size_range
+                    estimation_model.noise = custom_range_noise
+                if custom_observation_interval is not None:
+                    estimation_model.observation_interval = custom_observation_interval
 
                 # print("esimationmode", estimation_model)
                 # Solve the results of the estimation arc and save to dictionary

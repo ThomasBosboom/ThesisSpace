@@ -26,7 +26,7 @@ from tests.postprocessing import ProcessNavigationResults, ProcessSensitivityRes
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 10
+num_runs = 5
 
 default_window_inputs = {
     "duration": 28,
@@ -35,18 +35,26 @@ default_window_inputs = {
     "arc_duration": 1
 }
 
-
-
 combined_sensitivity_settings = {
-    # "sensitivity_settings_windows": {
-    #     # "orbit_insertion_error": [np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1],
-    #     "arc_duration": [0.1, 0.5, 1.0, 2.0],
-    #     "arc_interval": [1.0, 2.0, 3.0, 4.0],
-    #     "mission_start_epoch": [60390, 60395, 60400],
-    # },
+    "sensitivity_settings_windows": {
+        # "initial_estimation_error": [
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/100,
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/10,
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+        #     ],
+        # "orbit_insertion_error": [np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
+        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0.5,
+        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1,
+        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
+        #     ],
+        # "arc_duration": [0.1, 0.5, 1.0, 2.0],
+        # "arc_interval": [1.0, 2.0, 3.0, 4.0],
+        "mission_start_epoch": [60390, 60395, 60400, 60405],
+    },
     "sensitivity_settings_auxiliary": {
-        "observation_step_size_range": [10, 50, 100, 600],
-        "noise_range": [0.1, 1, 10, 100],
+        "observation_interval": [100, 500, 1000, 5000],
+        "noise": [0.1, 1, 10, 100],
         "target_point_epochs": [[2], [3], [4], [5]],
         "delta_v_min": [0.00, 0.01, 0.02, 0.03],
         "station_keeping_error": [0.00, 0.01, 0.05, 0.1],
@@ -54,7 +62,7 @@ combined_sensitivity_settings = {
 }
 
 auxilary_settings = {
-    "show_corrections_in_terminal": False
+    "show_corrections_in_terminal": True
 }
 
 for sensitivity_settings in combined_sensitivity_settings.values():

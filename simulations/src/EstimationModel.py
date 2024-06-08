@@ -27,9 +27,9 @@ class EstimationModel:
         # self.initial_estimation_error = None
 
         # Defining basis for observations
-        self.bias_range = 0
-        self.noise_range = 1
-        self.observation_step_size_range = 300
+        self.bias = 0
+        self.noise = 1
+        self.observation_interval = 300
         self.total_observation_count = None
         self.retransmission_delay = 0.5e-10
         self.integration_time = 0.5e-10
@@ -63,7 +63,7 @@ class EstimationModel:
             light_time_correction_settings.append(observation.first_order_relativistic_light_time_correction(correcting_bodies))
 
         # Define settings for range and doppler bias
-        range_bias_settings = observation.combined_bias([observation.absolute_bias([self.bias_range]),
+        range_bias_settings = observation.combined_bias([observation.absolute_bias([self.bias]),
                                                          observation.time_drift_bias(bias_value = np.array([self.time_drift_bias]),
                                                                                      time_link_end = observation.transmitter,
                                                                                      ref_epoch = self.dynamic_model.simulation_start_epoch)])
@@ -73,7 +73,7 @@ class EstimationModel:
         for link in self.link_definition.keys():
             self.observation_settings_list.extend([observation.two_way_range(self.link_definition[link],
                                                                         light_time_correction_settings = light_time_correction_settings,
-                                                                        # bias_settings = range_bias_settings
+                                                                        bias_settings = range_bias_settings
                                                                         )])
 
 
@@ -81,7 +81,7 @@ class EstimationModel:
 
         self.set_observation_model_settings()
 
-        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.observation_step_size_range)
+        self.observation_times_range = np.arange(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.observation_interval)
         if self.total_observation_count is not None:
             self.observation_times_range = np.linspace(self.dynamic_model.simulation_start_epoch+self.margin, self.dynamic_model.simulation_end_epoch-self.margin, self.total_observation_count)
             # print((self.observation_times_range[-1]-self.observation_times_range[0])/len(self.observation_times_range))
@@ -98,7 +98,7 @@ class EstimationModel:
         # # Add noise levels to observations
         # observation.add_gaussian_noise_to_observable(
         #     self.observation_simulation_settings,
-        #     self.noise_range,
+        #     self.noise,
         #     observation.n_way_range_type)
 
         # Add noise levels to observations
@@ -107,7 +107,7 @@ class EstimationModel:
         rng = np.random.default_rng(seed=self.seed)
         # print("seed used for estimation: ", self.seed, self.margin, self.observation_times_range[0])
         def range_noise_function(time):
-            noise = rng.normal(loc=0, scale=self.noise_range, size=1)
+            noise = rng.normal(loc=0, scale=self.noise, size=1)
             save_noise.append(noise)
             return noise
 
@@ -199,7 +199,7 @@ class EstimationModel:
                                                          save_state_history_per_iteration=False)
 
         # Define weighting of the observations in the inversion
-        weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise_range**-2}
+        weights_per_observable = {estimation_setup.observation.n_way_range_type: self.noise**-2}
         self.estimation_input.set_constant_weight_per_observable(weights_per_observable)
 
 
@@ -227,7 +227,7 @@ class EstimationModel:
 # # for propagation_time in [0.1, 0.2, 0.3, 0.4, 0.5]:
 
 #     print("NEXT LOOP ==============")
-#     # print(noise_range)
+#     # print(noise)
 
 #     for dynamic_model in [PMSRP01.HighFidelityDynamicModel(60390, 0.5)]:
 
@@ -235,7 +235,7 @@ class EstimationModel:
 
 #         dict1 = {}
 
-#         for noise_range in [0.1, 10]:
+#         for noise in [0.1, 10]:
 #             dict2 = {}
 #             for run in range(2):
 
@@ -249,7 +249,7 @@ class EstimationModel:
 #                                                 initial_estimation_error=initial_estimation_error,
 #                                                 # maximum_iterations=9,
 #                                                 redirect_out=False,
-#                                                 noise_range=noise_range,
+#                                                 noise=noise,
 #                                                 total_observation_count=total_observation_count)
 
 #                 estimation_model = estimation_model.get_estimation_results()
@@ -285,7 +285,7 @@ class EstimationModel:
 #                 dict2[run] = [np.linalg.norm(est_error_0[6:9]), np.linalg.norm(est_error[6:9])]
 #                 print(dict2[run])
 
-#             dict1[noise_range] = dict2
+#             dict1[noise] = dict2
 
 #             # print(np.linalg.norm(est_error_0[0:3]), np.linalg.norm(est_error_0[3:6]), np.linalg.norm(est_error_0[6:9]), np.linalg.norm(est_error_0[9:12]))
 #             # print(np.linalg.norm(est_error[0:3]), np.linalg.norm(est_error[3:6]), np.linalg.norm(est_error[6:9]), np.linalg.norm(est_error[9:12]))

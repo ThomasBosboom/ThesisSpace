@@ -36,7 +36,11 @@ class PlotSingleNavigationResults():
             setattr(self, key, value)
 
 
-    def plot_full_state_history(self, step_size=0.005):
+    def plot_full_state_history(self, step_size=None):
+
+        if not step_size:
+            step_size = self.navigation_simulator.step_size
+
 
         fig1_3d = plt.figure()
         ax_3d = fig1_3d.add_subplot(111, projection='3d')
@@ -664,6 +668,7 @@ class PlotSingleNavigationResults():
 
         ax[0].set_ylabel("Range [m]")
         ax[1].set_ylabel("Observation \n residual [m]")
+        ax[1].set_ylim([-5*estimation_model.noise, 5*estimation_model.noise])
         # ax[2].set_ylabel("Angles obs. \n in ECIJ2000 [deg]")
         ax[2].set_ylabel(r"$\angle \boldsymbol{a}_{j}, \boldsymbol{\rho}$  [deg]")
         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
@@ -671,7 +676,7 @@ class PlotSingleNavigationResults():
 
         sigma_rho = r"$\sigma_{\rho}$"
         f_obs = r"$\Delta t_{obs}$"
-        fig.suptitle(f"{sigma_rho} = {estimation_model.noise_range} [m]    {f_obs} = {estimation_model.observation_step_size_range} [s]")
+        fig.suptitle(f"{sigma_rho} = {estimation_model.noise} [m]  |  {f_obs} = {estimation_model.observation_interval} [s]")
         plt.tight_layout()
         # plt.show()
 
@@ -679,6 +684,7 @@ class PlotSingleNavigationResults():
     def plot_observability_metrics(self):
 
         fig, ax = plt.subplots(5, 1, figsize=(8, 6.5), sharex=True)
+        fig1, ax1 = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
         arc_nums = len(self.navigation_results[-1].keys())
 
         for arc_num in range(arc_nums):
@@ -730,14 +736,8 @@ class PlotSingleNavigationResults():
             information_matrix_history = np.stack(list(information_matrix_history.values()))
             information_vector_history = np.stack(list(information_vector_history.values()))
             total_information_matrix_history = np.stack(list(total_information_matrix_history.values()))
-
             state_transition_matrix_history = np.stack(list(state_transition_matrix_history.values()))
             dilution_of_precision_history = np.stack(list(dilution_of_precision_history.values()))
-
-            # print(information_vector_history[0, :])
-            # print(information_vector_history[-1, :])
-
-
 
             for m in range(2):
                 observability_lpf = np.sqrt(np.stack([np.diagonal(matrix) for matrix in information_matrix_history[:,0+3*m:3+3*m,0+3*m:3+3*m]]))
@@ -748,9 +748,14 @@ class PlotSingleNavigationResults():
                 ax[m].plot(epochs, observability_lpf_total, label="LPF" if m == 0 and arc_num == 0 else None, color="red")
                 ax[m].plot(epochs, observability_lumio_total, label="LUMIO" if m == 0 and arc_num == 0 else None, color="blue")
 
+                colors = ["red", "green", "blue"]
+                labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
+                for state in range(3):
+                    ax1[m][0].plot(epochs, observability_lpf[:, state], label=labels[m][state] if m==0 and arc_num==0 else None, color=colors[state])
+                    ax1[m][1].plot(epochs, observability_lumio[:, state], label=labels[m][state] if m==1 and arc_num==0 else None, color=colors[state])
+
             ax[2].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 0:3, 0:3]), color="red", label="LPF" if arc_num == 0 else None)
             ax[2].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 6:9, 6:9]), color="blue", label="LUMIO" if arc_num == 0 else None)
-
             ax[3].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 3:6, 3:6]), color="red", label="LPF" if arc_num == 0 else None)
             ax[3].plot(epochs, np.linalg.cond(total_information_matrix_history[:, 9:12, 9:12]), color="blue", label="LUMIO" if arc_num == 0 else None)
             # ax[2].plot(epochs, np.linalg.cond(total_information_matrix_history[:, :, :]), color="blue", label="LUMIO" if arc_num == 0 else None)
@@ -807,6 +812,50 @@ class PlotSingleNavigationResults():
 
         plt.tight_layout()
         # plt.suptitle("Observability metrics")
+
+
+
+
+
+        # Plot the estimation error history
+        colors = ["red", "green", "blue"]
+        labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
+        ylabels = [r'$\sqrt{\operatorname{eig}(\delta \mathbf{\Lambda}_{rr, j})}$', r'$\sqrt{\operatorname{eig}(\delta \mathbf{\Lambda}_{vv, j})}$']
+        # for k in range(2):
+        #     for j in range(2):
+        #         ax[k][j].plot(epochs, self.sigma_number*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1))
+
+        for k in range(2):
+            for j in range(2):
+                for i, gap in enumerate(self.navigation_simulator.observation_windows):
+                    ax1[k][j].axvspan(
+                        xmin=gap[0]-self.navigation_simulator.mission_start_epoch,
+                        xmax=gap[1]-self.navigation_simulator.mission_start_epoch,
+                        color="gray",
+                        alpha=0.1,
+                        label="Tracking arc" if i == 0 else None)
+
+                for i, epoch in enumerate(self.navigation_simulator.station_keeping_epochs):
+                    station_keeping_epoch = epoch - self.navigation_simulator.mission_start_epoch
+                    ax1[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
+
+                ax1[k][0].set_ylabel(ylabels[k])
+                ax1[k][j].grid(alpha=0.5, linestyle='--')
+                ax1[k][j].set_yscale("log")
+                ax1[k][0].set_title("LPF")
+                ax1[k][1].set_title("LUMIO")
+
+                # Set y-axis tick label format to scientific notation with one decimal place
+                # ax1[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+                # ax1[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+                ax1[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]", fontsize="small")
+
+        ax1[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+        ax1[1][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        # fig.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty ")
+        plt.tight_layout()
+
 
 
     def plot_dispersion_to_estimation_error_history(self):
@@ -1224,7 +1273,7 @@ class PlotMultipleNavigationResults():
 
         # fig.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), ncol=4)
         # fig.suptitle(f"Estimaton error history")
-        # fig.suptitle(r"Estimation error history \nRange-only, $1\sigma_{\rho}$ = ", navigation_simulator.noise_range, "[$m$], $t_{obs}$ = ", navigation_simulator.observation_step_size_range, "[$s$]")
+        # fig.suptitle(r"Estimation error history \nRange-only, $1\sigma_{\rho}$ = ", navigation_simulator.noise, "[$m$], $t_{obs}$ = ", navigation_simulator.observation_interval, "[$s$]")
         plt.tight_layout()
 
         if self.save_figure:

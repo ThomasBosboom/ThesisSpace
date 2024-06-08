@@ -61,8 +61,8 @@ observation_windows_settings = {
 print(observation_windows_settings)
 
 observation_windows_settings = {
-    "0.1 day": [
-        (helper_functions.get_constant_arc_observation_windows(5, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
+    "default": [
+        (helper_functions.get_constant_arc_observation_windows(15, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
     ],
 }
 
@@ -73,13 +73,38 @@ observation_windows_settings = {
 
 # Run the navigation routine using given settings
 auxilary_settings = {
-
-    # "step_size": 0.01
-    # "noise_range": 10
+    # "apriori_covariance": np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2),
+    # "apriori_covariance": np.diag(np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2),
+    # "step_size": 0.01,
+    # "observation_interval": 10000
+    # "noise": 102.44,
+    # "run_optimization_version": True
 }
+
+# import tracemalloc
+# tracemalloc.start()
+# from memory_profiler import profile
+
 navigation_outputs = helper_functions.generate_navigation_outputs(observation_windows_settings, **auxilary_settings)
 
-print(navigation_outputs)
+
+
+# snapshot = tracemalloc.take_snapshot()
+# # Find the largest memory allocation
+# top_stats = snapshot.statistics('traceback')
+# largest_allocation = max(top_stats, key=lambda stat: stat.size)
+
+# # Display information about the largest allocation
+# print("Largest Memory Allocation:")
+# print(f"Size: {largest_allocation.size / (1024 * 1024):.2f} MiB")
+# print(f"Traceback (most recent call last):")
+# for line in largest_allocation.traceback.format():
+#     print(line)
+
+
+
+# # Stop tracing memory allocations
+# tracemalloc.stop()
 
 
 ############################################################
@@ -88,7 +113,7 @@ print(navigation_outputs)
 
 print("Plotting results...")
 
-detailed_results = [["0.1 day"], [0], [0, 1]]
+detailed_results = [["default"], [0], [0]]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
     for case_index, window_case in enumerate(navigation_outputs_cases):
         for run_index, (run, navigation_output) in enumerate(window_case.items()):

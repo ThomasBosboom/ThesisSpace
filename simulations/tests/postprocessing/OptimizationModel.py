@@ -4,6 +4,8 @@ import sys
 import copy
 import scipy as sp
 import json
+import tracemalloc
+from memory_profiler import profile
 
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
@@ -115,10 +117,12 @@ class OptimizationModel:
 
         return initial_simplex.tolist()
 
-
+    @profile
     def optimize(self, objective_function):
 
         def wrapped_objective(design_vector):
+
+            # tracemalloc.start()
 
             observation_windows = self.generate_observation_windows(design_vector)
             objective_value = objective_function(observation_windows)
@@ -156,6 +160,13 @@ class OptimizationModel:
             print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value}")
 
             self.run_counter += 1
+
+            # snapshot = tracemalloc.take_snapshot()
+            # top_stats = snapshot.statistics('lineno')
+            # for stat in top_stats[:10]:
+            #     print(stat)
+            # total_memory = sum(stat.size for stat in top_stats)
+            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
             return objective_value
 

@@ -20,17 +20,20 @@ class NavigationSimulatorBase():
         self.station_keeping_error = 0.00
         self.state_noise_compensation_lpf = 1e-22
         self.state_noise_compensation_lumio = 1e-20
+        self.propagate_dynamics_linearly = False
+
+        # Initial error settings
         self.lpf_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
         self.lumio_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])
         self.initial_estimation_error = np.concatenate((self.lpf_estimation_error, self.lumio_estimation_error))
+        # self.apriori_covariance = np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2)
         self.apriori_covariance = np.diag(self.initial_estimation_error**2)
         self.orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
-        self.propagate_dynamics_linearly = False
 
         # Estimation settings
-        self.bias_range = 0
-        self.noise_range = 2.98
-        self.observation_step_size_range = 300
+        self.bias = 0
+        self.noise = 2.98
+        self.observation_interval = 300
         self.total_observation_count = None
         self.retransmission_delay = 0
         self.integration_time = 1e-20
@@ -40,3 +43,4 @@ class NavigationSimulatorBase():
         self.margin = 0
         self.redirect_out = True
         self.show_corrections_in_terminal = True
+        self.run_optimization_version = False

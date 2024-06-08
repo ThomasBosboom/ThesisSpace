@@ -1,851 +1,121 @@
-# # # # # # # # # # # # # # # # # import numpy as np
+# # import tracemalloc
 
+# # class DataGenerator:
+# #     def generate_large_list(self, size):
+# #         return [i ** 2 for i in range(size)]
 
-# # # # # # # # # # # # # # # # # matrix = np.random.rand(100, 12, 12)
+# #     def generate_large_dict(self, size):
+# #         return {i: i ** 2 for i in range(size)}
 
-# # # # # # # # # # # # # # # # # A1 = 500**2*np.eye(3,3)
+# # class DataProcessor:
+# #     def __init__(self):
+# #         self.data = None
 
-# # # # # # # # # # # # # # # # # A2 = np.array([[2, 1],
-# # # # # # # # # # # # # # # # #                [1, 2]])
+# #     def process_data(self, data):
+# #         self.data = data
+# #         # Simulate some processing
+# #         processed_data = [x * 2 for x in self.data]
+# #         return processed_data
 
-# # # # # # # # # # # # # # # # # print(np.linalg.cond(A1.T), np.linalg.eigvals(A1))
-# # # # # # # # # # # # # # # # # print(np.linalg.cond(A2), np.linalg.eigvals(A2))
+# # def main():
+# #     # Start tracing memory allocations
+# #     tracemalloc.start()
 
+# #     generator = DataGenerator()
+# #     processor = DataProcessor()
 
-# # # # # # # # # # # # # # # # import numpy as np
-# # # # # # # # # # # # # # # # import matplotlib.pyplot as plt
-# # # # # # # # # # # # # # # # from matplotlib.patches import Ellipse
+# #     # Generate large datasets
+# #     large_list = generator.generate_large_list(10000)
+# #     large_dict = generator.generate_large_dict(10000)
 
-# # # # # # # # # # # # # # # # def plot_cov_ellipse(cov, pos, nstd=2, **kwargs):
-# # # # # # # # # # # # # # # #     """
-# # # # # # # # # # # # # # # #     Plots an error ellipse based on the covariance matrix `cov` and the mean `pos`.
-# # # # # # # # # # # # # # # #     `nstd` is the number of standard deviations to determine the ellipse's radii.
-# # # # # # # # # # # # # # # #     """
-# # # # # # # # # # # # # # # #     eigvals, eigvecs = np.linalg.eigh(cov)
-# # # # # # # # # # # # # # # #     order = eigvals.argsort()[::-1]
-# # # # # # # # # # # # # # # #     eigvals, eigvecs = eigvals[order], eigvecs[:, order]
+# #     # Process the large list
+# #     processed_list = processor.process_data(large_list)
 
-# # # # # # # # # # # # # # # #     angle = np.degrees(np.arctan2(*eigvecs[:, 0][::-1]))
+# #     # Process the large dict (just converting values to list for simplicity)
+# #     processed_dict_values = processor.process_data(list(large_dict.values()))
 
-# # # # # # # # # # # # # # # #     width, height = 2 * nstd * np.sqrt(eigvals)
-# # # # # # # # # # # # # # # #     ellip = Ellipse(xy=pos, width=width, height=height, angle=angle, **kwargs)
+# #     # Take a snapshot
+# #     snapshot = tracemalloc.take_snapshot()
 
-# # # # # # # # # # # # # # # #     return ellip
+# #     # Display top memory allocations
+# #     # top_stats = snapshot.statistics('lineno')
+# #     top_stats = snapshot.statistics('traceback')
 
-# # # # # # # # # # # # # # # # # Example: Assume we have the following covariance history
-# # # # # # # # # # # # # # # # # Note: Replace this with your actual data
-# # # # # # # # # # # # # # # # num_samples = 100
-# # # # # # # # # # # # # # # # covariances = [np.random.rand(3, 3) for _ in range(num_samples)]
-# # # # # # # # # # # # # # # # means = [np.random.rand(3) for _ in range(num_samples)]
+# #     print("[ Top 10 memory allocations ]")
+# #     for stat in top_stats[:10]:
+# #         print(stat)
 
-# # # # # # # # # # # # # # # # # Plotting
-# # # # # # # # # # # # # # # # fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+# #     # Stop tracing memory allocations
+# #     tracemalloc.stop()
 
-# # # # # # # # # # # # # # # # # Labels for the principal planes
-# # # # # # # # # # # # # # # # plane_labels = [('State 1', 'State 2'), ('State 1', 'State 3'), ('State 2', 'State 3')]
+# # if __name__ == "__main__":
+# #     main()
 
-# # # # # # # # # # # # # # # # for i, (x_idx, y_idx) in enumerate([(0, 1), (0, 2), (1, 2)]):
-# # # # # # # # # # # # # # # #     ax = axes[i]
-# # # # # # # # # # # # # # # #     ax.set_xlabel(plane_labels[i][0])
-# # # # # # # # # # # # # # # #     ax.set_ylabel(plane_labels[i][1])
 
-# # # # # # # # # # # # # # # #     for cov, mean in zip(covariances, means):
-# # # # # # # # # # # # # # # #         sub_cov = cov[[x_idx, y_idx]][:, [x_idx, y_idx]]
-# # # # # # # # # # # # # # # #         sub_mean = mean[[x_idx, y_idx]]
 
-# # # # # # # # # # # # # # # #         ellip = plot_cov_ellipse(sub_cov, sub_mean, nstd=2, edgecolor='black', alpha=0.2)
-# # # # # # # # # # # # # # # #         ax.add_patch(ellip)
-# # # # # # # # # # # # # # # #         ax.scatter(*sub_mean, color='red')
+# import tracemalloc
+# import time
 
-# # # # # # # # # # # # # # # #     ax.grid(True)
+# # Start tracing memory allocations
+# tracemalloc.start()
 
-# # # # # # # # # # # # # # # # plt.tight_layout()
-# # # # # # # # # # # # # # # # plt.show()
+# # Simulate a function that gradually increases memory usage
+# def simulate_memory_usage():
+#     data = []
+#     for i in range(10):
+#         data.append([i] * 1000000)  # Increase memory usage
+#         time.sleep(1)
+#         print(f"Snapshot {i + 1}")
+#         snapshot = tracemalloc.take_snapshot()
+#         top_stats = snapshot.statistics('lineno')
+#         for stat in top_stats[:10]:
+#             print(stat)
+#         total_memory = sum(stat.size for stat in top_stats)
+#         print(f"Total memory used after iteration {i + 1}: {total_memory / (1024 ** 2):.2f} MB")
+#     return data
 
-# # # # # # # # # # # # # # # import numpy as np
-# # # # # # # # # # # # # # # import matplotlib.pyplot as plt
-# # # # # # # # # # # # # # # from matplotlib.patches import Ellipse
+# simulate_memory_usage()
 
-# # # # # # # # # # # # # # # def plot_cov_ellipse(cov, pos, nstd=2, **kwargs):
-# # # # # # # # # # # # # # #     """
-# # # # # # # # # # # # # # #     Plots an error ellipse based on the covariance matrix `cov` and the mean `pos`.
-# # # # # # # # # # # # # # #     `nstd` is the number of standard deviations to determine the ellipse's radii.
-# # # # # # # # # # # # # # #     """
-# # # # # # # # # # # # # # #     eigvals, eigvecs = np.linalg.eigh(cov)
-# # # # # # # # # # # # # # #     order = eigvals.argsort()[::-1]
-# # # # # # # # # # # # # # #     eigvals, eigvecs = eigvals[order], eigvecs[:, order]
+# # Optional: Stop tracing memory allocations
+# tracemalloc.stop()
 
-# # # # # # # # # # # # # # #     angle = np.degrees(np.arctan2(*eigvecs[:, 0][::-1]))
+from memory_profiler import profile
 
-# # # # # # # # # # # # # # #     width, height = 2 * nstd * np.sqrt(eigvals)
-# # # # # # # # # # # # # # #     ellip = Ellipse(xy=pos, width=width, height=height, angle=angle, **kwargs)
+class MyClass:
+    def __init__(self):
+        self.attribute1 = "initial_value1"
+        self.attribute2 = "initial_value2"
+        self.attribute3 = "initial_value3"
+        self.initial_state = vars(self).copy()  # Store initial state
 
-# # # # # # # # # # # # # # #     return ellip
+    @profile
+    def generate_additional_attributes(self):
+        # Method that generates additional attributes
+        self.additional_attribute1 = "new_value1"
+        self.additional_attribute2 = "new_value2"
 
-# # # # # # # # # # # # # # # # Example: Simulate smoother trajectory and increasing uncertainty
-# # # # # # # # # # # # # # # num_samples = 50
-# # # # # # # # # # # # # # # time = np.linspace(0, 2 * np.pi, num_samples)
-# # # # # # # # # # # # # # # means = np.array([np.sin(time), np.cos(time), np.sin(2*time)]).T  # Smoothed trajectory
+    @profile
+    def reset_to_init_state(self):
 
-# # # # # # # # # # # # # # # # Increasing covariance over time
-# # # # # # # # # # # # # # # covariances = [np.diag([0.1*(i+1), 0.005*(i+1), 0.01*(i+1)])/10 for i in range(num_samples)]
+        current_state = vars(self)
+        for attr_name in list(current_state.keys()):
+            if attr_name is not str("initial_state"):
+                if attr_name not in self.initial_state.keys():
+                    delattr(self, attr_name)
 
-# # # # # # # # # # # # # # # # Plotting
-# # # # # # # # # # # # # # # fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 
-# # # # # # # # # # # # # # # # Labels for the principal planes
-# # # # # # # # # # # # # # # plane_labels = [('State 1', 'State 2'), ('State 1', 'State 3'), ('State 2', 'State 3')]
+# Example usage:
+obj = MyClass()
 
-# # # # # # # # # # # # # # # for i, (x_idx, y_idx) in enumerate([(0, 1), (0, 2), (1, 2)]):
-# # # # # # # # # # # # # # #     ax = axes[i]
-# # # # # # # # # # # # # # #     ax.set_xlabel(plane_labels[i][0])
-# # # # # # # # # # # # # # #     ax.set_ylabel(plane_labels[i][1])
+print(vars(obj))
+# Call the method to generate additional attributes
+obj.generate_additional_attributes()
 
-# # # # # # # # # # # # # # #     # Extract mean positions for trajectory lines
-# # # # # # # # # # # # # # #     trajectory = means[:, [x_idx, y_idx]]
+# Print the attributes after generating additional attributes
+print(vars(obj))
 
-# # # # # # # # # # # # # # #     # Plot trajectory
-# # # # # # # # # # # # # # #     ax.plot(trajectory[:, 0], trajectory[:, 1], 'r--', alpha=0.5)
+# Call the method to reset attributes to their initial state
+obj.reset_to_init_state()
 
-# # # # # # # # # # # # # # #     for j, (cov, mean) in enumerate(zip(covariances, means)):
-# # # # # # # # # # # # # # #         sub_cov = cov[[x_idx, y_idx]][:, [x_idx, y_idx]]
-# # # # # # # # # # # # # # #         sub_mean = mean[[x_idx, y_idx]]
-
-# # # # # # # # # # # # # # #         ellip = plot_cov_ellipse(sub_cov, sub_mean, nstd=2, edgecolor='black', alpha=0.2)
-# # # # # # # # # # # # # # #         ax.add_patch(ellip)
-# # # # # # # # # # # # # # #         ax.scatter(*sub_mean, color='red')
-
-# # # # # # # # # # # # # # #         # Optional: Add a label to indicate the time step
-# # # # # # # # # # # # # # #         if j % 5 == 0:  # Show labels every 5 steps to avoid clutter
-# # # # # # # # # # # # # # #             ax.text(*sub_mean, f'T{j}', fontsize=9, ha='center')
-
-# # # # # # # # # # # # # # #     ax.grid(True)
-
-# # # # # # # # # # # # # # # plt.tight_layout()
-# # # # # # # # # # # # # # # plt.show()
-
-
-# # # # # # # # # # # # # # import numpy as np
-# # # # # # # # # # # # # # import matplotlib.pyplot as plt
-
-# # # # # # # # # # # # # # def plot_error_bounds(ax, traj, error_bounds, x_idx, y_idx, label):
-# # # # # # # # # # # # # #     """
-# # # # # # # # # # # # # #     Plot the trajectory with error bounds in a specific plane.
-# # # # # # # # # # # # # #     """
-# # # # # # # # # # # # # #     upper_bound_x = traj[:, x_idx] + error_bounds[:, x_idx]
-# # # # # # # # # # # # # #     lower_bound_x = traj[:, x_idx] - error_bounds[:, x_idx]
-
-# # # # # # # # # # # # # #     upper_bound_y = traj[:, y_idx] + error_bounds[:, y_idx]
-# # # # # # # # # # # # # #     lower_bound_y = traj[:, y_idx] - error_bounds[:, y_idx]
-
-# # # # # # # # # # # # # #     ax.plot(traj[:, x_idx], traj[:, y_idx], 'r', label=label)
-# # # # # # # # # # # # # #     ax.fill_between(traj[:, x_idx], lower_bound_y, upper_bound_y, color='gray', alpha=0.5, label='Error Bounds')
-# # # # # # # # # # # # # #     ax.fill_betweenx(traj[:, y_idx], lower_bound_x, upper_bound_x, color='gray', alpha=0.5)
-# # # # # # # # # # # # # #     ax.set_xlabel(f'State {x_idx + 1}')
-# # # # # # # # # # # # # #     ax.set_ylabel(f'State {y_idx + 1}')
-# # # # # # # # # # # # # #     ax.legend()
-# # # # # # # # # # # # # #     ax.grid(True)
-
-# # # # # # # # # # # # # # # Generate a smooth trajectory using sinusoidal functions
-# # # # # # # # # # # # # # num_samples = 100
-# # # # # # # # # # # # # # time = np.linspace(0, 0.3 * np.pi, num_samples)
-# # # # # # # # # # # # # # trajectory = np.array([np.sin(time), np.cos(time), np.sin(2 * time)]).T  # 3D trajectory
-# # # # # # # # # # # # # # print(np.shape(trajectory))
-
-# # # # # # # # # # # # # # # Define the error bounds (e.g., ±0.2 around the trajectory)
-# # # # # # # # # # # # # # error_bounds = 0.05 * (1 + np.sin(5 * time))[:, np.newaxis]
-# # # # # # # # # # # # # # error_bounds = np.hstack([error_bounds] * 3)  # Apply the same bounds to all three states
-# # # # # # # # # # # # # # print(np.shape(error_bounds))
-
-
-# # # # # # # # # # # # # # # Plotting
-# # # # # # # # # # # # # # fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-
-# # # # # # # # # # # # # # # Plot the trajectory and error bounds in the principal planes
-# # # # # # # # # # # # # # plot_error_bounds(axes[0], trajectory, error_bounds, 0, 1, 'Trajectory (State 1 vs. State 2)')
-# # # # # # # # # # # # # # plot_error_bounds(axes[1], trajectory, error_bounds, 0, 2, 'Trajectory (State 1 vs. State 3)')
-# # # # # # # # # # # # # # plot_error_bounds(axes[2], trajectory, error_bounds, 1, 2, 'Trajectory (State 2 vs. State 3)')
-
-# # # # # # # # # # # # # # plt.tight_layout()
-# # # # # # # # # # # # # # plt.show()
-
-
-# # # # # # # # # # # # # import matplotlib.pyplot as plt
-# # # # # # # # # # # # # import numpy as np
-
-# # # # # # # # # # # # # # Sample data
-# # # # # # # # # # # # # x = np.linspace(0, 10, 10)
-# # # # # # # # # # # # # y = np.sin(x)
-
-# # # # # # # # # # # # # # Create a figure and axis
-# # # # # # # # # # # # # fig, ax = plt.subplots()
-
-# # # # # # # # # # # # # # Plot the data
-# # # # # # # # # # # # # ax.plot(x, y)
-
-# # # # # # # # # # # # # # Draw arrows
-# # # # # # # # # # # # # start_positions = [3, 5, 7]  # X positions to start arrows
-# # # # # # # # # # # # # arrow_lengths = [0.5, 0.7, 0.6]  # Lengths of arrows
-# # # # # # # # # # # # # arrow_angles = [30, 45, 60]  # Angles of arrows in degrees
-
-# # # # # # # # # # # # # for start, length, angle in zip(start_positions, arrow_lengths, arrow_angles):
-# # # # # # # # # # # # #     ax.quiver(start, np.sin(start), length * np.cos(np.radians(angle)), length * np.sin(np.radians(angle)),
-# # # # # # # # # # # # #               angles='xy', scale_units='xy', scale=0.01, color='red')
-
-# # # # # # # # # # # # # # Set axis limits
-# # # # # # # # # # # # # ax.set_xlim(0, 10)
-# # # # # # # # # # # # # ax.set_ylim(-1, 1)
-
-# # # # # # # # # # # # # # Show plot
-# # # # # # # # # # # # # plt.show()
-
-# # # # # # # # # # # # class Mission:
-# # # # # # # # # # # #     def __init__(self, mission_start_epoch, duration, arc_length):
-# # # # # # # # # # # #         self.mission_start_epoch = mission_start_epoch
-# # # # # # # # # # # #         self.duration = duration
-# # # # # # # # # # # #         self.arc_length = arc_length
-
-# # # # # # # # # # # #     def generate_observation_windows(self, design_vector):
-# # # # # # # # # # # #         observation_windows = []
-# # # # # # # # # # # #         current_time = self.mission_start_epoch
-
-# # # # # # # # # # # #         for arc_interval in design_vector:
-# # # # # # # # # # # #             end_time = current_time + self.arc_length
-
-# # # # # # # # # # # #             # Adjust the end_time if it exceeds the mission duration
-# # # # # # # # # # # #             if end_time > self.mission_start_epoch + self.duration:
-# # # # # # # # # # # #                 end_time = self.mission_start_epoch + self.duration
-
-# # # # # # # # # # # #             observation_windows.append((current_time, end_time))
-# # # # # # # # # # # #             current_time = end_time + arc_interval
-
-# # # # # # # # # # # #             # Stop if the next start time exceeds the mission duration
-# # # # # # # # # # # #             if current_time >= self.mission_start_epoch + self.duration:
-# # # # # # # # # # # #                 break
-
-# # # # # # # # # # # #         return observation_windows
-
-# # # # # # # # # # # # # Example usage
-# # # # # # # # # # # # mission_start_epoch = 0  # Start of the mission in some time units
-# # # # # # # # # # # # duration = 100  # Total duration of the mission
-# # # # # # # # # # # # arc_length = 10  # Length of each observation arc
-
-# # # # # # # # # # # # # Each entry represents the interval between consecutive observation arcs
-# # # # # # # # # # # # design_vector = [5, 3, 7, 2, 6]
-
-# # # # # # # # # # # # mission = Mission(mission_start_epoch, duration, arc_length)
-# # # # # # # # # # # # observation_windows = mission.generate_observation_windows(design_vector)
-
-# # # # # # # # # # # # for window in observation_windows:
-# # # # # # # # # # # #     print(f"Observation window: Start = {window[0]}, End = {window[1]}")
-
-# # # # # # # # # # # # print(observation_windows)
-
-
-# # # # # # # # # # # import numpy as np
-
-# # # # # # # # # # # def generate_arc_sets(duration, arc_length, arc_interval):
-
-# # # # # # # # # # #     arc_sets = []
-# # # # # # # # # # #     current_time = 0
-# # # # # # # # # # #     while current_time < duration:
-# # # # # # # # # # #         arc_sets.append((current_time, current_time + arc_length))
-# # # # # # # # # # #         current_time += arc_length + arc_interval
-
-# # # # # # # # # # #     for arc_set in arc_sets:
-# # # # # # # # # # #         if arc_set[1] >= duration:
-# # # # # # # # # # #             arc_sets.remove(arc_set)
-# # # # # # # # # # #             break
-# # # # # # # # # # #     return arc_sets
-
-# # # # # # # # # # # # Example usage:
-# # # # # # # # # # # duration = 25
-# # # # # # # # # # # arc_length = 5
-# # # # # # # # # # # arc_interval = 2
-
-# # # # # # # # # # # arc_sets = generate_arc_sets(duration, arc_length, arc_interval)
-# # # # # # # # # # # print("Arc sets:", arc_sets)
-
-
-# # # # # # # # # # import numpy as np
-# # # # # # # # # # import matplotlib.pyplot as plt
-
-# # # # # # # # # # # Example data
-# # # # # # # # # # epochs = np.linspace(0, 10, 100)
-# # # # # # # # # # information_matrix_history_array = np.random.rand(100, 9, 9)
-
-# # # # # # # # # # # Plotting
-# # # # # # # # # # fig, ax = plt.subplots()
-
-# # # # # # # # # # # Plot LPF
-# # # # # # # # # # lpf_line = ax.plot(epochs, np.linalg.cond(information_matrix_history_array[:, 0:3, 0:3]), color="red", label="LPF")
-
-# # # # # # # # # # # Plot LUMIO
-# # # # # # # # # # lumio_line = ax.plot(epochs, np.linalg.cond(information_matrix_history_array[:, 6:9, 6:9]), color="blue", label="LUMIO")
-
-# # # # # # # # # # # Create legend with handles
-# # # # # # # # # # handles = [lpf_line, lumio_line]
-# # # # # # # # # # labels = [handle.get_label() for handle in handles]
-# # # # # # # # # # ax.legend(handles=handles, labels=labels)
-
-# # # # # # # # # # plt.show()
-
-
-
-
-# # # # # # # # # data = {
-# # # # # # # # #         "0": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 2.04,
-# # # # # # # # #                 2.04,
-# # # # # # # # #                 1.9,
-# # # # # # # # #                 2.04,
-# # # # # # # # #                 2.04
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.014174469877060197,
-# # # # # # # # #             "reduction": -4.4227775712858275
-# # # # # # # # #         },
-# # # # # # # # #         "1": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 2.04,
-# # # # # # # # #                 2.04,
-# # # # # # # # #                 1.9,
-# # # # # # # # #                 2.04,
-# # # # # # # # #                 2.04
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.014174469877060197,
-# # # # # # # # #             "reduction": -4.4227775712858275
-# # # # # # # # #         },
-# # # # # # # # #         "2": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8576000000000006,
-# # # # # # # # #                 1.9735999999999994,
-# # # # # # # # #                 1.9160000000000004,
-# # # # # # # # #                 2.1176000000000004,
-# # # # # # # # #                 2.1176000000000004
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01297308581041283,
-# # # # # # # # #             "reduction": -12.523606255263637
-# # # # # # # # #         },
-# # # # # # # # #         "3": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8576000000000006,
-# # # # # # # # #                 1.9735999999999994,
-# # # # # # # # #                 1.9160000000000004,
-# # # # # # # # #                 2.1176000000000004,
-# # # # # # # # #                 2.1176000000000004
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01297308581041283,
-# # # # # # # # #             "reduction": -12.523606255263637
-# # # # # # # # #         },
-# # # # # # # # #         "4": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8576000000000006,
-# # # # # # # # #                 1.9735999999999994,
-# # # # # # # # #                 1.9160000000000004,
-# # # # # # # # #                 2.1176000000000004,
-# # # # # # # # #                 2.1176000000000004
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01297308581041283,
-# # # # # # # # #             "reduction": -12.523606255263637
-# # # # # # # # #         },
-# # # # # # # # #         "5": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8576000000000006,
-# # # # # # # # #                 1.9735999999999994,
-# # # # # # # # #                 1.9160000000000004,
-# # # # # # # # #                 2.1176000000000004,
-# # # # # # # # #                 2.1176000000000004
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01297308581041283,
-# # # # # # # # #             "reduction": -12.523606255263637
-# # # # # # # # #         },
-# # # # # # # # #         "6": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8706713600000011,
-# # # # # # # # #                 2.040328959999999,
-# # # # # # # # #                 1.8101376000000005,
-# # # # # # # # #                 2.0776473600000003,
-# # # # # # # # #                 2.13140736
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01273035227551694,
-# # # # # # # # #             "reduction": -14.160337452752639
-# # # # # # # # #         },
-# # # # # # # # #         "7": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8706713600000011,
-# # # # # # # # #                 2.040328959999999,
-# # # # # # # # #                 1.8101376000000005,
-# # # # # # # # #                 2.0776473600000003,
-# # # # # # # # #                 2.13140736
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01273035227551694,
-# # # # # # # # #             "reduction": -14.160337452752639
-# # # # # # # # #         },
-# # # # # # # # #         "8": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8706713600000011,
-# # # # # # # # #                 2.040328959999999,
-# # # # # # # # #                 1.8101376000000005,
-# # # # # # # # #                 2.0776473600000003,
-# # # # # # # # #                 2.13140736
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01273035227551694,
-# # # # # # # # #             "reduction": -14.160337452752639
-# # # # # # # # #         },
-# # # # # # # # #         "9": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8706713600000011,
-# # # # # # # # #                 2.040328959999999,
-# # # # # # # # #                 1.8101376000000005,
-# # # # # # # # #                 2.0776473600000003,
-# # # # # # # # #                 2.13140736
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01273035227551694,
-# # # # # # # # #             "reduction": -14.160337452752639
-# # # # # # # # #         },
-# # # # # # # # #         "10": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8641356800000008,
-# # # # # # # # #                 2.0069644799999993,
-# # # # # # # # #                 1.8630688000000004,
-# # # # # # # # #                 2.0976236800000003,
-# # # # # # # # #                 2.12450368
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.01260119535997549,
-# # # # # # # # #             "reduction": -15.031231345221235
-# # # # # # # # #         },
-# # # # # # # # #         "11": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8835924057600009,
-# # # # # # # # #                 2.0060491673599996,
-# # # # # # # # #                 1.8541564416000003,
-# # # # # # # # #                 2.0787864217600003,
-# # # # # # # # #                 2.12757058176
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012462843965700939,
-# # # # # # # # #             "reduction": -15.964122811257775
-# # # # # # # # #         },
-# # # # # # # # #         "12": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8835924057600009,
-# # # # # # # # #                 2.0060491673599996,
-# # # # # # # # #                 1.8541564416000003,
-# # # # # # # # #                 2.0787864217600003,
-# # # # # # # # #                 2.12757058176
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012462843965700939,
-# # # # # # # # #             "reduction": -15.964122811257775
-# # # # # # # # #         },
-# # # # # # # # #         "13": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8720527751040006,
-# # # # # # # # #                 2.0043557277439996,
-# # # # # # # # #                 1.8473682246400003,
-# # # # # # # # #                 2.0910998615040004,
-# # # # # # # # #                 2.1297533255039998
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012457978260848457,
-# # # # # # # # #             "reduction": -15.996931837555875
-# # # # # # # # #         },
-# # # # # # # # #         "14": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "15": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "16": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "17": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "18": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "19": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "20": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "21": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         },
-# # # # # # # # #         "22": {
-# # # # # # # # #             "design_vector": [
-# # # # # # # # #                 1.8577502809856008,
-# # # # # # # # #                 2.0185653090815996,
-# # # # # # # # #                 1.8606205288960003,
-# # # # # # # # #                 2.0812477459456007,
-# # # # # # # # #                 2.1182490355456
-# # # # # # # # #             ],
-# # # # # # # # #             "objective_value": 0.012453536470413844,
-# # # # # # # # #             "reduction": -16.02688244565853
-# # # # # # # # #         }
-# # # # # # # # #     }
-
-# # # # # # # # # import matplotlib.pyplot as plt
-# # # # # # # # # import numpy as np
-
-# # # # # # # # # # Extract the iteration keys and the corresponding objective values
-# # # # # # # # # iterations = list(map(int, data.keys()))
-# # # # # # # # # design_vectors = np.array([data[str(key)]["design_vector"] for key in iterations])
-# # # # # # # # # objective_values = np.array([data[str(key)]["objective_value"] for key in iterations])
-# # # # # # # # # reduction = np.array([data[str(key)]["objective_value"] for key in iterations])
-
-# # # # # # # # # # Plot the objective values over the iterations
-# # # # # # # # # fig, axs = plt.subplots(2, 1, figsize=(10, 15), sharex=True)
-
-# # # # # # # # # axs[0].plot(iterations, objective_values, marker='o', color='b')
-# # # # # # # # # # axs[0].set_xlabel('Iteration')
-# # # # # # # # # axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
-# # # # # # # # # axs[0].set_title('Objective values')
-# # # # # # # # # axs[0].grid(alpha=0.5, linestyle='--')
-
-# # # # # # # # # for i in range(design_vectors.shape[1]):
-# # # # # # # # #     axs[1].plot(iterations, design_vectors[:, i], marker='o', label=f'State {i+1}')
-# # # # # # # # # axs[1].set_xlabel('Iteration')
-# # # # # # # # # axs[1].set_ylabel("Arc length [days]")
-# # # # # # # # # axs[1].set_title('Design vector history')
-# # # # # # # # # axs[1].grid(alpha=0.5, linestyle='--')
-
-# # # # # # # # # plt.legend(loc="upper right")
-# # # # # # # # # plt.show()
-
-# # # # # # # # import numpy as np
-# # # # # # # # from scipy.optimize import minimize
-
-# # # # # # # # # Example objective function
-# # # # # # # # def objective_function(x):
-# # # # # # # #     # Replace this with your actual objective function
-# # # # # # # #     return np.sum((x - np.arange(1, len(x) + 1))**2)
-
-# # # # # # # # # Initial guess (design vector of arbitrary length)
-# # # # # # # # initial_guess = np.array([1.0] * 5)  # Example with a design vector of length 5
-
-# # # # # # # # def generate_initial_simplex(initial_guess):
-# # # # # # # #     # Perturbations based on parameter scale
-# # # # # # # #     perturbation_scale = 0.2  # Adjust the scale as needed
-# # # # # # # #     n = len(initial_guess)
-# # # # # # # #     perturbations = np.eye(n) * perturbation_scale
-
-# # # # # # # #     initial_simplex = [initial_guess]
-# # # # # # # #     for i in range(n):
-# # # # # # # #         vertex = initial_guess + perturbations[i]
-# # # # # # # #         initial_simplex.append(vertex)
-# # # # # # # #     initial_simplex = np.array(initial_simplex)
-
-# # # # # # # #     return initial_simplex
-
-# # # # # # # # initial_simplex = generate_initial_simplex(initial_guess)
-
-# # # # # # # # # Run Nelder-Mead with custom initial simplex
-# # # # # # # # result = minimize(objective_function, initial_guess, method='Nelder-Mead',
-# # # # # # # #                   options={'initial_simplex': initial_simplex, 'xatol': 1e-8, 'fatol': 1e-8,
-# # # # # # # #                            'maxiter': 2000, 'maxfev': 2000, 'adaptive': True})
-
-# # # # # # # # print("Simplex at the start of the optimization process: \n", initial_simplex)
-# # # # # # # # print("Simplex at the end of the optimization process: \n", result.final_simplex)
-
-
-
-# # # # # # # import numpy as np
-# # # # # # # import matplotlib.pyplot as plt
-
-# # # # # # # # Example data
-# # # # # # # categories = ['Category 1', 'Category 2', 'Category 3', 'Category 4']
-# # # # # # # values1 = [10, 15, 20, 25]  # Values for the first set of bars
-# # # # # # # values2 = [12, 18, 22, 28]  # Values for the second set of bars
-
-# # # # # # # # Define positions for the bars
-# # # # # # # positions = np.arange(len(categories))  # Positions for the bars
-
-# # # # # # # # Create the plot
-# # # # # # # plt.barh(positions, values2, color='green', label='Bar 2')  # Stacked on top of Bar 1
-# # # # # # # plt.barh(positions, values1, color='blue', label='Bar 1')
-
-
-# # # # # # # # Set y-axis ticks and labels
-# # # # # # # plt.yticks(positions, categories)
-
-# # # # # # # # Add legend
-# # # # # # # plt.legend()
-
-# # # # # # # # Show the plot
-# # # # # # # plt.show()
-
-
-# # # # # # import numpy as np
-# # # # # # import matplotlib.pyplot as plt
-
-# # # # # # # Example data
-# # # # # # categories = ['Category 1', 'Category 2', 'Category 3', 'Category 4']
-# # # # # # values1 = [10, 15, 20, 25]  # Values for the main bars
-# # # # # # values2 = [2, 4, 6, 8]  # Values for the striped area
-
-# # # # # # # Define positions for the bars
-# # # # # # positions = np.arange(len(categories))  # Positions for the bars
-
-# # # # # # # Create the plot
-# # # # # # plt.barh(positions, values1, color='blue', label='Main Bar')
-# # # # # # plt.barh(positions, values2, color='white', hatch='/', edgecolor='black')
-
-
-# # # # # # # # Plot striped area
-# # # # # # # for i, (v1, v2) in enumerate(zip(values1, values2)):
-# # # # # # #     if i % 2 == 0:
-# # # # # # #         plt.barh(positions[i], v1 - v2, left=v2, color='white', hatch='/', edgecolor='black', height=0.6)
-
-# # # # # # # Set y-axis ticks and labels
-# # # # # # plt.yticks(positions, categories)
-
-# # # # # # # Add legend
-# # # # # # plt.legend()
-
-# # # # # # # Show the plot
-# # # # # # plt.show()
-
-
-# # # # # import pandas as pd
-
-# # # # # # Define the data
-# # # # # data = {
-# # # # #     "State": ["Estimated Inertial", "Truth Inertial", "Estimated Synodic", "Truth Synodic", "Reference Inertial", "Reference Synodic"],
-# # # # #     "LPF": ["", "", "", "", "", ""],
-# # # # #     "LUMIO": ["", "", "", "", "", ""],
-# # # # #     "": ["", "", "", "", "", ""],
-# # # # #     "Unit": ["m", "m", "m", "m/s", "m/s", "m/s"],
-# # # # #     "$x$": ["-274751545.6", "-274752045.6", "-310468779.1", "-310469279.1", "-310469279.1", "0.970048539"],
-# # # # #     "$y$": ["250414392.2", "250413892.2", "249476676", "249476176", "249476176", "-0.001916455"],
-# # # # #     "$z$": ["137232530.7", "137232030.7", "174974583", "174974083", "174974083", "-0.013816446"],
-# # # # #     "$v_x$": ["-503.2448066", "-503.2458066", "-993.4040049", "-993.4050049", "-993.4050049", "0.12284516"],
-# # # # #     "$v_y$": ["-183.5823604", "-183.5833604", "-766.3354851", "-766.3364851", "-766.3364851", "-1.506863742"],
-# # # # #     "$v_z$": ["-297.1638318", "-297.1648318", "-524.9891151", "-524.9901151", "-524.9901151", "-0.183400182"]
-# # # # # }
-
-# # # # # # Convert dictionary to DataFrame
-# # # # # df = pd.DataFrame(data)
-
-# # # # # # Save DataFrame to a CSV file
-# # # # # df.to_csv("initial_states.csv", index=False)
-
-# # # # import matplotlib.pyplot as plt
-
-# # # # # Create a 4x4 grid of subplots
-# # # # fig, axs = plt.subplots(4, 4, figsize=(12, 12))
-
-# # # # # Example plotting with labels
-# # # # labels = ['Label 1', 'Label 2', 'Label 3']
-# # # # for i in range(4):
-# # # #     for j in range(4):
-# # # #         for k, label in enumerate(labels):
-# # # #             axs[i, j].plot([0, 1, 2], [k, k+1, k+2], label=label)
-
-# # # # # Get the handles and labels from the upper right subplot
-# # # # handles, labels = axs[0, 3].get_legend_handles_labels()
-
-# # # # # Create a legend centered below all subplots
-# # # # fig.legend(handles, labels, loc='upper center', ncol=len(labels), bbox_to_anchor=(-1.0, 0))
-
-# # # # # Adjust the layout to make room for the legend
-# # # # plt.tight_layout(rect=[0, 0.1, 1, 1])
-
-# # # # # Adjust bottom margin to make room for the legend
-# # # # fig.subplots_adjust(bottom=0.15)
-
-# # # # # Show the plot
-# # # # plt.show()
-
-
-# # # def convert_key(key):
-# # #     # Split the key by underscores
-# # #     words = key.split('_')
-# # #     # Capitalize each word
-# # #     words = [word.capitalize() for word in words]
-# # #     # Join the words with a space
-# # #     return ' '.join(words)
-
-# # # # Test the function
-# # # sensitivity_settings = {
-# # #     "threshold": [0.1, 0.5, 1.0, 2.0],
-# # #     "orbit_insertion_error": [0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2],
-# # #     "arc_duration": [0.1, 0.5, 1.0, 2.0],
-# # #     "arc_interval": [1.0, 2.0, 3.0, 4.0],
-# # #     "mission_start_epoch": [60390],
-# # #     "noise_range": [1],
-# # #     "target_point_epochs": [[2], [3], [4]],
-# # #     "delta_v_min": [0.00, 0.01, 0.02, 0.03],
-# # #     "station_keeping_error": [0.00, 0.01, 0.05, 0.1],
-# # # }
-
-# # # converted_sensitivity_settings = {convert_key(key): value for key, value in sensitivity_settings.items()}
-
-# # # # Print the converted dictionary
-# # # for key, value in converted_sensitivity_settings.items():
-# # #     print(f"{key}: {value}")
-
-
-# # import matplotlib.pyplot as plt
-# # import numpy as np
-# # from mpl_toolkits.mplot3d import Axes3D
-
-# # # Create data for plotting
-# # x = np.linspace(-5, 5, 100)
-# # y = np.linspace(-5, 5, 100)
-# # x, y = np.meshgrid(x, y)
-# # z = np.sin(np.sqrt(x**2 + y**2))
-
-# # # Create a 3D plot
-# # fig = plt.figure(figsize=(10, 7))
-# # ax = fig.add_subplot(111, projection='3d')
-
-# # # Plot the surface
-# # surf = ax.plot_surface(x, y, z, cmap='viridis')
-
-# # # Define the viewing angle
-# # ax.view_init(elev=30, azim=60)  # 30 degrees elevation, 60 degrees azimuth
-
-# # # Add color bar which maps values to colors.
-# # fig.colorbar(surf)
-
-# # # Set labels
-# # ax.set_xlabel('X axis')
-# # ax.set_ylabel('Y axis')
-# # ax.set_zlabel('Z axis')
-
-# # # Show plot
-# # plt.show()
-
-
-# import numpy as np
-
-# # Assuming full_estimation_error_histories is your 2D array
-# full_estimation_error_histories = np.random.rand(100, 30)  # Example array
-
-# # Define your parameters
-# evaluation_threshold = 20
-# navigation_simulator = type('nav', (object,), {'step_size': 2})()  # Example step_size
-# k = 1
-# j = 2
-
-# # Calculate indices
-# row_start = -int(evaluation_threshold / navigation_simulator.step_size)
-# col_start = 3 * k + 6 * j
-# col_end = col_start + 3
-
-# # Print indices
-# print(f"Row start index: {row_start}")
-# print(f"Column start index: {col_start}, Column end index: {col_end}")
-
-# # Slice the array and calculate RMSE
-# try:
-#     sliced_array = full_estimation_error_histories[row_start:, 3*k+6*j:3*k+6*j+3]
-#     print("Sliced array shape:", sliced_array.shape)
-#     rmse = np.sqrt(np.mean(sliced_array**2, axis=0))
-#     print(f"RMSE over the period: {rmse}")
-# except IndexError as e:
-#     print("IndexError:", e)
-
-
-import numpy as np
-
-# Example data: assuming full_estimation_error_histories is a 100 by 30 NumPy array
-full_estimation_error_histories = 10+np.random.rand(100, 30)  # Replace with your actual data
-
-# Define your parameters
-evaluation_threshold = 20
-navigation_simulator = type('nav', (object,), {'step_size': 2})()  # Example step_size
-k = 1
-j = 2
-
-# Calculate indices
-row_start = -int(evaluation_threshold / navigation_simulator.step_size)
-col_start = 3 * k + 6 * j
-col_end = col_start + 3
-
-# Print indices for debugging
-print(f"Row start index: {row_start}")
-print(f"Column start index: {col_start}, Column end index: {col_end}")
-
-# Extract the relevant subset of the array
-try:
-    period_errors = full_estimation_error_histories[row_start:, col_start:col_end]
-    print("Period errors shape:", period_errors.shape)
-
-    # Calculate the sum of squares for each row (3D position error)
-    sum_of_squares = np.sum(period_errors**2, axis=1)
-
-    # Calculate the mean of these sums of squares
-    mean_sum_of_squares = np.mean(sum_of_squares)
-
-    # Calculate the square root of the mean sum of squares to get the average RSS
-    average_rss = np.sqrt(mean_sum_of_squares)
-
-    print(f"Average RSS over the period: {average_rss}")
-except IndexError as e:
-    print("IndexError:", e)
+# Print the attributes after resetting
+print(vars(obj))

@@ -3,6 +3,7 @@ import os
 import sys
 import numpy as np
 import copy
+import tracemalloc
 
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
@@ -40,11 +41,12 @@ class ObjectiveFunctions():
         mean_cost = np.mean(costs)
         return mean_cost
 
-
     def station_keeping_cost(self, observation_windows):
 
         cost_list = []
         for run in range(self.num_runs):
+
+            tracemalloc.start()
 
             print(f"Run {run+1} of {self.num_runs}, seed {run}")
 
@@ -60,6 +62,13 @@ class ObjectiveFunctions():
             cost_list.append(delta_v)
 
             self.reset_navigation_simulator()
+
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+            for stat in top_stats[:10]:
+                print(stat)
+            total_memory = sum(stat.size for stat in top_stats)
+            print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
         total_cost = np.mean(cost_list)
 

@@ -134,7 +134,9 @@ def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_siz
 #################################################################
 ###### Generate NavigationOutput objects ########################
 #################################################################
+# from memory_profiler import profile
 
+# @profile
 def generate_navigation_outputs(observation_windows_settings, **kwargs):
 
     # Run the navigation routine using given settings
