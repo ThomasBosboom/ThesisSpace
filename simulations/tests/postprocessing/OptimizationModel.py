@@ -117,7 +117,7 @@ class OptimizationModel:
 
         return initial_simplex.tolist()
 
-    @profile
+
     def optimize(self, objective_function):
 
         def wrapped_objective(design_vector):

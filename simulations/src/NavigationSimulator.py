@@ -53,7 +53,7 @@ class NavigationSimulator(NavigationSimulatorBase):
 
         return result
 
-    @profile
+    # @profile
     def perform_navigation(self, observation_windows, seed=0):
 
         # tracemalloc.start()
@@ -223,7 +223,6 @@ class NavigationSimulator(NavigationSimulatorBase):
                 self.custom_initial_state = state_history_estimated[-1,:]
                 self.apriori_covariance = np.stack(list(propagated_covariance_estimated.values()))[-1]
 
-
             # Save histories for reading out later
             self.full_estimation_error_dict.update(dict(zip(epochs, state_history_estimated-state_history_truth)))
             self.full_propagated_covariance_dict.update(propagated_covariance_estimated)
@@ -291,6 +290,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             else:
                 break
 
+        # len: 12
         navigation_result_dicts = [self.full_estimation_error_dict, self.full_reference_state_deviation_dict, self.full_propagated_covariance_dict, self.full_propagated_formal_errors_dict,\
                     self.full_state_history_reference_dict, self.full_state_history_truth_dict, self.full_state_history_estimated_dict, self.full_state_history_final_dict, self.delta_v_dict,\
                     self.full_dependent_variables_history_estimated, self.full_state_transition_matrix_history_estimated, self.estimation_arc_results_dict]

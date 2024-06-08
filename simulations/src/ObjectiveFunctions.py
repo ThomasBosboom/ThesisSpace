@@ -46,7 +46,7 @@ class ObjectiveFunctions():
         cost_list = []
         for run in range(self.num_runs):
 
-            tracemalloc.start()
+            # tracemalloc.start()
 
             print(f"Run {run+1} of {self.num_runs}, seed {run}")
 
@@ -63,12 +63,14 @@ class ObjectiveFunctions():
 
             self.reset_navigation_simulator()
 
-            snapshot = tracemalloc.take_snapshot()
-            top_stats = snapshot.statistics('lineno')
-            for stat in top_stats[:10]:
-                print(stat)
-            total_memory = sum(stat.size for stat in top_stats)
-            print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+            # del navigation_output, navigation_results, navigation_simulator
+
+            # snapshot = tracemalloc.take_snapshot()
+            # top_stats = snapshot.statistics('lineno')
+            # for stat in top_stats[:10]:
+            #     print(stat)
+            # total_memory = sum(stat.size for stat in top_stats)
+            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
         total_cost = np.mean(cost_list)
 
