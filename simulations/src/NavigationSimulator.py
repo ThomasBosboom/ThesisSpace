@@ -2,8 +2,6 @@
 import os
 import sys
 import numpy as np
-import time
-from matplotlib import pyplot as plt
 import copy
 import tracemalloc
 from memory_profiler import profile
@@ -234,6 +232,19 @@ class NavigationSimulator(NavigationSimulatorBase):
             self.full_state_transition_matrix_history_estimated.update(dict(zip(epochs, state_transition_matrix_history_estimated)))
             self.full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_truth-state_history_reference)))
 
+            # self.full_estimation_error_dict = dict()
+            # self.full_reference_state_deviation_dict = dict()
+            # self.full_propagated_covariance_dict = dict()
+            # self.full_propagated_formal_errors_dict = dict()
+            # self.full_state_history_reference_dict = dict()
+            # self.full_state_history_truth_dict = dict()
+            # self.full_state_history_estimated_dict = dict()
+            # self.full_state_history_final_dict = dict()
+            # self.delta_v_dict = dict()
+            # self.full_dependent_variables_history_estimated = dict()
+            # self.full_state_transition_matrix_history_estimated = dict()
+            # self.estimation_arc_results_dict = dict()
+
 
             ##############################################################
             #### STATION KEEPING #########################################
@@ -300,14 +311,6 @@ class NavigationSimulator(NavigationSimulatorBase):
         else:
             self.navigation_output = NavigationOutput(self, navigation_result_dicts)
 
-
-        # snapshot = tracemalloc.take_snapshot()
-        # top_stats = snapshot.statistics('lineno')
-        # for stat in top_stats[:10]:
-        #     print(stat)
-        # total_memory = sum(stat.size for stat in top_stats)
-        # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
-
         return self.navigation_output
 
 
@@ -339,4 +342,22 @@ class NavigationOutput():
 
 
 
+if __name__ == "__main__":
 
+    navigation_simulator = NavigationSimulator(run_optimization_version=True)
+
+    observation_windows = [(60390, 60391), (60394, 60395)]
+
+    tracemalloc.start()
+    a = []
+    for _ in range(2):
+        navigation_output = navigation_simulator.perform_navigation(observation_windows)
+        a.append(navigation_output)
+        # print(navigation_simulator)
+
+    snapshot = tracemalloc.take_snapshot()
+    top_stats = snapshot.statistics('lineno')
+    for stat in top_stats[:10]:
+        print(stat)
+    total_memory = sum(stat.size for stat in top_stats)
+    print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")

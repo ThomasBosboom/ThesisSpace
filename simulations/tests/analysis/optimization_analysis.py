@@ -54,11 +54,11 @@ if __name__ == "__main__":
             duration=28,
             arc_length=1,
             arc_interval=3,
-            max_iterations=1,
+            max_iterations=100,
             bounds=(-0.9, 0.9),
             optimization_method="Nelder-Mead",
             design_vector_type="arc_lengths",
-            initial_simplex_perturbation = -0.1
+            initial_simplex_perturbation = 0.5
         )
 
 
@@ -73,15 +73,15 @@ if __name__ == "__main__":
         # observation_windows = optimization_model.generate_observation_windows(optimization_results.initial_guess)
         # cost_optimized = objective_functions.station_keeping_cost(observation_windows)
 
-    snapshot = tracemalloc.take_snapshot()
-    top_stats = snapshot.statistics('traceback')
-    largest_allocation = max(top_stats, key=lambda stat: stat.size)
+    # snapshot = tracemalloc.take_snapshot()
+    # top_stats = snapshot.statistics('traceback')
+    # largest_allocation = max(top_stats, key=lambda stat: stat.size)
 
-    # Display information about the largest allocation
-    for line in largest_allocation.traceback.format():
-        print(line)
+    # # Display information about the largest allocation
+    # for line in largest_allocation.traceback.format():
+    #     print(line)
 
-    plot_optimization_results = ProcessOptimizationResults.PlotOptimizationResults(time_tag=current_time)
+    plot_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(time_tag=current_time)
     plot_optimization_results.plot_iteration_history()
     plt.show()
 

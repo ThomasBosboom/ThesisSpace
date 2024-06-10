@@ -23,7 +23,7 @@ from tests.postprocessing import ProcessNavigationResults
 ###### Define the observation windows ###########################
 #################################################################
 
-num_runs = 1
+num_runs = 5
 duration = 28
 mission_start_epoch = 60390.0
 
@@ -53,18 +53,16 @@ observation_windows_settings = {
     "1.0 day": [
         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
     ],
-    "2.0 day": [
-        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=2.0, mission_start_epoch=mission_start_epoch), num_runs),
-    ]
+    # "2.0 day": [
+    #     (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=2.0, mission_start_epoch=mission_start_epoch), num_runs),
+    # ]
 }
 
-print(observation_windows_settings)
-
-observation_windows_settings = {
-    "default": [
-        (helper_functions.get_constant_arc_observation_windows(15, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
-    ],
-}
+# observation_windows_settings = {
+#     "default": [
+#         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.1, mission_start_epoch=mission_start_epoch), 1),
+#     ],
+# }
 
 
 #######################################################
@@ -81,30 +79,8 @@ auxilary_settings = {
     # "run_optimization_version": True
 }
 
-# import tracemalloc
-# tracemalloc.start()
-# from memory_profiler import profile
 
 navigation_outputs = helper_functions.generate_navigation_outputs(observation_windows_settings, **auxilary_settings)
-
-
-
-# snapshot = tracemalloc.take_snapshot()
-# # Find the largest memory allocation
-# top_stats = snapshot.statistics('traceback')
-# largest_allocation = max(top_stats, key=lambda stat: stat.size)
-
-# # Display information about the largest allocation
-# print("Largest Memory Allocation:")
-# print(f"Size: {largest_allocation.size / (1024 * 1024):.2f} MiB")
-# print(f"Traceback (most recent call last):")
-# for line in largest_allocation.traceback.format():
-#     print(line)
-
-
-
-# # Stop tracing memory allocations
-# tracemalloc.stop()
 
 
 ############################################################

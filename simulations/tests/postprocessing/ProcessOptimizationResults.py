@@ -12,7 +12,7 @@ for _ in range(2):
     sys.path.append(file_directory)
 
 
-class PlotOptimizationResults():
+class ProcessOptimizationResults():
 
     def __init__(self, time_tag, **kwargs):
 
@@ -68,3 +68,5 @@ class PlotOptimizationResults():
         axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=5, fontsize="small", title="Design variables")
         plt.tight_layout()
         # plt.show()
+
+    # def

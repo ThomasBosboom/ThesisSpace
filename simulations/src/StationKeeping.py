@@ -2,7 +2,6 @@
 import os
 import sys
 import numpy as np
-import matplotlib.pyplot as plt
 
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
