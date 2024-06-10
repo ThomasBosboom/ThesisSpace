@@ -33,14 +33,13 @@ if __name__ == "__main__":
     # tracemalloc.start()
 
     if not run_optimization:
-        current_time = str(202406071548)
+        current_time = str(202406011440)
 
     else:
 
         navigation_simulator = NavigationSimulator.NavigationSimulator(
             show_corrections_in_terminal=True,
             run_optimization_version=True
-            # orbit_insertion_error=np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
         )
 
         objective_functions = ObjectiveFunctions.ObjectiveFunctions(
@@ -70,7 +69,7 @@ if __name__ == "__main__":
         # Compare before and after optimization
         # observation_windows = optimization_model.generate_observation_windows(optimization_results.final_solution)
         # cost_initial = objective_functions.station_keeping_cost(observation_windows)
-        # observation_windows = optimization_model.generate_observation_windows(optimization_results.initial_guess)
+        # observation_windows = optimization_model.generate_observation_windows(optimization_results.initial_design_vector)
         # cost_optimized = objective_functions.station_keeping_cost(observation_windows)
 
     # snapshot = tracemalloc.take_snapshot()
@@ -81,8 +80,9 @@ if __name__ == "__main__":
     # for line in largest_allocation.traceback.format():
     #     print(line)
 
-    plot_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(time_tag=current_time)
-    plot_optimization_results.plot_iteration_history()
+    process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(time_tag=current_time)
+    process_optimization_results.plot_iteration_history()
+    process_optimization_results.plot_improved_design()
     plt.show()
 
 

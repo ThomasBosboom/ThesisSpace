@@ -6,17 +6,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Define path to import src files
+file_name = os.path.splitext(os.path.basename(__file__))[0]
 file_directory = os.path.realpath(__file__)
-for _ in range(2):
+for _ in range(5):
     file_directory = os.path.dirname(file_directory)
     sys.path.append(file_directory)
 
+# # Define current time
+# current_time = datetime.now().strftime("%Y%m%d%H%M")
+
+from tests.postprocessing import TableGenerator
 
 class ProcessOptimizationResults():
 
-    def __init__(self, time_tag, **kwargs):
+    def __init__(self, time_tag, save_settings={"save_table": True, "save_figure": True, "current_time": float, "file_name": str}, **kwargs):
 
         self.time_tag = str(time_tag)
+        self.optimization_results = self.load_from_json()
+
+        for key, value in save_settings.items():
+            if save_settings["save_table"] or save_settings["save_figure"]:
+                setattr(self, key, value)
 
 
     def load_from_json(self):
@@ -32,8 +42,7 @@ class ProcessOptimizationResults():
 
     def plot_iteration_history(self):
 
-        optimization_results = self.load_from_json()
-        iteration_history = optimization_results["iteration_history"]
+        iteration_history = self.optimization_results["iteration_history"]
 
         iterations = list(map(str, iteration_history.keys()))
         design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
@@ -69,4 +78,42 @@ class ProcessOptimizationResults():
         plt.tight_layout()
         # plt.show()
 
-    # def
+
+    def plot_improved_design(self):
+
+        table_generator = TableGenerator.TableGenerator(
+            # table_settings={
+            #     "save_table": True,
+            #     "current_time": self.current_time,
+            #     "file_name": self.file_name
+            # }
+        )
+
+        current_time = self.optimization_results["current_time"]
+        table_generator.generate_optimization_analysis_table(
+            self.optimization_results,
+            file_name=f"{current_time}_optimization_analysis.tex"
+        )
+
+
+if __name__ == "__main__":
+    # Example usage
+    data = {
+        "initial": {
+            "values": [1, 1, 1, 1, 1, 1],
+            "cost": 10
+        },
+        "final": {
+            "values": [2, 5, 1, 5, 2, 6],
+            "cost": 8
+        }
+    }
+
+    # Generate the Overleaf table with custom caption, label, and decimals
+    file_name = "design_vector_table.tex"
+    overleaf_table = save_optimization_results_table(data, caption="Design vector comparison before and after optimization", label="tab:DesignVectorOptimization", file_name=file_name, decimals=4)
+
+    # Print the Overleaf table
+    print(overleaf_table)
+
+

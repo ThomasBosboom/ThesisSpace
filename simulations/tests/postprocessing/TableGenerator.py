@@ -5,11 +5,11 @@ import numpy as np
 import re
 
 # Define path to import src files
+file_name = os.path.splitext(os.path.basename(__file__))[0]
 file_directory = os.path.realpath(__file__)
-for _ in range(3):
+for _ in range(5):
     file_directory = os.path.dirname(file_directory)
     sys.path.append(file_directory)
-
 
 class TableGenerator():
 
@@ -23,6 +23,25 @@ class TableGenerator():
     def escape_tex_symbols(self, string):
         escape_chars = {'%': '\\%', '&': '\\&', '_': '\\_', '#': '\\#', '$': '\\$', '{': '\\{', '}': '\\}'}
         return re.sub(r'[%&_#${}]', lambda match: escape_chars[match.group(0)], string)
+
+
+    def save_table_to_folder(self, table_str, file_name):
+
+        # Define the path to the tables folder
+        tables_folder = os.path.join(os.path.dirname(__file__), "tables")
+
+        # Create the tables folder if it doesn't exist
+        if not os.path.exists(tables_folder):
+            os.makedirs(tables_folder)
+
+        # Define the file path for the LaTeX table
+        file_path = os.path.join(tables_folder, file_name)
+
+        print(file_path)
+
+        if file_name:
+            with open(file_path, 'w') as file:
+                file.write(table_str)
 
 
     def generate_sensitivity_analysis_table(self, sensitivity_statistics, caption="Statistical results of Monte Carlo sensitivity analysis", label="tab:SensitivityAnalysis", file_name="sensitivity_analysis.tex", decimals=4):
@@ -58,26 +77,53 @@ class TableGenerator():
         table_str += r'\label{' + label + '}' + '\n'
         table_str += r'\end{table}'
 
-        # Define the path to the tables folder
-        tables_folder = os.path.join(os.path.dirname(__file__), "tables")
-
-        # Create the tables folder if it doesn't exist
-        if not os.path.exists(tables_folder):
-            os.makedirs(tables_folder)
-
-        # Define the file path for the LaTeX table
-        file_path = os.path.join(tables_folder, file_name)
-
-        if file_name:
-            with open(file_path, 'w') as file:
-                file.write(table_str)
+        if self.save_table:
+            self.save_table_to_folder(table_str, file_name)
 
         print(table_str, sensitivity_statistics)
 
         print(f"LaTeX table code has been written")
 
 
+    def generate_optimization_analysis_table(self, optimization_results, caption="Results of optimization", label="tab:OptimizationAnalysis", file_name='optimization_analysis.tex', decimals=4):
 
+        table_str = ""
+        table_str += r'\begin{table}[h!]' + '\n'
+        table_str += r'\centering' + '\n'
+        table_str += r'\begin{tabular}{llll}' + '\n'
+        table_str += r'\textbf{}      & \cellcolor[HTML]{EFEFEF}\textbf{Vectors} & \textbf{} & \textbf{}         \\' + '\n'
+        table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
+        table_str += r'\textbf{Entry} & \textbf{Initial} & \textbf{Optimized} & \textbf{Difference} \\' + '\n'
+
+        states = [f"T_{i}" for i in range(len(optimization_results["initial_design_vector"]))]
+        initial_values = optimization_results["initial_design_vector"]
+        final_values = optimization_results["best_design_vector"]
+
+        for state, initial, final in zip(states, initial_values, final_values):
+            if initial != 0:
+                percentage_diff = ((final - initial) / initial) * 100
+            else:
+                percentage_diff = 0  # Handle division by zero case
+            table_str += f"${state}$ & {initial:.{decimals}f} & {final:.{decimals}f} & {round(percentage_diff, 2)}\%" + r' \\ ' + '\n'
+
+        initial_cost = optimization_results["initial_objective_value"]
+        final_cost = optimization_results["best_objective_value"]
+
+        if initial_cost != 0:
+            cost_percentage_diff = ((final_cost - initial_cost) / initial_cost) * 100
+        else:
+            cost_percentage_diff = 0  # Handle division by zero case
+
+        table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
+        table_str += f"\\textbf{{Cost}}  & {initial_cost:.{decimals}f} & {final_cost:.{decimals}f} & {round(cost_percentage_diff, 2)}\%" + r' \\ ' + '\n'
+
+        table_str += r'\end{tabular}' + '\n'
+        table_str += r'\caption{' + caption + '}' + '\n'
+        table_str += r'\label{' + label + '}' + '\n'
+        table_str += r'\end{table}'
+
+        if self.save_table:
+            self.save_table_to_folder(table_str, file_name)
 
 # sensitivity_statistics = {'Mission Start Epoch': {'60400': {'epoch_stats': {60401: {'mean': 0.0009584622699008587, 'std': 0.00012090392308297616}, 60405: {'mean': 0.005817788376310036, 'std': 0.00037029311626137146}, 60409: {'mean': 0.008644247621561418, 'std': 0.0005053710034636791}, 60413: {'mean': 0.005080131839618855, 'std': 0.00023168028875643863}, 60417: {'mean': 0.004809221532270387, 'std': 3.9893292452597776e-05}, 60421: {'mean': 0.006285460633615646, 'std': 8.38717396107417e-06}, 60425: {'mean': 0.004344988578237152, 'std': 1.8757136821656323e-05}}, 'total_stats': {'mean': 0.035940300851514353, 'std': 0.0008319253572869126}, 'total_stats_with_threshold': {'mean': 0.010630449211852798, 'std': 2.7144310782730927e-05}}, '60405': {'epoch_stats': {60406: {'mean': 0.0015351618242127139, 'std': 0.00013187301205383895}, 60410: {'mean':
 # 0.00799192741303232, 'std': 0.0002248332180725481}, 60414: {'mean': 0.005974354267140028, 'std': 0.000644619795165433}, 60418: {'mean': 0.0018000426173089507, 'std': 5.893201985299472e-05}, 60422: {'mean': 0.006652248384311513, 'std': 7.734345273977027e-05}, 60426: {'mean': 0.0036958802153875215, 'std': 4.1799903744081006e-05},

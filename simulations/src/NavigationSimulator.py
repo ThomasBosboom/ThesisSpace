@@ -57,6 +57,7 @@ class NavigationSimulator(NavigationSimulatorBase):
         # tracemalloc.start()
 
         self.seed = seed
+        rng = np.random.default_rng(seed=self.seed)
 
         # Adjusting decimals based on the step size used
         num_str = "{:.15f}".format(self.step_size).rstrip('0')
@@ -269,7 +270,6 @@ class NavigationSimulator(NavigationSimulatorBase):
                     # Generate random noise to simulate station-keeping errors
                     if self.model_type == "HF":
 
-                        rng = np.random.default_rng(seed=self.seed)
                         delta_v_noise_sigma = np.abs(self.station_keeping_error*delta_v)
                         delta_v_noise = rng.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
 
@@ -334,30 +334,37 @@ class NavigationOutput():
 
 
         else:
-            for i, navigation_result_dict in enumerate(custom_list):
-                if navigation_result_dict:
-                    self.navigation_results.append(utils.convert_dictionary_to_array(navigation_result_dict))
-                else:
-                    self.navigation_results.append(navigation_result_dict)
+            pass
+            # for i, navigation_result_dict in enumerate(custom_list):
+            #     if navigation_result_dict:
+            #         self.navigation_results.append(utils.convert_dictionary_to_array(navigation_result_dict))
+            #     else:
+            #         self.navigation_results.append(navigation_result_dict)
 
 
 
 if __name__ == "__main__":
 
-    navigation_simulator = NavigationSimulator(run_optimization_version=True)
+    navigation_simulator = NavigationSimulator(run_optimization_version=False)
 
     observation_windows = [(60390, 60391), (60394, 60395)]
 
     tracemalloc.start()
-    a = []
+    cost_list = []
     for _ in range(2):
         navigation_output = navigation_simulator.perform_navigation(observation_windows)
-        a.append(navigation_output)
-        # print(navigation_simulator)
+        navigation_simulator = navigation_output.navigation_simulator
 
-    snapshot = tracemalloc.take_snapshot()
-    top_stats = snapshot.statistics('lineno')
-    for stat in top_stats[:10]:
-        print(stat)
-    total_memory = sum(stat.size for stat in top_stats)
-    print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+        delta_v_dict = navigation_simulator.delta_v_dict
+        delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+        delta_v_history = np.stack(list(delta_v_dict.values()))
+        delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+0)
+
+        cost_list.append(delta_v)
+
+        snapshot = tracemalloc.take_snapshot()
+        top_stats = snapshot.statistics('lineno')
+        for stat in top_stats[:10]:
+            print(stat)
+        total_memory = sum(stat.size for stat in top_stats)
+        print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")

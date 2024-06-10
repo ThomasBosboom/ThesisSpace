@@ -2333,3 +2333,34 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url       = {https://www.mdpi.com/2226-4310/9/11/659},
   urldate   = {2024-05-28},
 }
+
+ 
+@Article{Giordano2023,
+  author   = {Giordano, Carmine and Topputo, Francesco},
+  journal  = {The Journal of the Astronautical Sciences},
+  title    = {Analysis, {Design}, and {Optimization} of {Robust} {Trajectories} in {Cislunar} {Environment} for {Limited}-{Capability} {Spacecraft}},
+  year     = {2023},
+  issn     = {2195-0571},
+  month    = nov,
+  number   = {6},
+  pages    = {53},
+  volume   = {70},
+  abstract = {Nowadays, the space exploration is going in the direction of exploiting small platforms to get high scientific return at significantly lower costs. However, miniaturized spacecraft pose different challenges both from the technological and mission analysis point of view. While the former is in constant evolution due to the manufacturers, the latter is an open point, since it is still based on a traditional approach, not able to cope with the new platforms’ peculiarities. In this work, a revised preliminary mission analysis approach, merging the nominal trajectory optimization with a complete navigation assessment, is formulated in a general form and three main blocks composing it are identified. Then, the integrated approach is specialized for a cislunar test case scenario, represented by the transfer trajectory from a low lunar orbit to an halo orbit of the CubeSat LUMIO, and each block is modeled with mathematical means. Eventually, optimal solutions, minimizing the total costs, are sought, showing the benefits of an integrated approach.},
+  doi      = {10.1007/s40295-023-00413-8},
+  file     = {:Giordano2023 - Analysis, Design, and Optimization of Robust Trajectories in Cislunar Environment for Limited Capability Spacecraft.pdf:PDF},
+  keywords = {Mission analysis, Trajectory optimization, CubeSat, Robust trajectories},
+  language = {en},
+  url      = {https://doi.org/10.1007/s40295-023-00413-8},
+  urldate  = {2024-06-04},
+}
+
+ 
+@Article{Moon2023,
+  author  = {Moon, Quinn},
+  journal = {All Graduate Theses and Dissertations, Spring 1920 to Summer 2023},
+  title   = {Cislunar {Navigation} {Techniques} and {Navigation} {Performance} {Optimization}},
+  year    = {2023},
+  month   = aug,
+  doi     = {https://doi.org/10.26076/ec6f-9ef6},
+  url     = {https://digitalcommons.usu.edu/etd/8848},
+}

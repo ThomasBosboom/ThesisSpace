@@ -1,0 +1,21 @@
+% Please add the following required packages to your document preamble:
+% \usepackage[table,xcdraw]{xcolor}
+% Beamer presentation requires \usepackage{colortbl} instead of \usepackage[table,xcdraw]{xcolor}
+\begin{table}[]
+\centering
+\begin{tabular}{llll}
+\textbf{}      & \cellcolor[HTML]{EFEFEF}\textbf{Design vector} & \textbf{}          & \textbf{}             \\
+\rowcolor[HTML]{EFEFEF} 
+\textbf{State} & \textbf{Initial}                               & \textbf{Optimized} & \textbf{\% Difference} \\
+$x$ & 1.0000 & 2.0000 & 100.0\% \\ 
+$y$ & 1.0000 & 5.0000 & 400.0\% \\ 
+$z$ & 1.0000 & 1.0000 & 0.0\% \\ 
+$v_{x}$ & 1.0000 & 5.0000 & 400.0\% \\ 
+$v_{y}$ & 1.0000 & 2.0000 & 100.0\% \\ 
+$v_{z}$ & 1.0000 & 6.0000 & 500.0\% \\ 
+\rowcolor[HTML]{EFEFEF} 
+\textbf{Cost}  & 10.0000 & 8.0000 & -20.0\% \\ 
+\end{tabular}
+\caption{Design vector comparison before and after optimization}
+\label{tab:DesignVectorOptimization}
+\end{table}

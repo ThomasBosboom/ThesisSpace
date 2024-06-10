@@ -26,7 +26,7 @@ class OptimizationModel:
         self.max_iterations = 50
         self.bounds = (-0.9, 0.9)
         self.design_vector_type = 'arc_lengths'
-        self.custom_initial_guess = None
+        self.custom_initial_design_vector = None
         self.initial_simplex_perturbation = 0.5
 
         self.iteration = 0
@@ -82,7 +82,7 @@ class OptimizationModel:
         return observation_windows
 
 
-    def generate_initial_guess(self):
+    def generate_initial_design_vector(self):
 
         initial_observation_windows = []
         current_time = 0
@@ -95,23 +95,23 @@ class OptimizationModel:
                 initial_observation_windows.remove(arc_set)
                 break
 
-        initial_guess = np.ones(len(initial_observation_windows))
+        initial_design_vector = np.ones(len(initial_observation_windows))
         if self.design_vector_type == 'arc_lengths':
-            initial_guess *= self.arc_length
+            initial_design_vector *= self.arc_length
         if self.design_vector_type == 'arc_intervals':
-            initial_guess *= self.arc_interval
+            initial_design_vector *= self.arc_interval
 
-        return initial_guess.tolist()
+        return initial_design_vector.tolist()
 
 
-    def generate_initial_simplex(self, initial_guess):
+    def generate_initial_simplex(self, initial_design_vector):
 
-        n = len(initial_guess)
+        n = len(initial_design_vector)
         perturbations = np.eye(n) * self.initial_simplex_perturbation
 
-        initial_simplex = [initial_guess]
+        initial_simplex = [initial_design_vector]
         for i in range(n):
-            vertex = initial_guess + perturbations[i]
+            vertex = initial_design_vector + perturbations[i]
             initial_simplex.append(vertex)
         initial_simplex = np.array(initial_simplex)
 
@@ -154,6 +154,7 @@ class OptimizationModel:
             if self.best_objective_value is None or objective_value < self.best_objective_value:
                 self.best_objective_value = objective_value
                 self.best_design_vector = np.copy(design_vector).tolist()
+                self.best_observation_windows = observation_windows
 
             self.save_to_json()
 
@@ -191,30 +192,33 @@ class OptimizationModel:
 
 
         # Initialize the design vector with the maximum number of arcs
-        if self.custom_initial_guess is None:
-            self.initial_guess = self.generate_initial_guess()
+        if self.custom_initial_design_vector is None:
+            self.initial_design_vector = self.generate_initial_design_vector()
         else:
-            self.initial_guess = self.custom_initial_guess
+            self.initial_design_vector = self.custom_initial_design_vector
 
         # Define bounds for the design vector entries
-        self.bounds_vector = [(state+self.bounds[0], state+self.bounds[1]) for state in self.generate_initial_guess()]
+        self.bounds_vector = [(state+self.bounds[0], state+self.bounds[1]) for state in self.generate_initial_design_vector()]
 
         # Adjust the initial simplex for better convergence
-        initial_simplex = self.generate_initial_simplex(self.initial_guess)
+        initial_simplex = self.generate_initial_simplex(self.initial_design_vector)
         self.options.update({"initial_simplex": initial_simplex})
+
+        # Define the initial observation windows
+        self.initial_observation_windows = self.generate_observation_windows(self.initial_design_vector)
 
         # Plotting preliminary details
         print("Current time: ", self.current_time)
         print("Design vector type: \n", self.design_vector_type)
-        print("Initial guess: \n", self.initial_guess)
+        print("Initial guess: \n", self.initial_design_vector)
         print("Initial simplex: \n", initial_simplex)
-        print("Initial observation windows: \n", self.generate_observation_windows(self.initial_guess))
+        print("Initial observation windows: \n", self.generate_observation_windows(self.initial_design_vector))
         print("Bounds: \n", self.bounds)
 
         result = sp.optimize.minimize(
             fun=wrapped_objective,
             callback=callback_function,
-            x0=self.initial_guess,
+            x0=self.initial_design_vector,
             method=self.optimization_method,
             bounds=self.bounds_vector,
             options=self.options,
@@ -239,84 +243,3 @@ class OptimizationModel:
         file_path = os.path.join(folder, filename)
         with open(file_path, 'w') as file:
             json.dump(vars(self), file, indent=4)
-
-
-
-
-
-
-# class ObjectiveFunctions():
-
-#     def __init__(self, navigation_simulator, **kwargs):
-
-#         self.navigation_simulator = navigation_simulator
-#         self.default_navigation_simulator = copy.deepcopy(navigation_simulator)
-#         self.evaluation_threshold = 14
-#         self.num_runs = 2
-#         self.seed = 0
-
-#         for key, value in kwargs.items():
-#             if hasattr(self, key):
-#                 setattr(self, key, value)
-
-
-#     def reset_navigation_simulator(self):
-#         self.navigation_simulator.__dict__ = copy.deepcopy(self.default_navigation_simulator.__dict__)
-
-
-#     def test(self, observation_windows):
-
-#         costs = []
-#         for run in range(1):
-#             noise = np.random.normal(0, 0.0000001)
-#             cost = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
-#             costs.append(cost)
-#         mean_cost = np.mean(costs)
-#         return mean_cost
-
-
-#     def station_keeping_cost(self, observation_windows):
-
-#         cost_list = []
-#         for run in range(self.num_runs):
-
-#             print(f"Run {run+1} of {self.num_runs}")
-
-#             navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=self.seed)
-#             navigation_results = navigation_output.navigation_results
-#             navigation_simulator = navigation_output.navigation_simulator
-
-#             delta_v_dict = navigation_simulator.delta_v_dict
-#             delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-#             delta_v_history = np.stack(list(delta_v_dict.values()))
-#             delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+self.evaluation_threshold)
-
-#             cost_list.append(delta_v)
-
-#             self.reset_navigation_simulator()
-
-#         total_cost = np.mean(cost_list)
-
-#         return total_cost
-
-
-#     def overall_uncertainty(self, observation_windows):
-
-#         navigation_simulator = self.navigation_simulator.perform_navigation(observation_windows, seed=self.seed).navigation_simulator
-#         covariance_dict = navigation_simulator.full_propagated_covariance_dict
-#         covariance_epochs = np.stack(list(covariance_dict.keys()))
-#         covariance_history = np.stack(list(covariance_dict.values()))
-
-#         beta_aves = []
-#         for i in range(2):
-
-#             beta_bar_1 = np.mean(3*np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history[:, 3*i+0:3*i+3, 3*i+0:3*i+3]))), axis=1))
-#             beta_bar_2 = np.mean(3*np.max(np.sqrt(np.abs(np.linalg.eigvals(covariance_history[:, 3*i+6:3*i+3+6, 3*i+6:3*i+3+6]))), axis=1))
-#             beta_ave = 1/2*(beta_bar_1+beta_bar_2)
-
-#             beta_aves.append(beta_ave)
-
-#         self.reset_navigation_simulator()
-
-#         return beta_aves[0]
-

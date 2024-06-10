@@ -10,7 +10,7 @@
         0.9
     ],
     "design_vector_type": "arc_lengths",
-    "custom_initial_guess": null,
+    "custom_initial_design_vector": null,
     "initial_simplex_perturbation": 0.1,
     "current_time": "202406041226",
     "iteration": 17,
@@ -1047,7 +1047,7 @@
             ]
         ]
     },
-    "initial_guess": [
+    "initial_design_vector": [
         1.0,
         1.0,
         1.0,
