@@ -17,7 +17,7 @@ from tests.postprocessing import TableGenerator
 
 class PlotSensitivityResults():
 
-    def __init__(self, navigation_outputs_sensitivity, figure_settings={"save_figure": True, "current_time": float, "file_name": str}):
+    def __init__(self, navigation_outputs_sensitivity, figure_settings={"save_figure": False, "current_time": float, "file_name": str}):
 
         self.navigation_outputs_sensitivity = navigation_outputs_sensitivity
         for key, value in figure_settings.items():
@@ -112,7 +112,7 @@ class PlotSensitivityResults():
                     for run_index, (run, navigation_output) in enumerate(navigation_outputs_sensitivity_case.items()):
 
                         # Extracting the relevant objects
-                        navigation_results = navigation_output.navigation_results
+                        # navigation_results = navigation_output.navigation_results
                         navigation_simulator = navigation_output.navigation_simulator
 
                         # Extracting the relevant results from objects
@@ -153,17 +153,17 @@ class PlotSensitivityResults():
                                                         zorder=0,
                                                         label="SKM" if i==0 and index==0 else None)
 
-                        full_propagated_formal_errors_epochs = navigation_results[3][0]
-                        full_propagated_formal_errors_history = navigation_results[3][1]
+                        full_propagated_formal_errors_epochs = np.stack(list(navigation_simulator.full_propagated_formal_errors_dict.keys()))
+                        full_propagated_formal_errors_history = np.stack(list(navigation_simulator.full_propagated_formal_errors_dict.values()))
                         relative_epochs = full_propagated_formal_errors_epochs - navigation_simulator.mission_start_epoch
                         full_propagated_formal_errors_histories.append(full_propagated_formal_errors_history)
 
-                        full_estimation_error_epochs = navigation_results[0][0]
-                        full_estimation_error_history = navigation_results[0][1]
+                        full_estimation_error_epochs = np.stack(list(navigation_simulator.full_estimation_error_dict.keys()))
+                        full_estimation_error_history = np.stack(list(navigation_simulator.full_estimation_error_dict.values()))
                         full_estimation_error_histories.append(full_estimation_error_history)
 
-                        full_reference_state_deviation_epochs = navigation_results[1][0]
-                        full_reference_state_deviation_history = navigation_results[1][1]
+                        full_reference_state_deviation_epochs = np.stack(list(navigation_simulator.full_reference_state_deviation_dict.keys()))
+                        full_reference_state_deviation_history = np.stack(list(navigation_simulator.full_reference_state_deviation_dict.values()))
                         full_reference_state_deviation_histories.append(full_reference_state_deviation_history)
 
                         axs[0].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),

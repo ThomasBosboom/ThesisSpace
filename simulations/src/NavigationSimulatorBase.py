@@ -43,4 +43,6 @@ class NavigationSimulatorBase():
         self.margin = 0
         self.redirect_out = True
         self.show_corrections_in_terminal = True
+
         self.run_optimization_version = False
+        self.step_size_optimization_version = 0.01

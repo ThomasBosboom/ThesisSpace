@@ -24,53 +24,43 @@ from src import NavigationSimulator, ObjectiveFunctions
 from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
-
-
-
 run_optimization = True
 if __name__ == "__main__":
 
     # tracemalloc.start()
+
+    navigation_simulator = NavigationSimulator.NavigationSimulator(
+        show_corrections_in_terminal=True,
+        run_optimization_version=True
+    )
+
+    objective_functions = ObjectiveFunctions.ObjectiveFunctions(
+        navigation_simulator,
+        evaluation_threshold=14,
+        num_runs=5
+    )
+
+    optimization_model = OptimizationModel.OptimizationModel(
+        json_settings={"save_json": True, "current_time": current_time, "file_name": file_name},
+        duration=28,
+        arc_length=1,
+        arc_interval=3,
+        max_iterations=100,
+        bounds=(-0.9, 0.9),
+        optimization_method="Nelder-Mead",
+        design_vector_type="arc_lengths",
+        initial_simplex_perturbation = -0.3
+    )
 
     if not run_optimization:
         current_time = str(202406011440)
 
     else:
 
-        navigation_simulator = NavigationSimulator.NavigationSimulator(
-            show_corrections_in_terminal=True,
-            run_optimization_version=True
-        )
-
-        objective_functions = ObjectiveFunctions.ObjectiveFunctions(
-            navigation_simulator,
-            evaluation_threshold=14,
-            num_runs=1
-        )
-
-        optimization_model = OptimizationModel.OptimizationModel(
-            json_settings={"save_json": True, "current_time": current_time, "file_name": file_name},
-            duration=28,
-            arc_length=1,
-            arc_interval=3,
-            max_iterations=100,
-            bounds=(-0.9, 0.9),
-            optimization_method="Nelder-Mead",
-            design_vector_type="arc_lengths",
-            initial_simplex_perturbation = 0.5
-        )
-
-
         # Chose the objective function to optimize
         # optimization_results = optimization_model.optimize(objective_functions.test)
         optimization_results = optimization_model.optimize(objective_functions.station_keeping_cost)
         # optimization_results = optimization_model.optimize(objective_functions.overall_uncertainty)
-
-        # Compare before and after optimization
-        # observation_windows = optimization_model.generate_observation_windows(optimization_results.final_solution)
-        # cost_initial = objective_functions.station_keeping_cost(observation_windows)
-        # observation_windows = optimization_model.generate_observation_windows(optimization_results.initial_design_vector)
-        # cost_optimized = objective_functions.station_keeping_cost(observation_windows)
 
     # snapshot = tracemalloc.take_snapshot()
     # top_stats = snapshot.statistics('traceback')
@@ -80,9 +70,22 @@ if __name__ == "__main__":
     # for line in largest_allocation.traceback.format():
     #     print(line)
 
-    process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(time_tag=current_time)
+
+    process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(
+        current_time,
+        optimization_model,
+        save_settings={"save_table": True,
+                       "save_figure": True,
+                       "current_time": current_time,
+                       "file_name": file_name
+        }
+    )
+
     process_optimization_results.plot_iteration_history()
-    process_optimization_results.plot_improved_design()
+    process_optimization_results.plot_optimization_result_comparison(
+        show_observation_window_settings=False,
+        num_runs=2)
+
     plt.show()
 
 

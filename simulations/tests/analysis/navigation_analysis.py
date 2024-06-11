@@ -58,11 +58,14 @@ observation_windows_settings = {
     # ]
 }
 
-# observation_windows_settings = {
-#     "default": [
-#         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.1, mission_start_epoch=mission_start_epoch), 1),
-#     ],
-# }
+observation_windows_settings = {
+    "default": [
+        (helper_functions.get_constant_arc_observation_windows(8, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 2),
+    ],
+    # "optimized": [
+    #     (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), 1),
+    # ],
+}
 
 
 #######################################################
@@ -73,7 +76,7 @@ observation_windows_settings = {
 auxilary_settings = {
     # "apriori_covariance": np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2),
     # "apriori_covariance": np.diag(np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2),
-    # "step_size": 0.01,
+    "step_size": 0.01,
     # "observation_interval": 10000
     # "noise": 102.44,
     # "run_optimization_version": True
@@ -117,10 +120,11 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         process_single_navigation_results.plot_correlation_history()
                         process_single_navigation_results.plot_observability_metrics()
 
-# plt.show()
+plt.show()
 
 process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
     navigation_outputs,
+    color_cycle=['gray', "green"],
     figure_settings={"save_figure": True,
                      "current_time": current_time,
                      "file_name": file_name

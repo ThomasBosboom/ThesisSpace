@@ -15,14 +15,16 @@ for _ in range(5):
 # # Define current time
 # current_time = datetime.now().strftime("%Y%m%d%H%M")
 
-from tests.postprocessing import TableGenerator
+from tests.postprocessing import TableGenerator, ProcessNavigationResults
+from tests.analysis import helper_functions
 
 class ProcessOptimizationResults():
 
-    def __init__(self, time_tag, save_settings={"save_table": True, "save_figure": True, "current_time": float, "file_name": str}, **kwargs):
+    def __init__(self, time_tag, optimization_model, save_settings={"save_table": True, "save_figure": False, "current_time": float, "file_name": str}, **kwargs):
 
         self.time_tag = str(time_tag)
         self.optimization_results = self.load_from_json()
+        self.optimization_model = optimization_model
 
         for key, value in save_settings.items():
             if save_settings["save_table"] or save_settings["save_figure"]:
@@ -79,21 +81,50 @@ class ProcessOptimizationResults():
         # plt.show()
 
 
-    def plot_improved_design(self):
+    def plot_optimization_result_comparison(self, show_observation_window_settings=False, num_runs=1):
 
-        table_generator = TableGenerator.TableGenerator(
-            # table_settings={
-            #     "save_table": True,
-            #     "current_time": self.current_time,
-            #     "file_name": self.file_name
-            # }
+        observation_windows_settings = {
+            "Default": [
+                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs),
+            ],
+            "Optimized": [
+                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), num_runs)
+            ],
+        }
+
+        if show_observation_window_settings:
+            print("Observation window settings \n:", observation_windows_settings)
+
+        # Run the navigation routine using given settings
+        auxilary_settings = {}
+        navigation_outputs = helper_functions.generate_navigation_outputs(
+            observation_windows_settings,
+            **auxilary_settings)
+
+        process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
+            navigation_outputs,
+            color_cycle=["grey", "green"],
+            figure_settings={"save_figure": self.save_figure,
+                            "current_time": self.current_time,
+                            "file_name": self.file_name
+            }
         )
 
-        current_time = self.optimization_results["current_time"]
-        table_generator.generate_optimization_analysis_table(
-            self.optimization_results,
-            file_name=f"{current_time}_optimization_analysis.tex"
-        )
+        process_multiple_navigation_results.plot_uncertainty_comparison()
+        process_multiple_navigation_results.plot_maneuvre_costs()
+        process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
+        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None)
+
+        if self.save_table:
+            table_generator = TableGenerator.TableGenerator(
+                table_settings={"save_table": self.save_table,
+                                "current_time": self.current_time,
+                                "file_name": self.file_name})
+            current_time = self.optimization_results["current_time"]
+            table_generator.generate_optimization_analysis_table(
+                self.optimization_results,
+                file_name=f"{current_time}_optimization_analysis.tex"
+            )
 
 
 if __name__ == "__main__":

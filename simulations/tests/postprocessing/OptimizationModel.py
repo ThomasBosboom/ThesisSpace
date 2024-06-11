@@ -120,10 +120,13 @@ class OptimizationModel:
 
     def optimize(self, objective_function):
 
-        def wrapped_objective(design_vector):
+        def constraints(design_vector):
+            pass
+
+
+        def objective(design_vector):
 
             # tracemalloc.start()
-
             observation_windows = self.generate_observation_windows(design_vector)
             objective_value = objective_function(observation_windows)
 
@@ -157,6 +160,8 @@ class OptimizationModel:
                 self.best_observation_windows = observation_windows
 
             self.save_to_json()
+
+            print("design vector after objective function:", design_vector)
 
             print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value}")
 
@@ -210,13 +215,13 @@ class OptimizationModel:
         # Plotting preliminary details
         print("Current time: ", self.current_time)
         print("Design vector type: \n", self.design_vector_type)
-        print("Initial guess: \n", self.initial_design_vector)
+        print("Initial design vector: \n", self.initial_design_vector)
         print("Initial simplex: \n", initial_simplex)
-        print("Initial observation windows: \n", self.generate_observation_windows(self.initial_design_vector))
+        print("Initial observation windows: \n", self.initial_observation_windows)
         print("Bounds: \n", self.bounds)
 
         result = sp.optimize.minimize(
-            fun=wrapped_objective,
+            fun=objective,
             callback=callback_function,
             x0=self.initial_design_vector,
             method=self.optimization_method,
@@ -231,6 +236,7 @@ class OptimizationModel:
         self.save_to_json()
 
         return self
+
 
     def save_to_json(self):
 

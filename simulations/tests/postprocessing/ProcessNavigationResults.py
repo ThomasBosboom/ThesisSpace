@@ -22,11 +22,11 @@ import FrameConverter
 
 class PlotSingleNavigationResults():
 
-    def __init__(self, navigation_output, sigma_number=3, figure_settings={"save_figure": True, "current_time": float, "file_name": str}):
+    def __init__(self, navigation_output, sigma_number=3, figure_settings={"save_figure": False, "current_time": float, "file_name": str}):
 
         self.navigation_output = navigation_output
         self.navigation_simulator = navigation_output.navigation_simulator
-        self.navigation_results = navigation_output.navigation_results
+        # self.navigation_results = navigation_output.navigation_results
         self.sigma_number = sigma_number
         self.mission_start_epoch = self.navigation_simulator.mission_start_epoch
         self.observation_windows = self.navigation_simulator.observation_windows
@@ -48,11 +48,11 @@ class PlotSingleNavigationResults():
         ax_3d2 = fig1_3d2.add_subplot(111, projection='3d')
         fig, ax = plt.subplots(2, 3, figsize=(11, 6))
 
-        state_history_reference = self.navigation_results[4][1]
-        state_history_truth = self.navigation_results[5][1]
-        state_history_estimated = self.navigation_results[6][1]
-        epochs = self.navigation_results[9][0]
-        dependent_variables_history = self.navigation_results[9][1]
+        state_history_reference = np.stack(list(self.navigation_simulator.full_state_history_reference_dict.values()))
+        state_history_truth = np.stack(list(self.navigation_simulator.full_state_history_truth_dict.values()))
+        state_history_estimated = np.stack(list(self.navigation_simulator.full_state_history_estimated_dict.values()))
+        epochs = np.stack(list(self.navigation_simulator.full_dependent_variables_history_estimated.keys()))
+        dependent_variables_history = np.stack(list(self.navigation_simulator.full_dependent_variables_history_estimated.values()))
         delta_v_dict = self.navigation_simulator.delta_v_dict
 
         full_state_history_truth_dict = self.navigation_simulator.full_state_history_truth_dict
@@ -326,8 +326,8 @@ class PlotSingleNavigationResults():
         # Plot how the formal errors grow over time
         fig, ax = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
 
-        full_propagated_formal_errors_epochs = self.navigation_results[3][0]
-        full_propagated_formal_errors_history = self.navigation_results[3][1]
+        full_propagated_formal_errors_epochs = np.stack(list(self.navigation_simulator.full_propagated_formal_errors_dict.keys()))
+        full_propagated_formal_errors_history = np.stack(list(self.navigation_simulator.full_propagated_formal_errors_dict.values()))
         relative_epochs = full_propagated_formal_errors_epochs - self.mission_start_epoch
 
         colors = ["red", "green", "blue"]
@@ -373,9 +373,9 @@ class PlotSingleNavigationResults():
     def plot_uncertainty_history(self):
 
         fig, ax = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
-        full_propagated_formal_errors_epochs = self.navigation_results[3][0]
-        full_propagated_formal_errors_history = self.navigation_results[3][1]
-        propagated_covariance_epochs = self.navigation_results[2][0]
+        full_propagated_formal_errors_epochs = np.stack(list(self.navigation_simulator.full_propagated_formal_errors_dict.keys()))
+        full_propagated_formal_errors_history = np.stack(list(self.navigation_simulator.full_propagated_formal_errors_dict.values()))
+        propagated_covariance_epochs = np.stack(list(self.navigation_simulator.full_propagated_covariance_dict.keys()))
         relative_epochs = full_propagated_formal_errors_epochs - self.mission_start_epoch
 
         # Plot the estimation error history
@@ -421,8 +421,8 @@ class PlotSingleNavigationResults():
 
         # Plot how the deviation from the reference orbit
         fig, ax = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
-        full_reference_state_deviation_epochs = self.navigation_results[1][0]
-        full_reference_state_deviation_history = self.navigation_results[1][1]
+        full_reference_state_deviation_epochs = np.stack(list(self.navigation_simulator.full_reference_state_deviation_dict.keys()))
+        full_reference_state_deviation_history = np.stack(list(self.navigation_simulator.full_reference_state_deviation_dict.values()))
         relative_epochs = full_reference_state_deviation_epochs - self.mission_start_epoch
 
         colors = ["red", "green", "blue"]
@@ -464,10 +464,10 @@ class PlotSingleNavigationResults():
 
         fig, ax = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
 
-        full_estimation_error_epochs = self.navigation_results[0][0]
-        full_estimation_error_history = self.navigation_results[0][1]
-        propagated_covariance_epochs = self.navigation_results[2][0]
-        full_propagated_formal_errors_history = self.navigation_results[3][1]
+        full_estimation_error_epochs = np.stack(list(self.navigation_simulator.full_estimation_error_dict.keys()))
+        full_estimation_error_history = np.stack(list(self.navigation_simulator.full_estimation_error_dict.values()))
+        propagated_covariance_epochs = np.stack(list(self.navigation_simulator.full_propagated_covariance_dict.keys()))
+        full_propagated_formal_errors_history = np.stack(list(self.navigation_simulator.full_propagated_formal_errors_dict.values()))
         relative_epochs = propagated_covariance_epochs - self.mission_start_epoch
 
         for k in range(2):
@@ -520,12 +520,12 @@ class PlotSingleNavigationResults():
     def plot_observations(self):
 
         fig, ax = plt.subplots(3, 1, figsize=(12, 7), sharex=True)
-        arc_nums = len(self.navigation_results[-1].keys())
+        arc_nums = len(self.navigation_simulator.estimation_arc_results_dict.keys())
 
         # For each arc, plot the observations and its residuals
         for arc_num in range(arc_nums):
 
-            estimation_model = self.navigation_results[-1][arc_num]
+            estimation_model = self.navigation_simulator.estimation_arc_results_dict[arc_num]
             estimation_output = estimation_model.estimation_output
 
             for i, (observable_type, information_sets) in enumerate(estimation_model.sorted_observation_sets.items()):
@@ -546,12 +546,12 @@ class PlotSingleNavigationResults():
                         ax[1].scatter(observation_times, residual_history[i*index:(i+1)*index, best_iteration], color=color, s=s)
 
         # Plot the history of observation angle with respect to the large covariance axis
-        state_history = self.navigation_results[6][1]
-        epochs = self.navigation_results[9][0]
-        dependent_variables_history = self.navigation_results[9][1]
+        state_history = np.stack(list(self.navigation_simulator.full_state_history_estimated_dict.values()))
+        epochs = np.stack(list(self.navigation_simulator.full_dependent_variables_history_estimated.keys()))
+        dependent_variables_history = np.stack(list(self.navigation_simulator.full_dependent_variables_history_estimated.values()))
         relative_state_history = dependent_variables_history[:,6:12]
-        full_propagated_covariance_epochs = self.navigation_results[2][0]
-        full_propagated_covariance_history = self.navigation_results[2][1]
+        full_propagated_covariance_epochs = np.stack(list(self.navigation_simulator.full_propagated_covariance_dict.keys()))
+        full_propagated_covariance_history = np.stack(list(self.navigation_simulator.full_propagated_covariance_dict.values()))
 
         # Generate history of eigenvectors
         eigenvectors_dict = dict()
@@ -685,11 +685,11 @@ class PlotSingleNavigationResults():
 
         fig, ax = plt.subplots(5, 1, figsize=(8, 6.5), sharex=True)
         fig1, ax1 = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
-        arc_nums = len(self.navigation_results[-1].keys())
+        arc_nums = len(self.navigation_simulator.estimation_arc_results_dict.keys())
 
         for arc_num in range(arc_nums):
 
-            estimation_model = self.navigation_results[-1][arc_num]
+            estimation_model = self.navigation_simulator.estimation_arc_results_dict[arc_num]
             estimation_output = estimation_model.estimation_output
             estimator = estimation_model.estimator
             state_transition_interface = estimator.state_transition_interface
@@ -795,9 +795,9 @@ class PlotSingleNavigationResults():
             ax[j].set_yscale("log")
 
         # Plot the history of observation angle with respect to the large covariance axis
-        # state_history = self.navigation_results[6][1]
-        # epochs = self.navigation_results[9][0]
-        # dependent_variables_history = self.navigation_results[9][1]
+        # state_history = np.stack(list(self.navigation_simulator.full_state_history_estimated_dict.values()))
+        # epochs = np.stack(list(self.navigation_simulator.full_dependent_variables_history_estimated.keys()))
+        # dependent_variables_history = np.stack(list(self.navigation_simulator.full_dependent_variables_history_estimated.values()))
         # moon_state_history = dependent_variables_history[:,0:6]
 
         # state_history_moon_lpf = state_history[:, 0:6] - moon_state_history
@@ -895,16 +895,16 @@ class PlotSingleNavigationResults():
     def plot_correlation_history(self):
 
         # Plot the estimation error history
-        arc_nums = list(self.navigation_results[-1].keys())
+        arc_nums = list(self.navigation_simulator.estimation_arc_results_dict.keys())
 
         fig, ax = plt.subplots(1, 2, figsize=(9, 4))
 
-        full_propagated_covariance_history = self.navigation_results[2][1]
+        full_propagated_covariance_history = np.stack(list(self.navigation_simulator.full_propagated_covariance_dict.values()))
 
         correlation_start = np.corrcoef(full_propagated_covariance_history[0])
         correlation_end = np.corrcoef(full_propagated_covariance_history[-1])
 
-        estimation_model = self.navigation_results[-1][arc_nums[0]]
+        estimation_model = self.navigation_simulator.estimation_arc_results_dict[arc_nums[0]]
         estimation_output = estimation_model.estimation_output
         correlation_end = estimation_output.correlations
 
@@ -933,13 +933,14 @@ class PlotSingleNavigationResults():
         # plt.show()
 
 
-
-
 class PlotMultipleNavigationResults():
 
-    def __init__(self, navigation_outputs, figure_settings={"save_figure": True, "current_time": float, "file_name": str}):
+    def __init__(self, navigation_outputs, color_cycle=None, figure_settings={"save_figure": False, "current_time": float, "file_name": str}):
 
         self.navigation_outputs = navigation_outputs
+        self.color_cycle = color_cycle
+        if not color_cycle:
+            self.color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
         for key, value in figure_settings.items():
             setattr(self, key, value)
@@ -950,12 +951,12 @@ class PlotMultipleNavigationResults():
         self.save_figure = save_figure
 
         fig, axs = plt.subplots(2, 2, figsize=(12.5, 5), sharex=True)
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
         line_style_cycle = ["solid", "dashed", "dashdot"]
         ylabels = ["3D RSS OD position \nuncertainty [m]", "3D RSS OD velocity \nuncertainty [m/s]"]
         for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
 
-            color = color_cycle[int(type_index%len(color_cycle))]
+            color = self.color_cycle[int(type_index%len(self.color_cycle))]
             for case_index, window_case in enumerate(navigation_outputs_cases):
 
                 line_style = line_style_cycle[int(case_index%len(line_style_cycle))]
@@ -965,12 +966,12 @@ class PlotMultipleNavigationResults():
                     # print(f"Results for {window_type} window_case {case_index} run {run}:")
 
                     # Extracting the relevant objects
-                    navigation_results = navigation_output.navigation_results
+                    # navigation_results = navigation_output.navigation_results
                     navigation_simulator = navigation_output.navigation_simulator
 
                     # Extract the relevant information from the objects
-                    full_propagated_formal_errors_epochs = navigation_results[3][0]
-                    full_propagated_formal_errors_history = navigation_results[3][1]
+                    full_propagated_formal_errors_epochs = np.stack(list(navigation_simulator.full_propagated_formal_errors_dict.keys()))
+                    full_propagated_formal_errors_history = np.stack(list(navigation_simulator.full_propagated_formal_errors_dict.values()))
                     relative_epochs = full_propagated_formal_errors_epochs - navigation_simulator.mission_start_epoch
 
                     full_propagated_formal_errors_histories.append(full_propagated_formal_errors_history)
@@ -999,9 +1000,6 @@ class PlotMultipleNavigationResults():
                                         alpha=0.2,
                                         label=f"Arc" if k==0 and j==1 and window_index==0 and case_index==0 else None
                                         )
-
-
-
 
                                 # Plot the results of the first run
                                 # axs[k][j].plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1),
@@ -1032,7 +1030,7 @@ class PlotMultipleNavigationResults():
 
         axs[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
         # fig.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=len(self.navigation_outputs.keys()), fontsize='small')
-        fig.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty")
+        # fig.suptitle(f"Total 3D RSS 3$\sigma$ uncertainty")
         plt.tight_layout()
 
         if self.save_figure:
@@ -1046,11 +1044,11 @@ class PlotMultipleNavigationResults():
         fig, axs = plt.subplots(figsize=(12, 4), sharex=True)
         axs_twin = axs.twinx()
         ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
         line_style_cycle = ["solid", "dashed", "dashdot"]
         for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
 
-            color = color_cycle[int(type_index%len(color_cycle))]
+            color = self.color_cycle[int(type_index%len(self.color_cycle))]
 
             for case_index, window_case in enumerate(navigation_outputs_cases):
 
@@ -1063,7 +1061,7 @@ class PlotMultipleNavigationResults():
                     # print(f"Results for {window_type} window_case {case_index} run {run}:")
 
                     # Extracting the relevant objects
-                    navigation_results = navigation_output.navigation_results
+                    # navigation_results = navigation_output.navigation_results
                     navigation_simulator = navigation_output.navigation_simulator
 
                     # Extracting the relevant results from objects
@@ -1087,13 +1085,13 @@ class PlotMultipleNavigationResults():
                                 # label=f"Observation window" if window_index==0 and case_index==0 else None
                                 )
 
-                    full_propagated_formal_errors_epochs = navigation_results[3][0]
-                    full_propagated_formal_errors_history = navigation_results[3][1]
+                    full_propagated_formal_errors_epochs = np.stack(list(navigation_simulator.full_propagated_formal_errors_dict.keys()))
+                    full_propagated_formal_errors_history = np.stack(list(navigation_simulator.full_propagated_formal_errors_dict.values()))
                     relative_epochs = full_propagated_formal_errors_epochs - navigation_simulator.mission_start_epoch
                     full_propagated_formal_errors_histories.append(full_propagated_formal_errors_history)
 
-                    full_estimation_error_epochs = navigation_results[0][0]
-                    full_estimation_error_history = navigation_results[0][1]
+                    full_estimation_error_epochs = np.stack(list(navigation_simulator.full_estimation_error_dict.keys()))
+                    full_estimation_error_history = np.stack(list(navigation_simulator.full_estimation_error_dict.values()))
 
                     if run_index == 0:
 
@@ -1151,7 +1149,7 @@ class PlotMultipleNavigationResults():
             axs = np.array([axs])
         label_index = 0
         detailed_results = [["Perilune", "Apolune", "Random"], [0], [0]]
-        color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
         line_style_cycle = ["solid", "dashed", "dashdot"]
         colors = ["red", "green", "blue"]
         symbols = [[r"x", r"y", r"z"], [r"x", r"y", r"z"]]
@@ -1159,7 +1157,7 @@ class PlotMultipleNavigationResults():
         titles = [r"$\mathbf{r}-\hat{\mathbf{r}}$ LPF", r"$\mathbf{r}-\hat{\mathbf{r}}$ LUMIO", r"$\mathbf{v}-\hat{\mathbf{v}}$ LPF", r"$\mathbf{v}-\hat{\mathbf{v}}$ LUMIO"]
         for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
 
-            color = color_cycle[int(type_index%len(color_cycle))]
+            color = self.color_cycle[int(type_index%len(self.color_cycle))]
             for case_index, window_case in enumerate(navigation_outputs_cases):
 
                 line_style = line_style_cycle[int(case_index%len(line_style_cycle))]
@@ -1167,13 +1165,13 @@ class PlotMultipleNavigationResults():
                 for run_index, (run, navigation_output) in enumerate(window_case.items()):
 
                     # Extracting the relevant objects
-                    navigation_results = navigation_output.navigation_results
+                    # navigation_results = navigation_output.navigation_results
                     navigation_simulator = navigation_output.navigation_simulator
 
                     # Extract relevant data from the objects
-                    full_estimation_error_epochs = navigation_results[0][0]
-                    full_estimation_error_history = navigation_results[0][1]
-                    full_propagated_formal_errors_history = navigation_results[3][1]
+                    full_estimation_error_epochs = np.stack(list(navigation_simulator.full_estimation_error_dict.keys()))
+                    full_estimation_error_history = np.stack(list(navigation_simulator.full_estimation_error_dict.values()))
+                    full_propagated_formal_errors_history = np.stack(list(navigation_simulator.full_propagated_formal_errors_dict.values()))
                     relative_epochs = full_estimation_error_epochs - navigation_simulator.mission_start_epoch
                     full_estimation_error_histories.append(full_estimation_error_history)
 
@@ -1304,7 +1302,7 @@ class PlotMultipleNavigationResults():
                         # print(f"Results for {window_type} window_case {window_case} run {run}:")
 
                         # Extracting the relevant objects
-                        navigation_results = navigation_output.navigation_results
+                        # navigation_results = navigation_output.navigation_results
                         navigation_simulator = navigation_output.navigation_simulator
 
                         # Extracting the relevant results from objects
@@ -1341,10 +1339,8 @@ class PlotMultipleNavigationResults():
             bars = defaultdict(list)
 
             if colors is None:
-                color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-                # colors = {g_name: [f"C{i}" for _ in values]
-                #           for i, (g_name, values) in enumerate(data.items())}
-                colors = {g_name: color_cycle[i]
+                # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+                colors = {g_name: self.color_cycle[i]
                         for i, (g_name, values) in enumerate(data.items())}
 
             ax.grid(alpha=0.5)

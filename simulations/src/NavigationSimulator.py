@@ -23,9 +23,11 @@ class NavigationSimulator(NavigationSimulatorBase):
     def __init__(self, **kwargs):
         super().__init__()
 
+        self._initial_attrs = {**self.__dict__}
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+                self._initial_attrs.update({key: value})
 
 
     def get_Gamma(self, delta_t):
@@ -51,37 +53,41 @@ class NavigationSimulator(NavigationSimulatorBase):
 
         return result
 
+
+    def reset_attributes(self):
+        # Reset attributes to initial state defined in __init__
+        for attr, value in self._initial_attrs.items():
+            setattr(self, attr, value)
+
+
     # @profile
     def perform_navigation(self, observation_windows, seed=0):
 
         # tracemalloc.start()
-
         self.seed = seed
         rng = np.random.default_rng(seed=self.seed)
 
         # Adjusting decimals based on the step size used
+        if self.run_optimization_version:
+            self.step_size = self.step_size_optimization_version
         num_str = "{:.15f}".format(self.step_size).rstrip('0')
-        self.decimal_places = len(num_str) - num_str.index('.') - 1
+        decimal_places = len(num_str) - num_str.index('.') - 1
 
-        # Update mission start epoch based on given observation window
+        # Observation window settings
         self.mission_start_epoch = observation_windows[0][0]
-
-        # Rounding values
         self.observation_windows = observation_windows
-        self.observation_windows = [(np.round(tup[0], self.decimal_places), np.round(tup[1], self.decimal_places)) for tup in observation_windows]
-        self.initial_station_keeping_epochs = [np.round(observation_window[1], self.decimal_places) for observation_window in observation_windows]
-        self.batch_start_times = np.array([t[0] for t in self.observation_windows])
+        self.observation_windows = [(np.round(tup[0], decimal_places), np.round(tup[1], decimal_places)) for tup in observation_windows]
+        self.initial_station_keeping_epochs = [np.round(observation_window[1], decimal_places) for observation_window in observation_windows]
         self.station_keeping_epochs = []
 
         # Managing the time vector to define all arcs
-        self.times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
-        self.times = list(set(self.times))
-        self.times = sorted(self.times)
+        batch_start_times = np.array([t[0] for t in self.observation_windows])
+        times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
+        times = list(set(times))
+        times = sorted(times)
 
-        # print(self.decimal_places, self.times, self.seed)
-
-        self.navigation_arc_durations = np.round(np.diff(self.times), self.decimal_places)
-        self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), self.decimal_places)
+        self.navigation_arc_durations = np.round(np.diff(times), decimal_places)
+        self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), decimal_places)
 
         interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size)
 
@@ -102,7 +108,7 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.full_dependent_variables_history_estimated = dict()
         self.full_state_transition_matrix_history_estimated = dict()
         self.estimation_arc_results_dict = dict()
-        for t, time in enumerate(self.times):
+        for t, time in enumerate(times):
 
             navigation_arc_duration = self.navigation_arc_durations[navigation_arc]
 
@@ -166,7 +172,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             #### LOOP FOR ESTIMATION ARCS ################################
             ##############################################################
             estimation_arc_activated = False
-            if time in self.batch_start_times:
+            if time in batch_start_times:
 
                 estimation_arc_activated = True
                 estimation_arc_duration = self.estimation_arc_durations[estimation_arc]
@@ -252,11 +258,11 @@ class NavigationSimulator(NavigationSimulatorBase):
             ##############################################################
 
             if self.include_station_keeping:
-                if self.times[navigation_arc+1] in self.initial_station_keeping_epochs:
+                if times[navigation_arc+1] in self.initial_station_keeping_epochs:
 
                     params = [0, self.target_point_epochs]
 
-                    dynamic_model_objects = utils.get_dynamic_model_objects(self.times[navigation_arc+1], max(params[1]),
+                    dynamic_model_objects = utils.get_dynamic_model_objects(times[navigation_arc+1], max(params[1]),
                                                                             custom_initial_state=self.custom_initial_state,
                                                                             custom_model_dict={self.model_type: [self.model_name]},
                                                                             custom_model_list=[self.model_number])
@@ -283,76 +289,75 @@ class NavigationSimulator(NavigationSimulatorBase):
                             delta_v_noise_covariance[9:12] = delta_v_noise_sigma
                             self.apriori_covariance += np.outer(delta_v_noise_covariance, delta_v_noise_covariance)
 
-                            self.station_keeping_epochs.append(self.times[navigation_arc+1])
-                            self.delta_v_dict.update({self.times[navigation_arc+1]: delta_v})
+                            self.station_keeping_epochs.append(times[navigation_arc+1])
+                            self.delta_v_dict.update({times[navigation_arc+1]: delta_v})
 
                             if self.show_corrections_in_terminal:
-                                print(f"Correction at {self.times[navigation_arc+1]}: ", \
+                                print(f"Correction at {times[navigation_arc+1]}: ", \
                                     np.sqrt(np.mean(residual_history[:, best_iteration]**2)), "m   ", \
                                     np.linalg.norm(delta_v), "m/s   ", \
                                     np.linalg.norm(self.initial_estimation_error[6:9]), "m   ", \
+                                    # np.linalg.norm(dynamic_model.custom_initial_state[6:9]-state_history_truth[0,:][6:9]), "m   ", \
                                     np.linalg.norm(dispersion[:3]), "m"
                                 )
 
 
-            if navigation_arc < len(self.times)-2:
+            if navigation_arc < len(times)-2:
                 navigation_arc += 1
-
             else:
                 break
-
-        # len: 12
-        navigation_result_dicts = [self.full_estimation_error_dict, self.full_reference_state_deviation_dict, self.full_propagated_covariance_dict, self.full_propagated_formal_errors_dict,\
-                    self.full_state_history_reference_dict, self.full_state_history_truth_dict, self.full_state_history_estimated_dict, self.full_state_history_final_dict, self.delta_v_dict,\
-                    self.full_dependent_variables_history_estimated, self.full_state_transition_matrix_history_estimated, self.estimation_arc_results_dict]
+# full_state_history_final_dict, self.full_state_transition_matrix_history_estimated
 
         if self.run_optimization_version:
-            self.navigation_output = NavigationOutput(self, navigation_result_dicts, custom_list=[self.full_propagated_covariance_dict, self.delta_v_dict])
-        else:
-            self.navigation_output = NavigationOutput(self, navigation_result_dicts)
 
-        return self.navigation_output
+            required_attributes = {
+                # "full_propagated_covariance_dict": self.full_propagated_covariance_dict,
+                "delta_v_dict": self.delta_v_dict
+            }
+            return NavigationOutput(
+                self,
+                **required_attributes
+            )
+
+        else:
+            return NavigationOutput(self)
+
+        return navigation_output
 
 
 class NavigationOutput():
 
-    def __init__(self, navigation_simulator, navigation_result_dicts, custom_list=False):
+    def __init__(self, navigation_simulator, **required_attributes):
 
         self.navigation_simulator = navigation_simulator
-        self.navigation_results = []
+        self.navigation_simulator.reset_attributes()
 
-        if not custom_list:
-            for i, navigation_result_dict in enumerate(navigation_result_dicts):
+        if required_attributes:
 
-                if navigation_result_dict:
-                    if i in range(0, 11):
-                        self.navigation_results.append(utils.convert_dictionary_to_array(navigation_result_dict))
-                    else:
-                        self.navigation_results.append(navigation_result_dict)
-                else:
-                    self.navigation_results.append(([],[]))
-
-
-        else:
-            pass
-            # for i, navigation_result_dict in enumerate(custom_list):
-            #     if navigation_result_dict:
-            #         self.navigation_results.append(utils.convert_dictionary_to_array(navigation_result_dict))
-            #     else:
-            #         self.navigation_results.append(navigation_result_dict)
+            # Reset the attributes with keep only the relevant dictionaries for the optimization routine
+            _initial_attrs = self.navigation_simulator._initial_attrs.copy()
+            remaining_dict = {"_initial_attrs": _initial_attrs}
+            for key, value in vars(self.navigation_simulator).items():
+                if key in _initial_attrs:
+                    remaining_dict[key] = value
+            self.navigation_simulator.__dict__.clear()
+            for key, value in remaining_dict.items():
+                setattr(self.navigation_simulator, key, value)
+            for key, value in required_attributes.items():
+                setattr(self.navigation_simulator, key, value)
 
 
 
 if __name__ == "__main__":
 
-    navigation_simulator = NavigationSimulator(run_optimization_version=False)
+    navigation_simulator = NavigationSimulator(run_optimization_version=True)
 
-    observation_windows = [(60390, 60391), (60394, 60395)]
+    observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
 
     tracemalloc.start()
     cost_list = []
-    for _ in range(2):
-        navigation_output = navigation_simulator.perform_navigation(observation_windows)
+    for i in range(2):
+        navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
         navigation_simulator = navigation_output.navigation_simulator
 
         delta_v_dict = navigation_simulator.delta_v_dict

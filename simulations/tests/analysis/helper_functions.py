@@ -226,7 +226,7 @@ def generate_objective_value_results(navigation_outputs, evaluation_threshold=14
                 print(f"Results for {window_type} window_case {window_case} run {run}:")
 
                 # Extracting the relevant objects
-                navigation_results = navigation_output.navigation_results
+                # navigation_results = navigation_output.navigation_results
                 navigation_simulator = navigation_output.navigation_simulator
 
                 # Extracting the relevant results from objects

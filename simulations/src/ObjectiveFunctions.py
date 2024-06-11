@@ -17,7 +17,7 @@ class ObjectiveFunctions():
     def __init__(self, navigation_simulator, **kwargs):
 
         self.navigation_simulator = navigation_simulator
-        self.default_navigation_simulator = copy.deepcopy(navigation_simulator)
+        # self.default_navigation_simulator = copy.deepcopy(navigation_simulator)
         self.evaluation_threshold = 14
         self.num_runs = 2
         self.seed = 0
@@ -27,8 +27,8 @@ class ObjectiveFunctions():
                 setattr(self, key, value)
 
 
-    def reset_navigation_simulator(self):
-        self.navigation_simulator.__dict__ = copy.deepcopy(self.default_navigation_simulator.__dict__)
+    # def reset_navigation_simulator(self):
+    #     self.navigation_simulator.__dict__ = copy.deepcopy(self.default_navigation_simulator.__dict__)
 
 
     def test(self, observation_windows):
@@ -41,17 +41,17 @@ class ObjectiveFunctions():
         mean_cost = np.mean(costs)
         return mean_cost
 
+
     def station_keeping_cost(self, observation_windows):
 
         cost_list = []
         for run in range(self.num_runs):
 
-            # tracemalloc.start()
+            tracemalloc.start()
 
             print(f"Run {run+1} of {self.num_runs}, seed {run}")
 
             navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=run)
-            # navigation_results = navigation_output.navigation_results
             navigation_simulator = navigation_output.navigation_simulator
 
             delta_v_dict = navigation_simulator.delta_v_dict
@@ -61,16 +61,14 @@ class ObjectiveFunctions():
 
             cost_list.append(delta_v)
 
-            self.reset_navigation_simulator()
+            # navigation_simulator.reset_attributes()
 
-            # del navigation_output, navigation_results, navigation_simulator
-
-            # snapshot = tracemalloc.take_snapshot()
-            # top_stats = snapshot.statistics('lineno')
-            # for stat in top_stats[:10]:
-            #     print(stat)
-            # total_memory = sum(stat.size for stat in top_stats)
-            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+            snapshot = tracemalloc.take_snapshot()
+            top_stats = snapshot.statistics('lineno')
+            for stat in top_stats[:10]:
+                print(stat)
+            total_memory = sum(stat.size for stat in top_stats)
+            print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
         total_cost = np.mean(cost_list)
 
@@ -93,6 +91,6 @@ class ObjectiveFunctions():
 
             beta_aves.append(beta_ave)
 
-        self.reset_navigation_simulator()
+        # self.reset_navigation_simulator()
 
         return beta_aves[0]

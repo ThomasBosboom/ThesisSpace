@@ -393,10 +393,13 @@ def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folde
 
     if custom_sub_folder_name is None:
         sub_folder_name = inspect.currentframe().f_back.f_code.co_name
+
     else:
         sub_folder_name = custom_sub_folder_name
+        print(sub_folder_name)
 
     sub_folder = os.path.join(dict_folder, sub_folder_name)
+    print(sub_folder)
     if not os.path.exists(sub_folder):
         os.makedirs(sub_folder, exist_ok=True)
 
