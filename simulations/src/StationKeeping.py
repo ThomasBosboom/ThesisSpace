@@ -10,9 +10,7 @@ for _ in range(2):
     sys.path.append(file_directory)
 
 # Own
-from tests import utils
 import reference_data, Interpolator
-
 
 class StationKeeping:
 

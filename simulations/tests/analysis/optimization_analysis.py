@@ -24,7 +24,7 @@ from src import NavigationSimulator, ObjectiveFunctions
 from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
-run_optimization = True
+run_optimization = False
 if __name__ == "__main__":
 
     # tracemalloc.start()
@@ -34,10 +34,11 @@ if __name__ == "__main__":
         run_optimization_version=True
     )
 
+    num_runs = 5
     objective_functions = ObjectiveFunctions.ObjectiveFunctions(
         navigation_simulator,
         evaluation_threshold=14,
-        num_runs=5
+        num_runs=num_runs
     )
 
     optimization_model = OptimizationModel.OptimizationModel(
@@ -53,7 +54,7 @@ if __name__ == "__main__":
     )
 
     if not run_optimization:
-        current_time = str(202406011440)
+        current_time = str(202406112013)
 
     else:
 
@@ -84,7 +85,7 @@ if __name__ == "__main__":
     process_optimization_results.plot_iteration_history()
     process_optimization_results.plot_optimization_result_comparison(
         show_observation_window_settings=False,
-        num_runs=2)
+        num_runs=num_runs)
 
     plt.show()
 

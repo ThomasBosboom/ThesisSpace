@@ -63,7 +63,6 @@ class NavigationSimulator(NavigationSimulatorBase):
     # @profile
     def perform_navigation(self, observation_windows, seed=0):
 
-        # tracemalloc.start()
         self.seed = seed
         rng = np.random.default_rng(seed=self.seed)
 
@@ -182,7 +181,6 @@ class NavigationSimulator(NavigationSimulatorBase):
                     self.maximum_iterations = self.maximum_iterations_first_arc
 
                 estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self))
-                # print("Inputs EstimationModel: ", vars(estimation_model))
                 estimation_model_result = estimation_model.get_estimation_results()
                 estimation_output = estimation_model_result.estimation_output
                 parameter_history = estimation_output.parameter_history
@@ -306,6 +304,8 @@ class NavigationSimulator(NavigationSimulatorBase):
                 navigation_arc += 1
             else:
                 break
+
+
 # full_state_history_final_dict, self.full_state_transition_matrix_history_estimated
 
         if self.run_optimization_version:
@@ -355,6 +355,7 @@ if __name__ == "__main__":
     observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
 
     tracemalloc.start()
+    snapshot1 = tracemalloc.take_snapshot()
     cost_list = []
     for i in range(2):
         navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
@@ -367,8 +368,15 @@ if __name__ == "__main__":
 
         cost_list.append(delta_v)
 
-        snapshot = tracemalloc.take_snapshot()
-        top_stats = snapshot.statistics('lineno')
+
+
+        # Take another snapshot after the function call
+        snapshot2 = tracemalloc.take_snapshot()
+
+        # Compare the two snapshots
+        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+
+        print("[ Top 10 differences ]")
         for stat in top_stats[:10]:
             print(stat)
         total_memory = sum(stat.size for stat in top_stats)
