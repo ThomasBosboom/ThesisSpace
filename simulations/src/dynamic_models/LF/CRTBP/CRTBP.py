@@ -15,7 +15,6 @@ parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(os.path.dirname(parent_dir))
 
 # Own
-import reference_data
 from DynamicModelBase import DynamicModelBase
 
 

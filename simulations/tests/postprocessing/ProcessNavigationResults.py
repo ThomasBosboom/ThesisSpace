@@ -927,7 +927,7 @@ class PlotSingleNavigationResults():
         plt.colorbar(im_start)
         plt.colorbar(im_end)
 
-        fig.suptitle(f"State correlations for estimation, example arc of {self.navigation_simulator.estimation_arc_durations[0]} days")
+        fig.suptitle(f"State correlations for estimation, example arc of {np.round(self.navigation_simulator.estimation_arc_durations[0], 1)} days")
         fig.tight_layout()
 
         # plt.show()
@@ -1281,114 +1281,286 @@ class PlotMultipleNavigationResults():
     def plot_maneuvre_costs_bar_chart(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
              legend=True, x_labels=True, label_fontsize=8,
              colors=None, barlabel_offset=1,
-             bar_labeler=lambda k, i, s: str(round(s, 3))):
+             bar_labeler=lambda k, i, s: str(round(s, 3)), maneuvre_cost_only=True):
 
         self.save_figure = save_figure
 
         fig, ax = plt.subplots(figsize=(10, 4))
+        rows=1
+        if not maneuvre_cost_only:
+            rows = 3
+            fig, ax = plt.subplots(rows, 1, figsize=(10, 3*rows), sharex=False)
+        if rows==1:
+            ax = np.array([ax])
+        ax = ax.flatten()
 
-        for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
+        for plot_index in range(rows):
+            for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
 
-            data = {}
-            for window_type in self.navigation_outputs.keys():
+                data = {}
+                for window_type in self.navigation_outputs.keys():
 
-                objective_value_results_per_window_case = []
-                for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
+                    objective_value_results_per_window_case = []
+                    for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
 
-                    objective_values = []
-                    delta_v_per_skm_list = []
-                    for run, navigation_output in navigation_output_list.items():
+                        objective_values = []
+                        delta_v_per_skm_list = []
+                        for run, navigation_output in navigation_output_list.items():
 
-                        # print(f"Results for {window_type} window_case {window_case} run {run}:")
+                            # Extracting the relevant objects
+                            navigation_simulator = navigation_output.navigation_simulator
 
-                        # Extracting the relevant objects
-                        # navigation_results = navigation_output.navigation_results
-                        navigation_simulator = navigation_output.navigation_simulator
+                            # Extracting the relevant results from objects
+                            delta_v_dict = navigation_simulator.delta_v_dict
+                            delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+                            delta_v_history = np.stack(list(delta_v_dict.values()))
+                            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
+                            # delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
 
-                        # Extracting the relevant results from objects
-                        delta_v_dict = navigation_simulator.delta_v_dict
-                        delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-                        delta_v_history = np.stack(list(delta_v_dict.values()))
-                        delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
-                        delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
+                            # delta_v_per_skm_list.append(delta_v_per_skm.tolist())
+                            objective_values.append(delta_v)
 
-                        delta_v_per_skm_list.append(delta_v_per_skm.tolist())
-                        objective_values.append(delta_v)
+                            # Extracting orbit determination errors
+                            # full_state_history_truth_history = np.stack(list(navigation_simulator.full_state_history_truth_dict.values()))
+                            # full_state_history_final_dict = np.stack(list(navigation_simulator.full_state_history_final_dict.values()))
+                            # full_state_history_estimated_history = np.stack(list(navigation_simulator.full_state_history_estimated_dict.values()))
 
-                        # print("Objective: ", delta_v_per_skm, delta_v)
+                            # Function to find the closest key
+                            def get_closest_key_value(data, specific_value):
+                                closest_key = min(data.keys(), key=lambda k: abs(k - specific_value))
+                                return data[closest_key]
 
-                    objective_value_results_per_window_case.append((len(objective_values),
-                                                                min(objective_values),
-                                                                max(objective_values),
-                                                                np.mean(objective_values),
-                                                                np.std(objective_values),
-                                                                objective_values,
-                                                                delta_v_per_skm_list))
+                            for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
+                                batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
+                                estimation_model_result = navigation_simulator.estimation_arc_results_dict[batch_index]
+                                estimation_output = estimation_model_result.estimation_output
+                                best_iteration = estimation_output.best_iteration
+                                parameter_history = estimation_output.parameter_history
+                                estimate = parameter_history[:, best_iteration]
+                                propagated_estimate = get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_start_time)
+                                estimation_error_start = estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_start_time)
+                                estimation_error_end = propagated_estimate - get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_end_time)
 
-                data[window_type] = objective_value_results_per_window_case
+                                if batch_index==0:
+                                    if plot_index==1:
+                                        objective_values.append(np.linalg.norm(estimation_error_start[6:9]))
+                                    if plot_index==2:
+                                        objective_values.append(np.linalg.norm(estimation_error_end[6:9]))
 
-            std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
-            data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+                        objective_value_results_per_window_case.append((len(objective_values),
+                                                                    min(objective_values),
+                                                                    max(objective_values),
+                                                                    np.mean(objective_values),
+                                                                    np.std(objective_values),
+                                                                    objective_values,
+                                                                    # delta_v_per_skm_list
+                                                                    ))
 
-            sorted_data = list(data.items())
-            sorted_k, sorted_v  = zip(*sorted_data)
-            max_n_bars = max(len(v) for v in data.values())
-            group_centers = np.cumsum([max_n_bars
-                                    for _ in sorted_data]) - (max_n_bars / 2)
-            bar_offset = (1 - bar_stretch) / 2
-            bars = defaultdict(list)
+                    data[window_type] = objective_value_results_per_window_case
 
-            if colors is None:
-                # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
-                colors = {g_name: self.color_cycle[i]
-                        for i, (g_name, values) in enumerate(data.items())}
+                std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
+                data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
 
-            ax.grid(alpha=0.5)
-            ax.set_xticks(group_centers)
-            ax.set_xlabel("Tracking window scenario")
-            ax.set_ylabel(r'||$\Delta V$|| [m/s]')
-            ax.set_title(title)
+                sorted_data = list(data.items())
+                sorted_k, sorted_v  = zip(*sorted_data)
+                max_n_bars = max(len(v) for v in data.values())
+                group_centers = np.cumsum([max_n_bars
+                                        for _ in sorted_data]) - (max_n_bars / 2)
+                bar_offset = (1 - bar_stretch) / 2
+                bars = defaultdict(list)
 
-            for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
-                                                                group_centers)):
+                if colors is None:
+                    # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+                    colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
+                            for i, (g_name, values) in enumerate(data.items())}
 
-                n_bars = len(vals)
-                group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
-                for val_i, val in enumerate(vals):
+                print(plot_index)
+                ax[plot_index].grid(alpha=0.5)
+                ax[plot_index].set_xticks(group_centers)
+                ax[plot_index].set_xlabel("Tracking window scenario")
+                ax[plot_index].set_ylabel(r'||$\Delta V$|| [m/s]')
+                ax[plot_index].set_title(title)
 
-                    if threshold_index == 0:
-                        bar = ax.bar(group_beg + val_i + bar_offset,
-                                    height=val, width=bar_stretch,
-                                    color=colors[g_name],
-                                    yerr=std_data[g_name][val_i],
-                                    capsize=4)[0]
+                for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
+                                                                    group_centers)):
 
-                    else:
-                        bar = ax.bar(group_beg + val_i + bar_offset,
-                                    height=val, width=0.8,
-                                    color="white", hatch='/', edgecolor='black', alpha=0.6,
-                                    yerr=std_data[g_name][val_i],
-                                    label=f"After {evaluation_threshold} days" if g_i == 0 else None,
-                                    capsize=4)[0]
+                    n_bars = len(vals)
+                    group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
+                    for val_i, val in enumerate(vals):
 
-                    bars[g_name].append(bar)
-                    if bar_labeler is not None:
-                        x_pos = bar.get_x() + (bar.get_width() / 2.0)
-                        y_pos = val + barlabel_offset
-                        barlbl = bar_labeler(g_name, val_i, val)
-                        ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
-                                fontsize=label_fontsize)
+                        if threshold_index == 0:
+                            bar = ax[plot_index].bar(group_beg + val_i + bar_offset,
+                                        height=val, width=bar_stretch,
+                                        color=colors[g_name],
+                                        yerr=std_data[g_name][val_i],
+                                        capsize=4)[0]
 
-        if legend:
-            ax.legend(loc='upper right', fontsize="small")
+                        else:
+                            bar = ax[plot_index].bar(group_beg + val_i + bar_offset,
+                                        height=val, width=0.8,
+                                        color="white", hatch='/', edgecolor='black', alpha=0.6,
+                                        yerr=std_data[g_name][val_i],
+                                        label=f"After {evaluation_threshold} days" if g_i == 0 else None,
+                                        capsize=4)[0]
 
-        if x_labels:
-            ax.set_xticklabels(sorted_k)
-        else:
-            ax.set_xticklabels()
+                        bars[g_name].append(bar)
+                        if bar_labeler is not None:
+                            x_pos = bar.get_x() + (bar.get_width() / 2.0)
+                            y_pos = val + barlabel_offset
+                            barlbl = bar_labeler(g_name, val_i, val)
+                            ax[plot_index].text(x_pos, y_pos, barlbl, ha="center", va="bottom",
+                                    fontsize=label_fontsize)
+
+            if legend:
+                ax[plot_index].legend(loc='upper right', fontsize="small")
+
+            if x_labels:
+                ax[plot_index].set_xticklabels(sorted_k)
+            else:
+                ax[plot_index].set_xticklabels()
 
         plt.tight_layout()
 
         if self.save_figure:
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    # def plot_maneuvre_costs_bar_chart(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
+    #          legend=True, x_labels=True, label_fontsize=8,
+    #          colors=None, barlabel_offset=1,
+    #          bar_labeler=lambda k, i, s: str(round(s, 3))):
+
+    #     self.save_figure = save_figure
+
+    #     fig, ax = plt.subplots(figsize=(10, 4))
+
+    #     for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
+
+    #         data = {}
+    #         for window_type in self.navigation_outputs.keys():
+
+    #             objective_value_results_per_window_case = []
+    #             for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
+
+    #                 objective_values = []
+    #                 delta_v_per_skm_list = []
+    #                 for run, navigation_output in navigation_output_list.items():
+
+    #                     # print(f"Results for {window_type} window_case {window_case} run {run}:")
+
+    #                     # Extracting the relevant objects
+    #                     # navigation_results = navigation_output.navigation_results
+    #                     navigation_simulator = navigation_output.navigation_simulator
+
+    #                     # Extracting the relevant results from objects
+    #                     delta_v_dict = navigation_simulator.delta_v_dict
+    #                     delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+    #                     delta_v_history = np.stack(list(delta_v_dict.values()))
+    #                     delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
+    #                     delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
+
+    #                     delta_v_per_skm_list.append(delta_v_per_skm.tolist())
+    #                     objective_values.append(delta_v)
+
+    #                     # print("Objective: ", delta_v_per_skm, delta_v)
+
+    #                 objective_value_results_per_window_case.append((len(objective_values),
+    #                                                             min(objective_values),
+    #                                                             max(objective_values),
+    #                                                             np.mean(objective_values),
+    #                                                             np.std(objective_values),
+    #                                                             objective_values,
+    #                                                             delta_v_per_skm_list))
+
+    #             data[window_type] = objective_value_results_per_window_case
+
+    #         std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
+    #         data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+
+    #         sorted_data = list(data.items())
+    #         sorted_k, sorted_v  = zip(*sorted_data)
+    #         max_n_bars = max(len(v) for v in data.values())
+    #         group_centers = np.cumsum([max_n_bars
+    #                                 for _ in sorted_data]) - (max_n_bars / 2)
+    #         bar_offset = (1 - bar_stretch) / 2
+    #         bars = defaultdict(list)
+
+    #         if colors is None:
+    #             # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    #             colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
+    #                     for i, (g_name, values) in enumerate(data.items())}
+
+    #         ax.grid(alpha=0.5)
+    #         ax.set_xticks(group_centers)
+    #         ax.set_xlabel("Tracking window scenario")
+    #         ax.set_ylabel(r'||$\Delta V$|| [m/s]')
+    #         ax.set_title(title)
+
+    #         for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
+    #                                                             group_centers)):
+
+    #             n_bars = len(vals)
+    #             group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
+    #             for val_i, val in enumerate(vals):
+
+    #                 if threshold_index == 0:
+    #                     bar = ax.bar(group_beg + val_i + bar_offset,
+    #                                 height=val, width=bar_stretch,
+    #                                 color=colors[g_name],
+    #                                 yerr=std_data[g_name][val_i],
+    #                                 capsize=4)[0]
+
+    #                 else:
+    #                     bar = ax.bar(group_beg + val_i + bar_offset,
+    #                                 height=val, width=0.8,
+    #                                 color="white", hatch='/', edgecolor='black', alpha=0.6,
+    #                                 yerr=std_data[g_name][val_i],
+    #                                 label=f"After {evaluation_threshold} days" if g_i == 0 else None,
+    #                                 capsize=4)[0]
+
+    #                 bars[g_name].append(bar)
+    #                 if bar_labeler is not None:
+    #                     x_pos = bar.get_x() + (bar.get_width() / 2.0)
+    #                     y_pos = val + barlabel_offset
+    #                     barlbl = bar_labeler(g_name, val_i, val)
+    #                     ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
+    #                             fontsize=label_fontsize)
+
+    #     if legend:
+    #         ax.legend(loc='upper right', fontsize="small")
+
+    #     if x_labels:
+    #         ax.set_xticklabels(sorted_k)
+    #     else:
+    #         ax.set_xticklabels()
+
+    #     plt.tight_layout()
+
+    #     if self.save_figure:
+    #         utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
 

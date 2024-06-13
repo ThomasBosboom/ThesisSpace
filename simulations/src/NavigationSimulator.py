@@ -14,7 +14,7 @@ for _ in range(2):
 
 # Own
 from tests import utils
-import reference_data, Interpolator, StationKeeping, EstimationModel
+import ReferenceData, Interpolator, StationKeeping, EstimationModel
 from NavigationSimulatorBase import NavigationSimulatorBase
 from tudatpy.kernel import constants
 
@@ -28,6 +28,13 @@ class NavigationSimulator(NavigationSimulatorBase):
             if hasattr(self, key):
                 setattr(self, key, value)
                 self._initial_attrs.update({key: value})
+
+        self.interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size)
+        self.reference_data = ReferenceData.ReferenceData(step_size=self.step_size)
+
+        self._initial_attrs = {**self.__dict__}
+
+        # print(self.step_size)
 
 
     def get_Gamma(self, delta_t):
@@ -55,13 +62,20 @@ class NavigationSimulator(NavigationSimulatorBase):
 
 
     def reset_attributes(self):
-        # Reset attributes to initial state defined in __init__
+
         for attr, value in self._initial_attrs.items():
             setattr(self, attr, value)
 
 
     # @profile
+
     def perform_navigation(self, observation_windows, seed=0):
+
+        # tracemalloc.start()
+
+        # snapshot1 = tracemalloc.take_snapshot()
+
+        print("step size here: ", self.step_size)
 
         self.seed = seed
         rng = np.random.default_rng(seed=self.seed)
@@ -80,15 +94,15 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.station_keeping_epochs = []
 
         # Managing the time vector to define all arcs
-        batch_start_times = np.array([t[0] for t in self.observation_windows])
+        self.batch_start_times = np.array([t[0] for t in self.observation_windows])
         times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
         times = list(set(times))
         times = sorted(times)
 
+        print(self.delta_v_min)
+
         self.navigation_arc_durations = np.round(np.diff(times), decimal_places)
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), decimal_places)
-
-        interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size)
 
         # print("=========================")
         # print("Start navigation simulation")
@@ -134,10 +148,8 @@ class NavigationSimulator(NavigationSimulatorBase):
             # Obtain the initial state of the whole simulation once
             state_history_reference = list()
             for body in dynamic_model.bodies_to_propagate:
-                state_history_reference.append(reference_data.get_reference_state_history(time, navigation_arc_duration,
-                                                                                          satellite=body,
-                                                                                          step_size=self.step_size,
-                                                                                          get_full_history=True))
+                state_history_reference.append(self.reference_data.get_reference_state_history(
+                    time, navigation_arc_duration, satellite=body, get_full_history=True))
             state_history_reference = np.concatenate(state_history_reference, axis=1)
 
             if navigation_arc == 0:
@@ -148,14 +160,13 @@ class NavigationSimulator(NavigationSimulatorBase):
             truth_model.custom_initial_state = self.custom_initial_state_truth
 
             epochs, state_history_estimated, dependent_variables_history_estimated, state_transition_matrix_history_estimated = \
-                interpolator.get_propagation_results(dynamic_model, solve_variational_equations=True)
+                self.interpolator.get_propagation_results(dynamic_model, solve_variational_equations=True)
 
             epochs, state_history_truth, dependent_variables_history_truth = \
-                interpolator.get_propagation_results(truth_model, solve_variational_equations=False)
+                self.interpolator.get_propagation_results(truth_model, solve_variational_equations=False)
 
             if self.propagate_dynamics_linearly:
                 state_history_estimated = state_history_truth + np.dot(state_transition_matrix_history_estimated, self.custom_initial_state-self.custom_initial_state_truth)
-                # print("length: \n", epochs[0], epochs[-1], len(state_history_estimated))
 
             # Save the propagated histories of the uncertainties
             if self.apriori_covariance is not None:
@@ -171,7 +182,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             #### LOOP FOR ESTIMATION ARCS ################################
             ##############################################################
             estimation_arc_activated = False
-            if time in batch_start_times:
+            if time in self.batch_start_times:
 
                 estimation_arc_activated = True
                 estimation_arc_duration = self.estimation_arc_durations[estimation_arc]
@@ -190,7 +201,7 @@ class NavigationSimulator(NavigationSimulatorBase):
 
                 dynamic_model.custom_initial_state = parameter_history[:, best_iteration]
                 epochs_final, state_history_final, dependent_variables_history_final, state_transition_history_matrix_final = \
-                    interpolator.get_propagation_results(dynamic_model, solve_variational_equations=True)
+                    self.interpolator.get_propagation_results(dynamic_model, solve_variational_equations=True)
 
                 if self.propagate_dynamics_linearly:
                     state_history_final = state_history_truth + np.dot(state_transition_history_matrix_final, dynamic_model.custom_initial_state-state_history_truth[0,:])
@@ -227,28 +238,17 @@ class NavigationSimulator(NavigationSimulatorBase):
                 self.apriori_covariance = np.stack(list(propagated_covariance_estimated.values()))[-1]
 
             # Save histories for reading out later
-            self.full_estimation_error_dict.update(dict(zip(epochs, state_history_estimated-state_history_truth)))
             self.full_propagated_covariance_dict.update(propagated_covariance_estimated)
-            self.full_propagated_formal_errors_dict.update(propagated_formal_errors_estimated)
-            self.full_state_history_reference_dict.update(dict(zip(epochs, state_history_reference)))
-            self.full_state_history_truth_dict.update(dict(zip(epochs, state_history_truth)))
-            self.full_state_history_estimated_dict.update(dict(zip(epochs, state_history_estimated)))
-            self.full_dependent_variables_history_estimated.update(dict(zip(epochs, dependent_variables_history_estimated)))
-            self.full_state_transition_matrix_history_estimated.update(dict(zip(epochs, state_transition_matrix_history_estimated)))
-            self.full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_truth-state_history_reference)))
 
-            # self.full_estimation_error_dict = dict()
-            # self.full_reference_state_deviation_dict = dict()
-            # self.full_propagated_covariance_dict = dict()
-            # self.full_propagated_formal_errors_dict = dict()
-            # self.full_state_history_reference_dict = dict()
-            # self.full_state_history_truth_dict = dict()
-            # self.full_state_history_estimated_dict = dict()
-            # self.full_state_history_final_dict = dict()
-            # self.delta_v_dict = dict()
-            # self.full_dependent_variables_history_estimated = dict()
-            # self.full_state_transition_matrix_history_estimated = dict()
-            # self.estimation_arc_results_dict = dict()
+            if not self.run_optimization_version:
+                self.full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_truth-state_history_reference)))
+                self.full_estimation_error_dict.update(dict(zip(epochs, state_history_estimated-state_history_truth)))
+                self.full_propagated_formal_errors_dict.update(propagated_formal_errors_estimated)
+                self.full_state_history_reference_dict.update(dict(zip(epochs, state_history_reference)))
+                self.full_state_history_truth_dict.update(dict(zip(epochs, state_history_truth)))
+                self.full_state_history_estimated_dict.update(dict(zip(epochs, state_history_estimated)))
+                self.full_dependent_variables_history_estimated.update(dict(zip(epochs, dependent_variables_history_estimated)))
+                self.full_state_transition_matrix_history_estimated.update(dict(zip(epochs, state_transition_matrix_history_estimated)))
 
 
             ##############################################################
@@ -266,7 +266,10 @@ class NavigationSimulator(NavigationSimulatorBase):
                                                                             custom_model_list=[self.model_number])
                     dynamic_model_station_keeping = dynamic_model_objects[self.model_type][self.model_name][0]
 
-                    station_keeping = StationKeeping.StationKeeping(dynamic_model_station_keeping, step_size=self.step_size)
+                    station_keeping = StationKeeping.StationKeeping(dynamic_model_station_keeping,
+                                                                    self.reference_data,
+                                                                    self.interpolator,
+                                                                    )
                     delta_v, dispersion = station_keeping.get_corrected_state_vector(cut_off_epoch=params[0],
                                                                                     correction_epoch=params[0],
                                                                                     target_point_epochs=params[1])
@@ -277,7 +280,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                         delta_v_noise_sigma = np.abs(self.station_keeping_error*delta_v)
                         delta_v_noise = rng.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
 
-                        od_update = np.linalg.norm(state_history_estimated[0, 6:9]-state_history_truth[0, 6:9])-np.linalg.norm(self.initial_estimation_error[6:9])
+                        # od_update = np.linalg.norm(state_history_estimated[0, 6:9]-state_history_truth[0, 6:9])-np.linalg.norm(self.initial_estimation_error[6:9])
 
                         if np.linalg.norm(delta_v) >= self.delta_v_min:
                             self.custom_initial_state[9:12] += delta_v
@@ -305,24 +308,38 @@ class NavigationSimulator(NavigationSimulatorBase):
             else:
                 break
 
+            # # Take another snapshot after the function call
+            # snapshot2 = tracemalloc.take_snapshot()
+
+            # # Compare the two snapshots
+            # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+
+            # print("[ Top 5 differences ]")
+            # for stat in top_stats[:5]:
+            #     print(stat)
+            # total_memory = sum(stat.size for stat in top_stats)
+            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
 # full_state_history_final_dict, self.full_state_transition_matrix_history_estimated
 
-        if self.run_optimization_version:
+        # if self.run_optimization_version:
 
-            required_attributes = {
-                # "full_propagated_covariance_dict": self.full_propagated_covariance_dict,
-                "delta_v_dict": self.delta_v_dict
-            }
-            return NavigationOutput(
-                self,
-                **required_attributes
-            )
+        #     required_attributes = {
+        #         # "full_propagated_covariance_dict": self.full_propagated_covariance_dict,
+        #         "delta_v_dict": self.delta_v_dict,
+        #         "reference_data": self.reference_data,
+        #         "interpolator": self.interpolator
+        #     }
+        #     return NavigationOutput(
+        #         self,
+        #         **required_attributes
+        #     )
 
-        else:
-            return NavigationOutput(self)
+        # else:
+        #     return NavigationOutput(self)
 
-        return navigation_output
+        return NavigationOutput(self)
+
 
 
 class NavigationOutput():
@@ -332,33 +349,62 @@ class NavigationOutput():
         self.navigation_simulator = navigation_simulator
         self.navigation_simulator.reset_attributes()
 
-        if required_attributes:
+        # if required_attributes:
 
-            # Reset the attributes with keep only the relevant dictionaries for the optimization routine
-            _initial_attrs = self.navigation_simulator._initial_attrs.copy()
-            remaining_dict = {"_initial_attrs": _initial_attrs}
-            for key, value in vars(self.navigation_simulator).items():
-                if key in _initial_attrs:
-                    remaining_dict[key] = value
-            self.navigation_simulator.__dict__.clear()
-            for key, value in remaining_dict.items():
-                setattr(self.navigation_simulator, key, value)
-            for key, value in required_attributes.items():
-                setattr(self.navigation_simulator, key, value)
+        #     # Reset the attributes with keep only the relevant dictionaries for the optimization routine
+        #     _initial_attrs = self.navigation_simulator._initial_attrs.copy()
+        #     remaining_dict = {"_initial_attrs": _initial_attrs}
+        #     for key, value in vars(self.navigation_simulator).items():
+        #         if key in _initial_attrs:
+        #             remaining_dict[key] = value
+        #     self.navigation_simulator.__dict__.clear()
+        #     for key, value in remaining_dict.items():
+        #         setattr(self.navigation_simulator, key, value)
+        #     for key, value in required_attributes.items():
+        #         setattr(self.navigation_simulator, key, value)
 
 
 
 if __name__ == "__main__":
 
-    navigation_simulator = NavigationSimulator(run_optimization_version=True)
+    # tracemalloc.start()
+    # snapshot1 = tracemalloc.take_snapshot()
+    navigation_simulator = NavigationSimulator(run_optimization_version=True, step_size=0.01)
+    #     # Take another snapshot after the function call
+    # snapshot2 = tracemalloc.take_snapshot()
 
-    observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
+    # # Compare the two snapshots
+    # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
 
-    tracemalloc.start()
-    snapshot1 = tracemalloc.take_snapshot()
+    # print("[ Top 5 differences ]")
+    # for stat in top_stats[:5]:
+    #     print(stat)
+    # total_memory = sum(stat.size for stat in top_stats)
+    # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+
+    # observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
+    observation_windows = [(60390, 60391.0), (60394.0, 60395.0)]
+
+    # tracemalloc.start()
     cost_list = []
-    for i in range(2):
+    for i in [0, 1]:
+
+        tracemalloc.start()
+        snapshot1 = tracemalloc.take_snapshot()
+
         navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
+
+        # # Take another snapshot after the function call
+        snapshot2 = tracemalloc.take_snapshot()
+        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+
+        print("[ Top 5 differences ]")
+        for stat in top_stats[:5]:
+            print(stat)
+        total_memory = sum(stat.size for stat in top_stats)
+        print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+
+
         navigation_simulator = navigation_output.navigation_simulator
 
         delta_v_dict = navigation_simulator.delta_v_dict
@@ -368,16 +414,14 @@ if __name__ == "__main__":
 
         cost_list.append(delta_v)
 
+        #     # Take another snapshot after the function call
+        # snapshot2 = tracemalloc.take_snapshot()
 
+        # # Compare the two snapshots
+        # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
 
-        # Take another snapshot after the function call
-        snapshot2 = tracemalloc.take_snapshot()
-
-        # Compare the two snapshots
-        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-
-        print("[ Top 10 differences ]")
-        for stat in top_stats[:10]:
-            print(stat)
-        total_memory = sum(stat.size for stat in top_stats)
-        print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+        # print("[ Top 5 differences ]")
+        # for stat in top_stats[:5]:
+        #     print(stat)
+        # total_memory = sum(stat.size for stat in top_stats)
+        # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")

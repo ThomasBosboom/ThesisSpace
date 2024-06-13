@@ -102,13 +102,9 @@ class EstimationModel:
         #     observation.n_way_range_type)
 
         # Add noise levels to observations
-        # seed = int(self.dynamic_model.simulation_start_epoch)
-        save_noise = []
         rng = np.random.default_rng(seed=self.seed)
-        # print("seed used for estimation: ", self.seed, self.margin, self.observation_times_range[0])
         def range_noise_function(time):
             noise = rng.normal(loc=0, scale=self.noise, size=1)
-            save_noise.append(noise)
             return noise
 
         observation.add_noise_function_to_observable(

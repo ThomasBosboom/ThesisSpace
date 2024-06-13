@@ -12,11 +12,13 @@ for _ in range(4):
     file_directory = os.path.dirname(file_directory)
     sys.path.append(file_directory)
 
-from src import reference_data
-
+from src import ReferenceData
 
 # Load spice kernels.
 spice.load_standard_kernels()
+
+# Load reference history to obtain trajectory of lumio
+reference_data = ReferenceData.ReferenceData()
 
 class DynamicModelBase:
 
@@ -89,6 +91,5 @@ class DynamicModelBase:
             self.simulation_start_epoch
         )
 
-        # print(initial_state_moon_centered + moon_state_earth_centered)
         return initial_state_moon_centered + moon_state_earth_centered
 

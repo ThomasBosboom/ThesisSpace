@@ -24,22 +24,32 @@ from src import NavigationSimulator, ObjectiveFunctions
 from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
-run_optimization = False
+run_optimization = True
 if __name__ == "__main__":
 
     # tracemalloc.start()
 
+    navigation_simulator_settings = {
+        "show_corrections_in_terminal": True,
+        "run_optimization_version": True,
+        "step_size": 0.05,
+        "delta_v_min": 0.00,
+    }
     navigation_simulator = NavigationSimulator.NavigationSimulator(
-        show_corrections_in_terminal=True,
-        run_optimization_version=True
+        **navigation_simulator_settings
     )
 
-    num_runs = 5
+
+    objective_functions_settings = {
+        "evaluation_threshold": 14,
+        "num_runs": 1,
+        "seed": 0
+    }
     objective_functions = ObjectiveFunctions.ObjectiveFunctions(
         navigation_simulator,
-        evaluation_threshold=14,
-        num_runs=num_runs
+        **objective_functions_settings
     )
+
 
     optimization_model = OptimizationModel.OptimizationModel(
         json_settings={"save_json": True, "current_time": current_time, "file_name": file_name},
@@ -50,7 +60,18 @@ if __name__ == "__main__":
         bounds=(-0.9, 0.9),
         optimization_method="Nelder-Mead",
         design_vector_type="arc_lengths",
-        initial_simplex_perturbation = -0.3
+        initial_simplex_perturbation = -0.3,
+        **navigation_simulator_settings,
+        **objective_functions_settings
+        # custom_initial_design_vector= [
+        #             0.9142857142857144,
+        #             0.9142857142857144,
+        #             0.9142857142857144,
+        #             1.3,
+        #             0.9142857142857144,
+        #             0.9142857142857144,
+        #             0.9142857142857144
+        #         ]
     )
 
     if not run_optimization:
@@ -85,7 +106,7 @@ if __name__ == "__main__":
     process_optimization_results.plot_iteration_history()
     process_optimization_results.plot_optimization_result_comparison(
         show_observation_window_settings=False,
-        num_runs=num_runs)
+    )
 
     plt.show()
 

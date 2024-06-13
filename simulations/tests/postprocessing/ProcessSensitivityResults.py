@@ -80,6 +80,18 @@ class PlotSensitivityResults():
     def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True):
 
         self.save_figure = save_figure
+        units = {
+            "arc_duration": "[days]",
+            "arc_interval": "[days]",
+            "mission_start_epoch": "[MJD]",
+            "initial_estimation_error": "[m]/[m/s]",
+            "orbit_insertion_error": "[m]/[m/s]",
+            "observation_interval": "[s]",
+            "noise": "[m]",
+            "target_point_epochs": "[days]",
+            "delta_v_min": "[m/s]",
+            "station_keeping_error": "[%]"
+        }
 
         nrows = len(list(sensitivity_settings.items()))
         fig1, axs1 = plt.subplots(nrows, 1, figsize=(7, min(3*nrows, 10)), sharex=True)
@@ -244,8 +256,20 @@ class PlotSensitivityResults():
                         label=f"After {evaluation_threshold} days" if case_index==0 else None,
                         )
 
+                    ylabel = self.convert_key(sensitivity_type)
+                    if sensitivity_type == "initial_estimation_error":
+                        ylabel = "Estimation Error"
+                    if sensitivity_type == "orbit_inseration_error":
+                        ylabel = "Insertation Error"
+                    if sensitivity_type == "observation_interval":
+                        ylabel = "Obs. Interval"
+                    if sensitivity_type == "target_point_epochs":
+                            ylabel = "Target Points"
+                    if sensitivity_type == "station_keeping_error":
+                            ylabel = "SKM Error"
+
                     axs1[sensitivity_type_index].grid(alpha=0.5, linestyle='--', zorder=0)
-                    axs1[sensitivity_type_index].set_ylabel(self.convert_key(sensitivity_type))
+                    axs1[sensitivity_type_index].set_ylabel(f"{ylabel} \n{units[sensitivity_type]}")
                     axs1[-1].set_xlabel(r"Total $||\Delta V||$ [m/s]", fontsize="small")
                     # axs1[-1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), fontsize="small")
 

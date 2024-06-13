@@ -45,13 +45,14 @@ class ObjectiveFunctions():
     def station_keeping_cost(self, observation_windows):
 
         cost_list = []
-        for run in range(self.num_runs):
+        for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
 
             tracemalloc.start()
+            snapshot1 = tracemalloc.take_snapshot()
 
-            print(f"Run {run+1} of {self.num_runs}, seed {run}")
+            print(f"Run {run+1} of {self.num_runs}, seed {seed}")
 
-            navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=run)
+            navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=seed)
             navigation_simulator = navigation_output.navigation_simulator
 
             delta_v_dict = navigation_simulator.delta_v_dict
@@ -61,12 +62,13 @@ class ObjectiveFunctions():
 
             cost_list.append(delta_v)
 
-            # navigation_simulator.reset_attributes()
+            # # Take another snapshot after the function call
+            snapshot2 = tracemalloc.take_snapshot()
+            top_stats = snapshot2.compare_to(snapshot1, 'lineno')
 
-            snapshot = tracemalloc.take_snapshot()
-            top_stats = snapshot.statistics('lineno')
-            for stat in top_stats[:10]:
-                print(stat)
+            # print("[ Top 5 differences ]")
+            # for stat in top_stats[:5]:
+            #     print(stat)
             total_memory = sum(stat.size for stat in top_stats)
             print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 

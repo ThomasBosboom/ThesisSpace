@@ -35,15 +35,11 @@ default_window_inputs = {
 }
 
 combined_sensitivity_settings = {
-    # "sensitivity_settings_windows": {
-    #     "arc_duration": [1.0],
-    #     "arc_interval": [1.0],
-    # },
-    # "sensitivity_settings_windows": {
-    #     "arc_duration": [0.1, 0.5, 1.0, 2.0],
-    #     "arc_interval": [1.0, 2.0, 3.0, 4.0],
-    #     "mission_start_epoch": [60390, 60395, 60400, 60405],
-    # },
+    "sensitivity_settings_windows": {
+        "arc_duration": [0.1, 0.5, 1.0, 2.0],
+        "arc_interval": [1.0, 2.0, 3.0, 4.0],
+        "mission_start_epoch": [60390, 60395, 60400, 60405],
+    },
     "sensitivity_settings_auxiliary": {
         "initial_estimation_error": [
             np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/100,
@@ -63,6 +59,27 @@ combined_sensitivity_settings = {
         "station_keeping_error": [0.00, 0.01, 0.05, 0.1],
     }
 }
+
+# combined_sensitivity_settings = {
+#     "sensitivity_settings_windows": {
+#         "arc_duration": [0.1],
+#         "arc_interval": [1.0],
+#         "mission_start_epoch": [60390],
+#     },
+#     "sensitivity_settings_auxiliary": {
+#         "initial_estimation_error": [
+#             np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+#             ],
+#         "orbit_insertion_error": [
+#             np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
+#             ],
+#         "observation_interval": [100],
+#         "noise": [0.1],
+#         "target_point_epochs": [[2]],
+#         "delta_v_min": [0.00],
+#         "station_keeping_error": [0.00],
+#     }
+# }
 
 auxilary_settings = {
     "show_corrections_in_terminal": True
@@ -89,7 +106,4 @@ for sensitivity_settings in combined_sensitivity_settings.values():
     )
     print("Plotting done...")
 
-plt.show()
-
-
-
+    plt.show()

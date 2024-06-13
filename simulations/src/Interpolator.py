@@ -8,7 +8,7 @@ class Interpolator:
 
     def __init__(self, step_size=0.005, kind='cubic', epoch_in_MJD=True):
 
-        self.step_size = step_size*constants.JULIAN_DAY
+        self.step_size = step_size
         self.kind = kind
         self.epoch_in_MJD = epoch_in_MJD
 
@@ -32,6 +32,8 @@ class Interpolator:
             if hasattr(dynamic_model, key):
                 setattr(dynamic_model, key, value)
 
+        step_size = self.step_size*constants.JULIAN_DAY
+
         # Get simulation results from each dynamic model
         if solve_variational_equations:
             dynamics_simulator, variational_equations_solver = dynamic_model.get_propagation_simulator(solve_variational_equations=solve_variational_equations)
@@ -42,7 +44,8 @@ class Interpolator:
         simulation_end_epoch = dynamic_model.simulation_end_epoch
 
         # Define updated time vector that is the same for all dynamic models irrespective of their own time vector
-        interp_epochs = np.arange(simulation_start_epoch, simulation_end_epoch+self.step_size, self.step_size)
+        interp_epochs = np.arange(simulation_start_epoch, simulation_end_epoch+step_size, step_size)
+        # print("Interpolator: ", simulation_start_epoch, simulation_end_epoch+step_size, len(interp_epochs))
 
         if solve_variational_equations:
              # Extract the variational_equations_solver results

@@ -10,10 +10,11 @@ from dynamic_models import TraditionalLowFidelity
 root_dir = Path(__file__).resolve().parent.parent
 reference_folder_path = root_dir / "reference"
 
-
 class ReferenceData():
 
-    def __init__(self, include_attitude=False):
+    def __init__(self, step_size=0.01, include_attitude=False):
+
+        self.step_size = step_size
 
         folder_path = reference_folder_path / "DataLUMIO" / "TextFiles"
         # file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path)]
@@ -50,8 +51,7 @@ class ReferenceData():
 
 
 
-
-    def get_reference_state_history(self, simulation_start_epoch_MJD, propagation_time, custom_dynamic_model=None, step_size=0.001, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
+    def get_reference_state_history(self, simulation_start_epoch_MJD, propagation_time, custom_dynamic_model=None, satellite="LUMIO", body="satellite", interpolation_kind='cubic', get_dict=False, get_epoch_in_array=False, get_full_history=False):
 
         if satellite == "LUMIO":
             state_history = self.state_history_reference_lumio
@@ -81,8 +81,8 @@ class ReferenceData():
         interpolated_state = interp_func(user_start_epoch)
 
         interpolated_states = np.zeros((1,6))
-        epochs = np.arange(user_start_epoch, user_end_epoch+step_size*constants.JULIAN_DAY, step_size*constants.JULIAN_DAY)
-        # print(len(epochs))
+        epochs = np.arange(user_start_epoch, user_end_epoch+self.step_size*constants.JULIAN_DAY, self.step_size*constants.JULIAN_DAY)
+        # print("ReferenceData: ", user_start_epoch, user_end_epoch+self.step_size*constants.JULIAN_DAY, len(epochs))
         i = 0
         for epoch in epochs:
             interpolated_states = np.vstack((interpolated_states, interp_func(epoch)))
@@ -91,8 +91,9 @@ class ReferenceData():
 
         # Create a dictionary with epochs as keys and vectors as values
         data_dict = {epoch: vector for epoch, vector in zip(epochs, interpolated_states) \
-                        if epoch <= user_end_epoch \
-                            and epoch >= user_start_epoch}
+                        # if epoch <= user_end_epoch \
+                        #     and epoch >= user_start_epoch
+                            }
 
         if get_dict == False:
             if get_full_history == True:
@@ -108,16 +109,29 @@ class ReferenceData():
 
 
 
-import tracemalloc
+
 if __name__ == '__main__':
 
-
+    import tracemalloc
 
     tracemalloc.start()
     snapshot1 = tracemalloc.take_snapshot()
+    reference_data = ReferenceData()
+    snapshot2 = tracemalloc.take_snapshot()
+    top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+
+    print("[ Top 10 differences ]")
+    for stat in top_stats[:10]:
+        print(stat)
+    total_memory = sum(stat.size for stat in top_stats)
+    print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+
+    # tracemalloc.start()
+
     for _ in range(4):
 
-        reference_data = ReferenceData()
+        # snapshot1 = tracemalloc.take_snapshot()
+
 
         # Obtain the initial state of the whole simulation once
         state_history_reference = list()
@@ -130,17 +144,17 @@ if __name__ == '__main__':
 
         print(state_history_reference)
 
-        # Take another snapshot after the function call
-        snapshot2 = tracemalloc.take_snapshot()
+        # # Take another snapshot after the function call
+        # snapshot2 = tracemalloc.take_snapshot()
 
-        # Compare the two snapshots
-        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+        # # Compare the two snapshots
+        # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
 
-        print("[ Top 10 differences ]")
-        for stat in top_stats[:10]:
-            print(stat)
-        total_memory = sum(stat.size for stat in top_stats)
-        print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+        # print("[ Top 10 differences ]")
+        # for stat in top_stats[:10]:
+        #     print(stat)
+        # total_memory = sum(stat.size for stat in top_stats)
+        # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
 
 

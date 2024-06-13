@@ -81,14 +81,14 @@ class ProcessOptimizationResults():
         # plt.show()
 
 
-    def plot_optimization_result_comparison(self, show_observation_window_settings=False, num_runs=1):
+    def plot_optimization_result_comparison(self, show_observation_window_settings=False):
 
         observation_windows_settings = {
             "Default": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs),
+                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), self.optimization_results["num_runs"]),
             ],
             "Optimized": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), num_runs)
+                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), self.optimization_results["num_runs"])
             ],
         }
 
@@ -125,26 +125,3 @@ class ProcessOptimizationResults():
                 self.optimization_results,
                 file_name=f"{current_time}_optimization_analysis.tex"
             )
-
-
-if __name__ == "__main__":
-    # Example usage
-    data = {
-        "initial": {
-            "values": [1, 1, 1, 1, 1, 1],
-            "cost": 10
-        },
-        "final": {
-            "values": [2, 5, 1, 5, 2, 6],
-            "cost": 8
-        }
-    }
-
-    # Generate the Overleaf table with custom caption, label, and decimals
-    file_name = "design_vector_table.tex"
-    overleaf_table = save_optimization_results_table(data, caption="Design vector comparison before and after optimization", label="tab:DesignVectorOptimization", file_name=file_name, decimals=4)
-
-    # Print the Overleaf table
-    print(overleaf_table)
-
-

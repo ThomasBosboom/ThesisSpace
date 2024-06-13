@@ -46,6 +46,7 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
                     if package_type == "LF":
                         DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
                     else:
+                        # print("here")
                         DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
 
                     sub_dict[package_name_list[package_name_counter]].extend([DynamicModel])

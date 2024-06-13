@@ -14,7 +14,6 @@ parent_dir = os.path.dirname(parent_dir)
 sys.path.append(parent_dir)
 
 # Own
-import reference_data
 from DynamicModelBase import DynamicModelBase
 class HighFidelityDynamicModel(DynamicModelBase):
 

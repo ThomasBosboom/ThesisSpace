@@ -36,16 +36,20 @@ class OptimizationModel:
         self.best_objective_value = None
         self.latest_objective_value = None
         self.run_counter = 0
+        self.num_runs = 1
+        self.evaluation_threshold = 14
 
         for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
+            # if hasattr(self, key):
+            setattr(self, key, value)
 
         self.options = {'maxiter': self.max_iterations, 'disp': False, "adaptive": True}
 
         for key, value in json_settings.items():
             if json_settings["save_json"]:
                 setattr(self, key, value)
+
+        print(vars(self))
 
 
     def generate_observation_windows(self, design_vector):
@@ -121,14 +125,19 @@ class OptimizationModel:
     def optimize(self, objective_function):
 
         def constraints(design_vector):
-            pass
+
+            observation_windows = self.generate_observation_windows(design_vector)
+            if observation_windows[-1][-1]-observation_windows[0][0] > self.duration:
+                return np.inf
+            else:
+                return 0
 
 
         def objective(design_vector):
 
             # tracemalloc.start()
             observation_windows = self.generate_observation_windows(design_vector)
-            objective_value = objective_function(observation_windows)
+            objective_value = objective_function(observation_windows) + constraints(design_vector)
 
             # Initialize initial objective value
             if self.initial_objective_value is None:
