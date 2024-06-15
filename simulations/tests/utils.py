@@ -17,7 +17,7 @@ from src import Interpolator, EstimationModel
 parent_dir = os.path.dirname(os.path.dirname(__file__))
 
 
-def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_model_list=None, custom_initial_state=None, custom_propagation_time=None):
+def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, custom_model_dict=None, get_only_first=False, custom_model_list=None, custom_initial_state=None, custom_propagation_time=None, **kwargs):
 
     if custom_model_dict is None:
         custom_model_dict = {"LF": ["CRTBP"], "HF": ["PM", "PMSRP", "SH", "SHSRP"], "FF": ["TRUTH"]}
@@ -44,10 +44,10 @@ def get_dynamic_model_objects(simulation_start_epoch_MJD, propagation_time, cust
                     module = __import__(module_path, fromlist=[file_name])
 
                     if package_type == "LF":
-                        DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
+                        DynamicModel = module.LowFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time, **kwargs)
                     else:
                         # print("here")
-                        DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time)
+                        DynamicModel = module.HighFidelityDynamicModel(simulation_start_epoch_MJD, propagation_time, custom_initial_state=custom_initial_state, custom_propagation_time=custom_propagation_time, **kwargs)
 
                     sub_dict[package_name_list[package_name_counter]].extend([DynamicModel])
                     dynamic_model_objects[package_type] = sub_dict

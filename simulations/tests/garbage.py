@@ -545,3 +545,11 @@
 
 
 
+import numpy as np
+
+start = 60390
+end = 60390.91428571429
+num_points = 10
+
+array_with_endpoints = np.linspace(start, end, num_points, endpoint=True)
+print(array_with_endpoints)

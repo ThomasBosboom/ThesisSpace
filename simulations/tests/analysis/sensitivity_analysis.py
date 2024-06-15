@@ -26,7 +26,7 @@ from tests.postprocessing import ProcessNavigationResults, ProcessSensitivityRes
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 5
+num_runs = 10
 default_window_inputs = {
     "duration": 28,
     "arc_interval": 3,
@@ -35,11 +35,11 @@ default_window_inputs = {
 }
 
 combined_sensitivity_settings = {
-    "sensitivity_settings_windows": {
-        "arc_duration": [0.1, 0.5, 1.0, 2.0],
-        "arc_interval": [1.0, 2.0, 3.0, 4.0],
-        "mission_start_epoch": [60390, 60395, 60400, 60405],
-    },
+    # "sensitivity_settings_windows": {
+    #     "arc_duration": [0.1, 0.5, 1.0, 2.0],
+    #     "arc_interval": [1.0, 2.0, 3.0, 4.0],
+    #     "mission_start_epoch": [60390, 60395, 60400, 60405],
+    # },
     "sensitivity_settings_auxiliary": {
         "initial_estimation_error": [
             np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/100,
@@ -62,10 +62,10 @@ combined_sensitivity_settings = {
 
 # combined_sensitivity_settings = {
 #     "sensitivity_settings_windows": {
-#         "arc_duration": [0.1],
+#         # "arc_duration": [0.1],
 #         "arc_interval": [1.0],
 #         "mission_start_epoch": [60390],
-#     },
+#     },}
 #     "sensitivity_settings_auxiliary": {
 #         "initial_estimation_error": [
 #             np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10

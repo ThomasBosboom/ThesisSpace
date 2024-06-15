@@ -45,7 +45,7 @@ class DynamicModelBase:
         self.central_bodies = [self.name_primary, self.name_primary]
         self.bodies_to_create = [self.name_primary, self.name_secondary]
         self.bodies_to_propagate = [self.name_ELO, self.name_LPO]
-        self.bodies_mass = [280, 22.3]
+        self.bodies_mass = [280, 22.8]  # 22.3
         self.bodies_reference_area_radiation = [3.0, 0.41064]
         self.bodies_radiation_pressure_coefficient = [1.8, 1.08]
         self.gravitational_parameter_primary = spice.get_body_gravitational_parameter(self.name_primary)

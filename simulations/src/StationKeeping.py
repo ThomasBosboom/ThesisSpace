@@ -23,6 +23,7 @@ class StationKeeping:
 
     def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch=0):
 
+        print("start stationkeeping")
         # Get the reference orbit states
         reference_state_history = list()
         for body in self.dynamic_model.bodies_to_propagate:
@@ -33,13 +34,16 @@ class StationKeeping:
                                                                                       get_full_history=True))
         reference_state_history = np.concatenate(reference_state_history, axis=1)
 
+
+
+
         # Propagate the results of the dynamic model to generate target points
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
             self.interpolator.get_propagation_results(self.dynamic_model,
                                                 custom_initial_state=self.dynamic_model.custom_initial_state,
                                                 custom_propagation_time=self.dynamic_model.propagation_time)
 
-
+        print("Epoch in station_keeping: ", epochs[0], epochs[-1], len(epochs))
         # print("state_history", state_history)
         # epochs, reference_state_history, dependent_variables_history_reference, state_transition_matrix_history_reference = \
         #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(self.dynamic_model,
@@ -47,14 +51,19 @@ class StationKeeping:
         #                                                                                                     custom_propagation_time=self.dynamic_model.propagation_time)
 
 
-
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
-        print(
-            "Start and end: ", epochs[0], epochs[-1], \
-            "state_history: ", np.linalg.norm(state_history[0, 6:9]), "m   ", \
-            "reference_state_history: ", np.linalg.norm(reference_state_history[0, 6:9]), "m   ", \
-            "state_deviation_history: ", np.linalg.norm(state_deviation_history[0, 6:9]), "m   "
+        # print(
+        #     "Start and end: ", epochs[0], epochs[-1], \
+        #     "state_history: ", np.linalg.norm(state_history[0, 6:9]), "m   ", \
+        #     "reference_state_history: ", np.linalg.norm(reference_state_history[0, 6:9]), "m   ", \
+        #     "state_deviation_history: ", np.linalg.norm(state_deviation_history[0, 6:9]), "m   "
+        # )
+        print("StationKeeping: ", \
+            epochs[0], epochs[-1], \
+            np.linalg.norm(state_history[0, 6:9]), "m   ", \
+            np.linalg.norm(reference_state_history[0, 6:9]), "m   ", \
+            np.linalg.norm(state_deviation_history[0, 6:9]), "m   "
         )
 
         R_i = 1e-2*np.eye(3)

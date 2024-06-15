@@ -139,7 +139,7 @@ def comparison_models_reference(simulation_start_epoch_MJD, propagation_time, st
 #                                                                                 satellite=body,
 #                                                                                 step_size=step_size,
 #                                                                                 get_full_history=True,
-#                                                                                 interpolation_kind="cubic",
+#                                                                                 interpolation_kind="linear",
 #                                                                                 get_epoch_in_array=False,
 #                                                                                 get_dict=False))
 
@@ -151,7 +151,7 @@ def comparison_models_reference(simulation_start_epoch_MJD, propagation_time, st
 #                                                                                 body="moon",
 #                                                                                 step_size=step_size,
 #                                                                                 get_full_history=True,
-#                                                                                 interpolation_kind="cubic",
+#                                                                                 interpolation_kind="linear",
 #                                                                                 get_epoch_in_array=True,
 #                                                                                 get_dict=False))
 

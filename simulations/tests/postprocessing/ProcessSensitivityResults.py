@@ -31,7 +31,7 @@ class PlotSensitivityResults():
         return ' '.join(words)
 
 
-    def calculate_sensitivity_statistics(self, data, mission_start_epoch, custom_mission_start_epoch=False, evaluation_threshold=14):
+    def calculate_sensitivity_statistics(self, data, mission_start_epoch, custom_mission_start_epoch=False, evaluation_threshold=14, include_annual=True):
 
         result_dict = {}
 
@@ -45,6 +45,7 @@ class PlotSensitivityResults():
             epoch_stats = {}
             combined_per_run = {}
             combined_per_run_with_threshold = {}
+            threshold = mission_start_epoch + evaluation_threshold
             for epoch, runs in epochs.items():
                 keys = list(runs.keys())
                 values = list(runs.values())
@@ -56,8 +57,9 @@ class PlotSensitivityResults():
                         combined_per_run_with_threshold[key] = []
 
                     combined_per_run[key].append(runs[key])
-                    if epoch >= mission_start_epoch + evaluation_threshold:
+                    if epoch >= threshold:
                         combined_per_run_with_threshold[key].append(runs[key])
+
 
             total = []
             total_with_threshold = []
@@ -66,11 +68,22 @@ class PlotSensitivityResults():
             for run, combined in combined_per_run_with_threshold.items():
                 total_with_threshold.append(np.sum(combined))
 
+            if include_annual:
+                annual_total_with_threshold = []
+                multiplier = 365/(list(epochs.keys())[-1] - threshold)
+                # print(multiplier, list(epochs.keys())[-1], threshold, list(epochs.keys())[-1] - threshold)
+                for run, combined in combined_per_run_with_threshold.items():
+                    annual_total_with_threshold.append(np.sum(combined)*multiplier)
+
             total_stats = {'mean': np.mean(total), 'std': np.std(total)}
             total_stats_with_threshold = {'mean': np.mean(total_with_threshold), 'std': np.std(total_with_threshold)}
+            total_annual_stats_with_threshold = {'mean': np.mean(annual_total_with_threshold), 'std': np.std(annual_total_with_threshold)}
 
             # Store statistics in the result dictionary
-            result_dict[case_type] = {'epoch_stats': epoch_stats, 'total_stats': total_stats, 'total_stats_with_threshold': total_stats_with_threshold}
+            result_dict[case_type] = {'epoch_stats': epoch_stats,
+                                      'total_stats': total_stats,
+                                      'total_stats_with_threshold': total_stats_with_threshold,
+                                      'total_annual_stats_with_threshold': total_annual_stats_with_threshold}
 
         return result_dict
 
@@ -174,8 +187,10 @@ class PlotSensitivityResults():
                         full_estimation_error_history = np.stack(list(navigation_simulator.full_estimation_error_dict.values()))
                         full_estimation_error_histories.append(full_estimation_error_history)
 
-                        full_reference_state_deviation_epochs = np.stack(list(navigation_simulator.full_reference_state_deviation_dict.keys()))
-                        full_reference_state_deviation_history = np.stack(list(navigation_simulator.full_reference_state_deviation_dict.values()))
+                        full_state_history_truth_history = np.stack(list(self.navigation_simulator.full_state_history_truth_dict.values()))
+                        full_state_history_reference_history = np.stack(list(self.navigation_simulator.full_state_history_reference_dict.values()))
+                        full_reference_state_deviation_epochs = np.stack(list(self.navigation_simulator.full_state_history_reference_dict.keys()))
+                        full_reference_state_deviation_history = full_state_history_truth_history - full_state_history_reference_history
                         full_reference_state_deviation_histories.append(full_reference_state_deviation_history)
 
                         axs[0].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
@@ -267,6 +282,8 @@ class PlotSensitivityResults():
                             ylabel = "Target Points"
                     if sensitivity_type == "station_keeping_error":
                             ylabel = "SKM Error"
+                    if sensitivity_type == "noise":
+                            ylabel = "Obs. Noise"
 
                     axs1[sensitivity_type_index].grid(alpha=0.5, linestyle='--', zorder=0)
                     axs1[sensitivity_type_index].set_ylabel(f"{ylabel} \n{units[sensitivity_type]}")

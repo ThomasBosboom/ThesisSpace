@@ -60,7 +60,7 @@ observation_windows_settings = {
 
 observation_windows_settings = {
     "default": [
-        (helper_functions.get_constant_arc_observation_windows(8, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 2),
+        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 2),
     ],
     # "optimized": [
     #     (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), 1),
@@ -68,68 +68,68 @@ observation_windows_settings = {
 }
 
 
-observation_windows_settings = {
-    "default1": [
-        ([(60390, 60390.05)], 2),
-    ],
-    "default2": [
-        ([(60390, 60390.1)], 2),
-    ],
-    # "default3": [
-    #     ([(60390, 60390.15)], 2),
-    # ],
-    # "default4": [
-    #     ([(60390, 60390.20)], 2),
-    # ],
-    # "default5": [
-    #     ([(60390, 60390.25)], 2),
-    # ],
-    # "default6": [
-    #     ([(60390, 60390.30)], 2),
-    # ],
-    # "default7": [
-    #     ([(60390, 60390.35)], 2),
-    # ],
-    # "default8": [
-    #     ([(60390, 60390.40)], 2),
-    # ],
-    # "default9": [
-    #     ([(60390, 60390.45)], 2),
-    # ],
-    # "default10": [
-    #     ([(60390, 60390.50)], 2),
-    # ],
-    # "default11": [
-    #     ([(60390, 60390.55)], 2),
-    # ],
-    # "default12": [
-    #     ([(60390, 60390.60)], 2),
-    # ],
-    # "default13": [
-    #     ([(60390, 60390.65)], 2),
-    # ],
-    # "default14": [
-    #     ([(60390, 60390.70)], 2),
-    # ],
-    # "default15": [
-    #     ([(60390, 60390.75)], 2),
-    # ],
-    # "default16": [
-    #     ([(60390, 60390.80)], 2),
-    # ],
-    # "default17": [
-    #     ([(60390, 60390.85)], 2),
-    # ],
-    # "default18": [
-    #     ([(60390, 60390.90)], 2),
-    # ],
-    # "default19": [
-    #     ([(60390, 60390.95)], 2),
-    # ],
-    # "default20": [
-    #     ([(60390, 60391)], 2),
-    # ],
-}
+# observation_windows_settings = {
+#     "default1": [
+#         ([(60390, 60390.05)], 2),
+#     ],
+#     "default2": [
+#         ([(60390, 60390.1)], 2),
+#     ],
+#     # "default3": [
+#     #     ([(60390, 60390.15)], 2),
+#     # ],
+#     # "default4": [
+#     #     ([(60390, 60390.20)], 2),
+#     # ],
+#     # "default5": [
+#     #     ([(60390, 60390.25)], 2),
+#     # ],
+#     # "default6": [
+#     #     ([(60390, 60390.30)], 2),
+#     # ],
+#     # "default7": [
+#     #     ([(60390, 60390.35)], 2),
+#     # ],
+#     # "default8": [
+#     #     ([(60390, 60390.40)], 2),
+#     # ],
+#     # "default9": [
+#     #     ([(60390, 60390.45)], 2),
+#     # ],
+#     # "default10": [
+#     #     ([(60390, 60390.50)], 2),
+#     # ],
+#     # "default11": [
+#     #     ([(60390, 60390.55)], 2),
+#     # ],
+#     # "default12": [
+#     #     ([(60390, 60390.60)], 2),
+#     # ],
+#     # "default13": [
+#     #     ([(60390, 60390.65)], 2),
+#     # ],
+#     # "default14": [
+#     #     ([(60390, 60390.70)], 2),
+#     # ],
+#     # "default15": [
+#     #     ([(60390, 60390.75)], 2),
+#     # ],
+#     # "default16": [
+#     #     ([(60390, 60390.80)], 2),
+#     # ],
+#     # "default17": [
+#     #     ([(60390, 60390.85)], 2),
+#     # ],
+#     # "default18": [
+#     #     ([(60390, 60390.90)], 2),
+#     # ],
+#     # "default19": [
+#     #     ([(60390, 60390.95)], 2),
+#     # ],
+#     # "default20": [
+#     #     ([(60390, 60391)], 2),
+#     # ],
+# }
 
 
 

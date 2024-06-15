@@ -211,6 +211,29 @@ class EstimationModel:
 
 
 
+if __name__ == "__main__":
+
+    import tracemalloc
+    from src.dynamic_models.HF.PMSRP import *
+
+    tracemalloc.start()
+    snapshot1 = tracemalloc.take_snapshot()
+    dynamic_model = PMSRP01.HighFidelityDynamicModel(60390, 1, bodies_mass=[280, 28])
+    truth_model = PMSRP01.HighFidelityDynamicModel(60390, 1, bodies_mass=[280, 28])
+    estimation_model = EstimationModel(dynamic_model, truth_model, noise=100)
+    estimation_model_results = estimation_model.get_estimation_results()
+    print(estimation_model_results.estimation_input)
+
+    snapshot2 = tracemalloc.take_snapshot()
+    top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+
+    print("[ Top 5 differences ]")
+    for stat in top_stats[:5]:
+        print(stat)
+    total_memory = sum(stat.size for stat in top_stats)
+    print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+
+
 # from src.dynamic_models.HF.PMSRP import *
 # import Interpolator
 # from matplotlib import pyplot as plt

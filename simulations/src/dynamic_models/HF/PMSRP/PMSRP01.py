@@ -9,9 +9,10 @@ from tudatpy.kernel import constants, numerical_simulation
 from tudatpy.kernel.numerical_simulation import propagation_setup, environment_setup, estimation_setup
 
 # Define path to import src files
-parent_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-parent_dir = os.path.dirname(parent_dir)
-sys.path.append(parent_dir)
+file_directory = os.path.realpath(__file__)
+for _ in range(3):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
 
 # Own
 from DynamicModelBase import DynamicModelBase
@@ -188,6 +189,28 @@ class HighFidelityDynamicModel(DynamicModelBase):
             return dynamics_simulator
 
 
+
+if __name__ == "__main__":
+
+    import tracemalloc
+
+    tracemalloc.start()
+    snapshot1 = tracemalloc.take_snapshot()
+    dynamic_model = HighFidelityDynamicModel(60390, 10, bodies_mass=[280, 28])
+
+    snapshot2 = tracemalloc.take_snapshot()
+    top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+
+    print("[ Top 5 differences ]")
+    for stat in top_stats[:5]:
+        print(stat)
+    total_memory = sum(stat.size for stat in top_stats)
+    print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+
+
+    print(dynamic_model.bodies_mass)
+
+    print(dynamic_model.get_propagation_simulator)
 
 # from tudatpy.kernel.astro import time_conversion, element_conversion
 # test = HighFidelityDynamicModel(60390, 80)

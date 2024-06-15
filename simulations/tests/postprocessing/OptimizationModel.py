@@ -36,6 +36,7 @@ class OptimizationModel:
         self.best_objective_value = None
         self.latest_objective_value = None
         self.run_counter = 0
+        self.total_run_counter = 0
         self.num_runs = 1
         self.evaluation_threshold = 14
 
@@ -135,6 +136,8 @@ class OptimizationModel:
 
         def objective(design_vector):
 
+            print("==============")
+
             # tracemalloc.start()
             observation_windows = self.generate_observation_windows(design_vector)
             objective_value = objective_function(observation_windows) + constraints(design_vector)
@@ -170,9 +173,8 @@ class OptimizationModel:
 
             self.save_to_json()
 
-            print("design vector after objective function:", design_vector)
-
-            print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value}")
+            print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value} \nObservation windows: \n {observation_windows}")
+            print("==============")
 
             self.run_counter += 1
 
@@ -189,6 +191,7 @@ class OptimizationModel:
         def callback_function(x):
 
             self.iteration += 1
+            self.total_run_counter += self.run_counter
             self.run_counter = 0
 
             print(f"Callback iteration {self.iteration} =================")

@@ -32,9 +32,7 @@ class NavigationSimulator(NavigationSimulatorBase):
         self.interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size)
         self.reference_data = ReferenceData.ReferenceData(step_size=self.step_size)
 
-        self._initial_attrs = {**self.__dict__}
-
-        # print(self.step_size)
+        self._initial_attrs.update({"interpolator": self.interpolator, "reference_data": self.reference_data})
 
 
     def get_Gamma(self, delta_t):
@@ -65,10 +63,13 @@ class NavigationSimulator(NavigationSimulatorBase):
 
         for attr, value in self._initial_attrs.items():
             setattr(self, attr, value)
+        for key, value in vars(self).copy().items():
+            if key != "_initial_attrs":
+                if key not in self._initial_attrs.keys():
+                    delattr(self, key)
 
 
     # @profile
-
     def perform_navigation(self, observation_windows, seed=0):
 
         # tracemalloc.start()
@@ -128,12 +129,14 @@ class NavigationSimulator(NavigationSimulatorBase):
             # print(f"Start of navigation arc {navigation_arc} at {time} for {navigation_arc_duration} days")
 
             # Define dynamic and truth models to calculate the relevant histories
+            print("dynaic model")
             dynamic_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration,
                                                                     custom_initial_state=self.custom_initial_state,
                                                                     custom_model_dict={self.model_type: [self.model_name]},
                                                                     custom_model_list=[self.model_number])
             dynamic_model = dynamic_model_objects[self.model_type][self.model_name][0]
 
+            print("truth model")
             truth_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration,
                                                                   custom_initial_state=self.custom_initial_state_truth,
                                                                   custom_model_dict={self.model_type_truth: [self.model_name_truth]},
@@ -146,6 +149,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             ##############################################################
 
             # Obtain the initial state of the whole simulation once
+            print("state_history_reference")
             state_history_reference = list()
             for body in dynamic_model.bodies_to_propagate:
                 state_history_reference.append(self.reference_data.get_reference_state_history(
@@ -308,36 +312,6 @@ class NavigationSimulator(NavigationSimulatorBase):
             else:
                 break
 
-            # # Take another snapshot after the function call
-            # snapshot2 = tracemalloc.take_snapshot()
-
-            # # Compare the two snapshots
-            # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-
-            # print("[ Top 5 differences ]")
-            # for stat in top_stats[:5]:
-            #     print(stat)
-            # total_memory = sum(stat.size for stat in top_stats)
-            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
-
-# full_state_history_final_dict, self.full_state_transition_matrix_history_estimated
-
-        # if self.run_optimization_version:
-
-        #     required_attributes = {
-        #         # "full_propagated_covariance_dict": self.full_propagated_covariance_dict,
-        #         "delta_v_dict": self.delta_v_dict,
-        #         "reference_data": self.reference_data,
-        #         "interpolator": self.interpolator
-        #     }
-        #     return NavigationOutput(
-        #         self,
-        #         **required_attributes
-        #     )
-
-        # else:
-        #     return NavigationOutput(self)
-
         return NavigationOutput(self)
 
 
@@ -347,7 +321,7 @@ class NavigationOutput():
     def __init__(self, navigation_simulator, **required_attributes):
 
         self.navigation_simulator = navigation_simulator
-        self.navigation_simulator.reset_attributes()
+        # self.navigation_simulator.reset_attributes()
 
         # if required_attributes:
 
@@ -382,17 +356,26 @@ if __name__ == "__main__":
     # total_memory = sum(stat.size for stat in top_stats)
     # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
-    # observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
-    observation_windows = [(60390, 60391.0), (60394.0, 60395.0)]
+    observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
+    # observation_windows = [(60390, 60391.0), (60394.0, 60395.0)]
 
-    # tracemalloc.start()
+    tracemalloc.start()
+    snapshot1 = tracemalloc.take_snapshot()
     cost_list = []
     for i in [0, 1]:
 
-        tracemalloc.start()
-        snapshot1 = tracemalloc.take_snapshot()
-
         navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
+        navigation_simulator = navigation_output.navigation_simulator
+
+        delta_v_dict = navigation_simulator.delta_v_dict
+        delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+        delta_v_history = np.stack(list(delta_v_dict.values()))
+        delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+0)
+
+        cost_list.append(delta_v)
+        print(cost_list)
+
+        navigation_simulator.reset_attributes()
 
         # # Take another snapshot after the function call
         snapshot2 = tracemalloc.take_snapshot()
@@ -403,25 +386,3 @@ if __name__ == "__main__":
             print(stat)
         total_memory = sum(stat.size for stat in top_stats)
         print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
-
-
-        navigation_simulator = navigation_output.navigation_simulator
-
-        delta_v_dict = navigation_simulator.delta_v_dict
-        delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-        delta_v_history = np.stack(list(delta_v_dict.values()))
-        delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+0)
-
-        cost_list.append(delta_v)
-
-        #     # Take another snapshot after the function call
-        # snapshot2 = tracemalloc.take_snapshot()
-
-        # # Compare the two snapshots
-        # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-
-        # print("[ Top 5 differences ]")
-        # for stat in top_stats[:5]:
-        #     print(stat)
-        # total_memory = sum(stat.size for stat in top_stats)
-        # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")

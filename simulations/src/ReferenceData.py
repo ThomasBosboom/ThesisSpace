@@ -83,6 +83,7 @@ class ReferenceData():
         interpolated_states = np.zeros((1,6))
         epochs = np.arange(user_start_epoch, user_end_epoch+self.step_size*constants.JULIAN_DAY, self.step_size*constants.JULIAN_DAY)
         # print("ReferenceData: ", user_start_epoch, user_end_epoch+self.step_size*constants.JULIAN_DAY, len(epochs))
+        print("Epoch in reference_data: ", epochs[0], epochs[-1], len(epochs))
         i = 0
         for epoch in epochs:
             interpolated_states = np.vstack((interpolated_states, interp_func(epoch)))

@@ -24,7 +24,7 @@ from src import NavigationSimulator, ObjectiveFunctions
 from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
-run_optimization = True
+run_optimization = False
 if __name__ == "__main__":
 
     # tracemalloc.start()
@@ -75,6 +75,19 @@ if __name__ == "__main__":
     )
 
     if not run_optimization:
+
+        observation_windows = optimization_model.generate_observation_windows([
+                    0.95,
+                    0.9142857142857144,
+                    0.9142857142857144,
+                    1.3,
+                    0.9142857142857144,
+                    0.9142857142857144,
+                    0.9142857142857144
+                ])
+
+        print(observation_windows)
+        navigation_simulator.perform_navigation(observation_windows)
         current_time = str(202406112013)
 
     else:

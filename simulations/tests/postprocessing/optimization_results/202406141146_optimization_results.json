@@ -42,33 +42,20 @@
                 ],
                 "objective_value": 0.020192298507122564,
                 "reduction": 0.0
-            },
-            "1": {
-                "design_vector": [
-                    0.7,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0,
-                    1.0
-                ],
-                "objective_value": 0.026392883208721067,
-                "reduction": 30.707671538291343
             }
         }
     },
     "initial_objective_value": 0.020192298507122564,
     "best_objective_value": 0.020192298507122564,
-    "latest_objective_value": 0.026392883208721067,
-    "run_counter": 1,
+    "latest_objective_value": 0.020192298507122564,
+    "run_counter": 0,
     "num_runs": 1,
     "evaluation_threshold": 14,
     "show_corrections_in_terminal": true,
     "run_optimization_version": true,
-    "step_size": 0.05,
+    "step_size": 0.01,
     "delta_v_min": 0.0,
-    "seed": 1,
+    "seed": 0,
     "options": {
         "maxiter": 100,
         "disp": false,
@@ -149,7 +136,7 @@
         ]
     },
     "save_json": true,
-    "current_time": "202406131840",
+    "current_time": "202406141146",
     "file_name": "optimization_analysis",
     "initial_design_vector": [
         1.0,

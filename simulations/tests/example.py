@@ -23,8 +23,8 @@ class Estimator:
 
     def process_a_lot(self):
 
-        self.large_observation_history = np.zeros((10000, 10))
-        self.large_estimation_properties = np.zeros((10000, 10))
+        self.large_observation_history = np.zeros((100000, 10))
+        self.large_estimation_properties = np.zeros((100000, 10))
 
         return self
 
@@ -40,6 +40,8 @@ class DataProcessor:
 
         self.interpolator = Interpolator(self.step_size)
         self.reference_data = ReferenceData(self.step_size)
+
+        # self.initial_attributes.update({"interpolator": self.interpolator, "reference_data": self.reference_data})
 
         self.initial_attributes = {**self.__dict__}
 
@@ -58,17 +60,23 @@ class DataProcessor:
 
         return DataOutput(self)
 
+
     def reset_attributes(self):
+
         for key, value in self.initial_attributes.items():
             setattr(self, key, value)
-
+        for key, value in vars(self).copy().items():
+            if key is not "initial_attributes":
+                if key not in self.initial_attributes.keys():
+                    delattr(self, key)
 
 class DataOutput():
 
     def __init__(self, data_processor):
 
         self.data_processor = data_processor
-        self.data_processor.reset_attributes()
+        # self.data_processor.reset_attributes()
+        # print(self.data_processor.more_data)
 
 
 
@@ -91,7 +99,11 @@ saved_data = []
 for i, value in enumerate(range(10)):
 
     # Example method that generates a lot of data
-    processor.process(value*1000)
+    data_output = processor.process(value*1000)
+    extracted_data = list(data_output.data_processor.new_data.values())
+    saved_data.append(extracted_data)
+
+    data_output.data_processor.reset_attributes()
 
     # Take a snapshot after each iteration
     snapshot = tracemalloc.take_snapshot()
