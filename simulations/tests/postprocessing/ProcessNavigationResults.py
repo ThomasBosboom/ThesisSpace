@@ -407,9 +407,9 @@ class PlotSingleNavigationResults():
                 ax[k][1].set_title("LUMIO")
 
                 # Set y-axis tick label format to scientific notation with one decimal place
-                ax[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-                ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
-                ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
+                # ax[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+                # ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+                ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]", fontsize="small")
 
         ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
@@ -519,7 +519,7 @@ class PlotSingleNavigationResults():
 
     def plot_observations(self):
 
-        fig, ax = plt.subplots(3, 1, figsize=(12, 7), sharex=True)
+        fig, ax = plt.subplots(2, 1, figsize=(12, 7), sharex=True)
         arc_nums = len(self.navigation_simulator.estimation_arc_results_dict.keys())
 
         # For each arc, plot the observations and its residuals
@@ -629,8 +629,8 @@ class PlotSingleNavigationResults():
 
         observation_angles = np.array(observation_angles)
 
-        ax[2].plot(epochs-self.mission_start_epoch, observation_angles[:, 0])
-        ax[2].plot(epochs-self.mission_start_epoch, observation_angles[:, 1])
+        # ax[2].plot(epochs-self.mission_start_epoch, observation_angles[:, 0])
+        # ax[2].plot(epochs-self.mission_start_epoch, observation_angles[:, 1])
 
 
 
@@ -670,7 +670,7 @@ class PlotSingleNavigationResults():
         ax[1].set_ylabel("Observation \n residual [m]")
         ax[1].set_ylim([-5*estimation_model.noise, 5*estimation_model.noise])
         # ax[2].set_ylabel("Angles obs. \n in ECIJ2000 [deg]")
-        ax[2].set_ylabel(r"$\angle \boldsymbol{a}_{j}, \boldsymbol{\rho}$  [deg]")
+        # ax[2].set_ylabel(r"$\angle \boldsymbol{a}_{j}, \boldsymbol{\rho}$  [deg]")
         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
         ax[-1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, fontsize="small")
 
@@ -812,9 +812,6 @@ class PlotSingleNavigationResults():
 
         plt.tight_layout()
         # plt.suptitle("Observability metrics")
-
-
-
 
 
         # Plot the estimation error history
@@ -1258,7 +1255,8 @@ class PlotMultipleNavigationResults():
                             index_length=len(mean_full_estimation_error_histories)
 
                         # rss_values = np.sqrt(np.sum(np.square(mean_full_estimation_error_histories[-1, 3*k+6*j:3*k+6*j+3])))
-                        rss_values = np.sqrt(np.mean(np.sum(np.square(mean_full_estimation_error_histories[-index_length:, 3*k+6*j:3*k+6*j+3]), axis=1)))
+                        rss_values = np.sqrt(np.sum(np.square(np.mean(mean_full_estimation_error_histories[-index_length:, 3*k+6*j:3*k+6*j+3]))))
+                        # rss_values = np.sqrt(np.mean(np.sum(np.square(mean_full_estimation_error_histories[-index_length:, 3*k+6*j:3*k+6*j+3]), axis=1)))
 
                         if type_index == 0:
                             axs[type_index][n].set_title(titles[n]+f"\nMean RSS: {np.round(rss_values, 3)} "+units[n], fontsize="small")

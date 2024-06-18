@@ -9,9 +9,6 @@ for _ in range(2):
     file_directory = os.path.dirname(file_directory)
     sys.path.append(file_directory)
 
-# Own
-# import Interpolator
-
 class StationKeeping:
 
     def __init__(self, dynamic_model, reference_data, interpolator):
@@ -21,21 +18,17 @@ class StationKeeping:
         self.interpolator = interpolator
 
 
-    def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch=0):
+    def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch):
 
-        print("start stationkeeping")
+        # print("start stationkeeping")
         # Get the reference orbit states
         reference_state_history = list()
         for body in self.dynamic_model.bodies_to_propagate:
             reference_state_history.append(self.reference_data.get_reference_state_history(self.dynamic_model.simulation_start_epoch_MJD,
-                                                                                      self.dynamic_model.propagation_time,
-                                                                                      satellite=body,
-                                                                                    #   step_size=self.step_size,
-                                                                                      get_full_history=True))
+                                                                                            self.dynamic_model.propagation_time,
+                                                                                            satellite=body,
+                                                                                            get_full_history=True))
         reference_state_history = np.concatenate(reference_state_history, axis=1)
-
-
-
 
         # Propagate the results of the dynamic model to generate target points
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \
@@ -43,28 +36,17 @@ class StationKeeping:
                                                 custom_initial_state=self.dynamic_model.custom_initial_state,
                                                 custom_propagation_time=self.dynamic_model.propagation_time)
 
-        print("Epoch in station_keeping: ", epochs[0], epochs[-1], len(epochs))
-        # print("state_history", state_history)
-        # epochs, reference_state_history, dependent_variables_history_reference, state_transition_matrix_history_reference = \
-        #     Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size).get_propagation_results(self.dynamic_model,
-        #                                                                                                     custom_initial_state=reference_state_history[0, :],
-        #                                                                                                     custom_propagation_time=self.dynamic_model.propagation_time)
-
+        # print("Epoch in station_keeping: ", epochs[0], epochs[-1], len(epochs))
 
         # Perform target point method algorithm
         state_deviation_history = state_history - reference_state_history
-        # print(
-        #     "Start and end: ", epochs[0], epochs[-1], \
-        #     "state_history: ", np.linalg.norm(state_history[0, 6:9]), "m   ", \
-        #     "reference_state_history: ", np.linalg.norm(reference_state_history[0, 6:9]), "m   ", \
-        #     "state_deviation_history: ", np.linalg.norm(state_deviation_history[0, 6:9]), "m   "
+
+        # print("StationKeeping: ", \
+        #     epochs[0], epochs[-1], \
+        #     np.linalg.norm(state_history[0, 6:9]), "m   ", \
+        #     np.linalg.norm(reference_state_history[0, 6:9]), "m   ", \
+        #     np.linalg.norm(state_deviation_history[0, 6:9]), "m   "
         # )
-        print("StationKeeping: ", \
-            epochs[0], epochs[-1], \
-            np.linalg.norm(state_history[0, 6:9]), "m   ", \
-            np.linalg.norm(reference_state_history[0, 6:9]), "m   ", \
-            np.linalg.norm(state_deviation_history[0, 6:9]), "m   "
-        )
 
         R_i = 1e-2*np.eye(3)
         Q = 1e-1*np.eye(3)
@@ -77,12 +59,15 @@ class StationKeeping:
         total_sum = np.zeros((3,3))
         for target_point_epoch in target_point_epochs:
 
-            step_size = self.interpolator.step_size
-
             # Define the indexes
-            i_tc = int(cut_off_epoch/step_size)
-            i_tv = int(correction_epoch/step_size)
-            i_ti = int(target_point_epoch/step_size)
+            cut_off_epoch = epochs[0] + cut_off_epoch
+            correction_epoch = epochs[0] + correction_epoch
+            target_point_epoch = epochs[0] + target_point_epoch
+            i_tc = self.interpolator.get_closest_index(epochs[0], epochs[-1], cut_off_epoch)
+            i_tv = self.interpolator.get_closest_index(epochs[0], epochs[-1], correction_epoch)
+            i_ti = self.interpolator.get_closest_index(epochs[0], epochs[-1], target_point_epoch)
+
+            # Extract the dispersion elements
             dr_tc = state_deviation_history[i_tc,6:9]
             dv_tc = state_deviation_history[i_tc,9:12]
             dr_ti = state_deviation_history[i_ti,6:9]

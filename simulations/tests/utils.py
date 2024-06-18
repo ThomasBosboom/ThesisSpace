@@ -350,7 +350,7 @@ def get_max_depth(dictionary):
         return 0
 
 
-def save_dicts_to_folder(dicts=[], labels=[], custom_sub_folder_name=None, folder_name='data'):
+def save_dict_to_folder(dicts=[], labels=[], custom_sub_folder_name=None, folder_name='dicts'):
 
     # Get the frame of the caller
     caller_frame = inspect.stack()[1]
@@ -370,15 +370,24 @@ def save_dicts_to_folder(dicts=[], labels=[], custom_sub_folder_name=None, folde
     if not os.path.exists(sub_folder):
         os.makedirs(sub_folder, exist_ok=True)
 
-    for i, dict in enumerate(dicts):
+    for i, _dict in enumerate(dicts):
         if len(dicts) != len(labels):
             file_name = f"dict_{i}.json"
         else:
             file_name = f"{labels[i]}.json"
         path = os.path.join(sub_folder, file_name)
 
+        # Convert keys to int
+        def convert_keys_to_int(d):
+            if isinstance(d, dict):
+                return {int(k) if isinstance(k, (np.int32, np.int64)) else k: convert_keys_to_int(v) for k, v in d.items()}
+            return d
+
+        _dict = convert_keys_to_int(_dict)
+
         with open(path, 'w') as json_file:
-            json.dump(dict, json_file, indent=get_max_depth(dict))
+            json.dump(_dict, json_file, indent=get_max_depth(_dict))
+
 
 
 def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folder_name='figures'):
@@ -397,10 +406,8 @@ def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folde
 
     else:
         sub_folder_name = custom_sub_folder_name
-        print(sub_folder_name)
 
     sub_folder = os.path.join(dict_folder, sub_folder_name)
-    print(sub_folder)
     if not os.path.exists(sub_folder):
         os.makedirs(sub_folder, exist_ok=True)
 
@@ -411,6 +418,39 @@ def save_figure_to_folder(figs=[], labels=[], custom_sub_folder_name=None, folde
             file_name = f"{labels[i]}.png"
         figure_path = os.path.join(sub_folder, file_name)
         fig.savefig(figure_path)
+
+
+
+def save_table_to_folder(tables=[], labels=[], custom_sub_folder_name=None, folder_name='tables'):
+
+    # Get the frame of the caller
+    caller_frame = inspect.stack()[1]
+    file_path = caller_frame.filename
+    file_path = os.path.dirname(file_path)
+
+    dict_folder = os.path.join(file_path, folder_name)
+    if not os.path.exists(dict_folder):
+        os.makedirs(dict_folder, exist_ok=True)
+
+    if custom_sub_folder_name is None:
+        sub_folder_name = inspect.currentframe().f_back.f_code.co_name
+    else:
+        sub_folder_name = custom_sub_folder_name
+
+    sub_folder = os.path.join(dict_folder, sub_folder_name)
+    if not os.path.exists(sub_folder):
+        os.makedirs(sub_folder, exist_ok=True)
+
+    for i, table in enumerate(tables):
+        if len(tables) != len(labels):
+            file_name = f"table_{i}.tex"
+        else:
+            file_name = f"{labels[i]}.tex"
+        file_path = os.path.join(sub_folder, file_name)
+        with open(file_path, 'w') as file:
+                file.write(table)
+
+
 
 
 def get_monte_carlo_stats_dict(data_dict):
@@ -432,9 +472,3 @@ def get_monte_carlo_stats_dict(data_dict):
             stats[key] = value
 
     return stats
-
-
-# # Commonly used parameters
-# synodic_initial_state = np.array([0.985121349979458, 0.001476496155141, 0.004925468520363, -0.873297306080392, -1.611900486933861, 0,	\
-#                                   1.147342501,	-0.0002324517381, -0.151368318,	-0.000202046355,	-0.2199137166,	0.0002817105509])
-

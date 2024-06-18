@@ -90,7 +90,7 @@ def run_times():
     fig.legend(handles=[legend_handles[0]], loc='upper right', fontsize="x-small")
     fig.suptitle(f"Run time dynamic models for {propagation_time} day, n={len(run_cases)*10}, varying MJD ([{start_epoch}, {end_epoch}]) \nProcessor: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz, 2208 Mhz", fontsize=8)
 
-    # utils.save_dicts_to_folder([accumulator_dict, result_dict], labels=["run_times", "run_times_monte_carlo_statistics"], custom_sub_folder_name=file_name)
+    # utils.save_dict_to_folder([accumulator_dict, result_dict], labels=["run_times", "run_times_monte_carlo_statistics"], custom_sub_folder_name=file_name)
     utils.save_figure_to_folder(figs=[fig], labels=["run_times"], custom_sub_folder_name=file_name)
 
     # plt.show()
@@ -185,7 +185,7 @@ def run_deviations():
     fig.suptitle(f"RMSE LUMIO position deviations for {propagation_time} days, n={50}, varying MJD ([{60390}, {60404}]) \nProcessor: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz, 2208 Mhz", fontsize=8)
     # fig.suptitle(f"RMSE LUMIO position deviations for {propagation_time} days \nProcessor: Intel(R) Core(TM) i7-8750H CPU @ 2.20GHz, 2208 Mhz", fontsize=8)
 
-    # utils.save_dicts_to_folder([accumulator_dict, result_dict], labels=["run_times", "run_times_monte_carlo_statistics"], custom_sub_folder_name=file_name)
+    # utils.save_dict_to_folder([accumulator_dict, result_dict], labels=["run_times", "run_times_monte_carlo_statistics"], custom_sub_folder_name=file_name)
     utils.save_figure_to_folder(figs=[fig], labels=["run_deviations"], custom_sub_folder_name=file_name)
 
     # plt.show()

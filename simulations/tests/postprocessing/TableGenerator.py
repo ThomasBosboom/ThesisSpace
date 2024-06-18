@@ -11,13 +11,14 @@ for _ in range(5):
     file_directory = os.path.dirname(file_directory)
     sys.path.append(file_directory)
 
+from tests import utils
+
 class TableGenerator():
 
     def __init__(self, table_settings={"save_table": True, "current_time": float, "file_name": str}):
 
         for key, value in table_settings.items():
-            if table_settings["save_table"]:
-                setattr(self, key, value)
+            setattr(self, key, value)
 
 
     def escape_tex_symbols(self, string):
@@ -25,23 +26,23 @@ class TableGenerator():
         return re.sub(r'[%&_#${}]', lambda match: escape_chars[match.group(0)], string)
 
 
-    def save_table_to_folder(self, table_str, file_name):
+    # def save_table_to_folder(self, table_str, file_name):
 
-        # Define the path to the tables folder
-        tables_folder = os.path.join(os.path.dirname(__file__), "tables")
+    #     # Define the path to the tables folder
+    #     tables_folder = os.path.join(os.path.dirname(__file__), "tables")
 
-        # Create the tables folder if it doesn't exist
-        if not os.path.exists(tables_folder):
-            os.makedirs(tables_folder)
+    #     # Create the tables folder if it doesn't exist
+    #     if not os.path.exists(tables_folder):
+    #         os.makedirs(tables_folder)
 
-        # Define the file path for the LaTeX table
-        file_path = os.path.join(tables_folder, file_name)
+    #     # Define the file path for the LaTeX table
+    #     file_path = os.path.join(tables_folder, file_name)
 
-        print(file_path)
+    #     print(file_path)
 
-        if file_name:
-            with open(file_path, 'w') as file:
-                file.write(table_str)
+    #     if file_name:
+    #         with open(file_path, 'w') as file:
+    #             file.write(table_str)
 
 
     def generate_sensitivity_analysis_table(self, sensitivity_statistics, caption="Statistical results of Monte Carlo sensitivity analysis", label="tab:SensitivityAnalysis", file_name="sensitivity_analysis.tex", decimals=4, include_worst_case=True):
@@ -82,7 +83,7 @@ class TableGenerator():
         table_str += r'\end{table}'
 
         if self.save_table:
-            self.save_table_to_folder(table_str, file_name)
+            utils.save_table_to_folder(tables=[table_str], labels=[f"{self.current_time}_sensitivity_analysis"], custom_sub_folder_name=self.file_name)
 
         print(table_str, sensitivity_statistics)
 
@@ -127,4 +128,4 @@ class TableGenerator():
         table_str += r'\end{table}'
 
         if self.save_table:
-            self.save_table_to_folder(table_str, file_name)
+            utils.save_table_to_folder(tables=[table_str], labels=[f"{self.current_time}_optimization_analysis"], custom_sub_folder_name=self.file_name)

@@ -28,39 +28,39 @@ duration = 28
 mission_start_epoch = 60390.0
 
 # Collect a series of observation window sets to compare
+observation_windows_settings = {
+    "Perilune": [
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, mission_start_epoch=mission_start_epoch), num_runs),
+    ],
+    "Apolune": [
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, apolune=True), num_runs),
+    ],
+    "Random": [
+        (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
+    ],
+    "Constant": [
+        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
+    ]
+}
+
 # observation_windows_settings = {
-#     "Perilune": [
-#         (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, mission_start_epoch=mission_start_epoch), num_runs),
+#     "0.1 day": [
+#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=0.1, mission_start_epoch=mission_start_epoch), num_runs),
 #     ],
-#     "Apolune": [
-#         (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, apolune=True), num_runs),
+#     "0.5 day": [
+#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), num_runs),
 #     ],
-#     "Random": [
-#         (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
+#     "1.0 day": [
+#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
 #     ],
-#     "Constant": [
-#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
-#     ]
+#     # "2.0 day": [
+#     #     (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=2.0, mission_start_epoch=mission_start_epoch), num_runs),
+#     # ]
 # }
 
 observation_windows_settings = {
-    "0.1 day": [
-        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=0.1, mission_start_epoch=mission_start_epoch), num_runs),
-    ],
-    "0.5 day": [
-        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), num_runs),
-    ],
-    "1.0 day": [
-        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
-    ],
-    # "2.0 day": [
-    #     (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=2.0, mission_start_epoch=mission_start_epoch), num_runs),
-    # ]
-}
-
-observation_windows_settings = {
     "default": [
-        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 2),
+        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
     ],
     # "optimized": [
     #     (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), 1),

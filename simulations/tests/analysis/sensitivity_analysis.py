@@ -26,9 +26,9 @@ from tests.postprocessing import ProcessNavigationResults, ProcessSensitivityRes
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 10
+num_runs = 1
 default_window_inputs = {
-    "duration": 28,
+    "duration": 14,
     "arc_interval": 3,
     "threshold": 1,
     "arc_duration": 1
@@ -60,29 +60,31 @@ combined_sensitivity_settings = {
     }
 }
 
-# combined_sensitivity_settings = {
-#     "sensitivity_settings_windows": {
-#         # "arc_duration": [0.1],
-#         "arc_interval": [1.0],
-#         "mission_start_epoch": [60390],
-#     },}
-#     "sensitivity_settings_auxiliary": {
-#         "initial_estimation_error": [
-#             np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
-#             ],
-#         "orbit_insertion_error": [
-#             np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
-#             ],
-#         "observation_interval": [100],
-#         "noise": [0.1],
-#         "target_point_epochs": [[2]],
-#         "delta_v_min": [0.00],
-#         "station_keeping_error": [0.00],
-#     }
-# }
+combined_sensitivity_settings = {
+    "sensitivity_settings_windows": {
+        # "arc_duration": [0.1],
+        "arc_interval": [1.0],
+        "mission_start_epoch": [60390],
+    },
+    # }
+    # "sensitivity_settings_auxiliary": {
+    #     "initial_estimation_error": [
+    #         np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+    #         ],
+    #     "orbit_insertion_error": [
+    #         np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
+    #         ],
+    #     "observation_interval": [100],
+    #     "noise": [0.1],
+    #     "target_point_epochs": [[2]],
+    #     "delta_v_min": [0.00],
+    #     "station_keeping_error": [0.00],
+    # }
+}
 
 auxilary_settings = {
-    "show_corrections_in_terminal": True
+    "show_corrections_in_terminal": True,
+    "step_size": 0.1
 }
 
 for sensitivity_settings in combined_sensitivity_settings.values():
@@ -96,7 +98,12 @@ for sensitivity_settings in combined_sensitivity_settings.values():
 
     process_sensitivity_results = ProcessSensitivityResults.PlotSensitivityResults(
         navigation_outputs_sensitivity,
-        figure_settings={"save_figure": True, "current_time": current_time, "file_name": file_name}
+        figure_settings={"save_figure": True,
+                         "save_table": True,
+                         "save_dict": True,
+                         "current_time": current_time,
+                         "file_name": file_name
+        }
     )
 
     print("Plotting results...")

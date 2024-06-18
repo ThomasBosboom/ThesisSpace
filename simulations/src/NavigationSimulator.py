@@ -30,7 +30,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                 self._initial_attrs.update({key: value})
 
         self.interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size)
-        self.reference_data = ReferenceData.ReferenceData(step_size=self.step_size)
+        self.reference_data = ReferenceData.ReferenceData(self.interpolator)
 
         self._initial_attrs.update({"interpolator": self.interpolator, "reference_data": self.reference_data})
 
@@ -100,7 +100,7 @@ class NavigationSimulator(NavigationSimulatorBase):
         times = list(set(times))
         times = sorted(times)
 
-        print(self.delta_v_min)
+        # print(self.delta_v_min)
 
         self.navigation_arc_durations = np.round(np.diff(times), decimal_places)
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), decimal_places)
@@ -129,14 +129,12 @@ class NavigationSimulator(NavigationSimulatorBase):
             # print(f"Start of navigation arc {navigation_arc} at {time} for {navigation_arc_duration} days")
 
             # Define dynamic and truth models to calculate the relevant histories
-            print("dynaic model")
             dynamic_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration,
                                                                     custom_initial_state=self.custom_initial_state,
                                                                     custom_model_dict={self.model_type: [self.model_name]},
                                                                     custom_model_list=[self.model_number])
             dynamic_model = dynamic_model_objects[self.model_type][self.model_name][0]
 
-            print("truth model")
             truth_model_objects = utils.get_dynamic_model_objects(time, navigation_arc_duration,
                                                                   custom_initial_state=self.custom_initial_state_truth,
                                                                   custom_model_dict={self.model_type_truth: [self.model_name_truth]},
@@ -149,7 +147,6 @@ class NavigationSimulator(NavigationSimulatorBase):
             ##############################################################
 
             # Obtain the initial state of the whole simulation once
-            print("state_history_reference")
             state_history_reference = list()
             for body in dynamic_model.bodies_to_propagate:
                 state_history_reference.append(self.reference_data.get_reference_state_history(
@@ -343,7 +340,7 @@ if __name__ == "__main__":
 
     # tracemalloc.start()
     # snapshot1 = tracemalloc.take_snapshot()
-    navigation_simulator = NavigationSimulator(run_optimization_version=True, step_size=0.01)
+    navigation_simulator = NavigationSimulator(run_optimization_version=True, step_size=0.5)
     #     # Take another snapshot after the function call
     # snapshot2 = tracemalloc.take_snapshot()
 
@@ -362,7 +359,7 @@ if __name__ == "__main__":
     tracemalloc.start()
     snapshot1 = tracemalloc.take_snapshot()
     cost_list = []
-    for i in [0, 1]:
+    for i in [0, 1, 2]:
 
         navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
         navigation_simulator = navigation_output.navigation_simulator

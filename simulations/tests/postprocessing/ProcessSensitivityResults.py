@@ -17,18 +17,41 @@ from tests.postprocessing import TableGenerator
 
 class PlotSensitivityResults():
 
-    def __init__(self, navigation_outputs_sensitivity, figure_settings={"save_figure": False, "current_time": float, "file_name": str}):
+    def __init__(self, navigation_outputs_sensitivity, figure_settings={"save_dict": True, "save_table": True, "save_figure": False, "current_time": float, "file_name": str}):
 
         self.navigation_outputs_sensitivity = navigation_outputs_sensitivity
         for key, value in figure_settings.items():
-            if figure_settings["save_figure"]:
-                setattr(self, key, value)
+            setattr(self, key, value)
 
 
     def convert_key(self, key):
         words = key.split('_')
         words = [word.capitalize() for word in words]
         return ' '.join(words)
+
+
+    # def save_to_json(self, data, folder_name='dictionaries'):
+
+    #     filename=f'{self.current_time}_sensitivity_analysis_results.json'
+
+    #     folder = os.path.join(os.path.dirname(__file__), "sensitivity_analysis_results")
+    #     if not os.path.exists(folder):
+    #         os.makedirs(folder)
+
+    #     file_path = os.path.join(folder, filename)
+    #     with open(file_path, 'w') as file:
+    #         json.dump(data, file, indent=4)
+
+
+    #     dict_folder = os.path.join(file_path, folder_name)
+    #     if not os.path.exists(dict_folder):
+    #         os.makedirs(dict_folder, exist_ok=True)
+    #     sub_folder = os.path.join(dict_folder, sub_folder_name)
+    #     print(sub_folder)
+    #     if not os.path.exists(sub_folder):
+    #         os.makedirs(sub_folder, exist_ok=True)
+    #     figure_path = os.path.join(sub_folder, file_name)
+    #     fig.savefig(figure_path)
 
 
     def calculate_sensitivity_statistics(self, data, mission_start_epoch, custom_mission_start_epoch=False, evaluation_threshold=14, include_annual=True):
@@ -93,6 +116,7 @@ class PlotSensitivityResults():
     def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True):
 
         self.save_figure = save_figure
+        self.save_table = save_table
         units = {
             "arc_duration": "[days]",
             "arc_interval": "[days]",
@@ -187,9 +211,9 @@ class PlotSensitivityResults():
                         full_estimation_error_history = np.stack(list(navigation_simulator.full_estimation_error_dict.values()))
                         full_estimation_error_histories.append(full_estimation_error_history)
 
-                        full_state_history_truth_history = np.stack(list(self.navigation_simulator.full_state_history_truth_dict.values()))
-                        full_state_history_reference_history = np.stack(list(self.navigation_simulator.full_state_history_reference_dict.values()))
-                        full_reference_state_deviation_epochs = np.stack(list(self.navigation_simulator.full_state_history_reference_dict.keys()))
+                        full_state_history_truth_history = np.stack(list(navigation_simulator.full_state_history_truth_dict.values()))
+                        full_state_history_reference_history = np.stack(list(navigation_simulator.full_state_history_reference_dict.values()))
+                        full_reference_state_deviation_epochs = np.stack(list(navigation_simulator.full_state_history_reference_dict.keys()))
                         full_reference_state_deviation_history = full_state_history_truth_history - full_state_history_reference_history
                         full_reference_state_deviation_histories.append(full_reference_state_deviation_history)
 
@@ -274,8 +298,8 @@ class PlotSensitivityResults():
                     ylabel = self.convert_key(sensitivity_type)
                     if sensitivity_type == "initial_estimation_error":
                         ylabel = "Estimation Error"
-                    if sensitivity_type == "orbit_inseration_error":
-                        ylabel = "Insertation Error"
+                    if sensitivity_type == "orbit_insertion_error":
+                        ylabel = "Insertion Error"
                     if sensitivity_type == "observation_interval":
                         ylabel = "Obs. Interval"
                     if sensitivity_type == "target_point_epochs":
@@ -320,10 +344,18 @@ class PlotSensitivityResults():
                     utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_sensitivity_analysis_{sensitivity_type}"], custom_sub_folder_name=self.file_name)
                     utils.save_figure_to_folder(figs=[fig1], labels=[f"{self.current_time}_sensitivity_analysis"], custom_sub_folder_name=self.file_name)
 
-        if save_table:
+                print(sensitivity_statistics)
+                if self.save_dict:
+                    utils.save_dict_to_folder(dicts=[sensitivity_statistics], labels=[f"{self.current_time}_sensitivity_analysis"], custom_sub_folder_name=self.file_name)
+
+        if self.save_table:
 
             sensitivity_statistics = {self.convert_key(key): value for key, value in sensitivity_statistics.items()}
-            table_generator = TableGenerator.TableGenerator()
+            table_generator = TableGenerator.TableGenerator(
+                table_settings={"save_table": True,
+                                "current_time": self.current_time,
+                                "file_name": self.file_name}
+            )
             table_generator.generate_sensitivity_analysis_table(
                 sensitivity_statistics,
                 file_name=f"{self.current_time}_sensitivity_analysis.tex"

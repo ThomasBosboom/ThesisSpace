@@ -32,8 +32,9 @@ class ProcessOptimizationResults():
 
 
     def load_from_json(self):
-        folder = os.path.join(os.path.dirname(__file__), "optimization_results")
-        filename=f'{self.time_tag}_optimization_results.json'
+        folder = os.path.join(os.path.dirname(__file__), "dicts")
+        folder = os.path.join(folder, "optimization_analysis")
+        filename=f'{self.time_tag}_optimization_analysis.json'
 
         file_path = os.path.join(folder, filename)
         with open(file_path, 'r') as file:
@@ -110,10 +111,11 @@ class ProcessOptimizationResults():
             }
         )
 
+        evaluation_threshold = self.optimization_results["evaluation_threshold"]
         process_multiple_navigation_results.plot_uncertainty_comparison()
         process_multiple_navigation_results.plot_maneuvre_costs()
-        process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
-        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None)
+        process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=evaluation_threshold)
+        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, bar_labeler=None)
 
         if self.save_table:
             table_generator = TableGenerator.TableGenerator(

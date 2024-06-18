@@ -24,7 +24,8 @@ from src import NavigationSimulator, ObjectiveFunctions
 from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
-run_optimization = False
+run_optimization = True
+time_tag = 202406172311
 if __name__ == "__main__":
 
     # tracemalloc.start()
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "step_size": 0.05,
+        "step_size": 0.5,
         "delta_v_min": 0.00,
     }
     navigation_simulator = NavigationSimulator.NavigationSimulator(
@@ -42,7 +43,7 @@ if __name__ == "__main__":
 
     objective_functions_settings = {
         "evaluation_threshold": 14,
-        "num_runs": 1,
+        "num_runs": 5,
         "seed": 0
     }
     objective_functions = ObjectiveFunctions.ObjectiveFunctions(
@@ -52,7 +53,7 @@ if __name__ == "__main__":
 
 
     optimization_model = OptimizationModel.OptimizationModel(
-        json_settings={"save_json": True, "current_time": current_time, "file_name": file_name},
+        json_settings={"save_dict": True, "current_time": current_time, "file_name": file_name},
         duration=28,
         arc_length=1,
         arc_interval=3,
@@ -60,51 +61,22 @@ if __name__ == "__main__":
         bounds=(-0.9, 0.9),
         optimization_method="Nelder-Mead",
         design_vector_type="arc_lengths",
-        initial_simplex_perturbation = -0.3,
+        initial_simplex_perturbation = -0.5,
         **navigation_simulator_settings,
         **objective_functions_settings
-        # custom_initial_design_vector= [
-        #             0.9142857142857144,
-        #             0.9142857142857144,
-        #             0.9142857142857144,
-        #             1.3,
-        #             0.9142857142857144,
-        #             0.9142857142857144,
-        #             0.9142857142857144
-        #         ]
     )
 
     if not run_optimization:
-
-        observation_windows = optimization_model.generate_observation_windows([
-                    0.95,
-                    0.9142857142857144,
-                    0.9142857142857144,
-                    1.3,
-                    0.9142857142857144,
-                    0.9142857142857144,
-                    0.9142857142857144
-                ])
-
-        print(observation_windows)
-        navigation_simulator.perform_navigation(observation_windows)
-        current_time = str(202406112013)
+        current_time = str(time_tag)
 
     else:
 
-        # Chose the objective function to optimize
+
+        # Choose the objective function to optimize
         # optimization_results = optimization_model.optimize(objective_functions.test)
-        optimization_results = optimization_model.optimize(objective_functions.station_keeping_cost)
+        # optimization_results = optimization_model.optimize(objective_functions.mean_station_keeping_cost)
+        optimization_results = optimization_model.optimize(objective_functions.worst_case_station_keeping_cost)
         # optimization_results = optimization_model.optimize(objective_functions.overall_uncertainty)
-
-    # snapshot = tracemalloc.take_snapshot()
-    # top_stats = snapshot.statistics('traceback')
-    # largest_allocation = max(top_stats, key=lambda stat: stat.size)
-
-    # # Display information about the largest allocation
-    # for line in largest_allocation.traceback.format():
-    #     print(line)
-
 
     process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(
         current_time,
@@ -118,9 +90,7 @@ if __name__ == "__main__":
 
     process_optimization_results.plot_iteration_history()
     process_optimization_results.plot_optimization_result_comparison(
-        show_observation_window_settings=False,
+        show_observation_window_settings=False
     )
 
     plt.show()
-
-

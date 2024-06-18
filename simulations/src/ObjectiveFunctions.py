@@ -42,7 +42,7 @@ class ObjectiveFunctions():
         return mean_cost
 
 
-    def station_keeping_cost(self, observation_windows):
+    def mean_station_keeping_cost(self, observation_windows):
 
         tracemalloc.start()
         snapshot1 = tracemalloc.take_snapshot()
@@ -75,6 +75,38 @@ class ObjectiveFunctions():
         return total_cost
 
 
+    def worst_case_station_keeping_cost(self, observation_windows):
+
+        tracemalloc.start()
+        snapshot1 = tracemalloc.take_snapshot()
+
+        cost_list = []
+        for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
+
+            print(f"Run {run+1} of {self.num_runs}, seed {seed}")
+
+            navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=seed)
+            navigation_simulator = navigation_output.navigation_simulator
+
+            delta_v_dict = navigation_simulator.delta_v_dict
+            delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+            delta_v_history = np.stack(list(delta_v_dict.values()))
+            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+self.evaluation_threshold)
+
+            cost_list.append(delta_v)
+            navigation_simulator.reset_attributes()
+
+            # # Take another snapshot after the function call
+            snapshot2 = tracemalloc.take_snapshot()
+            top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+            total_memory = sum(stat.size for stat in top_stats)
+            print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+
+        total_cost = np.mean(cost_list)*1+3*np.std(cost_list)
+
+        return total_cost
+
+
     def overall_uncertainty(self, observation_windows):
 
         navigation_simulator = self.navigation_simulator.perform_navigation(observation_windows, seed=self.seed).navigation_simulator
@@ -91,6 +123,6 @@ class ObjectiveFunctions():
 
             beta_aves.append(beta_ave)
 
-        # self.reset_navigation_simulator()
+        navigation_simulator.reset_attributes()
 
         return beta_aves[0]
