@@ -25,7 +25,8 @@ from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
 run_optimization = True
-time_tag = 202406172311
+custom_input = False
+time_tag = 202406191718
 if __name__ == "__main__":
 
     # tracemalloc.start()
@@ -63,13 +64,23 @@ if __name__ == "__main__":
         design_vector_type="arc_lengths",
         initial_simplex_perturbation = -0.5,
         **navigation_simulator_settings,
-        **objective_functions_settings
+        **objective_functions_settings,
     )
 
     if not run_optimization:
         current_time = str(time_tag)
 
     else:
+
+        if custom_input:
+            current_time = str(time_tag)
+            optimization_results = optimization_model.load_from_json(current_time)
+            optimization_model = OptimizationModel.OptimizationModel(custom_input=optimization_results)
+
+
+        import psutil
+        # process = psutil.Process()
+        print(psutil.virtual_memory())
 
 
         # Choose the objective function to optimize

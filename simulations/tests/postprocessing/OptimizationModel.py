@@ -285,7 +285,7 @@ from tests import utils
 
 class OptimizationModel:
 
-    def __init__(self, json_settings={"save_dict": True, "current_time": float, "file_name": str}, **kwargs):
+    def __init__(self, json_settings={"save_dict": True, "current_time": float, "file_name": str}, custom_input={}, **kwargs):
 
         self.duration = 28
         self.arc_length = 1
@@ -305,7 +305,7 @@ class OptimizationModel:
         self.initial_objective_value = None
         self.best_objective_value = None
         self.latest_objective_value = None
-        self.latest_simplex = []
+        self.best_simplex = []
         self.run_counter = 0
         self.total_run_counter = 0
         self.num_runs = 1
@@ -319,9 +319,29 @@ class OptimizationModel:
         for key, value in json_settings.items():
             setattr(self, key, value)
 
+        self.custom_input = custom_input
+        if custom_input:
+            print("been here")
+            for key, value in custom_input.items():
+                print(key)
+                setattr(self, key, value)
+
+        # print(vars(self))
+
+
+    def load_from_json(self, time_tag):
+        folder = os.path.join(os.path.dirname(__file__), "dicts")
+        folder = os.path.join(folder, "optimization_analysis")
+        filename=f'{time_tag}_optimization_analysis.json'
+
+        file_path = os.path.join(folder, filename)
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+
+        return data
+
 
     def save_to_json(self):
-
         if self.save_dict:
             utils.save_dict_to_folder(dicts=[vars(self)], labels=[f"{self.current_time}_optimization_analysis"], custom_sub_folder_name=self.file_name)
 
@@ -443,13 +463,18 @@ class OptimizationModel:
                 self.best_design_vector = np.copy(design_vector).tolist()
                 self.best_observation_windows = observation_windows
 
-            self.save_to_json()
-
             print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value} \nObservation windows: \n {observation_windows}")
             print("==============")
 
             self.run_counter += 1
-            self.latest_simplex.append(design_vector.tolist())
+            self.best_simplex.append(design_vector.tolist())
+            self.best_simplex = self.best_simplex[-len(design_vector)-1:]
+
+            self.save_to_json()
+
+
+            import psutil
+            print(psutil.virtual_memory())
 
             return objective_value
 
@@ -459,13 +484,12 @@ class OptimizationModel:
             self.iteration += 1
             self.total_run_counter += self.run_counter
             self.run_counter = 0
-            self.latest_simplex = self.latest_simplex[-len(x):]
 
-            print(f"Callback iteration {self.iteration} =================")
-            print(f"Design vector: \n", self.best_design_vector)
-            print(f"Objective value: \n", self.best_objective_value)
-            print(f"Reduction: \n", (self.best_objective_value-self.initial_objective_value)/self.initial_objective_value*100)
-            print("===========================")
+            # print(f"Callback iteration {self.iteration} =================")
+            # print(f"Design vector: \n", self.best_design_vector)
+            # print(f"Objective value: \n", self.best_objective_value)
+            # print(f"Reduction: \n", (self.best_objective_value-self.initial_objective_value)/self.initial_objective_value*100)
+            # print("===========================")
 
             # Only save the final result of each iteration
             self.iteration_history[self.iteration] = {
@@ -474,19 +498,19 @@ class OptimizationModel:
                     'reduction': (self.best_objective_value-self.initial_objective_value)/self.initial_objective_value*100
                 }
 
-
         # Initialize the design vector with the maximum number of arcs
-        self.initial_design_vector = self.custom_initial_design_vector
-        if self.custom_initial_design_vector is None:
-            self.initial_design_vector = self.generate_initial_design_vector()
+        self.initial_design_vector = self.generate_initial_design_vector()
+        if self.custom_input:
+            # print("BEST VECTOR:", self.best_design_vector)
+            self.initial_design_vector = self.best_design_vector
 
         # Define bounds for the design vector entries
         self.bounds_vector = [(state+self.bounds[0], state+self.bounds[1]) for state in self.generate_initial_design_vector()]
 
         # Adjust the initial simplex for better convergence
-        self.initial_simplex = self.custom_initial_simplex
-        if self.custom_initial_design_vector is None:
-            self.initial_simplex = self.generate_initial_simplex(self.initial_design_vector)
+        self.initial_simplex = self.generate_initial_simplex(self.initial_design_vector)
+        if self.custom_input:
+            self.initial_simplex = self.best_simplex
         self.options.update({"initial_simplex": self.initial_simplex})
 
         # Define the initial observation windows

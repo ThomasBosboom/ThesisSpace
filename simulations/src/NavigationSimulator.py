@@ -18,6 +18,8 @@ import ReferenceData, Interpolator, StationKeeping, EstimationModel
 from NavigationSimulatorBase import NavigationSimulatorBase
 from tudatpy.kernel import constants
 
+import gc
+
 class NavigationSimulator(NavigationSimulatorBase):
 
     def __init__(self, **kwargs):
@@ -68,8 +70,9 @@ class NavigationSimulator(NavigationSimulatorBase):
                 if key not in self._initial_attrs.keys():
                     delattr(self, key)
 
+        # gc.collect()
 
-    # @profile
+
     def perform_navigation(self, observation_windows, seed=0):
 
         # tracemalloc.start()
@@ -312,28 +315,10 @@ class NavigationSimulator(NavigationSimulatorBase):
         return NavigationOutput(self)
 
 
-
 class NavigationOutput():
 
     def __init__(self, navigation_simulator, **required_attributes):
-
         self.navigation_simulator = navigation_simulator
-        # self.navigation_simulator.reset_attributes()
-
-        # if required_attributes:
-
-        #     # Reset the attributes with keep only the relevant dictionaries for the optimization routine
-        #     _initial_attrs = self.navigation_simulator._initial_attrs.copy()
-        #     remaining_dict = {"_initial_attrs": _initial_attrs}
-        #     for key, value in vars(self.navigation_simulator).items():
-        #         if key in _initial_attrs:
-        #             remaining_dict[key] = value
-        #     self.navigation_simulator.__dict__.clear()
-        #     for key, value in remaining_dict.items():
-        #         setattr(self.navigation_simulator, key, value)
-        #     for key, value in required_attributes.items():
-        #         setattr(self.navigation_simulator, key, value)
-
 
 
 if __name__ == "__main__":
@@ -342,7 +327,6 @@ if __name__ == "__main__":
     # snapshot1 = tracemalloc.take_snapshot()
     navigation_simulator = NavigationSimulator(run_optimization_version=True, step_size=0.5)
     #     # Take another snapshot after the function call
-    # snapshot2 = tracemalloc.take_snapshot()
 
     # # Compare the two snapshots
     # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
@@ -359,10 +343,12 @@ if __name__ == "__main__":
     tracemalloc.start()
     snapshot1 = tracemalloc.take_snapshot()
     cost_list = []
-    for i in [0, 1, 2]:
+    for i in [0, 1]:
 
         navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
         navigation_simulator = navigation_output.navigation_simulator
+        full_propagated_covariance_dict = navigation_simulator.full_propagated_covariance_dict
+        print(len(full_propagated_covariance_dict))
 
         delta_v_dict = navigation_simulator.delta_v_dict
         delta_v_epochs = np.stack(list(delta_v_dict.keys()))
@@ -372,14 +358,14 @@ if __name__ == "__main__":
         cost_list.append(delta_v)
         print(cost_list)
 
-        navigation_simulator.reset_attributes()
+        # navigation_simulator.reset_attributes()
 
         # # Take another snapshot after the function call
         snapshot2 = tracemalloc.take_snapshot()
         top_stats = snapshot2.compare_to(snapshot1, 'lineno')
 
         print("[ Top 5 differences ]")
-        for stat in top_stats[:5]:
+        for stat in top_stats[:10]:
             print(stat)
         total_memory = sum(stat.size for stat in top_stats)
         print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")

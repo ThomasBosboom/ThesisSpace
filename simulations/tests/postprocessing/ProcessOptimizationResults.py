@@ -23,24 +23,16 @@ class ProcessOptimizationResults():
     def __init__(self, time_tag, optimization_model, save_settings={"save_table": True, "save_figure": False, "current_time": float, "file_name": str}, **kwargs):
 
         self.time_tag = str(time_tag)
-        self.optimization_results = self.load_from_json()
         self.optimization_model = optimization_model
+        self.optimization_results = self.optimization_model.load_from_json(time_tag)
+
 
         for key, value in save_settings.items():
             if save_settings["save_table"] or save_settings["save_figure"]:
                 setattr(self, key, value)
 
 
-    def load_from_json(self):
-        folder = os.path.join(os.path.dirname(__file__), "dicts")
-        folder = os.path.join(folder, "optimization_analysis")
-        filename=f'{self.time_tag}_optimization_analysis.json'
 
-        file_path = os.path.join(folder, filename)
-        with open(file_path, 'r') as file:
-            data = json.load(file)
-
-        return data
 
 
     def plot_iteration_history(self):

@@ -77,8 +77,8 @@ class ObjectiveFunctions():
 
     def worst_case_station_keeping_cost(self, observation_windows):
 
-        tracemalloc.start()
-        snapshot1 = tracemalloc.take_snapshot()
+        # tracemalloc.start()
+        # snapshot1 = tracemalloc.take_snapshot()
 
         cost_list = []
         for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
@@ -97,10 +97,13 @@ class ObjectiveFunctions():
             navigation_simulator.reset_attributes()
 
             # # Take another snapshot after the function call
-            snapshot2 = tracemalloc.take_snapshot()
-            top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-            total_memory = sum(stat.size for stat in top_stats)
-            print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+            # snapshot2 = tracemalloc.take_snapshot()
+            # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+            # total_memory = sum(stat.size for stat in top_stats)
+            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+
+            import psutil
+            print(psutil.virtual_memory())
 
         total_cost = np.mean(cost_list)*1+3*np.std(cost_list)
 
