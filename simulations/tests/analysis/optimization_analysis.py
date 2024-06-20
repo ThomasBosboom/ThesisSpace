@@ -26,7 +26,7 @@ from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 run_optimization = True
 custom_input = False
-time_tag = 202406191718
+time_tag = 202406192250
 if __name__ == "__main__":
 
     # tracemalloc.start()
@@ -71,23 +71,18 @@ if __name__ == "__main__":
         current_time = str(time_tag)
 
     else:
-
         if custom_input:
             current_time = str(time_tag)
             optimization_results = optimization_model.load_from_json(current_time)
             optimization_model = OptimizationModel.OptimizationModel(custom_input=optimization_results)
 
-
         import psutil
-        # process = psutil.Process()
         print(psutil.virtual_memory())
 
-
         # Choose the objective function to optimize
-        # optimization_results = optimization_model.optimize(objective_functions.test)
-        # optimization_results = optimization_model.optimize(objective_functions.mean_station_keeping_cost)
-        optimization_results = optimization_model.optimize(objective_functions.worst_case_station_keeping_cost)
-        # optimization_results = optimization_model.optimize(objective_functions.overall_uncertainty)
+        objective_function = objective_functions.worst_case_station_keeping_cost
+        optimization_results = optimization_model.optimize(objective_function)
+
 
     process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(
         current_time,
@@ -99,9 +94,9 @@ if __name__ == "__main__":
         }
     )
 
-    process_optimization_results.plot_iteration_history()
-    process_optimization_results.plot_optimization_result_comparison(
-        show_observation_window_settings=False
-    )
+    process_optimization_results.plot_iteration_history(compare_time_tags=[])
+    # process_optimization_results.plot_optimization_result_comparison(
+    #     show_observation_window_settings=False
+    # )
 
     plt.show()

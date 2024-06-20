@@ -2,7 +2,6 @@
 import os
 import sys
 import copy
-import pytest_html
 import numpy as np
 import time
 import json

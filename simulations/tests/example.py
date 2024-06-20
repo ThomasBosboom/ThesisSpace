@@ -1,6 +1,26 @@
-import tracemalloc
 import numpy as np
+import os
+import sys
+import numpy as np
+import copy
+# import tracemalloc
+# from memory_profiler import profile
 
+# Define path to import src files
+file_directory = os.path.realpath(__file__)
+for _ in range(2):
+    file_directory = os.path.dirname(file_directory)
+    sys.path.append(file_directory)
+
+from src import NavigationSimulator
+
+navigation_simulator = NavigationSimulator.NavigationSimulator()
+observation_windows = observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
+
+for i in range(3):
+    navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
+    navigation_simulator = navigation_output.navigation_simulator
+    print(navigation_simulator.delta_v_dict)
 
 
 class Interpolator:
@@ -84,14 +104,14 @@ class DataOutput():
 # Create an instance of DataProcessor
 processor = DataProcessor()
 
-# Start tracing memory allocations
-tracemalloc.start()
+# # Start tracing memory allocations
+# tracemalloc.start()
 
-# Take an initial snapshot before the loop
-initial_snapshot = tracemalloc.take_snapshot()
+# # Take an initial snapshot before the loop
+# initial_snapshot = tracemalloc.take_snapshot()
 
-# Initialize a variable to accumulate memory usage differences
-total_memory_diff = 0
+# # Initialize a variable to accumulate memory usage differences
+# total_memory_diff = 0
 
 
 saved_data = []
@@ -105,18 +125,19 @@ for i, value in enumerate(range(10)):
 
     data_output.data_processor.reset_attributes()
 
+    print("been here")
     # Take a snapshot after each iteration
-    snapshot = tracemalloc.take_snapshot()
+    # snapshot = tracemalloc.take_snapshot()
 
-    # Compare the snapshot to the initial snapshot
-    top_stats = snapshot.compare_to(initial_snapshot, 'lineno')
+#     # Compare the snapshot to the initial snapshot
+#     top_stats = snapshot.compare_to(initial_snapshot, 'lineno')
 
-    if top_stats:
-        # Calculate the total memory difference
-        total_memory_diff = sum(stat.size_diff for stat in top_stats)
-        print(f"[Iteration {i + 1}] Top memory usage difference:")
-        print(top_stats[0])  # Print only the top 1 memory usage difference
-        print(f"Total memory difference: {total_memory_diff / 1024:.2f} KiB")
+#     if top_stats:
+#         # Calculate the total memory difference
+#         total_memory_diff = sum(stat.size_diff for stat in top_stats)
+#         print(f"[Iteration {i + 1}] Top memory usage difference:")
+#         print(top_stats[0])  # Print only the top 1 memory usage difference
+#         print(f"Total memory difference: {total_memory_diff / 1024:.2f} KiB")
 
-# Stop tracing memory allocations
-tracemalloc.stop()
+# # Stop tracing memory allocations
+# tracemalloc.stop()

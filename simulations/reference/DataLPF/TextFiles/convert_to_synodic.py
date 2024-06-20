@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 file_path = os.path.realpath(__file__)
 file_path = os.path.dirname(file_path)
-cut_value = 60390+1
-step_size = 0.01
+cut_value = 60390+50
+step_size = 0.05
 
 state_histories = {}
 for body in ["LPF", "Moon"]:

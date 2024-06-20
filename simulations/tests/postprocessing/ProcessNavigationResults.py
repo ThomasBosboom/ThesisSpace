@@ -1372,7 +1372,6 @@ class PlotMultipleNavigationResults():
                     colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
                             for i, (g_name, values) in enumerate(data.items())}
 
-                print(plot_index)
                 ax[plot_index].grid(alpha=0.5)
                 ax[plot_index].set_xticks(group_centers)
                 ax[plot_index].set_xlabel("Tracking window scenario")

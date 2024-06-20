@@ -17,7 +17,6 @@ class ObjectiveFunctions():
     def __init__(self, navigation_simulator, **kwargs):
 
         self.navigation_simulator = navigation_simulator
-        # self.default_navigation_simulator = copy.deepcopy(navigation_simulator)
         self.evaluation_threshold = 14
         self.num_runs = 2
         self.seed = 0
@@ -25,10 +24,6 @@ class ObjectiveFunctions():
         for key, value in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-
-
-    # def reset_navigation_simulator(self):
-    #     self.navigation_simulator.__dict__ = copy.deepcopy(self.default_navigation_simulator.__dict__)
 
 
     def test(self, observation_windows):

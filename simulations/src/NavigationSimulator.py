@@ -3,8 +3,8 @@ import os
 import sys
 import numpy as np
 import copy
-import tracemalloc
-from memory_profiler import profile
+# import tracemalloc
+# from memory_profiler import profile
 
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
@@ -18,10 +18,11 @@ import ReferenceData, Interpolator, StationKeeping, EstimationModel
 from NavigationSimulatorBase import NavigationSimulatorBase
 from tudatpy.kernel import constants
 
-import gc
+# import gc
 
 class NavigationSimulator(NavigationSimulatorBase):
 
+    # @profile
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -72,14 +73,14 @@ class NavigationSimulator(NavigationSimulatorBase):
 
         # gc.collect()
 
-
+    # @profile
     def perform_navigation(self, observation_windows, seed=0):
 
         # tracemalloc.start()
 
         # snapshot1 = tracemalloc.take_snapshot()
 
-        print("step size here: ", self.step_size)
+        # print("step size here: ", self.step_size)
 
         self.seed = seed
         rng = np.random.default_rng(seed=self.seed)
@@ -148,6 +149,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             ##############################################################
             #### PROPAGATIONS OF STATE HISTORIES #########################
             ##############################################################
+            # print("reached state histories")
 
             # Obtain the initial state of the whole simulation once
             state_history_reference = list()
@@ -155,6 +157,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                 state_history_reference.append(self.reference_data.get_reference_state_history(
                     time, navigation_arc_duration, satellite=body, get_full_history=True))
             state_history_reference = np.concatenate(state_history_reference, axis=1)
+            # print("after")
 
             if navigation_arc == 0:
                 self.custom_initial_state_truth = truth_model.initial_state + self.orbit_insertion_error
@@ -168,6 +171,7 @@ class NavigationSimulator(NavigationSimulatorBase):
 
             epochs, state_history_truth, dependent_variables_history_truth = \
                 self.interpolator.get_propagation_results(truth_model, solve_variational_equations=False)
+            # print("interpolations")
 
             if self.propagate_dynamics_linearly:
                 state_history_estimated = state_history_truth + np.dot(state_transition_matrix_history_estimated, self.custom_initial_state-self.custom_initial_state_truth)
@@ -185,6 +189,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             ##############################################################
             #### LOOP FOR ESTIMATION ARCS ################################
             ##############################################################
+            # print("reached estimator")
             estimation_arc_activated = False
             if time in self.batch_start_times:
 
@@ -219,8 +224,9 @@ class NavigationSimulator(NavigationSimulatorBase):
                         propagated_formal_errors_final.update({epochs_final[i]: np.sqrt(np.diagonal(propagated_covariance))})
 
                 # Save the results relevant to the estimation arc
-                self.full_state_history_final_dict.update(dict(zip(epochs_final, state_history_final)))
-                self.estimation_arc_results_dict.update({estimation_arc: estimation_model_result})
+                if not self.run_optimization_version:
+                    self.full_state_history_final_dict.update(dict(zip(epochs_final, state_history_final)))
+                    self.estimation_arc_results_dict.update({estimation_arc: estimation_model_result})
 
                 self.maximum_iterations = maximum_iterations
 
@@ -323,49 +329,41 @@ class NavigationOutput():
 
 if __name__ == "__main__":
 
-    # tracemalloc.start()
-    # snapshot1 = tracemalloc.take_snapshot()
-    navigation_simulator = NavigationSimulator(run_optimization_version=True, step_size=0.5)
-    #     # Take another snapshot after the function call
+    # @profile
+    def simulate_runs():
 
-    # # Compare the two snapshots
-    # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+        # tracemalloc.start()
+        # snapshot1 = tracemalloc.take_snapshot()
+        navigation_simulator = NavigationSimulator(run_optimization_version=False, step_size=0.5)
+        observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
+        # observation_windows = [(60390, 60391.0), (60394.0, 60395.0)]
 
-    # print("[ Top 5 differences ]")
-    # for stat in top_stats[:5]:
-    #     print(stat)
-    # total_memory = sum(stat.size for stat in top_stats)
-    # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+        cost_list = []
+        for i in [0, 1, 2]:
 
-    observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
-    # observation_windows = [(60390, 60391.0), (60394.0, 60395.0)]
+            navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
+            navigation_simulator = navigation_output.navigation_simulator
 
-    tracemalloc.start()
-    snapshot1 = tracemalloc.take_snapshot()
-    cost_list = []
-    for i in [0, 1]:
+            delta_v_dict = navigation_simulator.delta_v_dict
+            delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+            delta_v_history = np.stack(list(delta_v_dict.values()))
+            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+0)
 
-        navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
-        navigation_simulator = navigation_output.navigation_simulator
-        full_propagated_covariance_dict = navigation_simulator.full_propagated_covariance_dict
-        print(len(full_propagated_covariance_dict))
+            cost_list.append(delta_v)
+            print(cost_list)
 
-        delta_v_dict = navigation_simulator.delta_v_dict
-        delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-        delta_v_history = np.stack(list(delta_v_dict.values()))
-        delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+0)
+            navigation_simulator.reset_attributes()
 
-        cost_list.append(delta_v)
-        print(cost_list)
+            # Take another snapshot after the function call
+            # snapshot2 = tracemalloc.take_snapshot()
+            # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
 
-        # navigation_simulator.reset_attributes()
+            # print("[ Top 5 differences ]")
+            # for stat in top_stats[:10]:
+            #     print(stat)
+            # total_memory = sum(stat.size for stat in top_stats)
+            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
 
-        # # Take another snapshot after the function call
-        snapshot2 = tracemalloc.take_snapshot()
-        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
 
-        print("[ Top 5 differences ]")
-        for stat in top_stats[:10]:
-            print(stat)
-        total_memory = sum(stat.size for stat in top_stats)
-        print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+    for _ in range(2):
+        simulate_runs()

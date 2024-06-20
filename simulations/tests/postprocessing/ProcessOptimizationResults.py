@@ -4,6 +4,7 @@ import sys
 import json
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 # Define path to import src files
 file_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -26,52 +27,46 @@ class ProcessOptimizationResults():
         self.optimization_model = optimization_model
         self.optimization_results = self.optimization_model.load_from_json(time_tag)
 
-
         for key, value in save_settings.items():
             if save_settings["save_table"] or save_settings["save_figure"]:
                 setattr(self, key, value)
 
 
-
-
-
-    def plot_iteration_history(self):
-
-        iteration_history = self.optimization_results["iteration_history"]
-
-        iterations = list(map(str, iteration_history.keys()))
-        design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
-        objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
-        reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
+    def plot_iteration_history(self, compare_time_tags=[]):
 
         # Plot the objective values over the iterations
         fig, axs = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
         axs_twin = axs[0].twinx()
         marker = None
 
-        axs[0].plot(iterations, objective_values, marker=marker, color='b')
-        # axs[0].set_xlabel('Iteration')
-        axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
-        # axs[0].set_title('Objective values')
-        axs[0].grid(alpha=0.5, linestyle='--', which='both')
-        # axs[0].set_ylim((min(objective_values), max(objective_values)))
+        iteration_histories = [self.optimization_results["iteration_history"]]
+        for time_tag in compare_time_tags:
+            optimization_results = self.optimization_model.load_from_json(time_tag)
+            iteration_histories.append(optimization_results["iteration_history"])
 
-        axs_twin.plot(iterations, reduction, marker=marker, color='b')
-        # axs[0].set_xlabel('Iteration')
+        for iteration_history in iteration_histories:
+            iterations = list(map(str, iteration_history.keys()))
+            design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
+            objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
+            reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
+
+            axs[0].plot(iterations, objective_values, marker=marker)
+            axs_twin.plot(iterations, reduction, marker=marker)
+
+
+        axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
+        axs[0].grid(alpha=0.5, linestyle='--', which='both')
         axs_twin.set_ylabel("Reduction [%]")
-        # axs_twin.set_ylim((min(reduction), max(reduction)))
 
         for i in range(design_vectors.shape[1]):
             axs[1].plot(iterations, design_vectors[:, i], marker=marker, label=f'$T_{i+1}$')
         axs[1].set_xlabel('Iteration')
         axs[1].set_ylabel("Design variables [days]")
-        # axs[1].set_title('Design vector history')
         axs[1].grid(alpha=0.5, linestyle='--', which='both')
-        axs[1].set_xticks(iterations[::5])
+        axs[1].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
 
         axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=5, fontsize="small", title="Design variables")
         plt.tight_layout()
-        # plt.show()
 
 
     def plot_optimization_result_comparison(self, show_observation_window_settings=False):

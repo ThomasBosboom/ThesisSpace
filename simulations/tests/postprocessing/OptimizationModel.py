@@ -415,7 +415,7 @@ class OptimizationModel:
 
         return initial_simplex.tolist()
 
-
+    @profile
     def optimize(self, objective_function):
 
         def constraints(design_vector):
@@ -425,7 +425,6 @@ class OptimizationModel:
                 return np.inf
             else:
                 return 0
-
 
         def objective(design_vector):
 

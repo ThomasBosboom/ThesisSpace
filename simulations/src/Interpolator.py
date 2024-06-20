@@ -58,7 +58,7 @@ class Interpolator:
         if solve_variational_equations:
              # Extract the variational_equations_solver results
             epochs                          = np.stack(list(variational_equations_solver.state_transition_matrix_history.keys()))
-            state_transition_matrix_history = np.stack(list(variational_equations_solver.state_transition_matrix_history.values()), dtype=np.float32)
+            state_transition_matrix_history = np.stack(list(variational_equations_solver.state_transition_matrix_history.values()))
 
             # Perform interpolation
             interp_state_transition_matrix_history = self.get_interp_history(epochs, interp_epochs, state_transition_matrix_history)
@@ -66,7 +66,7 @@ class Interpolator:
         # Perform interpolation using on the results from dynamics_simulator
         epochs                          = np.stack(list(dynamics_simulator.state_history.keys()))
         state_history                   = np.stack(list(dynamics_simulator.state_history.values()))
-        dependent_variables_history     = np.stack(list(dynamics_simulator.dependent_variable_history.values()), dtype=np.float32)
+        dependent_variables_history     = np.stack(list(dynamics_simulator.dependent_variable_history.values()))
 
         # Perform interpolation
         interp_state_history = self.get_interp_history(epochs, interp_epochs, state_history)
@@ -77,11 +77,11 @@ class Interpolator:
                 time_conversion.seconds_since_epoch_to_julian_day(interp_epoch)) for interp_epoch in interp_epochs])
             # print("Epoch in interpolator: ", interp_epochs[0], interp_epochs[-1], len(interp_epochs))
 
+        # print(np.shape(interp_epochs), np.shape(interp_state_history), np.shape(interp_dependent_variables_history))
         if solve_variational_equations:
             return interp_epochs, interp_state_history, interp_dependent_variables_history, interp_state_transition_matrix_history
         else:
             return interp_epochs, interp_state_history, interp_dependent_variables_history
-
 
 
 if __name__ == "__main__":
