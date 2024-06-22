@@ -1,13 +1,13 @@
 import numpy as np
+import scipy as sp
 import os
 import sys
 import copy
-import scipy as sp
 import json
+import itertools
 from datetime import datetime
 import matplotlib.pyplot as plt
-import tracemalloc
-from memory_profiler import profile
+import psutil
 
 # Define path to import src files
 file_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -24,79 +24,108 @@ from src import NavigationSimulator, ObjectiveFunctions
 from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
-run_optimization = True
-custom_input = False
-time_tag = 202406192250
+def generate_case_time_tag(case, custom_time=False):
+    params_str = "_".join(f"{k}_{v:.2f}".replace('.', '_') for k, v in case.items())
+    time = current_time
+    if custom_time is not False:
+        time = custom_time
+    return f"{time}_{params_str}"
+
+
 if __name__ == "__main__":
 
-    # tracemalloc.start()
+    ##############################################################
+    #### Optimization settings ###################################
+    ##############################################################
+
+    run_optimization = True
+    custom_input = False
+    custom_time_tag = 202406211756
+
+    cases = {
+        "delta_v_min": [0.00, 0.01, 0.02],
+        # "station_keeping_error": [0.00, 0.01]
+    }
 
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "step_size": 0.5,
-        "delta_v_min": 0.00,
+        "step_size": 0.5
     }
-    navigation_simulator = NavigationSimulator.NavigationSimulator(
-        **navigation_simulator_settings
-    )
-
 
     objective_functions_settings = {
         "evaluation_threshold": 14,
-        "num_runs": 5,
+        "num_runs": 1,
         "seed": 0
     }
-    objective_functions = ObjectiveFunctions.ObjectiveFunctions(
-        navigation_simulator,
-        **objective_functions_settings
-    )
 
+    optimization_model_settings = {
+        "duration": 28,
+        "arc_length": 1,
+        "arc_interval": 3,
+        "max_iterations": 20,
+        "bounds": (-0.9, 0.9),
+        "design_vector_type": "arc_lengths",
+        "initial_simplex_perturbation": -0.5,
+    }
 
-    optimization_model = OptimizationModel.OptimizationModel(
-        json_settings={"save_dict": True, "current_time": current_time, "file_name": file_name},
-        duration=28,
-        arc_length=1,
-        arc_interval=3,
-        max_iterations=100,
-        bounds=(-0.9, 0.9),
-        optimization_method="Nelder-Mead",
-        design_vector_type="arc_lengths",
-        initial_simplex_perturbation = -0.5,
-        **navigation_simulator_settings,
-        **objective_functions_settings,
-    )
+    keys, values = zip(*cases.items())
+    combinations = [dict(zip(keys, v)) for v in itertools.product(*values)]
 
-    if not run_optimization:
-        current_time = str(time_tag)
+    time_tags = []
+    for case in combinations:
 
-    else:
+        time_tag = generate_case_time_tag(case)
         if custom_input:
-            current_time = str(time_tag)
-            optimization_results = optimization_model.load_from_json(current_time)
+            time_tag = generate_case_time_tag(case, custom_time=custom_time_tag)
+        time_tags.append(time_tag)
+
+        navigation_simulator_settings.update(case)
+        navigation_simulator = NavigationSimulator.NavigationSimulator(
+            **navigation_simulator_settings
+        )
+
+        objective_functions = ObjectiveFunctions.ObjectiveFunctions(
+            navigation_simulator,
+            **objective_functions_settings
+        )
+
+        optimization_model_settings.update({"json_settings": {"save_dict": True, "current_time": time_tag, "file_name": file_name}})
+        optimization_model = OptimizationModel.OptimizationModel(
+            **optimization_model_settings,
+            **navigation_simulator_settings,
+            **objective_functions_settings,
+        )
+
+        if custom_input:
+            optimization_results = optimization_model.load_from_json(time_tag=time_tag, folder_name="optimization_analysis")
+            optimization_results.update(optimization_model_settings)
             optimization_model = OptimizationModel.OptimizationModel(custom_input=optimization_results)
 
-        import psutil
-        print(psutil.virtual_memory())
+            print(psutil.virtual_memory())
 
         # Choose the objective function to optimize
         objective_function = objective_functions.worst_case_station_keeping_cost
         optimization_results = optimization_model.optimize(objective_function)
 
+        if not run_optimization:
+            optimization_results = optimization_model.load_from_json(time_tag=time_tag)
 
-    process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(
-        current_time,
-        optimization_model,
-        save_settings={"save_table": True,
-                       "save_figure": True,
-                       "current_time": current_time,
-                       "file_name": file_name
-        }
-    )
+        process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(
+            time_tag,
+            optimization_model,
+            save_settings={"save_table": True,
+                        "save_figure": True,
+                        "current_time": time_tag,
+                        "file_name": file_name
+            }
+        )
 
-    process_optimization_results.plot_iteration_history(compare_time_tags=[])
-    # process_optimization_results.plot_optimization_result_comparison(
-    #     show_observation_window_settings=False
-    # )
+        process_optimization_results.plot_iteration_history(compare_time_tags=[])
+        process_optimization_results.plot_optimization_result_comparison(
+            show_observation_window_settings=False
+        )
+
+    process_optimization_results.plot_iteration_history(compare_time_tags=time_tags)
 
     plt.show()

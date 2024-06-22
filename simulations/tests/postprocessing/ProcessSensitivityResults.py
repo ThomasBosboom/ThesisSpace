@@ -17,7 +17,7 @@ from tests.postprocessing import TableGenerator
 
 class PlotSensitivityResults():
 
-    def __init__(self, navigation_outputs_sensitivity, figure_settings={"save_dict": True, "save_table": True, "save_figure": False, "current_time": float, "file_name": str}):
+    def __init__(self, navigation_outputs_sensitivity, figure_settings={"save_dict": True, "save_table": True, "save_figure": True, "current_time": float, "file_name": str}):
 
         self.navigation_outputs_sensitivity = navigation_outputs_sensitivity
         for key, value in figure_settings.items():
@@ -352,7 +352,7 @@ class PlotSensitivityResults():
 
             sensitivity_statistics = {self.convert_key(key): value for key, value in sensitivity_statistics.items()}
             table_generator = TableGenerator.TableGenerator(
-                table_settings={"save_table": True,
+                table_settings={"save_table": self.save_table,
                                 "current_time": self.current_time,
                                 "file_name": self.file_name}
             )

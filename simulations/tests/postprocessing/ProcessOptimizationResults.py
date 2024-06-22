@@ -18,6 +18,7 @@ for _ in range(5):
 
 from tests.postprocessing import TableGenerator, ProcessNavigationResults
 from tests.analysis import helper_functions
+from tests import utils
 
 class ProcessOptimizationResults():
 
@@ -40,6 +41,7 @@ class ProcessOptimizationResults():
         marker = None
 
         iteration_histories = [self.optimization_results["iteration_history"]]
+        initial_design_vector = self.optimization_results["initial_design_vector"]
         for time_tag in compare_time_tags:
             optimization_results = self.optimization_model.load_from_json(time_tag)
             iteration_histories.append(optimization_results["iteration_history"])
@@ -65,8 +67,14 @@ class ProcessOptimizationResults():
         axs[1].grid(alpha=0.5, linestyle='--', which='both')
         axs[1].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
 
-        axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=5, fontsize="small", title="Design variables")
+        axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(initial_design_vector), fontsize="small", title="Design variables")
         plt.tight_layout()
+
+        if self.save_figure:
+            if not compare_time_tags:
+                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_iteration_history_optimization_analysis"], custom_sub_folder_name=self.file_name)
+            if compare_time_tags:
+                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_compared_iteration_history_optimization_analysis"], custom_sub_folder_name=self.file_name)
 
 
     def plot_optimization_result_comparison(self, show_observation_window_settings=False):
@@ -112,5 +120,5 @@ class ProcessOptimizationResults():
             current_time = self.optimization_results["current_time"]
             table_generator.generate_optimization_analysis_table(
                 self.optimization_results,
-                file_name=f"{current_time}_optimization_analysis.tex"
+                file_name=f"test_{current_time}_optimization_analysis.tex"
             )
