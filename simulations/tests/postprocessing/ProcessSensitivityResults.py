@@ -30,30 +30,6 @@ class PlotSensitivityResults():
         return ' '.join(words)
 
 
-    # def save_to_json(self, data, folder_name='dictionaries'):
-
-    #     filename=f'{self.current_time}_sensitivity_analysis_results.json'
-
-    #     folder = os.path.join(os.path.dirname(__file__), "sensitivity_analysis_results")
-    #     if not os.path.exists(folder):
-    #         os.makedirs(folder)
-
-    #     file_path = os.path.join(folder, filename)
-    #     with open(file_path, 'w') as file:
-    #         json.dump(data, file, indent=4)
-
-
-    #     dict_folder = os.path.join(file_path, folder_name)
-    #     if not os.path.exists(dict_folder):
-    #         os.makedirs(dict_folder, exist_ok=True)
-    #     sub_folder = os.path.join(dict_folder, sub_folder_name)
-    #     print(sub_folder)
-    #     if not os.path.exists(sub_folder):
-    #         os.makedirs(sub_folder, exist_ok=True)
-    #     figure_path = os.path.join(sub_folder, file_name)
-    #     fig.savefig(figure_path)
-
-
     def calculate_sensitivity_statistics(self, data, mission_start_epoch, custom_mission_start_epoch=False, evaluation_threshold=14, include_annual=True):
 
         result_dict = {}
@@ -341,12 +317,13 @@ class PlotSensitivityResults():
                 plt.tight_layout()
 
                 if self.save_figure:
-                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_sensitivity_analysis_{sensitivity_type}"], custom_sub_folder_name=self.file_name)
-                    utils.save_figure_to_folder(figs=[fig1], labels=[f"{self.current_time}_sensitivity_analysis"], custom_sub_folder_name=self.file_name)
+                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_{sensitivity_type}"], custom_sub_folder_name=self.file_name)
+                    utils.save_figure_to_folder(figs=[fig1], labels=[f"{self.current_time}"], custom_sub_folder_name=self.file_name)
 
                 print(sensitivity_statistics)
                 if self.save_dict:
-                    utils.save_dict_to_folder(dicts=[sensitivity_statistics], labels=[f"{self.current_time}_sensitivity_analysis"], custom_sub_folder_name=self.file_name)
+                    utils.save_dict_to_folder(dicts=[sensitivity_statistics], labels=[f"{self.current_time}"], custom_sub_folder_name=self.file_name)
+
 
         if self.save_table:
 
@@ -358,21 +335,5 @@ class PlotSensitivityResults():
             )
             table_generator.generate_sensitivity_analysis_table(
                 sensitivity_statistics,
-                file_name=f"{self.current_time}_sensitivity_analysis.tex"
+                file_name=f"{self.current_time}.tex"
             )
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

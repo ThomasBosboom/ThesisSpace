@@ -58,7 +58,6 @@ class OptimizationModel:
             setattr(self, key, value)
 
         self.options = {'maxiter': self.max_iterations, 'disp': False, "adaptive": True}
-        print(self.options)
 
 
     def load_from_json(self, time_tag, folder_name="optimization_analysis"):
@@ -151,20 +150,20 @@ class OptimizationModel:
     # @profile
     def optimize(self, objective_function):
 
-        def constraints(design_vector):
+        # def constraints(design_vector):
 
-            observation_windows = self.generate_observation_windows(design_vector)
-            if observation_windows[-1][-1]-observation_windows[0][0] > self.duration:
-                return np.inf
-            else:
-                return 0
+        #     observation_windows = self.generate_observation_windows(design_vector)
+        #     if observation_windows[-1][-1]-observation_windows[0][0] > self.duration:
+        #         return np.inf
+        #     else:
+        #         return 0
 
         def objective(design_vector):
 
             print("==============")
 
             observation_windows = self.generate_observation_windows(design_vector)
-            objective_value = objective_function(observation_windows) + constraints(design_vector)
+            objective_value = objective_function(observation_windows)
 
             # Initialize initial objective value
             if self.initial_objective_value is None:

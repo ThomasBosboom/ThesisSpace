@@ -68,13 +68,13 @@ observation_windows_settings = {
 }
 
 
-# observation_windows_settings = {
-#     "default1": [
-#         ([(60390, 60390.05)], 2),
-#     ],
-#     "default2": [
-#         ([(60390, 60390.1)], 2),
-#     ],
+observation_windows_settings = {
+    "default1": [
+        ([(60390, 60390.05)], 2),
+    ],
+    "default2": [
+        ([(60390, 60390.1)], 2),
+    ],
 #     # "default3": [
 #     #     ([(60390, 60390.15)], 2),
 #     # ],
@@ -129,7 +129,7 @@ observation_windows_settings = {
 #     # "default20": [
 #     #     ([(60390, 60391)], 2),
 #     # ],
-# }
+}
 
 
 
@@ -201,7 +201,7 @@ process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavig
 process_multiple_navigation_results.plot_uncertainty_comparison()
 process_multiple_navigation_results.plot_maneuvre_costs()
 process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
-process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None, maneuvre_cost_only=True)
+process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None, worst_case=True)
 print("Plotting done...")
 
 plt.show()

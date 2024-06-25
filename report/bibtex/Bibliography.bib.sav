@@ -278,6 +278,27 @@ Shows advantages of a satellite constellation for AOD.},
 }
 
  
+@Article{Dianetti2017,
+  author    = {Dianetti, A. D. and Weisman, R. M. and Crassidis, J. L.},
+  journal   = {AIAA Guidance, Navigation, and Control Conference},
+  title     = {Application of {Observability} {Analysis} to {Space} {Object} {Tracking}},
+  year      = {2017},
+  month     = jan,
+  comment   = {The information matrix thus provides a weighted assessment of observability.
+
+While verifying that the observability Gramian, or information matrix, is full rank will confirm that the system is observable, this does not assess the degree of observability. The magnitudes of the singular values will indicate the degree of observability of modes identified
+by the right-hand side vectors, which are composed of contributions from the system states. As such, it is
+possible to identify which states have stronger and weaker observability.},
+  doi       = {10.2514/6.2017-1258},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/6.2017-1258:application/pdf},
+  keywords  = {Earth Centered Earth Fixed, Singular Value Decomposition, Adaptive Filter, Extended Kalman Filter, Bidirectional Reflectance Distribution Function, Standard Gravitational Parameter, Observability Gramian, Geostationary Transfer Orbit, Ballistic Coefficient, Reflectivity},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  series    = {{AIAA} {SciTech} {Forum}},
+  url       = {https://arc.aiaa.org/doi/10.2514/6.2017-1258},
+  urldate   = {2023-02-18},
+}
+
+ 
 @Article{Zanetti2012,
   author    = {Zanetti, R. and Bishop, R. H.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -454,6 +475,23 @@ Autonomous properties usefull for further missions too.},
 }
 
  
+@MastersThesis{Caudill2021,
+  author    = {Caudill, M. T.},
+  school    = {University of Colorado Boulder},
+  title     = {A {Relative} {Orbit} {Determination} and {Navigation} {Strategy} for {Lunar} {Gateway}},
+  year      = {2021},
+  month     = jul,
+  abstract  = {With the Artemis program seeking to reestablish a human presence in lunar orbit and on the lunar surface, the planned lunar Gateway space station is to provide habitation services for crewed operations to and from the lunar surface. The lunar Gateway is to operate in cislunar space in what is known as a southern L2 near-rectilinear halo orbit, taking it quite close to the lunar surface at closest approach. This presents an opportunity for the collection of measurements with respect to the lunar surface on each pass, which may be useful in estimating the full orbital state of lunar Gateway. Given that the Deep Space Network is already over-encumbered, finding new methods for generating orbit determination solutions and subsequent navigation solutions is a valuable venture. This analysis provides methods for finding periodic orbits in the circular-restricted three-body problem, develops means for measuring these trajectories via range and Doppler measurements and terrain-relative measurements with respect to the surface. These measurements are then processed with nonlinear and linear estimators to generate an orbit determination solution which is used to plan and construct orbit maintenance maneuvers in accordance with a risk for trajectory divergence. An x-axis crossing control methodology is used to generate an orbit maintenance solution which maintains operations about a reference trajectory.},
+  comment   = {Provides information on filtering types
+
+Gives Advantages and Disadvantages of Linear and Nonlinear Estimation},
+  keywords  = {navigation, astrodynamics, Aerospace engineering, orbit determination},
+  language  = {en},
+  publisher = {University of Colorado Boulder},
+  urldate   = {2023-02-01},
+}
+
+ 
 @InCollection{Cheetham2022,
   author     = {Cheetham, B. and Gardner, T. and Forsman, A. and Kayser, E. and Clarkson, M.},
   booktitle  = {{Ascend} 2022},
@@ -469,6 +507,65 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   shorttitle = {{CAPSTONE}},
   url        = {https://arc.aiaa.org/doi/abs/10.2514/6.2022-4382},
   urldate    = {2023-02-23},
+}
+
+ 
+@Article{Akhlaghi2017,
+  author    = {Akhlaghi, S. and Zhou, N. and Huang, Z.},
+  journal   = {2017 IEEE Power \& Energy Society General Meeting},
+  title     = {Adaptive adjustment of noise covariance in {Kalman} filter for dynamic state estimation},
+  year      = {2017},
+  month     = jul,
+  pages     = {1--5},
+  abstract  = {Accurate estimation of the dynamic states of a synchronous machine (e.g., rotor's angle and speed) is essential in monitoring and controlling transient stability of a power system. It is well known that the covariance matrixes of process noise (Q) and measurement noise (R) have a significant impact on the Kalman filter's performance in estimating dynamic states. The conventional ad-hoc approaches for estimating the covariance matrixes are not adequate in achieving the best filtering performance. To address this problem, this paper proposes an adaptive filtering approach to adaptively estimate Q and R based on innovation and residual to improve the dynamic state estimation accuracy of the extended Kalman filter (EKF). It is shown through the simulation on the two-area model that the proposed estimation method is more robust against the initial errors in Q and R than the conventional method in estimating the dynamic states of a synchronous machine.},
+  address   = {Chicago, IL},
+  doi       = {10.1109/PESGM.2017.8273755},
+  file      = {:Akhlaghi2017a - Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation.html:URL},
+  isbn      = {9781538622124},
+  publisher = {IEEE},
+  url       = {http://ieeexplore.ieee.org/document/8273755/},
+  urldate   = {2023-02-24},
+}
+
+@PhdThesis{Hill2007,
+  author  = {{Hill}, K. A.},
+  school  = {University of Colorado Boulder},
+  title   = {{Autonomous navigation in libration point orbits}},
+  year    = {2007},
+  month   = jan,
+  adsnote = {Provided by the SAO/NASA Astrophysics Data System},
+  comment = {- Appendix contains conversion from nondimensional barycentric frame to International Celestial Reference Frame (ICRF).
+
+- In the three-body problem, the gravitational influence of the third body can indirectly provide information about the direction to that third body and with it, the absolute orientation of the orbits. Because of the strong asymmetry of the three-body force field, there is only one possible orientation for that orbit, the absolute orientation of that orbit can also be determined.
+
+- SST only provides information on the relative motion, used in conjunction with Earth-based tracking for absolute.
+
+- With no symmetry present in the function f(r, t), the orbit generated with each set of initial conditions would be unique.
+
+- For practical purposes, the effect of the asymmetric acceleration on the spacecraft trajectory must be significantly greater than the observation noise and the effects due to unmodeled accelerations.
+
+- Orbits around the Lunar L1 and L2 libration points are ideal for testing Liaison Navigation since those orbits are locally unique and always remain in regions where the asymmetry of the third-body perturbation is very strong.
+
+- The three collinear Lagrange points, L1, L2, and L3 are unstable equilibrium points, station keeping required. (Murray and Dermott, 1999)
+- Instead of estimating the initial state with the measurements, the error in the initial state is estimated using the observation residuals, which are the observed measurements minus those computed from the reference solution.
+
+ - To test whether Liaison Navigation is feasible, one of the most important steps is verifying that Λ is positive definite without Earth-based tracking, do not include P0 as can artificially warp observability.
+
+- The batch processor is very useful at determining observability, but is awkward at giving an estimate of how the covariance would change when processing observations in real time. KF cannot verify observability, but can show covariance changes.
+
+- The more revolutions a spacecraft can perform within the fit span, the more geometrically diverse observations can be obtained and the error is reduced. That's why Halo-Moon type constellations recover orbit information faster.
+
+- The improved orbit accuracy for spacecraft in libration orbits provided by Liaison Navigation would lead to a decrease in the ∆V needed for stationkeeping, since more accurate knowledge of the orbit leads to smaller stationkeeping maneuvers. (Gomez et al., 1998)
+
+- Important parameters to tracking scheduling:
+      - Observation effectiveness dips at certain moments, "blackout periods".
+      - For an unstable orbit like a halo orbit, the stability characteristics of the orbit create a more significant affect than a downtrack error.
+      - Propagation of STM for one period leads to "Monodromy matrix": 6 entries refer to expansion and contraction of uncertainty.Sensing along direction of local unstable manifold increases observation effectiveness
+     - Geometry of observations influence accuracy due to timing and extend of blackout periods.
+
+- Upgrading the force model to include precise planetary ephemerides resulted in halo orbits with larger orbit determination errors than the CRTBP and the bicircular model.},
+  url     = {https://ui.adsabs.harvard.edu/abs/2007PhDT.......129H},
+  urldate = {2023-02-22},
 }
 
  
@@ -504,6 +601,52 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
 }
 
  
+@InProceedings{Davis2017,
+  author    = {Davis, D. and Bhatt, S. and Howell, K. and Jang, J. and Whitley, R. and Clark, F. and Guzzetti, D. and Zimovan, E. and Barton, G.},
+  booktitle = {27th AAS/AIAA Space Flight Mechanics Meeting},
+  title     = {{Orbit} {Maintenance} {and} {Navigation} {of} {Human} {Spacecraft} {at} {Cislunar} {Near} {Rectilinear} {Halo} {Orbits}},
+  year      = {2017},
+  month     = feb,
+  abstract  = {Multiple studies have concluded that Earth-Moon libration point orbits are attractive candidates for staging operations. The Near Rectilinear Halo Orbit (NRHO), a member of the Earth-Moon halo orbit family, has been singularly demonstrated to meet multi-mission architectural constraints. In this paper, the challenges associated with operating human spacecraft in the NRHO are evaluated. Navigation accuracies and human vehicle process noise effects are applied to various stationkeeping strategies in order to obtain a reliable orbit maintenance algorithm. Additionally, the ability to absorb missed burns, construct phasing maneuvers to avoid eclipses and conduct rendezvous and proximity operations are examined.},
+  file      = {Full Text PDF:https\://www.researchgate.net/profile/Davide-Guzzetti/publication/316620535_ORBIT_MAINTENANCE_AND_NAVIGATION_OF_HUMAN_SPACECRAFT_AT_CISLUNAR_NEAR_RECTILINEAR_HALO_ORBITS/links/59083b31a6fdccd580dd111b/ORBIT-MAINTENANCE-AND-NAVIGATION-OF-HUMAN-SPACECRAFT-AT-CISLUNAR-NEAR-RECTILINEAR-HALO-ORBITS.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/316620535_ORBIT_MAINTENANCE_AND_NAVIGATION_OF_HUMAN_SPACECRAFT_AT_CISLUNAR_NEAR_RECTILINEAR_HALO_ORBITS:},
+  urldate   = {2023-02-22},
+}
+
+ 
+@Article{Folta2013,
+  author   = {Folta, D. and Pavlac, T. and Haapala, A. and Howell, K. and Woodard, M.},
+  journal  = {Acta Astronautica},
+  title    = {Earth–{Moon} libration point orbit stationkeeping -{Theory} modeling, and operations},
+  year     = {2013},
+  month    = jan,
+  volume   = {94},
+  abstract = {Collinear Earth–Moon libration points have emerged as locations with immediate  applications.These libration point orbits are inherently unstable and must be maintained regularly which constrains operations and maneuver locations.Stationkeeping is challenging due to relatively short timescales for divergence,effects of large orbital eccentricity of the secondary body, and third-body perturbations.Using the Acceleration Reconnection and Turbulence and Electrodynamics of the Moon’s Interaction with the Sun (ARTEMIS) mission orbit as a platform,the fundamental behavior of the trajectories is explored using Poincare´ maps in the circular restricted three-body problem.Operational stationkeeping results obtained using the Optimal Continuation Strategy are presented and compared to orbit stability information generated from mode analysis based in dynamical systems theory.},
+  doi      = {10.1016/j.actaastro.2013.01.022},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Mark-Woodard/publication/235992787_Earth-Moon_libration_point_orbit_stationkeeping_-Theory_modeling_and_operations/links/5c8f9f1a299bf14e7e842655/Earth-Moon-libration-point-orbit-stationkeeping-Theory-modeling-and-operations.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/235992787_Earth-Moon_libration_point_orbit_stationkeeping_-Theory_modeling_and_operations:},
+  urldate  = {2023-02-12},
+}
+
+ 
+@Article{Oshima2019,
+  author   = {Oshima, K.},
+  journal  = {Celestial Mechanics and Dynamical Astronomy},
+  title    = {The use of vertical instability of L1 and L2 planar {Lyapunov} orbits for transfers from near rectilinear halo orbits to planar distant retrograde orbits in the {Earth}–{Moon} system},
+  year     = {2019},
+  issn     = {1572-9478},
+  month    = mar,
+  number   = {3},
+  pages    = {14},
+  volume   = {131},
+  abstract = {This paper highlights natural transport pathways between in-plane and out-of-plane states associated with the vertical instability of planar Lyapunov orbits around the Lagrange points \$\$L\_1\$\$and \$\$L\_2\$\$in the Earth–Moon circular restricted three-body problem. Computations of invariant manifolds associated with the vertical instability of planar periodic orbits, “vertically” stable and unstable manifolds, enable quantitative analyses of inclination changes. This study finds that multiple lunar flybys gradually change the orbital elements of vertically stable and unstable manifolds, and that the distributions of the affected orbital elements depend on the Jacobi constant and on the associated Lagrange point \$\$L\_1\$\$or \$\$L\_2\$\$of the planar Lyapunov orbits. As an application, this study uses the vertically stable manifolds of the planar Lyapunov orbits as initial guesses for optimizing transfers from near rectilinear halo orbits to planar distant retrograde orbits. Significant \$\$\{{\textbackslash}varDelta \}v\$\$savings as compared with the known solutions demonstrate the usefulness of the vertical instability in spacecraft trajectory designs.},
+  doi      = {10.1007/s10569-019-9892-6},
+  file     = {:Oshima2019 - The Use of Vertical Instability of $$L_1$$and $$L_2$$planar Lyapunov Orbits for Transfers from near Rectilinear Halo Orbits to Planar Distant Retrograde Orbits in the Earth–Moon System.html:URL},
+  keywords = {Vertical instability, Planar Lyapunov orbits, Near rectilinear halo orbits, Planar distant retrograde orbits, Circular restricted three-body problem, Optimization},
+  language = {en},
+  url      = {https://doi.org/10.1007/s10569-019-9892-6},
+  urldate  = {2023-03-11},
+}
+
+ 
 @InProceedings{Kota2017,
   author     = {Kota, K. and Stefano, C. and Naoya, O. and Zaki and Kenta, O. and Shima and Tomohiro, Y. and Ryu, F.},
   booktitle  = {International Symposium on Space Technology and Science 2017},
@@ -514,6 +657,50 @@ The objective for CAPSTONE is to accelerate the infusion of autonomous spacecraf
   shorttitle = {{EQUULEUS} {Mission} {Analysis}},
   url        = {https://www.semanticscholar.org/paper/EQUULEUS-Mission-Analysis\%3A-Design-of-the-Science-Kota-Akihara/f56e91d87315dfd4f49a128eff4bdff058f33e1b},
   urldate    = {2023-03-14},
+}
+
+ 
+@PhdThesis{Pavlak2013,
+  author   = {Pavlak, T. A.},
+  school   = {Purdue University},
+  title    = {Trajectory design and orbit maintenance strategies in multi-body dynamical regimes},
+  year     = {2013},
+  month    = jan,
+  language = {en},
+  url      = {https://www.scinapse.io/papers/4131213},
+  urldate  = {2023-03-14},
+}
+
+ 
+@Book{Mahooti2020,
+  author   = {Mahooti, M.},
+  title    = {{JPL} {Development} {Ephemerides} ({DE405})\_MATLAB code},
+  year     = {2020},
+  month    = nov,
+  abstract = {The JPL planetary ephemerides are saved as files of Chebyshev polynomials fit to the Cartesian positions and velocities of the planets, Sun, and Moon, typically in 32-day intervals. The positions are integrated in astronomical units (au), but with polynomials stored in units of kilometers. References: Standish, E.M.: 1998, "JPL Planetary and Lunar Ephemerides, DE405/LE405",JPL IOM 312.F-98-048. http://ssd.jpl.nasa.gov/?planet\_eph\_export https://www.celestrak.com/SpaceData/},
+  doi      = {10.13140/RG.2.2.24955.95520},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Meysam-Mahooti/publication/346396111_JPL_Development_Ephemerides_DE405_MATLAB_code/data/5fbf9b2f458515b7977038cb/JPL-Planetary-and-Lunar-Ephemerides-DE405-LE405.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/346396111_JPL_Development_Ephemerides_DE405_MATLAB_code:},
+  urldate  = {2023-01-30},
+}
+
+ 
+@Article{Guzzetti2016,
+  author   = {Guzzetti, D. and Bosanac, N. and Haapala, A. and Howell, Kathleen C. and Folta, David C.},
+  journal  = {Acta Astronautica},
+  title    = {Rapid trajectory design in the {Earth}–{Moon} ephemeris system via an interactive catalog of periodic and quasi-periodic orbits},
+  year     = {2016},
+  issn     = {0094-5765},
+  month    = sep,
+  pages    = {439--455},
+  volume   = {126},
+  abstract = {Upcoming missions and prospective design concepts in the Earth–Moon system extensively leverage multi-body dynamics that may facilitate access to strategic locations or reduce propellant usage. To incorporate these dynamical structures into the mission design process, Purdue University and the NASA Goddard Flight Space Center have initiated the construction of a trajectory design framework to rapidly access and compare solutions from the circular restricted three-body problem. This framework, based upon a ‘dynamic’ catalog of periodic and quasi-periodic orbits within the Earth–Moon system, can guide an end-to-end trajectory design in an ephemeris model. In particular, the inclusion of quasi-periodic orbits further expands the design space, potentially enabling the detection of additional orbit options. To demonstrate the concept of a ‘dynamic’ catalog, a prototype graphical interface is developed. Strategies to characterize and represent periodic and quasi-periodic information for interactive trajectory comparison and selection are discussed. Two sample applications for formation flying near the Earth–Moon L2 point and lunar space infrastructures are explored to demonstrate the efficacy of a ‘dynamic’ catalog for rapid trajectory design and validity in higher-fidelity models.},
+  doi      = {10.1016/j.actaastro.2016.06.029},
+  file     = {:Guzzetti2016 - Rapid Trajectory Design in the Earth–Moon Ephemeris System Via an Interactive Catalog of Periodic and Quasi Periodic Orbits.html:URL},
+  keywords = {Multi-body systems, Three-body problem, Libration points, Quasi-periodic solutions, Periodic solutions},
+  language = {en},
+  series   = {Space {Flight} {Safety}},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0094576516301448},
+  urldate  = {2023-03-16},
 }
 
  
@@ -581,6 +768,27 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Luo2017,
+  author   = {Luo, Y. and Yang, Z.},
+  journal  = {Progress in Aerospace Sciences},
+  title    = {A review of uncertainty propagation in orbital mechanics},
+  year     = {2017},
+  issn     = {0376-0421},
+  month    = feb,
+  note     = {ADS Bibcode: 2017PrAeS..89...23L},
+  pages    = {23--39},
+  volume   = {89},
+  abstract = {Orbital uncertainty propagation plays an important role in space situational awareness related missions such as tracking and data association, conjunction assessment, sensor resource management and anomaly detection. Linear models and Monte Carlo simulation were primarily used to propagate uncertainties. However, due to the nonlinear nature of orbital dynamics, problems such as low precision and intensive computation have greatly hampered the application of these methods. Aiming at solving these problems, many nonlinear uncertainty propagators have been proposed in the past two decades. To motivate this research area and facilitate the development of orbital uncertainty propagation, this paper summarizes the existing linear and nonlinear uncertainty propagators and their associated applications in the field of orbital mechanics. Frameworks of methods for orbital uncertainty propagation, the advantages and drawbacks of different methods, as well as potential directions for future efforts are also discussed.},
+  comment  = {- Explains Uncertainty propagation proces
+- The Gaussian error hyper-ellipsoid magnifies and rotates with the increasing of propagation time, and gradually becomes non-Gaussian due to the nonlinear nature of dynamics.
+- The navigation uncertainties are added into the estimated state at the initial time, while the dynamic model uncertainties exist across the whole propagation process. Maneuvers may be executed out of the invisible arc, in this case the actuation uncertainties should be added into the propagation at the time of each maneuver.},
+  doi      = {10.1016/j.paerosci.2016.12.002},
+  keywords = {Uncertainty propagation, Space situational awareness, Covariance analysis, Probability density function, Orbital mechanics},
+  url      = {https://ui.adsabs.harvard.edu/abs/2017PrAeS..89...23L},
+  urldate  = {2023-04-25},
+}
+
+ 
 @InCollection{AlSaegh2014,
   author    = {Al-Saegh, A. M. and Sali, A. and Mandeep, J. S. and Ismail, A. and Al-Jumaily, A. H. J. and Gomes, C.},
   booktitle = {{MATLAB} {Applications} for the {Practical} {Engineer}},
@@ -598,6 +806,36 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Wan2000,
+  author    = {Wan, E.A. and Van Der Merwe, R.},
+  journal   = {Proceedings of the IEEE 2000 Adaptive Systems for Signal Processing, Communications, and Control Symposium (Cat. No.00EX373)},
+  title     = {The unscented {Kalman} filter for nonlinear estimation},
+  year      = {2000},
+  pages     = {153--158},
+  abstract  = {This paper points out the flaws in using the extended Kalman filter (EKE) and introduces an improvement, the unscented Kalman filter (UKF), proposed by Julier and Uhlman (1997). A central and vital operation performed in the Kalman filter is the propagation of a Gaussian random variable (GRV) through the system dynamics. In the EKF the state distribution is approximated by a GRV, which is then propagated analytically through the first-order linearization of the nonlinear system. This can introduce large errors in the true posterior mean and covariance of the transformed GRV, which may lead to sub-optimal performance and sometimes divergence of the filter. The UKF addresses this problem by using a deterministic sampling approach. The state distribution is again approximated by a GRV, but is now represented using a minimal set of carefully chosen sample points. These sample points completely capture the true mean and covariance of the GRV, and when propagated through the true nonlinear system, captures the posterior mean and covariance accurately to the 3rd order (Taylor series expansion) for any nonlinearity. The EKF in contrast, only achieves first-order accuracy. Remarkably, the computational complexity of the UKF is the same order as that of the EKF. Julier and Uhlman demonstrated the substantial performance gains of the UKF in the context of state-estimation for nonlinear control. Machine learning problems were not considered. We extend the use of the UKF to a broader class of nonlinear estimation problems, including nonlinear system identification, training of neural networks, and dual estimation problems. In this paper, the algorithms are further developed and illustrated with a number of additional examples.},
+  address   = {Lake Louise, Alta., Canada},
+  doi       = {10.1109/ASSPCC.2000.882463},
+  file      = {:Wan2000 - The Unscented Kalman Filter for Nonlinear Estimation.html:URL},
+  isbn      = {9780780358003},
+  publisher = {IEEE},
+  url       = {http://ieeexplore.ieee.org/document/882463/},
+  urldate   = {2023-05-01},
+}
+
+ 
+@PhdThesis{Parker2007,
+  author   = {Parker, Jeffrey S.},
+  school   = {University of Colorado Boulder},
+  title    = {Low-energy ballistic lunar transfers},
+  year     = {2007},
+  month    = jan,
+  abstract = {A systematic method is developed that uses dynamical systems theory to model, analyze, and construct low-energy ballistic lunar transfers (BLTs). It has been found that low-energy BLTs may be produced by intersecting the stable manifold of an unstable Earth-Moon three-body orbit with the Earth. A spacecraft following such a trajectory is only required to perform a single maneuver, namely, the Trans-Lunar Injection maneuver, in order to complete the transfer. After the Trans-Lunar Injection maneuver, the spacecraft follows an entirely ballistic trajectory that asymptotically approaches and arrives at the target lunar three-body orbit. Because these orbit transfers require no orbit insertion maneuver at the three-body orbit, the transfers may be used to send spacecraft 25--40\% more massive than spacecraft sent to the same orbits via conventional, direct transfers. From the targeted three-body orbits, the spacecraft may transfer to nearly any region within the Earth-Moon system, including any location on the surface of the Moon. The systematic methods developed in this research allow low-energy BLTs to be characterized by six parameters. It has been found that BLTs exist in families, where a family of BLTs consists of transfers whose parameters vary in a continuous fashion from one end of the family to the other. The families are easily identified and studied using a BLT State Space Map (BLT Map). The present research studies BLT Maps and has surveyed a wide variety of BLTs that exist in the observed families. It has been found that many types of BLTs may be constructed between 185-km low Earth parking orbits and lunar three-body orbits that require less than 3.27 km/s and fewer than 120 days of transfer time. Under certain conditions, BLTs may be constructed that require less than 3.2 km/s and fewer than 100 days of transfer time. It has been found that BLTs may implement LEO parking orbits with nearly any combination of altitude and inclination; they may depart from their LEO parking orbits nearly any day of each month; and they may target a variety of different classes of unstable Earth-Moon three-body orbits. Finally, studies are provided that address how low-energy transfers impact the design of spacecraft systems and how BLT Maps may be implemented as pragmatic tools in the design of practical lunar missions.},
+  comment  = {- Touches upon Differential Correction.},
+  url      = {https://ui.adsabs.harvard.edu/abs/2007PhDT.......138P},
+  urldate  = {2023-05-04},
+}
+
+ 
 @MastersThesis{Haapala2010,
   author   = {Haapala, Amanda},
   school   = {Purdue University},
@@ -606,6 +844,57 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   month    = jan,
   abstract = {The invariant manifolds associated with periodic orbits in the vicinity of the collinear libration points in the planar CR3BP have been previously demonstrated as mechanisms for transport. Trajectories that pass between adjoining regions within the zero-velocity curves pass through the invariant manifold tubes. In particular, the invariant manifolds associated with the unstable L1 and L2 periodic libration point orbits may be exploited to construct transit orbits between the interior and exterior regions associated with the zero-velocity curves. In this investigation, periapse Poincare maps are used to display the manifolds and to distinguish regions of escape and, conversely, regions of long-term capture. Manifold periapse structures are employed as a design tool to construct planar trajectories with predetermined characteristics. The strategies that are developed are demonstrated by producing planar trajectories with predetermined behaviors, namely, long-term capture orbits and transit trajectories, as well as heteroclinic and homoclinic connections. Additionally, path approximations are generated for four Jupiter family comets that experience temporary satellite capture. Periapse Poincare maps are also employed to design three-dimensional transit trajectories in the spatial circular restricted three-body problem.},
   file     = {Full Text PDF:https\://www.researchgate.net/profile/Amanda-Haapala/publication/241559190_Trajectory_design_using_periapse_maps_and_invariant_manifolds/links/00b7d529ca05acf946000000/Trajectory-design-using-periapse-maps-and-invariant-manifolds.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/241559190_Trajectory_design_using_periapse_maps_and_invariant_manifolds:},
+}
+
+@MastersThesis{Sirani2021,
+  author = {S. Sirani},
+  school = {Politecnico di Milano},
+  title  = {LUMIO orbit refinement in high fidelity model},
+  year   = {2021},
+  month  = dec,
+  url    = {https://www.politesi.polimi.it/handle/10589/182044?mode=complete},
+}
+
+ 
+@InProceedings{Crassidis2004,
+  author    = {Crassidis, John L. and Junkins, John L.},
+  booktitle = {IEEE Aerospace Conference 2008},
+  title     = {Optimal {Estimation} of {Dynamic} {Systems}},
+  year      = {2004},
+  month     = apr,
+  publisher = {Chapman and Hall/CRC},
+  doi       = {10.1201/9780203509128},
+  edition   = {2},
+  file      = {Semantic Scholar Link:https\://www.semanticscholar.org/paper/Optimal-Estimation-of-Dynamic-Systems-Crassidis-Junkins/a2eaa37a55779d296199c28645cda4fcfb1fb4ce:text/html},
+  isbn      = {9780203509128},
+  language  = {en},
+  url       = {https://www.taylorfrancis.com/books/9780203509128},
+  urldate   = {2023-05-15},
+}
+
+@Book{Labbe2020,
+  author    = {R. R. Labbe},
+  publisher = {GitHub},
+  title     = {Kalman and Bayesian Filters in Python},
+  year      = {2020},
+  url       = {https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python},
+}
+
+ 
+@Article{Lou2015,
+  author   = {Lou, T. and Fu, H. and Zhang, Y. and Wang, Z.},
+  journal  = {Advances in Space Research},
+  title    = {Consider unobservable uncertain parameters using radio beacon navigation during {Mars} entry},
+  year     = {2015},
+  issn     = {0273-1177},
+  number   = {4},
+  pages    = {1038--1050},
+  volume   = {55},
+  abstract = {This paper presents a navigation algorithm based on the extended consider Kalman filter (ECKF) to mitigate the adverse effects of unobservable uncertain parameters using radio measurements during Mars entry phase. Consistency of the Mars entry navigation using a radio beacon navigation scheme is also demonstrated. A nonlinear consider approach is utilized by incorporating the covariances of the unobservable uncertain atmospheric density and the ballistic coefficient into the state estimate covariance; parameters are specifically not estimated directly to improve the navigation accuracy and robustness during the Mars entry phase. Perturbation is introduced to analyze the navigation state errors from each unobservable uncertain parameter. Numerical simulations show that the presented ECKF-based navigation algorithm is more accurate and robust than the augmented extended Kalman filter for unobservable uncertain parameters. © 2014 COSPAR. Published by Elsevier Ltd. All rights reserved.},
+  annote   = {Cited By :23},
+  doi      = {10.1016/j.asr.2014.11.016},
+  keywords = {Extended consider Kalman filter, Mars entry, Uncertain parameter, Unobservable parameter},
+  language = {English},
 }
 
  
@@ -645,6 +934,63 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   keywords = {State-dependent Riccati equation filter, Relative navigation, Spacecraft formation flying},
   language = {en},
   url      = {https://www.sciencedirect.com/science/article/pii/S0273117715007085},
+  urldate  = {2023-05-17},
+}
+
+ 
+@Article{Chang2018,
+  author    = {Chang, Insu and Bentsman, Joseph},
+  journal   = {2018 Annual American Control Conference (ACC)},
+  title     = {High-{Fidelity} {Discrete}-{Time} {State}-{Dependent} {Riccati} {Equation} {Filters} for {Stochastic} {Nonlinear} {Systems} with {Gaussian}/{Non}-{Gaussian} {Noises}},
+  year      = {2018},
+  month     = jun,
+  pages     = {1132--1137},
+  abstract  = {Two filtering techniques are proposed by using the discrete-time state-dependent Riccati equation (D-SDRE) methodology. Detailed derivation of the D-SDRE-based filter (D-SDREF) with the two-step procedure (measurement and update) is provided under the assumption of Gaussian noises. The input-to-state stability of the error signal between the measured and the estimated signals is proven under reasonable assumptions on system properties. For the non-Gaussian distributed noises, we propose a filter by combining the D-SDREF and the particle filter (PF), named the combined D-SDRE/PF. Algorithms of D-SDREF and combined D-SDRE/PF are provided. Performance of the latter techniques is compared with that of several other ones through the use of a challenging numerical example. Using the latter example, the reliability and the efficacy of the proposed D-SDREF and the combined D-SDRE/PF are demonstrated.},
+  address   = {Milwaukee, WI},
+  annote    = {[TLDR] Two filtering techniques are proposed by using the discrete-time state-dependent Riccati equation (D-SDRE) methodology, and a filter by combining the D-SDREF and the particle filter (PF), named the combined D- SDRE/PF is proposed.},
+  doi       = {10.23919/ACC.2018.8431771},
+  file      = {:Chang2018 - High Fidelity Discrete Time State Dependent Riccati Equation Filters for Stochastic Nonlinear Systems with Gaussian_Non Gaussian Noises.html:URL},
+  isbn      = {9781538654286},
+  publisher = {IEEE},
+  url       = {https://ieeexplore.ieee.org/document/8431771/},
+  urldate   = {2023-05-17},
+}
+
+ 
+@Article{Hu2020,
+  author   = {Hu, Yunpeng and Sharf, Inna and Chen, Lei},
+  journal  = {Acta Astronautica},
+  title    = {Three-spacecraft autonomous orbit determination and observability analysis with inertial angles-only measurements},
+  year     = {2020},
+  issn     = {0094-5765},
+  month    = may,
+  pages    = {106--121},
+  volume   = {170},
+  abstract = {Autonomous orbit determination (OD) for a group of spacecraft using only inter-spacecraft measurements has considerable value in space systems engineering. This paper proposes a novel solution for cooperative autonomous OD for a system comprised of three spacecraft, by employing inertial angles-only measurements. Based on the two-body dynamics of each spacecraft, the observability problem for the two-spacecraft and three-spacecraft systems is analyzed with the Lie-derivative criterion. It is deduced that the two-spacecraft system is third-order locally weakly unobservable, while the three-spacecraft system with three sets of inter-spacecraft observations is third-order locally weakly observable under certain sufficient conditions. To complement the theoretical analysis, we use a numerical method to compute the observability measure to illustrate the degree of observability. Several scenarios are designed to demonstrate the influence of orbital configurations, of J2 dynamics, and measurement noise on the degree of observability. In addition, the observability of the three-spacecraft system is also compared with the two-spacecraft system. Finally, practical cases of three-spacecraft autonomous OD are simulated which demonstrate the application and feasibility of the proposed method.},
+  doi      = {10.1016/j.actaastro.2020.01.005},
+  file     = {:Hu2020 - Three Spacecraft Autonomous Orbit Determination and Observability Analysis with Inertial Angles Only Measurements.html:URL},
+  keywords = {Autonomous orbit determination, Inertial angles-only measurements, Three-spacecraft system},
+  language = {en},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0094576520300059},
+  urldate  = {2023-05-17},
+}
+
+ 
+@Article{Suggs2014,
+  author   = {Suggs, R. M. and Moser, D. E. and Cooke, W. J. and Suggs, R. J.},
+  journal  = {Icarus},
+  title    = {The flux of kilogram-sized meteoroids from lunar impact monitoring},
+  year     = {2014},
+  issn     = {0019-1035},
+  month    = aug,
+  pages    = {23--36},
+  volume   = {238},
+  abstract = {The flashes from meteoroid impacts on the Moon are useful in determining the flux of impactors with masses as low as a few tens of grams. A routine monitoring program at NASA’s Marshall Space Flight Center has recorded over 300 impacts since 2006. A selection of 126 flashes recorded during periods of photometric skies was analyzed, creating the largest and most homogeneous dataset of lunar impact flashes to date. Standard CCD photometric techniques were applied to the video and the luminous energy, kinetic energy, and mass are estimated for each impactor. Shower associations were determined for most of the impactors and a range of luminous efficiencies was considered. The flux to a limiting energy of 2.5×10−6kT TNT or 1.05×107J is 1.03×10−7km−2h−1 and the flux to a limiting mass of 30g is 6.14×10−10m−2yr−1 at the Moon. Comparisons made with measurements and models of the meteoroid population indicate that the flux of objects in this size range is slightly lower (but within the error bars) than flux at this size from the power law distribution determined for the near Earth object and fireball population by Brown et al. (Brown, P.G., Spalding, R., ReVelle, D., Tagliaferri, E., Worden, S. [2002]. Nature 420, 294–296). Size estimates for the crater detected by Lunar Reconnaissance Orbiter from a large impact observed on March 17, 2013 are also briefly discussed.},
+  doi      = {10.1016/j.icarus.2014.04.032},
+  file     = {:Suggs2014 - The Flux of Kilogram Sized Meteoroids from Lunar Impact Monitoring.html:URL},
+  keywords = {Meteors, Moon, Photometry, Near-Earth Objects, Cratering},
+  language = {en},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0019103514002243},
   urldate  = {2023-05-17},
 }
 
@@ -707,6 +1053,26 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Nugmanov2021,
+  author    = {Nugmanov, Arthur and Bober, Stanislav},
+  journal   = {Journal of Physics: Conference Series},
+  title     = {Computer {Simulation} of {Station} {Keeping} {Costs} of {Halo} {Orbits} in {Sun}-{Earth} system},
+  year      = {2021},
+  issn      = {1742-6596},
+  month     = jan,
+  number    = {1},
+  pages     = {012020},
+  volume    = {1740},
+  abstract  = {Spacecraft missions to the collinear libration points of the Sun-Earth system have long proved scientific merit by providing valuable observational data. The unstable nature of the orbits around the mentioned points in space requires the development of control strategies for such missions in order to hold the spacecraft in vicinity of the libration points. We investigate a possible control strategy for the spacecraft on the halo orbits around the L1 and L2 collinear libration points aiming to evaluate the station keeping performance. The station-keeping strategy is based on the elimination of unstable component of motion by periodical velocity corrections performed in unstable directions. The simulations were performed in circular restricted three body problem. The impact of spacecraft position and velocity measurement accuracy, as well as the precision of the control maneuvers, on the station keeping costs, was calculated and studied. It was found that the measurement accuracy of the velocity components of motion and the precision of control burns implementation have the highest impact on the performance of the control strategy.},
+  doi       = {10.1088/1742-6596/1740/1/012020},
+  file      = {IOP Full Text PDF:https\://iopscience.iop.org/article/10.1088/1742-6596/1740/1/012020/pdf:application/pdf},
+  language  = {en},
+  publisher = {IOP Publishing},
+  url       = {https://dx.doi.org/10.1088/1742-6596/1740/1/012020},
+  urldate   = {2023-05-18},
+}
+
+ 
 @Article{Fu2022,
   author   = {Fu, Xiaoyu and Baresi, Nicola and Armellin, Roberto},
   journal  = {Advances in Space Research},
@@ -726,6 +1092,20 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2023-05-18},
 }
 
+ 
+@InProceedings{Dirkx2022,
+  author    = {Dirkx, Dominic and Fayolle, Marie and Garrett, Geoffrey and Avillez, Miguel and Cowan, Kevin and Cowan, Sean and Encarnacao, Joao and Fortuny Lombrana, Carlos and Gaffarel, Jérémie and Hener, Jonas and Hu, Xuanyu and van Nistelrooij, Maarten and Oggionni, Filippo and Plumaris, Michael},
+  booktitle = {Europlanet Science Congress 2022},
+  title     = {The open-source astrodynamics {Tudatpy} software - overview for planetary mission design and science analysis},
+  year      = {2022},
+  month     = sep,
+  pages     = {EPSC2022--253},
+  doi       = {10.5194/epsc2022-253},
+  file      = {Full Text PDF:https\://ui.adsabs.harvard.edu/link_gateway/2022EPSC...16..253D/ARTICLE:application/pdf},
+  url       = {https://ui.adsabs.harvard.edu/abs/2022EPSC...16..253D},
+  urldate   = {2023-05-19},
+}
+
 @TechReport{Freeman2016,
   author    = {Freeman, A.},
   title     = {Deep {Space} {NanoSats} - positioned for exponential growth},
@@ -741,6 +1121,88 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Park2006,
+  author     = {Park, Ryan S. and Scheeres, Daniel J.},
+  journal    = {Journal of Guidance, Control, and Dynamics},
+  title      = {Nonlinear {Mapping} of {Gaussian} {Statistics}: {Theory} and {Applications} to {Spacecraft} {Trajectory} {Design}},
+  year       = {2006},
+  issn       = {0731-5090, 1533-3884},
+  month      = nov,
+  number     = {6},
+  pages      = {1367--1375},
+  volume     = {29},
+  abstract   = {This paper discusses the nonlinear propagation of spacecraft trajectory uncertainties via solutions of the Fokker– Planck equation. We first discuss the solutions of the Fokker–Planck equation for a deterministic system with a Gaussian boundary condition. Next, we derive an analytic expression of a nonlinear trajectory solution using a higher-order Taylor series approach, discuss the region of convergence for the solutions, and apply the result to spacecraft applications. Such applications consist of nonlinear propagation of the mean and covariance matrix, design of statistically correct trajectories, and nonlinear statistical targeting. The two-body and Hill three-body problems are chosen as examples and realistic initial uncertainty models are considered. The results show that the nonlinear map of the trajectory uncertainties can be approximated in an analytic form, and there exists an optimal place to perform a correction maneuver, which is not found using the linear method.},
+  doi        = {10.2514/1.20177},
+  file       = {:Park2006 - Nonlinear Mapping of Gaussian Statistics_ Theory and Applications to Spacecraft Trajectory Design.html:URL},
+  language   = {en},
+  shorttitle = {Nonlinear {Mapping} of {Gaussian} {Statistics}},
+  url        = {https://arc.aiaa.org/doi/10.2514/1.20177},
+  urldate    = {2023-06-28},
+}
+
+ 
+@MastersThesis{Gupta2018,
+  author   = {Gupta, Mini},
+  school   = {Luleå University of Technology},
+  title    = {Analysis of the {Representation} of {Orbital} {Errors} and {Improvement} of their {Modelling}},
+  year     = {2018},
+  month    = sep,
+  abstract = {In Space Situational Awareness (SSA), it is crucial to assess the uncertainty related to the state vector of resident space objects (RSO). This uncertainty plays a fundamental role in, for example, collision risk assessment and re-entry predictions. A realistic characterization of this uncertainty is, therefore, necessary.The most common representation of orbital uncertainty is through a Gaussian (or normal) distribution. However, in the absence of new observations, the uncertainty grows over time and the Gaussian representation is no longer valid under nonlinear dynamics like space mechanics. This study evaluates the time when the uncertainty starts becoming non-Gaussian in nature.  Different algorithms for evaluating the normality of a distribution were implemented and Monte Carlo tests were performed on them to assess their performance. Also, the distances between distributions when they are propagated under linear and nonlinear algorithms were computed and compared to the results from the Monte Carlo statistics tests in order to predict the time when the Gaussianity of the distribution breaks. Uncertainty propagation using StateTransition Tensors and Unscented Transform methods were also studied. Among the implemented algorithms for evaluating the normality of a distribution, it was found that Royston’s method gives the best performance. It was also found that if the Normalized L2 distance between the linear and non-linear propagated distributions is greater than 95\%, then uncertainty starts to become non-Gaussian. In the best case scenario of unperturbed two-body motion, it is observed that the Gaussianity is preserved for at least three orbital periods in the case of Low-Earth and Geostationary orbits when initial uncertainty corresponds to the mean precision of the space debris catalog. If the initial variances are reduced, then Gaussianity is preserved for a longer period of time. Time for which Gaussian assumption is valid on orbital uncertainty is also dependent on the initial mean anomaly. Effect of coordinates transformation on Gaussianity validity time is also analyzed by considering uncertainty in Cartesian, Keplerian and Poincaré coordinate systems.  This study can therefore be used to improve space debris cataloguing.},
+}
+
+ 
+@Article{Flegel2020,
+  author   = {Flegel, Sven K. and Bennett, James C.},
+  journal  = {The Journal of the Astronautical Sciences},
+  title    = {State {Uncertainty} {Normality} {Detection}},
+  year     = {2020},
+  issn     = {2195-0571},
+  month    = sep,
+  number   = {3},
+  pages    = {1044--1062},
+  volume   = {67},
+  abstract = {Two fundamentally different approaches of determining normality of the probability density function of the state estimation error are compared by application to a range of test cases. The first method is the Henze-Zirkler test, which operates on a random particle sample. The variability of its result is quantified. Using this method, departure from normality has been found to occur in three stages which are detailed. The second test compares the offset in whitened space of the predicted state to the predicted covariance mean obtained from the unscented transform. This test is much more efficient than the random particle based approach and can be applied using any perturbations model. The comparison is performed on the state estimation error in Cartesian space and using two-body motion without process noise. The more efficient, unscented transform based approach shows excellent agreement with the Henze-Zirkler test for constructed test cases. Application to orbit determination results from passive optical observations assessed with a Batch-Least-Squares orbit determination however reveals some discrepancies which have yet to be understood and underline the importance of rigorous testing.},
+  doi      = {10.1007/s40295-019-00201-3},
+  file     = {:Flegel2020 - State Uncertainty Normality Detection.pdf:PDF},
+  keywords = {Multi-variate normality, Astrodynamics, State uncertainty, Unscented transform based normalised offset (UNO), Henze-Zirkler, Optical data},
+  language = {en},
+  url      = {https://doi.org/10.1007/s40295-019-00201-3},
+  urldate  = {2023-06-28},
+}
+
+ 
+@Article{Younes2013,
+  author   = {Bani Younes, Ahmad and Turner, James and Majji, Manoranjan and Junkins, John},
+  journal  = {Advances in the Astronautical Sciences},
+  title    = {High-order uncertainity propagation using state transition tensor series},
+  year     = {2013},
+  month    = jan,
+  volume   = {147},
+  abstract = {Modeling and simulation for complex applications in science and engineering develop behavior predictions based on mechanical loads. Imprecise knowledge of the model parameters or external force laws alters the system response from the assumed nominal model data. As a result, one seeks algorithms for generating insights into the range of variability that can be the expected due to model uncertainty. Two issues complicate approaches for handling model uncertainty. First, most systems are fundamentally nonlinear, which means that closed-form solutions are not available for predicting the response or designing control and/or estimation strategies. Second, series approximations are usually required, which demands that partial derivative models are available. Both of these issues have been significant barriers to previous researchers, who have been forced to invoke computationally intense Monte-Carlo methods to gain insight into a systems nonlinear behavior through a massive sampling process. These barriers are overcome by introducing three strategies: (1) Computational differentiation that automatically builds exact partial derivative models; (2) Automatic development of state transition tensor series-based solution for mapping initial uncertainty models into instantaneous uncertainty models; and (3) Development of nonlinear transformations for mapping an initial probability distribution function into a current probability distribution function for computing fully nonlinear statistical system properties. The resulting nonlinear probability distribution function (pdf) represents a Liouiville approximation for the stochastic Fokker Planck equation. Several applications, using nonlinear systems, are presented that demonstrate the effectiveness of the proposed mathematical developments, where the solution is validated by using a Mont-Carlo simulation method. A nonlinear covariance algorithm is presented that uses a closed-form solution for evaluating the expectation values of high-order tensor models for Gaussian variables. The general modeling methodology is expected to be broadly useful for science and engineering applications in general, as well as grand challenge problems that exist at the frontiers of computational science and mathematics.},
+}
+
+ 
+@Article{Grenier2022,
+  author    = {Grenier, Antoine and Giordano, Pietro and Bucci, Lorenzo and Cropp, Alexander and Zoccarato, Paolo and Richard Swinden and Ventura-Traveset, Javier},
+  journal   = {NAVIGATION: Journal of the Institute of Navigation},
+  title     = {Positioning and {Velocity} {Performance} {Levels} for a {Lunar} {Lander} using a {Dedicated} {Lunar} {Communication} and {Navigation} {System}},
+  year      = {2022},
+  issn      = {0028-1522, 2161-4296},
+  month     = jun,
+  number    = {2},
+  volume    = {69},
+  abstract  = {The interest in Moon exploration has grown substantially in the last few years, appointing the Moon as the first step toward deep space exploration. However, the current state-of-the-art approach for lunar landing does not always reach the required performance levels. This contribution presents a potential implementation of a dedicated lunar communication and navigation service (LCNS) and the performance levels achievable by a representative lunar lander mission that uses the LCNS. The expected positioning precision during the final descent and at the landing site is demonstrated here with a variance-covariance analysis starting from reasonable assumptions about the capabilities of a potential dedicated LCNS system. The performance in positioning and navigation achievable during a generic moon-landing phase significantly outperforms existing ground-based baseline solutions, enabling the stringent requirements from the International Space Exploration Coordination Group (ISECG) to be met.},
+  chapter   = {Original Article},
+  copyright = {© 2022 Institute of Navigation. This is an open access article under the terms of the Creative Commons Attribution License, which permits use, distribution and reproduction in any medium, provided the original work is properly cited.},
+  doi       = {10.33012/navi.513},
+  file      = {:Grenier2022 - Positioning and Velocity Performance Levels for a Lunar Lander Using a Dedicated Lunar Communication and Navigation System.pdf:PDF},
+  language  = {en},
+  publisher = {Institute of Navigation},
+  url       = {https://navi.ion.org/content/69/2/navi.513},
+  urldate   = {2023-07-16},
+}
+
+ 
 @InProceedings{Turan2022d,
   author   = {Turan, E. and Speretta, S. and Gill, E.K.A.},
   title    = {Performance {Analysis} of {Radiometric} {Autonomous} {Navigation} for {Lunar} {Satellite} {Network} {Topologies}: 11th {International} {Workshop} on {Satellite} {Constellations} and {Formation} {Flying},},
@@ -749,6 +1211,97 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   abstract = {This study provides a performance analysis of radiometric autonomous navigation for the lunar satellite network topologies formed by three spacecraft at various orbits. This work is built on the Linked Autonomous Interplanetary Satellite Orbit Navigation (LiAISON) method and uses mesh (distributed) and centralized (star) network topologies. The optimal interlink network topologies and Distributed Satellite Systems (DSS) geometry have been investigated based on the Circular-Restricted Three-Body problem (CRTBP) and the Extended Kalman Filter (EKF) for state estimation. The network topologies consisted of all the possible combinations of 16 spacecraft at various L1/L2 Halo, Lyapunov, and Lunar orbits. It has been shown that the autonomous navigation system provided better state estimation results for the mesh topology than for the centralized topology. Overall, the lunar satellite network topologies consisting of orbits with large inter-satellite link distances and short orbital periods would bene\_t most from the radiometric autonomous navigation.},
   annote   = {Conference code: 11},
   language = {English},
+}
+
+ 
+@MastersThesis{McLeod2013,
+  author   = {McLeod, Christopher},
+  school   = {Naval Postgraduate School},
+  title    = {Effect of nonlinearities on orbit covariance propagation},
+  year     = {2013},
+  month    = sep,
+  abstract = {Abstract : This thesis will examine the effect of nonlinearities on the propagation of orbit uncertainties in order to gain insight into the accurateness of the estimation of covariance with time. Many real-world applications rely on a first-order approximation of nonlinear equations of motion for propagation of orbit uncertainty. The nonlinear effects that are ignored during the linearization process can greatly influence the accuracy of the solution. A comparative analysis of linear and nonlinear orbit uncertainty propagation is presented in order to attempt to determine when linearized uncertainty becomes non-Gaussian. An examination of performance metrics is then accomplished to compare linearly propagated uncertainty to uncertainty propagated using a second-order approximation. An attempt is then made to develop a performance metric that determines when propagated uncertainty is no longer Gaussian. The results show it is difficult to determine a clear method of defining when the linear approximated uncertainty is no longer Gaussian, but there are metrics that can be implemented given a user-defined threshold of performance.},
+  annote   = {[TLDR] The results show it is difficult to determine a clear method of defining when the linear approximated uncertainty is no longer Gaussian, but there are metrics that can be implemented given a user-defined threshold of performance.},
+  file     = {:mcleod_effect_2013 - Effect of Nonlinearities on Orbit Covariance Propagation.html:URL;:McLeod2013 - Effect of Nonlinearities on Orbit Covariance Propagation.html:URL},
+  url      = {https://www.semanticscholar.org/paper/Effect-of-nonlinearities-on-orbit-covariance-McLeod/9cdb2dfa563a53521d1df79cdd6409bd90df4279},
+  urldate  = {2023-07-21},
+}
+
+ 
+@Article{Hoffman1994,
+  author     = {Hoffman, F. Owen and Hammonds, Jana S.},
+  journal    = {Risk Analysis},
+  title      = {Propagation of {Uncertainty} in {Risk} {Assessments}: {The} {Need} to {Distinguish} {Between} {Uncertainty} {Due} to {Lack} of {Knowledge} and {Uncertainty} {Due} to {Variability}},
+  year       = {1994},
+  issn       = {1539-6924},
+  number     = {5},
+  pages      = {707--712},
+  volume     = {14},
+  abstract   = {In quantitative uncertainty analysis, it is essential to define rigorously the endpoint or target of the assessment. Two distinctly different approaches using Monte Carlo methods are discussed: (1) the end point is a fixed but unknown value (e.g., the maximally exposed individual, the average individual, or a specific individual) or (2) the end point is an unknown distribution of values (e.g., the variability of exposures among unspecified individuals in the population). In the first case, values are sampled at random from distributions representing various “degrees of belief” about the unknown “fixed” values of the parameters to produce a distribution of model results. The distribution of model results represents a subjective confidence statement about the true but unknown assessment end point. The important input parameters are those that contribute most to the spread in the distribution of the model results. In the second case, Monte Carlo calculations are performed in two dimensions producing numerous alternative representations of the true but unknown distribution. These alternative distributions permit subject confidence statements to be made from two perspectives: (1) for the individual exposure occurring at a specified fractile of the distribution or (2) for the fractile of the distribution associated with a specified level of individual exposure. The relative importance of input parameters will depend on the fractile or exposure level of interest. The quantification of uncertainty for the simulation of a true but unknown distribution of values represents the state-of-the-art in assessment modeling.},
+  doi        = {10.1111/j.1539-6924.1994.tb00281.x},
+  file       = {Full Text PDF:https\://onlinelibrary.wiley.com/doi/pdfdirect/10.1111/j.1539-6924.1994.tb00281.x:application/pdf},
+  keywords   = {Uncertainty, variability, lack of knowledge, Monte Carlo methods},
+  language   = {en},
+  shorttitle = {Propagation of {Uncertainty} in {Risk} {Assessments}},
+  url        = {https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1539-6924.1994.tb00281.x},
+  urldate    = {2023-08-12},
+}
+
+ 
+@Article{Geller2006,
+  author    = {Geller, David K.},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Linear {Covariance} {Techniques} for {Orbital} {Rendezvous} {Analysis} and {Autonomous} {Onboard} {Mission} {Planning}},
+  year      = {2006},
+  issn      = {0731-5090},
+  month     = nov,
+  number    = {6},
+  pages     = {1404--1414},
+  volume    = {29},
+  doi       = {10.2514/1.19447},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.19447:application/pdf},
+  keywords  = {Orbital Rendezvous, Closed Loop, Monte Carlo Simulation, Six Degree of Freedom, Electric Propulsion, Autonomous Flight, Formation Flying, Flight Software, Space Missions, Resident Space Object},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/1.19447},
+  urldate   = {2023-08-12},
+}
+
+ 
+@Article{Geller2009,
+  author    = {Geller, David K. and Rose, M. Ben and Woffinden, David C.},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Event {Triggers} in {Linear} {Covariance} {Analysis} with {Applications} to {Orbital} {Rendezvous}},
+  year      = {2009},
+  issn      = {0731-5090},
+  month     = jan,
+  number    = {1},
+  pages     = {102--111},
+  volume    = {32},
+  doi       = {10.2514/1.36834},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.36834:application/pdf},
+  keywords  = {Earth Orbital Rendezvous, Orbital Transfer, Monte Carlo Simulation, Flight Computer, Resident Space Object, LIDAR, Targeting Algorithms, White Noise, Navigation Algorithm, Dirac Delta Function},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/1.36834},
+  urldate   = {2023-08-13},
+}
+
+ 
+@Article{Park2007,
+  author    = {Park, Ryan S. and Scheeres, Daniel J.},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Nonlinear {Semi}-{Analytic} {Methods} for {Trajectory} {Estimation}},
+  year      = {2007},
+  issn      = {0731-5090},
+  month     = nov,
+  number    = {6},
+  pages     = {1668--1676},
+  volume    = {30},
+  doi       = {10.2514/1.29106},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.29106:application/pdf},
+  keywords  = {Unscented Kalman Filter, Earth, Halo Orbit, Monte Carlo Simulation, Probability Density Functions, Orbital Period, Nonlinear Filter, Dirac Delta Function, Square Root Information Filter, Very Long Baseline Interferometry},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/1.29106},
+  urldate   = {2023-08-13},
 }
 
  
@@ -781,6 +1334,18 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   keywords = {Astrodynamics},
   url      = {https://ntrs.nasa.gov/citations/20150007228},
   urldate  = {2023-08-15},
+}
+
+ 
+@InCollection{Parker2012,
+  author    = {Parker, Jeffrey and Anderson, Rodney and Born, George and Fujimoto, Kohei and Leonard, Jason and McGranaghan, Ryan},
+  booktitle = {{AIAA}/{AAS} {Astrodynamics} {Specialist} {Conference}},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  title     = {Navigation {Between} {Geosynchronous} and {Lunar} {L1} {Orbiters}},
+  doi       = {10.2514/6.2012-4878},
+  file      = {AIAA Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/6.2012-4878:application/pdf},
+  url       = {https://arc.aiaa.org/doi/abs/10.2514/6.2012-4878},
+  urldate   = {2023-08-15},
 }
 
  
@@ -817,6 +1382,23 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Damico2013,
+  author   = {Damico, S. and Ardaens, J.-S. and De Florio, S.},
+  journal  = {Acta Astronautica},
+  title    = {Autonomous formation flying based on {GPS} - {PRISMA} flight results},
+  year     = {2013},
+  issn     = {0094-5765},
+  number   = {1},
+  pages    = {69--79},
+  volume   = {82},
+  abstract = {This paper presents flight results from the early harvest of the Spaceborne Autonomous Formation Flying Experiment (SAFE) conducted in the frame of the Swedish PRISMA technology demonstration mission. SAFE represents one of the first demonstrations in low Earth orbit of an advanced guidance, navigation and control system for dual-spacecraft formations. Innovative techniques based on differential GPS-based navigation and relative orbital elements control are validated and tuned in orbit to fulfill the typical requirements of future distributed scientific instruments for remote sensing. © 2012 Elsevier Ltd.},
+  annote   = {Cited By :43},
+  doi      = {10.1016/j.actaastro.2012.04.033},
+  keywords = {Autonomy, Flight results, Formation flying, GNC, GPS},
+  language = {English},
+}
+
+ 
 @Article{Xiong2013,
   author   = {Xiong, K. and Wei, C. and Liu, L.},
   journal  = {Acta Astronautica},
@@ -830,6 +1412,29 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   doi      = {10.1016/j.actaastro.2012.12.001},
   keywords = {Autonomous navigation, Constellation, CRLB, MMAE, Star sensor, Visibility},
   language = {English},
+}
+
+ 
+@InProceedings{HurDiaz2007,
+  author = {Hur-Diaz, Sun and Bamford, Bill and Gaylor, David},
+  title  = {Autonomous {Lunar} {Orbit} {Navigation} {Using} {Optical} {Sensors}},
+  year   = {2007},
+  month  = aug,
+  file   = {Full Text PDF:https\://www.researchgate.net/profile/David-Gaylor/publication/303541834_Autonomous_Lunar_Orbit_Navigation_Using_Optical_Sensors/links/57473e9408aef66a78b07983/Autonomous-Lunar-Orbit-Navigation-Using-Optical-Sensors.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/303541834_Autonomous_Lunar_Orbit_Navigation_Using_Optical_Sensors:},
+}
+
+ 
+@Article{HurDiaz2008,
+  author   = {Hur-Diaz, Sun and Bamford, Bill and Gaylor, Dave},
+  journal  = {Astrodynamics 2007 - Advances in the Astronautical Sciences, Proceedings of the AAS/AIAA Astrodynamics Specialist Conference},
+  title    = {Autonomous lunar orbit navigation using optical sensors},
+  year     = {2008},
+  issn     = {9780877035435},
+  pages    = {997--1014},
+  abstract = {Autonomous use of optical sensors for obtaining self-contained navigation solutions in a lunar orbit that are independent of ground or other external aids is explored. Tracking of multiple unknown landmarks on the Moon is considered along with a disk measurement providing range information from infrared sensors. Sensitivity of the navigation performance to sensor accuracy, measurement frequency, and initial error is assessed. Navigation performance obtained from tracking unknown landmarks is compared with performance obtained from tracking known landmarks.},
+  series   = {Advances in the {Astronautical} {Sciences}},
+  url      = {http://www.scopus.com/inward/record.url?scp=60349101680&partnerID=8YFLogxK},
+  urldate  = {2023-08-16},
 }
 
  
@@ -875,6 +1480,44 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Boone2021,
+  author    = {Boone, Spencer and McMahon, Jay},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Orbital {Guidance} {Using} {Higher}-{Order} {State} {Transition} {Tensors}},
+  year      = {2021},
+  issn      = {0731-5090},
+  month     = mar,
+  number    = {3},
+  pages     = {493--504},
+  volume    = {44},
+  abstract  = {This paper derives the equations necessary to use state transition tensors (STTs) in a spacecraft guidance problem. The derivation includes all necessary equations up to the fourth-order expansions in the dynamics and the controls. These are first derived for the general case for a finite burn beginning at the epoch time; simplifications are made for when the target is the spacecraft state at a desired final time, and the controls at the epoch time are impulsive  Δv Δ 𝑣 ’s. An application is presented comparing the STT method with a linearized numerical predictor–corrector for computing an impulsive station-keeping maneuver in an unstable halo orbit around the Earth–moon  L 1 𝐿 1  Lagrange point. The STT method is shown to perform significantly faster, while also converging on accurate solutions for long-horizon targets where the predictor–corrector method fails. The formulation is able to accommodate any number of perturbations in the dynamics, rendering it suitable for onboard operational usage. This approach provides promise for fast and efficient determination of the desired controls to achieve a nonlinear target constraint surface in a highly nonlinear dynamic environment.},
+  doi       = {10.2514/1.G005493},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.G005493:application/pdf},
+  keywords  = {Predictor Corrector Method, Orbital Elements, Spacecraft Trajectories, Earth, Computing, Moon, Space Situational Awareness, Monte Carlo Simulation, Perturbed Orbit, Nonlinear Dynamics},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/1.G005493},
+  urldate   = {2023-09-02},
+}
+
+ 
+@Article{Boone2023,
+  author    = {Boone, Spencer and McMahon, Jay},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Directional {State} {Transition} {Tensors} for {Capturing} {Dominant} {Nonlinear} {Effects} in {Orbital} {Dynamics}},
+  year      = {2023},
+  issn      = {0731-5090},
+  number    = {3},
+  pages     = {431--442},
+  volume    = {46},
+  abstract  = {Higher-order methods such as state transition tensors (STTs) have shown promise for a variety of applications in astrodynamics, but can be limited in their use due to their potentially large computational and storage requirements. In this paper we present a method for approximating STTs by aligning the STTs with particularly unstable directions. This strategy allows us to isolate the most important terms in the higher-order STTs and ignore any less important terms. This method, which we call directional state transition tensors (DSTTs), is applied to several examples in two- and three-body dynamic systems, and it is shown to perform well for both nonlinear state and state uncertainty propagation. The method produces similar results to the full STTs, but requires significantly fewer elements to be stored, which can result in up to 1000× improvements in speed for nonlinear uncertainty propagation computations. DSTTs are promising for expanding the use of STTs to situations with highly nonlinear dynamics but limited computational resources, such as on-board a spacecraft.},
+  doi       = {10.2514/1.G006910},
+  file      = {AIAA Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.G006910:application/pdf},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://doi.org/10.2514/1.G006910},
+  urldate   = {2023-09-02},
+}
+
+ 
 @Article{Zhang2014,
   author    = {Zhang, Lei and Xu, Bo},
   journal   = {The Journal of Navigation},
@@ -896,6 +1539,67 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@InCollection{Chen2017,
+  author    = {Chen, Lei and Bai, Xian-Zong and Liang, Yan-Gang and Li, Ke-Bo},
+  publisher = {Springer},
+  title     = {Orbital {Prediction} {Error} {Propagation} of {Space} {Objects}},
+  year      = {2017},
+  address   = {Singapore},
+  editor    = {Chen, Lei and Bai, Xian-Zong and Liang, Yan-Gang and Li, Ke-Bo},
+  isbn      = {9789811029639},
+  pages     = {23--75},
+  abstract  = {An overview of the space object orbit prediction error is presented, the propagation methods of orbit prediction error based on orbit models are given, and so are the propagation methods based on relative dynamic theories.},
+  doi       = {10.1007/978-981-10-2963-9_2},
+  file      = {:Chen2017 - Orbital Prediction Error Propagation of Space Objects.html:URL},
+  keywords  = {Orbit Prediction Error, Characteristic Negative Correlation, Velocity Error, Near-circular Orbits, Relative Dynamic Equation},
+  language  = {en},
+  url       = {https://doi.org/10.1007/978-981-10-2963-9_2},
+  urldate   = {2023-09-15},
+}
+
+ 
+@Article{Zhou2022,
+  author    = {Zhou, Xingyu and Wang, Shuo and Qin, Tong},
+  journal   = {Applied Sciences},
+  title     = {Multi-{Spacecraft} {Tracking} and {Data} {Association} {Based} on {Uncertainty} {Propagation}},
+  year      = {2022},
+  issn      = {2076-3417},
+  month     = jan,
+  number    = {15},
+  pages     = {7660},
+  volume    = {12},
+  abstract  = {This paper proposed a novel multi-spacecraft tracking and data association method based on the orbit uncertainty propagation. The proposed method makes full use of the dynamic information and thus the data association performance is enhanced. The proposed method is divided into three portions, i.e., the uncertainty propagation, the data association, and the orbit estimation. The second-order solutions derived for state and measurement prediction, on which to base the optimal association, are set up. The optimal association is solved by the contract network algorithm to reduce the computing cost. Finally, a second-order extended Kalman filter is designed to estimate the orbit of each spacecraft. The proposed method is successfully applied for solving a four-spacecraft tracking problem. Simulations show that all the four targets are well tracked. The method demonstrates close to 100\% data association precision. The proposed method is proved to be efficient and effective to solve the multi-spacecraft tracking problem.},
+  copyright = {http://creativecommons.org/licenses/by/3.0/},
+  doi       = {10.3390/app12157660},
+  file      = {:Zhou2022 - Multi Spacecraft Tracking and Data Association Based on Uncertainty Propagation.pdf:PDF},
+  keywords  = {multi-spacecraft tracking, data association, uncertainty propagation, orbit estimation},
+  language  = {en},
+  publisher = {Multidisciplinary Digital Publishing Institute},
+  url       = {https://www.mdpi.com/2076-3417/12/15/7660},
+  urldate   = {2023-09-15},
+}
+
+ 
+@Article{Yang2019,
+  author   = {Yang, Zhen and Luo, Ya-Zhong and Zhang, Jin},
+  journal  = {Astrodynamics},
+  title    = {Nonlinear semi-analytical uncertainty propagation of trajectory under impulsive maneuvers},
+  year     = {2019},
+  issn     = {2522-0098},
+  month    = mar,
+  number   = {1},
+  pages    = {61--77},
+  volume   = {3},
+  abstract = {The usage of state transition tensors (STTs) was proved as an effective method for orbital uncertainty propagation. However, orbital maneuvers and their uncertainties are not considered in current STT-based methods. Uncertainty propagation of spacecraft trajectory with maneuvers plays an important role in spaceflight missions, e.g., the rendezvous phasing mission. Under the effects of impulsive maneuvers, the nominal trajectory of a spacecraft will be divided into several segments. If the uncertainty is piecewise propagated using the STTs one after another, large approximation errors will be introduced. To overcome this challenge, a set of modified STTs is derived, which connects the segmented trajectories together and allows for directly propagating uncertainty from the initial time to the final time. These modified STTs are then applied to analytically propagate the statistical moments of navigation and impulsive maneuver uncertainties. The probability density function is obtained by combining STTs with the Gaussian mixture model. The proposed uncertainty propagator is shown to be efficient and affords good agreement with Monte Carlo simulations. It also has no dimensionality problem for high-dimensional uncertainty propagation.},
+  doi      = {10.1007/s42064-018-0036-7},
+  file     = {:Yang2019 - Nonlinear Semi Analytical Uncertainty Propagation of Trajectory under Impulsive Maneuvers.html:URL},
+  keywords = {uncertainty propagation, state transition tensors (STTs), Gaussian mixture model, rendezvous phasing},
+  language = {en},
+  url      = {https://doi.org/10.1007/s42064-018-0036-7},
+  urldate  = {2023-09-15},
+}
+
+ 
 @Article{Yang2018,
   author   = {Yang, Zhen and Luo, Ya-zhong and Lappas, Vaios and Tsourdos, Antonios},
   journal  = {Journal of Guidance, Control, and Dynamics},
@@ -912,6 +1616,25 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   language = {en},
   url      = {https://arc.aiaa.org/doi/10.2514/1.G003071},
   urldate  = {2023-09-15},
+}
+
+ 
+@Article{Jin2019,
+  author    = {Jin, Yang and Xu, Bo},
+  journal   = {International Journal of Aerospace Engineering},
+  title     = {A {Modified} {Targeting} {Strategy} for {Station}-{Keeping} of {Libration} {Point} {Orbits} in the {Real} {Earth}-{Moon} {System}},
+  year      = {2019},
+  issn      = {1687-5966},
+  month     = sep,
+  pages     = {e3257514},
+  volume    = {2019},
+  abstract  = {In this paper, a modified targeting strategy is developed for missions on libration point orbits (LPOs) in the real Earth-Moon system. In order to simulate a station-keeping procedure in a dynamic model as realistic as possible, LPOs generated in the circular restricted three-body problem (CRTBP) are discretized and reconverged in a geocentric inertial system for later simulations. After that, based on the dynamic property of the state transition matrix, a modified strategy of selecting target points for station-keeping is presented to reduce maneuver costs. By considering both the solar gravity and radiation pressure in a nominal LPO design, station-keeping simulations about fuel consumption for real LPOs around both collinear and triangular libration points are performed in a high-fidelity ephemeris model. Results show the effectivity of the modified strategy with total maneuver costs reduced by greater than 10\% for maintaining triangular LPOs.},
+  doi       = {10.1155/2019/3257514},
+  file      = {:jin_modified_2019 - A Modified Targeting Strategy for Station Keeping of Libration Point Orbits in the Real Earth Moon System.pdf:PDF},
+  language  = {en},
+  publisher = {Hindawi},
+  url       = {https://www.hindawi.com/journals/ijae/2019/3257514/},
+  urldate   = {2023-09-21},
 }
 
  
@@ -955,6 +1678,38 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Shirobokov2017,
+  author    = {Shirobokov, Maksim and Trofimov, Sergey and Ovchinnikov, Mikhail},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Survey of {Station}-{Keeping} {Techniques} for {Libration} {Point} {Orbits}},
+  year      = {2017},
+  issn      = {0731-5090},
+  number    = {5},
+  pages     = {1085--1105},
+  volume    = {40},
+  doi       = {10.2514/1.G001850},
+  file      = {AIAA Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.G001850:application/pdf},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://doi.org/10.2514/1.G001850},
+  urldate   = {2023-10-02},
+}
+
+ 
+@Book{Parker2014,
+  author    = {Parker, Jeffrey S. and Anderson, Rodney L.},
+  publisher = {John Wiley \& Sons},
+  title     = {Low-{Energy} {Lunar} {Trajectory} {Design}},
+  year      = {2014},
+  isbn      = {9781118853870},
+  month     = jun,
+  note      = {Google-Books-ID: KlrwAwAAQBAJ},
+  abstract  = {Based on years of research conducted at the NASA Jet Propulsion Laboratory, Low-Energy Lunar Trajectory Design provides high-level information to mission managers and detailed information to mission designers about low-energy transfers between Earth and the moon. The book answers high-level questions about the availability and performance of such transfers in any given month and year. Low-energy lunar transfers are compared with various other types of transfers, and placed within the context of historical missions. Using this book, designers may reconstruct any transfer described therein, as well as design similar transfers with particular design parameters. An Appendix, “Locating the Lagrange Points,” and a useful list of terms and constants completes this technical reference.  Surveys thousands of possible trajectories that may be used to transfer spacecraft between Earth and the moon, including transfers to lunar libration orbits, low lunar orbits, and the lunar surface Provides information about the methods, models, and tools used to design low-energy lunar transfers Includes discussion about the variations of these transfers from one month to the next, and the important operational aspects of implementing a low-energy lunar transfer Additional discussions address navigation, station-keeping, and spacecraft systems issues},
+  file      = {:Parker2014 - Low Energy Lunar Trajectory Design.html:URL},
+  keywords  = {Technology \& Engineering / Aeronautics \& Astronautics, Technology \& Engineering / Manufacturing},
+  language  = {en},
+}
+
+ 
 @Article{Pavlak2012,
   author   = {Pavlak, Thomas A. and Howell, Kathleen C.},
   journal  = {Acta Astronautica},
@@ -971,6 +1726,38 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   keywords = {Spacecraft maneuver design, Libration point orbits, Multi-body dynamics, Restricted three-body problem},
   url      = {https://www.sciencedirect.com/science/article/pii/S0094576512002883},
   urldate  = {2023-10-20},
+}
+
+ 
+@Article{Farquhar1973,
+  author   = {Farquhar, Robert W. and Kamel, Ahmed A.},
+  journal  = {Celestial mechanics},
+  title    = {Quasi-periodic orbits about the translunar libration point},
+  year     = {1973},
+  issn     = {1572-9478},
+  month    = jun,
+  number   = {4},
+  pages    = {458--473},
+  volume   = {7},
+  abstract = {Analytical solutions for quasi-periodic orbits about the translunar libration point are obtained by using the method of Lindstedt-Poincaré and computerized algebraic manipulations. The solutions include the effects of nonlinearities, lunar orbital eccentricity, and the Sun's gravitational field. For a small-amplitude orbit, the orbital path as viewed from the Earth traces out a Lissajous figure. This is due to a small difference in the fundamental frequencies of the in-plane and out-of-plane oscillations. However, when the amplitude of the in-plane oscillation is greater than 32 379 km, there is a corresponding value of the out-of-plane amplitude that will produce a path where the fundamental frequencies are equal. This synchronized trajectory describes a ‘halo orbit’ of the Moon.},
+  doi      = {10.1007/BF01227511},
+  file     = {:Farquhar1973 - Quasi Periodic Orbits about the Translunar Libration Point.html:URL},
+  keywords = {Small Difference, Fundamental Frequency, Gravitational Field, Algebraic Manipulation, Libration Point},
+  language = {en},
+  url      = {https://doi.org/10.1007/BF01227511},
+  urldate  = {2023-10-20},
+}
+
+ 
+@InProceedings{Friedman2017,
+  author   = {Friedman, Alex M. and Frueh, Carolin},
+  title    = {Determining {Debris} {Characteristics} from {Observability} {Analysis} of {Artificial} {Near}-{Earth} {Objects}},
+  year     = {2017},
+  abstract = {1. Motivation The more than 100 million debris objects greater than 1 mm from almost 60 years of humankind’s exploration and operation in space are of great concern for safety of humans and assets in Earth orbit because of potentially high impact speeds between orbiting objects [3]. Space objects can be characterized by position and velocity, attitude, material properties,},
+  file     = {Full Text PDF:https\://conference.sdo.esoc.esa.int/proceedings/sdc7/paper/316/SDC7-paper316.pdf:application/pdf},
+  language = {de},
+  url      = {https://conference.sdo.esoc.esa.int/proceedings/sdc7/paper/316},
+  urldate  = {2023-11-09},
 }
 
  
@@ -1014,6 +1801,47 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Luo2022,
+  author    = {Luo, Yan and Qin, Tong and Zhou, Xingyu},
+  journal   = {Aerospace},
+  title     = {Observability {Analysis} and {Improvement} {Approach} for {Cooperative} {Optical} {Orbit} {Determination}},
+  year      = {2022},
+  issn      = {2226-4310},
+  month     = mar,
+  number    = {3},
+  pages     = {166},
+  volume    = {9},
+  abstract  = {Cooperative orbit determination (OD) using inter-spacecraft optical measurements is an important technology for space constellation missions. In this paper, the observability of a two-spacecraft cooperative OD system is investigated. The influence of geometric configuration on the observability is analyzed, and two special unobservable configurations are identified. Then, an approach to improve the observability by involving an additional spacecraft is proposed. Comparative analysis of system observability shows that an extra spacecraft in the system could change the coplanar and symmetric configuration and improve the observability of the cooperative OD system. Monte-Carlo simulations are carried out, and results verify the observability improvement conclusion.},
+  copyright = {http://creativecommons.org/licenses/by/3.0/},
+  doi       = {10.3390/aerospace9030166},
+  file      = {:Luo2022 - Observability Analysis and Improvement Approach for Cooperative Optical Orbit Determination.pdf:PDF},
+  keywords  = {cooperative orbit determination, optical measurements, observability analysis, orbit configuration},
+  language  = {en},
+  publisher = {Multidisciplinary Digital Publishing Institute},
+  url       = {https://www.mdpi.com/2226-4310/9/3/166},
+  urldate   = {2023-11-09},
+}
+
+ 
+@Article{Huxel2009,
+  author    = {Huxel, Paul J. and Bishop, Robert H.},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Navigation {Algorithms} and {Observability} {Analysis} for {Formation} {Flying} {Missions}},
+  year      = {2009},
+  issn      = {0731-5090},
+  month     = jul,
+  number    = {4},
+  pages     = {1218--1231},
+  volume    = {32},
+  doi       = {10.2514/1.41288},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.41288:application/pdf},
+  keywords  = {Navigation Algorithm, Formation Flying, Extended Kalman Filter, Linear Time Invariant System, Spacecraft Formation, Argument of Latitude, Earth, Navigation Performance, Computing, Orbital Elements},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/1.41288},
+  urldate   = {2023-11-09},
+}
+
+ 
 @Article{Fowler2023,
   author   = {Fowler, Erin E. and Paley, Derek A.},
   journal  = {The Journal of the Astronautical Sciences},
@@ -1034,6 +1862,40 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Cano2022,
+  author   = {Cano, Alejandro and Pastor, Alejandro and Fernández, Sergio and Míguez, Joaquín and Sanjurjo-Rivo, Manuel and Escobar, Diego},
+  journal  = {The Journal of the Astronautical Sciences},
+  title    = {Improving {Orbital} {Uncertainty} {Realism} {Through} {Covariance} {Determination} in {GEO}},
+  year     = {2022},
+  issn     = {2195-0571},
+  month    = oct,
+  number   = {5},
+  pages    = {1394--1420},
+  volume   = {69},
+  abstract = {The reliability of the uncertainty characterization, also known as uncertainty realism, is of the uttermost importance for Space Situational Awareness (SSA) services. Among the different sources of uncertainty related to the orbits of Resident Space Objects (RSOs), the uncertainty of dynamic models is one of the most relevant ones, although it is not always included in orbit determination processes. A classical approach to account for these sources of uncertainty is the consider parameters theory, which consists in including parameters in the underlying dynamical models whose variance aims to represent the uncertainty of the system. However, realistic variances of these consider parameters are not known a-priori. This work presents a method to infer the variance of the consider parameters, based on the distribution of the Mahalanobis distance of the orbital differences between predicted and estimated orbits, which theoretically shall follow a \$\${\textbackslash}chi {\textasciicircum}2\$\$distribution under Gaussian assumption. This paper presents results in a simulated scenario focusing on Geostationary (GEO) regimes. The effectiveness and traceability of the uncertainty sources is assessed via covariance realism metrics.},
+  doi      = {10.1007/s40295-022-00343-x},
+  file     = {:Cano2022 - Improving Orbital Uncertainty Realism through Covariance Determination in GEO.pdf:PDF},
+  keywords = {Uncertainty realism, Covariance realism, Space situational awareness, Covariance determination, Mahalanobis distance, Chi-square distribution},
+  language = {en},
+  url      = {https://doi.org/10.1007/s40295-022-00343-x},
+  urldate  = {2023-11-10},
+}
+
+ 
+@InProceedings{Lisano2007,
+  author   = {Lisano, Michael E.},
+  title    = {Comparing {Consider}-{Covariance} {Analysis} with {Sigma}-{Point} {Consider} {Filter} and {Linear}-{Theory} {Consider} {Filter} {Formulations}},
+  year     = {2007},
+  month    = sep,
+  note     = {NTRS Author Affiliations: Jet Propulsion Lab., California Inst. of Tech. NTRS Document ID: 20080012709 NTRS Research Center: Goddard Space Flight Center (GSFC)},
+  abstract = {Recent literature in applied estimation theory reflects growing interest in the sigma-point (also called unscented ) formulation for optimal sequential state estimation, often describing performance comparisons with extended Kalman filters as applied to specific dynamical problems [c.f. 1, 2, 3]. Favorable attributes of sigma-point filters are described as including a lower expected error for nonlinear even non-differentiable dynamical systems, and a straightforward formulation not requiring derivation or implementation of any partial derivative Jacobian matrices. These attributes are particularly attractive, e.g. in terms of enabling simplified code architecture and streamlined testing, in the formulation of estimators for nonlinear spaceflight mechanics systems, such as filter software onboard deep-space robotic spacecraft. As presented in [4], the Sigma-Point Consider Filter (SPCF) algorithm extends the sigma-point filter algorithm to the problem of consider covariance analysis. Considering parameters in a dynamical system, while estimating its state, provides an upper bound on the estimated state covariance, which is viewed as a conservative approach to designing estimators for problems of general guidance, navigation and control. This is because, whether a parameter in the system model is observable or not, error in the knowledge of the value of a non-estimated parameter will increase the actual uncertainty of the estimated state of the system beyond the level formally indicated by the covariance of an estimator that neglects errors or uncertainty in that parameter. The equations for SPCF covariance evolution are obtained in a fashion similar to the derivation approach taken with standard (i.e. linearized or extended) consider parameterized Kalman filters (c.f. [5]). While in [4] the SPCF and linear-theory consider filter (LTCF) were applied to an illustrative linear dynamics/linear measurement problem, in the present work examines the SPCF as applied to nonlinear sequential consider covariance analysis, i.e. in the presence of nonlinear dynamics and nonlinear measurements. A simple SPCF for orbit determination, exemplifying an algorithm hosted in the guidance, navigation and control (GN\&C) computer processor of a hypothetical robotic spacecraft, was implemented, and compared with an identically-parameterized (standard) extended, consider-parameterized Kalman filter. The onboard filtering scenario examined is a hypothetical spacecraft orbit about a small natural body with imperfectly-known mass. The formulations, relative complexities, and performances of the filters are compared and discussed.},
+  file     = {:Lisano2007 - Comparing Consider Covariance Analysis with Sigma Point Consider Filter and Linear Theory Consider Filter Formulations.pdf:PDF},
+  keywords = {Spacecraft Design, Testing And Performance},
+  url      = {https://ntrs.nasa.gov/citations/20080012709},
+  urldate  = {2023-11-10},
+}
+
+ 
 @Article{Psiaki2011,
   author    = {Psiaki, Mark L.},
   journal   = {Journal of Guidance, Control, and Dynamics},
@@ -1050,6 +1912,35 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   publisher = {American Institute of Aeronautics and Astronautics},
   url       = {https://arc.aiaa.org/doi/10.2514/1.47560},
   urldate   = {2023-11-13},
+}
+
+ 
+@Article{Zhou2023,
+  author   = {Zhou, Xingyu and Qin, Tong and Macdonald, Malcolm and Qiao, Dong},
+  journal  = {Acta Astronautica},
+  title    = {Observability analysis of cooperative orbit determination using inertial inter-spacecraft angle measurements},
+  year     = {2023},
+  issn     = {0094-5765},
+  month    = sep,
+  pages    = {289--302},
+  volume   = {210},
+  abstract = {The cooperative orbit determination (OD) using inertial inter-spacecraft measurements is of great value for the constellation. Previous studies concluded that the cooperative OD system in the two-body dynamics is observable using the inertial angle measurement. This paper performs an observability analysis for the inertial angle-only cooperative OD system based on the observability matrix (OM), and finds that the previous conclusions do not hold for some special configurations. Eight special configurations are proposed, and for each configuration, the unobservable orbit elements are analytically revealed by analyzing the linear relationship among different columns of the OM. Moreover, a method of improving the observability of the two-spacecraft system is proposed by adding another spacecraft. An extended Kalman filter is employed to numerically illustrate the observability of the proposed special configurations and to show the relationship between the observability and the convergence ratio of estimations. Monte Carlo simulations show that the convergence ratios of the observable orbit elements and state combinations are higher than 97\%, while convergence ratios of the unobservable states are lower than 70\%. With one non-planar elliptic orbit added, all the elements of the three-spacecraft system are observable, and the estimated errors converge within 6 h. The results found in this paper can provide a reference for the design and management of the constellation.},
+  doi      = {10.1016/j.actaastro.2023.05.019},
+  file     = {:Zhou2023 - Observability Analysis of Cooperative Orbit Determination Using Inertial Inter Spacecraft Angle Measurements.html:URL},
+  keywords = {Cooperative orbit determination, Constellation, Observability matrix, Extended Kalman filter, Convergence ratio},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0094576523002527},
+  urldate  = {2023-11-13},
+}
+
+ 
+@InProceedings{Yim2004,
+  author   = {Yim, J. and Crassidis, J. and Junkins, J.},
+  title    = {1 {AAS} 04-257 Autonomous Orbit Determination for Two Spacecraft from Relative Position Measurements},
+  year     = {2004},
+  abstract = {Autonomous orbit navigation of two spacecraft system is considered with the relative line-of-sight vector measurements between two spacecraft system. Observability of the system with the available measurements is investigated using the linear observability analysis, and the relative state variable observability is obtained. Error covariance analysis based on the extended Kalman filter is considered, and the position and velocity state estimations of two spacecrafts are obtained by using the extended Kalman filter. The estimation results show that the position can be estimated with an accuracy of about 200 m and the velocity about 0.2 m/sec. This estimation result is confirmed through the Monte-Carlo simulation. The results clearly show that a fully autonomous onboard orbit navigation system is feasible by using an electro-optical means for measuring the relative LOS vector.},
+  file     = {:yim_1_2004 - 1 AAS 04 257 AUTONOMOUS ORBIT NAVIGATION oF TWO SPACECRAFT SYSTEM USING RELATIVE LINE oF SIGHT VECTOR MEASUREMENTS.html:URL;:Yim2004 - 1 AAS 04 257 AUTONOMOUS ORBIT NAVIGATION oF TWO SPACECRAFT SYSTEM USING RELATIVE LINE oF SIGHT VECTOR MEASUREMENTS.pdf:PDF},
+  url      = {https://www.semanticscholar.org/paper/1-AAS-04-257-AUTONOMOUS-ORBIT-NAVIGATION-OF-TWO-OF-Yim-Crassidis/ef4818cfc1deaf9f3c69cf3069a42219c5180eaf},
+  urldate  = {2023-11-13},
 }
 
  
@@ -1104,6 +1995,22 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Kruger2023,
+  author   = {Kruger, Justin and D’Amico, Simone},
+  journal  = {Advances in Space Research},
+  title    = {Observability analysis and optimization for angles-only navigation of distributed space systems},
+  year     = {2023},
+  issn     = {0273-1177},
+  month    = sep,
+  abstract = {Angles-only navigation methods are compelling for distributed space systems (DSS) such as swarms and constellations. However, complex dependencies between state observability and system parameters present a challenging design problem. This paper proposes a unified angles-only observability analysis and design framework enabling designers of a DSS to 1) analytically determine whether its orbit state is observable, 2) numerically estimate its expected navigation performance, and 3) intelligently optimize the system to meet navigation requirements. First, a new system measurement topology representation is proposed for which analytic orbit observability can be assessed via a set of graphical conditions. Second, methods for numeric estimation of the achievable state covariance are augmented with auxiliary state variables, dynamics uncertainty, and measurement availability constraints. Third, a system cost function is developed and the topological and numeric methods are placed within a quasi-Newton optimization framework to enable automatic system design. The optimization is applied to a distributed science swarm and a space situational awareness constellation in lunar orbit. Both scenarios converge to a global cost minimum and output designs that achieve user requirements under realistic measurement conditions and constraints. Combined analytic and numeric methods therefore presents a powerful tool for design of angles-only DSS.},
+  doi      = {10.1016/j.asr.2023.08.055},
+  file     = {ScienceDirect Full Text PDF:https\://www.sciencedirect.com/science/article/abs/pii/S0273117723007032/pdfft?isDTMRedir=true&download=true:application/pdf},
+  keywords = {Angles-only navigation, Vision-based navigation, Observability analysis, Design optimization},
+  url      = {https://www.sciencedirect.com/science/article/pii/S0273117723007032},
+  urldate  = {2023-11-17},
+}
+
+ 
 @Book{Folcik2011,
   author   = {Folcik, Z. and Lue, A. and Vatsky, J.},
   title    = {Reconciling {Covariances} with {Reliable} {Orbital} {Uncertainty}},
@@ -1115,6 +2022,37 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   pages    = {E34},
   url      = {https://ui.adsabs.harvard.edu/abs/2011amos.confE..34F},
   urldate  = {2023-11-26},
+}
+
+ 
+@Article{Stiller2023,
+  author   = {Stiller, Dominik},
+  title    = {Short-term orbital effects of radiation pressure on the {Lunar} {Reconnaissance} {Orbiter}},
+  year     = {2023},
+  abstract = {Precision orbit determination for geodetic applications requires force models even for small perturbations. Radiation from the Sun and Moon is a significant source of perturbation in lunar orbits and inadequate modeling of radiation pressure (RP) can lead to large position errors. This paper describes the short-term effect of RP on the Lunar Reconnaissance Orbiter (LRO), which has a position knowledge requirement of 50 m to 100 m in total and below 1 m radially. We compared models of varying complexity to determine the benefits and computational cost of high-accuracy RP modeling. We found that (1) the accelerations differ greatly depending on the Sun position, (2) only a paneled spacecraft model can account properly for changing orientation and geometry of LRO, and (3) a constant-albedo model is sufficient for lunar radiation, which is dominated by the thermal component. A spherical harmonics model for lunar albedo increases computational cost with little gain in the attained accuracy. If RP is neglected, the along-track position errors can be as large as 1100 m and the radial error varies periodically with an amplitude of up to 24 m, highlighting the importance of adequate force modeling to meet LRO's orbit determination requirements.},
+  file     = {:Stiller2023 - Short Term Orbital Effects of Radiation Pressure on the Lunar Reconnaissance Orbiter.pdf:PDF},
+  language = {en},
+  url      = {https://repository.tudelft.nl/islandora/object/uuid%3A8a82400a-2233-4a84-98be-ed37f7eeb620},
+  urldate  = {2023-11-30},
+}
+
+ 
+@Article{Floberghagen1999,
+  author    = {Floberghagen, Rune and Pieter Visser, Pieter and Weischede, Frank},
+  journal   = {Advances in Space Research},
+  title     = {Lunar albedo force modeling and its effect on low lunar orbit and gravity field determination},
+  year      = {1999},
+  issn      = {0273-1177},
+  month     = jan,
+  number    = {4},
+  pages     = {733--738},
+  volume    = {23},
+  abstract  = {A force model for the lunar albedo effect on low lunar orbiters is developed on the basis of Clementine imagery and absolute albedo measurements. The …},
+  doi       = {10.1016/S0273-1177(99)00155-6},
+  language  = {en-US},
+  publisher = {Pergamon},
+  url       = {https://www.sciencedirect.com/science/article/abs/pii/S0273117799001556},
+  urldate   = {2023-12-11},
 }
 
  
@@ -1134,6 +2072,67 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   keywords = {Space navigation, Transponder delay, Doppler tracking, KBRR, Orbit determination, Light propagation},
   url      = {https://www.sciencedirect.com/science/article/pii/S0273117717306361},
   urldate  = {2024-01-19},
+}
+
+ 
+@InProceedings{Deng2015,
+  author   = {Deng, Lu and Sun, Xiucong and Han, Chao},
+  title    = {Analysis and {Comparison} on {UKF} and {BLS} for {Orbit} {Determination}},
+  year     = {2015},
+  month    = aug,
+  abstract = {Based on BeiDou-2 constellation navigation, properties of a relatively new method, unscented Kalman filter and the most classical method, batch least squares method are discussed. First, the research progresses of these two estimation methods are summarized, and then the principles of unscented Kalman filter and batch least squares method are briefly reviewed. Sensitivity analysis of orbit determination results to different measurement errors, measurement data sampling periods, and dynamic model errors, are made with classical unscented Kalman filter and batch least squares method. By comparison n, conclusions are drawn about choice of estimation method in constellation navigation.},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Xiucong-Sun-2/publication/310334667_Analysis_and_Comparison_on_UKF_and_BLS_for_Orbit_Determination/links/582c099608aef19cb806c739/Analysis-and-Comparison-on-UKF-and-BLS-for-Orbit-Determination.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/310334667_Analysis_and_Comparison_on_UKF_and_BLS_for_Orbit_Determination:},
+}
+
+ 
+@InProceedings{Thompson2022,
+  author   = {Thompson, Michael and Forsman, Alec and Peters, Brian and Ely, Todd and Sorensen, Dana and Cheetham, Brad},
+  title    = {Cislunar {Navigation} {Technology} {Demonstrations} on the {CAPSTONE} {Mission}},
+  year     = {2022},
+  month    = jan,
+  abstract = {The Cislunar Autonomous Positioning System Technology Operations and Navigation Experiment (CAPSTONE) mission is an upcoming lunar flight demonstration, with a targeted launch in early 2022. The primary objective of the mission is to test out navigation and operations in the same Near Rectilinear Halo Orbit (NRHO) that will be utilized by NASA’s Lunar Gateway.  In addition to this objective, CAPSTONE contains a dedicated flight board for the Cislunar Autonomous Positioning System (CAPS), a framework for autonomous or near-autonomous navigation in cislunar space developed by Advanced Space. During the mission, CAPS will demonstrate onboard orbit determination via both one-way uplink measurements and crosslink radiometric measurements with the Lunar Reconnaissance Orbiter (LRO). This paper previews the expected performance of these two experimental data types with a set of high-fidelity simulations using realistic CAPSTONE concept of operations (CONOPS) and radio specifications. For CAPSTONE, the nominal tracking architecture will rely on the standard two-way radiometric measurements of the Deep Space Network (DSN) – CAPS is intended is a technology demonstration. However, solutions will be processed onboard, and the expected navigation performance of these experimental data types are compared against the expected ground-based navigation performance.  The goal of CAPS is ultimately to provide a framework for autonomous navigation in cislunar space. The CAPS experiments onboard CAPSTONE will be the first on-orbit step towards this goal. While the early experiments will not replace the utilization of ground-based navigation, they should be able to supplement it and work towards a future where the reliance on two-way ground networks is greatly reduced. For the CAPSTONE orbit and radio specifications, the one-way uplink measurements are expected to provide navigation solutions with uncertainties on the order of single kilometers in position and single cm/s in velocity. These solutions could, in theory, be utilized to design stationkeeping maneuvers onboard the spacecraft and maintain its NRHO over time. Simulations of the expected crosslink measurements also show navigation performances similar to the expected performance of two-way tracking. In addition to examining the CAPSTONE operational CONOPS, the performance of a conceptual ground-based one-way beaconing system is examined, compared to standard two-way radiometric tracking, and used in conjunction with the expected crosslink performance to study what may be possible in terms of cislunar autonomous navigation provided by CAPS in the future.},
+  doi      = {10.33012/2022.18208},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Michael-Thompson-46/publication/358117559_Cislunar_Navigation_Technology_Demonstrations_on_the_CAPSTONE_Mission/links/62e31e6b7782323cf1824094/Cislunar-Navigation-Technology-Demonstrations-on-the-CAPSTONE-Mission.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/358117559_Cislunar_Navigation_Technology_Demonstrations_on_the_CAPSTONE_Mission:},
+}
+
+ 
+@Article{Gao2012,
+  author   = {Gao, Fuchang and Han, Lixing},
+  journal  = {Computational Optimization and Applications},
+  title    = {Implementing the {Nelder}-{Mead} simplex algorithm with adaptive parameters},
+  year     = {2012},
+  issn     = {1573-2894},
+  month    = jan,
+  number   = {1},
+  pages    = {259--277},
+  volume   = {51},
+  abstract = {In this paper, we first prove that the expansion and contraction steps of the Nelder-Mead simplex algorithm possess a descent property when the objective function is uniformly convex. This property provides some new insights on why the standard Nelder-Mead algorithm becomes inefficient in high dimensions. We then propose an implementation of the Nelder-Mead method in which the expansion, contraction, and shrink parameters depend on the dimension of the optimization problem. Our numerical experiments show that the new implementation outperforms the standard Nelder-Mead method for high dimensional problems.},
+  doi      = {10.1007/s10589-010-9329-3},
+  file     = {:Gao2012 - Implementing the Nelder Mead Simplex Algorithm With adaptive Parameters.html:URL},
+  keywords = {Nelder-Mead method, Simplex, Polytope, Adaptive parameter, Optimization},
+  language = {en},
+  url      = {https://doi.org/10.1007/s10589-010-9329-3},
+  urldate  = {2024-03-12},
+}
+
+ 
+@Article{Greaves2023,
+  author    = {Greaves, Jesse A. and Scheeres, Daniel J.},
+  journal   = {Journal of Guidance, Control, and Dynamics},
+  title     = {Autonomous {Optical}-{Only} {Spacecraft}-to-{Spacecraft} {Absolute} {Tracking} and {Maneuver} {Classification} in {Cislunar} {Space}},
+  year      = {2023},
+  issn      = {0731-5090},
+  month     = nov,
+  number    = {11},
+  pages     = {2092--2109},
+  volume    = {46},
+  abstract  = {Traditional concerns regarding spacecraft state estimation are exacerbated in cislunar space due to highly nonlinear dynamics, limited observational information, and increasingly overloaded Earth-based resources. These challenges motivate research into space-based navigation and observation capabilities that provide opportunities for autonomy. This paper demonstrates that relative optical measurements provide full inertial estimates of an agent and target spacecraft, while simultaneously enabling classification of unknown maneuvers in the cislunar environment. To achieve this objective two subtasks are demonstrated. First, the spacecraft-to-spacecraft absolute tracking method, which estimates the absolute state of two vehicles using relative measurements, is tested for observability and shown to produce consistent filter solutions given optical sensors. Second, maneuver classification is performed by labeling an estimated control profile generated from the optimal control based estimator. Collectively, this sequential methodology enables an agent craft to autonomously navigate itself while observing a target craft and classifying its maneuvers.},
+  doi       = {10.2514/1.G007223},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/1.G007223:application/pdf},
+  keywords  = {Space Exploration and Technology, Gaussian Mixture Models, Autonomous Navigation System, Maneuver Detection and Classification, Cislunar Orbit, Spacecraft Maneuvers, Nonlinear Filter, Unscented Kalman Filter, Optical Tracking},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  url       = {https://arc.aiaa.org/doi/10.2514/1.G007223},
+  urldate   = {2024-03-16},
 }
 
  
@@ -1170,6 +2169,53 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@TechReport{Kaplan2006,
+  author   = {Kaplan, George H.},
+  title    = {The {IAU} {Resolutions} on {Astronomical} {Reference} {Systems}, {Time} {Scales}, and {Earth} {Rotation} {Models}},
+  year     = {2006},
+  month    = feb,
+  note     = {arXiv:astro-ph/0602086 type: article},
+  abstract = {Recent resolutions passed by the International Astronomical Union (IAU) on astronomical reference systems, time scales, and Earth rotation models are the most significant set of international agreements in positional astronomy in several decades. These resolutions, the result of over ten years of international research and study, provide a coherent set of foundational standards for the treatment of astrometric data and the modeling of dynamics in the solar system. This circular explains these resolutions and provides a complete set of practical formulas for their implementation. The six main chapters cover relativity, time scales, the fundamental celestial reference system, ephemerides of solar system bodies, precession and nutation, and modeling the Earth's rotation.},
+  annote   = {Comment: 118 pages, 6 figures. Includes 6 main chapters plus table of contents, introductory material, references, and appendices. Available in hardback print edition and as a high-quality PDF file; see http://aa.usno.navy.mil/publications/docs/Circular\_179.html},
+  doi      = {10.48550/arXiv.astro-ph/0602086},
+  file     = {:Kaplan2006 - The IAU Resolutions on Astronomical Reference Systems, Time Scales, and Earth Rotation Models.pdf:PDF},
+  keywords = {Astrophysics},
+  school   = {arXiv},
+  url      = {http://arxiv.org/abs/astro-ph/0602086},
+  urldate  = {2024-04-11},
+}
+
+ 
+@Article{Howell1999,
+  author   = {Howell, Kathleen and Masdemont, Josep},
+  title    = {Aas 98-168 {Station}-{Keeping} {Strategies} {For} {Translunar} {Libration} {Point} {Orbits}},
+  year     = {1999},
+  month    = apr,
+  abstract = {INTRODUCTION As part of the trajectory design, some current missions and a number of recent proposals have included halo or Lissajous orbits in the vicinity of the L 1 or L 2 libration points, most notably in the Sun-Earth/Moon barycenter system. This effort is directed toward comparison and further development of two particular station--keeping approaches that can be used to maintain spacecraft near such libration point trajectories. Each type of analysis offers unique insights into the problem that may be mutually beneficial. In this case, the investigation is conducted in the quicker-Earth-Moon system; the reference orbit is a halo orbit computed in a full solar system model. Halo and Lissajous orbits are solutions that represent bounded motion in the vicinity of a collinear libration point. The problem of controlling a spacecraft moving near an inherently unstable libration point orbit is of current interest. In the late 1960},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Kathleen-Howell/publication/2279201_Aas_98-168_Station-Keeping_Strategies_For_Translunar_Libration_Point_Orbits/links/0c960526ae8f4ad858000000/Aas-98-168-Station-Keeping-Strategies-For-Translunar-Libration-Point-Orbits.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/2279201_Aas_98-168_Station-Keeping_Strategies_For_Translunar_Libration_Point_Orbits:},
+}
+
+ 
+@InProceedings{Ott2022,
+  author   = {Ott, Connor and Bolliger, Matthew and Thompson, Michael and Ré, Nathan and Davis, Diane},
+  title    = {Range {Biases}, {Measurement} {Noise}, and {Perilune} {Accuracy} in {Near} {Rectilinear} {Halo} {Orbit} {Navigation}},
+  year     = {2022},
+  month    = jan,
+  abstract = {View Video Presentation: https://doi.org/10.2514/6.2022-0999.vid The characteristics of Near Rectilinear Halo Orbits (NRHOs) that make them desirable for cislunar operations also introduce navigation challenges. The orbit’s large apolune distance provides excellent coverage of the lunar south pole, and its Earth-facing plane ensures constant line-of-sight with ground stations. However, the nearly perpendicular motion to the Earth-spacecraft line results in poor observability of range biases, and the necessarily low perilune altitude results in highly dynamic and sensitive perilune passages. Preliminary work indicates that range biases and state estimates near apolune and perilune are unintuitively related to range and range-rate measurement quality. This study seeks to clarify the relationship between measurements and navigation solutions, as well as to provide insight into filter designs that are more suitable for NRHO navigation operations.},
+  doi      = {10.2514/6.2022-0999},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Nathan-Re/publication/357568569_Range_Biases_Measurement_Noise_and_Perilune_Accuracy_in_Near_Rectilinear_Halo_Orbit_Navigation/links/62546814b0cee02d6963c7e6/Range-Biases-Measurement-Noise-and-Perilune-Accuracy-in-Near-Rectilinear-Halo-Orbit-Navigation.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/357568569_Range_Biases_Measurement_Noise_and_Perilune_Accuracy_in_Near_Rectilinear_Halo_Orbit_Navigation:},
+}
+
+ 
+@Article{Scotti2022,
+  author  = {Scotti, M. and Botteron, C. and Rico, M. and Basile, F. and Massaras, V. and Kieniewicz, B. and Svaton, J. and Giordano, P. and Ventura-Traveset, J.},
+  journal = {NAVITEC 2022},
+  title   = {{NaviMoon}-{Ultra}-{High} {Sensitivity} {GNSS} {Receiver} for {Lunar} {Navigation}},
+  year    = {2022},
+  volume  = {1},
+}
+
+ 
 @InCollection{Harle2024,
   author    = {Harle, Nelly Offord and Oates, Clive and Bywater, Sophie and Cranstoun, Charles and Friend, Jonathan and Lay, Gary and Schwarz, Ben and Stevens, Paul and Hufenbach, Bernhard and Liuicci, Francesco and Cosby, Matthew and Saunders, Chris},
   booktitle = {{ASCEND} 2021},
@@ -1180,6 +2226,16 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   file      = {AIAA Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/6.2021-4132:application/pdf},
   url       = {https://arc.aiaa.org/doi/abs/10.2514/6.2021-4132},
   urldate   = {2024-05-25},
+}
+
+ 
+@Misc{UKgov2022,
+  title    = {Lunar {Pathfinder}},
+  abstract = {Lunar Pathfinder will be the world’s first dedicated lunar communications relay spacecraft when it launches in 2024.},
+  journal  = {GOV.UK},
+  language = {en},
+  url      = {https://www.gov.uk/government/case-studies/lunar-pathfinder},
+  urldate  = {2024-05-25},
 }
 
  
@@ -1237,6 +2293,26 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
 }
 
  
+@Article{Gad2022,
+  author     = {Gad, Ahmed G.},
+  journal    = {Archives of Computational Methods in Engineering},
+  title      = {Particle {Swarm} {Optimization} {Algorithm} and {Its} {Applications}: {A} {Systematic} {Review}},
+  year       = {2022},
+  issn       = {1886-1784},
+  month      = aug,
+  number     = {5},
+  pages      = {2531--2561},
+  volume     = {29},
+  abstract   = {Throughout the centuries, nature has been a source of inspiration, with much still to learn from and discover about. Among many others, Swarm Intelligence (SI), a substantial branch of Artificial Intelligence, is built on the intelligent collective behavior of social swarms in nature. One of the most popular SI paradigms, the Particle Swarm Optimization algorithm (PSO), is presented in this work. Many changes have been made to PSO since its inception in the mid 1990s. Since their learning about the technique, researchers and practitioners have developed new applications, derived new versions, and published theoretical studies on the potential influence of various parameters and aspects of the algorithm. Various perspectives are surveyed in this paper on existing and ongoing research, including algorithm methods, diverse application domains, open issues, and future perspectives, based on the Systematic Review (SR) process. More specifically, this paper analyzes the existing research on methods and applications published between 2017 and 2019 in a technical taxonomy of the picked content, including hybridization, improvement, and variants of PSO, as well as real-world applications of the algorithm categorized into: health-care, environmental, industrial, commercial, smart city, and general aspects applications. Some technical characteristics, including accuracy, evaluation environments, and proposed case study are involved to investigate the effectiveness of different PSO methods and applications. Each addressed study has some valuable advantages and unavoidable drawbacks which are discussed and has accordingly yielded some hints presented for addressing the weaknesses of those studies and highlighting the open issues and future research perspectives on the algorithm.},
+  doi        = {10.1007/s11831-021-09694-4},
+  file       = {:Gad2022 - Particle Swarm Optimization Algorithm and Its Applications_ a Systematic Review.pdf:PDF},
+  language   = {en},
+  shorttitle = {Particle {Swarm} {Optimization} {Algorithm} and {Its} {Applications}},
+  url        = {https://doi.org/10.1007/s11831-021-09694-4},
+  urldate    = {2024-05-25},
+}
+
+ 
 @Article{Lombardo2022,
   author    = {Lombardo, Marco and Zannoni, Marco and Gai, Igor and Gomez Casajus, Luis and Gramigna, Edoardo and Manghi, Riccardo Lasagni and Tortora, Paolo and Di Tana, Valerio and Cotugno, Biagio and Simonetti, Simone and Patruno, Silvio and Pirrotta, Simone},
   journal   = {Aerospace},
@@ -1278,15 +2354,59 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   urldate  = {2024-06-04},
 }
 
-@Misc{satsearchHPGPThruster,
-  author       = {Satsearch2024},
+ 
+@Article{Moon2023,
+  author  = {Moon, Quinn},
+  journal = {All Graduate Theses and Dissertations, Spring 1920 to Summer 2023},
+  title   = {Cislunar {Navigation} {Techniques} and {Navigation} {Performance} {Optimization}},
+  year    = {2023},
+  month   = aug,
+  doi     = {https://doi.org/10.26076/ec6f-9ef6},
+  url     = {https://digitalcommons.usu.edu/etd/8848},
+}
+
+ 
+@Article{Takenaga2023,
+  author   = {Takenaga, Shintaro and Ozaki, Yoshihiko and Onishi, Masaki},
+  journal  = {Optimization Letters},
+  title    = {Practical initialization of the {Nelder}–{Mead} method for computationally expensive optimization problems},
+  year     = {2023},
+  issn     = {1862-4480},
+  month    = mar,
+  number   = {2},
+  pages    = {283--297},
+  volume   = {17},
+  abstract = {Black-box optimization (BBO) algorithms are widely employed by practitioners to address computationally expensive real-world problems such as automatic tuning of machine learning models and evacuation route planning. The Nelder–Mead (NM) method is a well-known local search heuristic for BBO that has been applied to solve many real-world problems from way back because of its promising performance. However, this method has a strong dependence on initialization due to its local search tendency. Nevertheless, a discussion on the proper initialization of the NM method is limited to the recent study by Wessing (Optim Lett 13(4):847–856, 2019), which is solely based on an analysis using the simple sphere function. In this study, we take a further step to improve Wessing’s result by massively investigating how the initialization affects the search performance in views of the initial simplex size and shape and a constraint handling method that is employed on 24 BBO benchmarking problems. Based on the numerical results, we present the empirical best practice for the initialization of the NM method for cases involving a limited evaluation budget.},
+  doi      = {10.1007/s11590-022-01953-y},
+  file     = {:Takenaga2023 - Practical Initialization of the Nelder–Mead Method for Computationally Expensive Optimization Problems.pdf:PDF},
+  keywords = {Nelder–Mead method, Initialization, Computationally expensive optimization, Black-box optimization},
+  language = {en},
+  url      = {https://doi.org/10.1007/s11590-022-01953-y},
+  urldate  = {2024-06-08},
+}
+
+ 
+@Article{Bokelmann2019,
+  author   = {Bokelmann, Kevin and Russell, Ryan},
+  journal  = {The Journal of the Astronautical Sciences},
+  title    = {Optimization of {Impulsive} {Europa} {Capture} {Trajectories} using {Primer} {Vector} {Theory}},
+  year     = {2019},
+  month    = may,
+  volume   = {67},
+  abstract = {The optimization of impulsive, three-dimensional transfer trajectories to capture at Europa is investigated. Two initial conditions are considered: a halo orbit in the vicinity of Europa, and a resonant orbit around Jupiter. Primer vector theory is utilized to determine the number of impulses and the gradient information needed for this highly nonlinear, many revolution optimization problem. A custom multi-shooting algorithm is developed to mitigate the extreme sensitivities from long flight times through regions dominated by chaotic dynamics. New equations are derived to inform decisions to keep or remove small intermediate maneuvers. Optimization of previously generated, near-optimal halo-to-capture transfers verifies that an energetic-based minimum ΔV provides a good initial measure of optimality. For the resonant boundary scenario, a new 3D periodic orbit is generated that incorporates natural transfers between a resonant orbit and a halo orbit. The intermediate halo orbit enables phase-free connection of the capture and resonant phases. The end-to-end transfers successfully converge to quasi-ballistic, manifold-like trajectories.},
+  doi      = {10.1007/s40295-018-00146-z},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Kevin-Bokelmann/publication/333006242_Optimization_of_Impulsive_Europa_Capture_Trajectories_using_Primer_Vector_Theory/links/5d9e92e1299bf13f40d0d996/Optimization-of-Impulsive-Europa-Capture-Trajectories-using-Primer-Vector-Theory.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/333006242_Optimization_of_Impulsive_Europa_Capture_Trajectories_using_Primer_Vector_Theory:},
+}
+
+@Misc{SatSearch2024,
+  author       = {SatSearch},
   howpublished = {\url{https://satsearch.co/products/ecaps-1n-hpgp-thruster}},
   note         = {[Accessed 19-06-2024]},
   title        = {1N HPGP Thruster | SatSearch},
 }
 
-@Misc{nanoavionicsCubeSatPropulsion,
-  author       = {Nanoaviations2024},
+@Misc{NanoAvionics2024,
+  author       = {NanoAvionics},
   howpublished = {\url{https://nanoavionics.com/cubesat-components/cubesat-propulsion-system-epss/}},
   note         = {[Accessed 19-06-2024]},
   title        = {Cubesat Propulsion System EPSS | NanoAvionics},

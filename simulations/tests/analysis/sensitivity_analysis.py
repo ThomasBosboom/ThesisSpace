@@ -61,25 +61,24 @@ combined_sensitivity_settings = {
 }
 
 # combined_sensitivity_settings = {
-#     "sensitivity_settings_windows": {
+#     "windows": {
 #         # "arc_duration": [0.1],
 #         "arc_interval": [1.0],
 #         "mission_start_epoch": [60390],
 #     },
-#     # }
-#     # "sensitivity_settings_auxiliary": {
-#     #     "initial_estimation_error": [
-#     #         np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
-#     #         ],
-#     #     "orbit_insertion_error": [
-#     #         np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
-#     #         ],
-#     #     "observation_interval": [100],
-#     #     "noise": [0.1],
-#     #     "target_point_epochs": [[2]],
-#     #     "delta_v_min": [0.00],
-#     #     "station_keeping_error": [0.00],
-#     # }
+#     "auxiliary": {
+#         # "initial_estimation_error": [
+#         #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+#         #     ],
+#         # "orbit_insertion_error": [
+#         #     np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
+#         #     ],
+#         # "observation_interval": [100],
+#         # "noise": [0.1],
+#         # "target_point_epochs": [[2]],
+#         "delta_v_min": [0.00],
+#         "station_keeping_error": [0.00],
+#     }
 # }
 
 auxilary_settings = {
@@ -87,7 +86,7 @@ auxilary_settings = {
     "step_size": 0.05
 }
 
-for sensitivity_settings in combined_sensitivity_settings.values():
+for sensitivity_name, sensitivity_settings in combined_sensitivity_settings.items():
 
     print("Sensitivity settings \n", sensitivity_settings)
     navigation_outputs_sensitivity = helper_functions.generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, **auxilary_settings)
@@ -101,7 +100,7 @@ for sensitivity_settings in combined_sensitivity_settings.values():
         figure_settings={"save_figure": True,
                          "save_table": True,
                          "save_dict": True,
-                         "current_time": current_time,
+                         "current_time": f"{current_time}_{sensitivity_name}",
                          "file_name": file_name
         }
     )
@@ -113,4 +112,4 @@ for sensitivity_settings in combined_sensitivity_settings.values():
     )
     print("Plotting done...")
 
-    plt.show()
+plt.show()

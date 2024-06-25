@@ -24,57 +24,76 @@ class ProcessOptimizationResults():
 
     def __init__(self, time_tag, optimization_model, save_settings={"save_table": True, "save_figure": False, "current_time": float, "file_name": str}, **kwargs):
 
-        self.time_tag = str(time_tag)
-        self.optimization_model = optimization_model
-        self.optimization_results = self.optimization_model.load_from_json(time_tag)
-
         for key, value in save_settings.items():
             if save_settings["save_table"] or save_settings["save_figure"]:
                 setattr(self, key, value)
 
+        self.time_tag = str(time_tag)
+        self.optimization_model = optimization_model
+        self.optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
 
-    def plot_iteration_history(self, compare_time_tags=[]):
+
+
+    def plot_iteration_history(self, show_design_variables=True, compare_time_tags=[]):
 
         # Plot the objective values over the iterations
-        fig, axs = plt.subplots(2, 1, figsize=(8, 6), sharex=True)
-        axs_twin = axs[0].twinx()
+        if show_design_variables:
+            fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
+        else:
+            fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
+        # axs_twin = axs[0].twinx()
         marker = None
 
+        labels = [self.optimization_results["current_time"]]
         iteration_histories = [self.optimization_results["iteration_history"]]
         initial_design_vector = self.optimization_results["initial_design_vector"]
+        if compare_time_tags:
+            labels = []
+            iteration_histories = []
+            initial_design_vector = []
         for time_tag in compare_time_tags:
-            optimization_results = self.optimization_model.load_from_json(time_tag)
+            optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
             iteration_histories.append(optimization_results["iteration_history"])
+            labels.append(optimization_results["current_time"])
+            initial_design_vector = self.optimization_results["initial_design_vector"]
 
-        for iteration_history in iteration_histories:
+        for index, iteration_history in enumerate(iteration_histories):
             iterations = list(map(str, iteration_history.keys()))
             design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
             objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
             reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
 
-            axs[0].plot(iterations, objective_values, marker=marker)
-            axs_twin.plot(iterations, reduction, marker=marker)
+            axs[0].plot(iterations, objective_values, marker=marker, label=labels[index])
+            axs[1].plot(iterations, reduction, marker=marker, label=labels[index])
 
-
+        axs[0].legend()
         axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
         axs[0].grid(alpha=0.5, linestyle='--', which='both')
-        axs_twin.set_ylabel("Reduction [%]")
 
-        for i in range(design_vectors.shape[1]):
-            axs[1].plot(iterations, design_vectors[:, i], marker=marker, label=f'$T_{i+1}$')
-        axs[1].set_xlabel('Iteration')
-        axs[1].set_ylabel("Design variables [days]")
+        axs[1].legend()
+        axs[1].set_ylabel("Reduction [%]")
         axs[1].grid(alpha=0.5, linestyle='--', which='both')
-        axs[1].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
 
-        axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(initial_design_vector), fontsize="small", title="Design variables")
+        if show_design_variables:
+            for i in range(design_vectors.shape[1]):
+                axs[2].plot(iterations, design_vectors[:, i], marker=marker, label=f'$T_{i+1}$')
+            axs[2].set_xlabel('Iteration')
+            axs[2].set_ylabel("Design variables [days]")
+            axs[2].grid(alpha=0.5, linestyle='--', which='both')
+            axs[2].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
+            axs[2].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(initial_design_vector), fontsize="small", title="Design variables")
+
+        else:
+            axs[1].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
+            axs[1].set_xlabel('Iteration')
+
         plt.tight_layout()
 
         if self.save_figure:
             if not compare_time_tags:
-                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_iteration_history_optimization_analysis"], custom_sub_folder_name=self.file_name)
+                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
             if compare_time_tags:
-                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_compared_iteration_history_optimization_analysis"], custom_sub_folder_name=self.file_name)
+                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_compared_iteration_history"], custom_sub_folder_name=self.file_name)
 
 
     def plot_optimization_result_comparison(self, show_observation_window_settings=False):
@@ -110,7 +129,10 @@ class ProcessOptimizationResults():
         process_multiple_navigation_results.plot_uncertainty_comparison()
         process_multiple_navigation_results.plot_maneuvre_costs()
         process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=evaluation_threshold)
-        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, bar_labeler=None)
+        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, worst_case=True, bar_labeler=None)
+
+
+    def tabulate_optimization_results(self):
 
         if self.save_table:
             table_generator = TableGenerator.TableGenerator(
@@ -120,5 +142,5 @@ class ProcessOptimizationResults():
             current_time = self.optimization_results["current_time"]
             table_generator.generate_optimization_analysis_table(
                 self.optimization_results,
-                file_name=f"test_{current_time}_optimization_analysis.tex"
+                file_name=f"{current_time}.tex"
             )
