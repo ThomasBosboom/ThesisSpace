@@ -4,7 +4,7 @@ import sys
 import numpy as np
 import copy
 # import tracemalloc
-# from memory_profiler import profile
+from memory_profiler import profile
 
 # Define path to import src files
 file_directory = os.path.realpath(__file__)
@@ -17,8 +17,6 @@ from tests import utils
 import ReferenceData, Interpolator, StationKeeping, EstimationModel
 from NavigationSimulatorBase import NavigationSimulatorBase
 from tudatpy.kernel import constants
-
-# import gc
 
 class NavigationSimulator(NavigationSimulatorBase):
 
@@ -71,16 +69,10 @@ class NavigationSimulator(NavigationSimulatorBase):
                 if key not in self._initial_attrs.keys():
                     delattr(self, key)
 
-        # gc.collect()
-
     # @profile
     def perform_navigation(self, observation_windows, seed=0):
 
-        # tracemalloc.start()
-
-        # snapshot1 = tracemalloc.take_snapshot()
-
-        # print("step size here: ", self.step_size)
+        # self.reference_data = ReferenceData.ReferenceData(self.interpolator)
 
         self.seed = seed
         rng = np.random.default_rng(seed=self.seed)
@@ -103,8 +95,6 @@ class NavigationSimulator(NavigationSimulatorBase):
         times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
         times = list(set(times))
         times = sorted(times)
-
-        # print(self.delta_v_min)
 
         self.navigation_arc_durations = np.round(np.diff(times), decimal_places)
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), decimal_places)
@@ -171,7 +161,6 @@ class NavigationSimulator(NavigationSimulatorBase):
 
             epochs, state_history_truth, dependent_variables_history_truth = \
                 self.interpolator.get_propagation_results(truth_model, solve_variational_equations=False)
-            # print("interpolations")
 
             if self.propagate_dynamics_linearly:
                 state_history_estimated = state_history_truth + np.dot(state_transition_matrix_history_estimated, self.custom_initial_state-self.custom_initial_state_truth)
@@ -321,25 +310,37 @@ class NavigationSimulator(NavigationSimulatorBase):
         return NavigationOutput(self)
 
 
+    def get_total_size(self):
+        total_size = 0
+        for key, value in vars(self).items():
+            total_size += asizeof.asizeof(value)
+            print(key, asizeof.asizeof(value), total_size)
+        return total_size
+
+
 class NavigationOutput():
 
     def __init__(self, navigation_simulator, **required_attributes):
         self.navigation_simulator = navigation_simulator
 
 
+
 if __name__ == "__main__":
 
-    # @profile
+    import psutil
+    from pympler import asizeof
+
+    @profile
     def simulate_runs():
 
         # tracemalloc.start()
         # snapshot1 = tracemalloc.take_snapshot()
         navigation_simulator = NavigationSimulator(run_optimization_version=False, step_size=0.5)
         observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
-        # observation_windows = [(60390, 60391.0), (60394.0, 60395.0)]
+        # observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0)]
 
         cost_list = []
-        for i in [0, 1, 2]:
+        for i in range(3):
 
             navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
             navigation_simulator = navigation_output.navigation_simulator
@@ -352,7 +353,14 @@ if __name__ == "__main__":
             cost_list.append(delta_v)
             print(cost_list)
 
+            print("===========")
+            print(navigation_simulator.get_total_size())
             navigation_simulator.reset_attributes()
+            print(navigation_simulator.get_total_size())
+
+            # print(psutil.virtual_memory())
+            # print(navigation_simulator.get_total_size())
+
 
             # Take another snapshot after the function call
             # snapshot2 = tracemalloc.take_snapshot()

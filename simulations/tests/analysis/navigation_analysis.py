@@ -143,10 +143,10 @@ observation_windows_settings = {
 auxilary_settings = {
     # "apriori_covariance": np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2),
     # "apriori_covariance": np.diag(np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2),
-    "step_size": 0.01,
+    # "step_size": 0.01,
     # "observation_interval": 10000
     # "noise": 102.44,
-    "run_optimization_version": False
+    # "run_optimization_version": False
 }
 
 
@@ -198,10 +198,11 @@ process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavig
     }
 )
 
-process_multiple_navigation_results.plot_uncertainty_comparison()
-process_multiple_navigation_results.plot_maneuvre_costs()
-process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
+# process_multiple_navigation_results.plot_uncertainty_comparison()
+# process_multiple_navigation_results.plot_maneuvre_costs()
+# process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
 process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None, worst_case=True)
+process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None, worst_case=Tru)
 print("Plotting done...")
 
 plt.show()

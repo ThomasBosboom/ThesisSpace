@@ -30,7 +30,7 @@ class ObjectiveFunctions():
 
         costs = []
         for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
-            noise = np.random.normal(0, 0.0000000001)
+            noise = np.random.normal(0, 0.01)
             cost = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
             costs.append(cost)
         mean_cost = np.mean(costs)

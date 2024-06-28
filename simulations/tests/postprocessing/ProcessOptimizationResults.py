@@ -34,15 +34,12 @@ class ProcessOptimizationResults():
 
 
 
-    def plot_iteration_history(self, show_design_variables=True, compare_time_tags=[]):
+    def plot_iteration_history(self, show_design_variables=True, compare_time_tags=[], highlight_mean_only=True):
 
-        # Plot the objective values over the iterations
         if show_design_variables:
             fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
         else:
             fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
-        # axs_twin = axs[0].twinx()
-        marker = None
 
         labels = [self.optimization_results["current_time"]]
         iteration_histories = [self.optimization_results["iteration_history"]]
@@ -57,19 +54,39 @@ class ProcessOptimizationResults():
             labels.append(optimization_results["current_time"])
             initial_design_vector = self.optimization_results["initial_design_vector"]
 
+        objective_values_total = []
+        reduction_total = []
         for index, iteration_history in enumerate(iteration_histories):
             iterations = list(map(str, iteration_history.keys()))
             design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
             objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
             reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
 
-            axs[0].plot(iterations, objective_values, marker=marker, label=labels[index])
-            axs[1].plot(iterations, reduction, marker=marker, label=labels[index])
+            objective_values_total.append(objective_values)
+            reduction_total.append(reduction)
+
+            marker = None
+            color = plt.rcParams['axes.prop_cycle'].by_key()['color'][int(index%10)]
+            label=labels[index]
+            if highlight_mean_only:
+                color = "lightgray"
+                label = None
+            axs[0].plot(iterations, objective_values, marker=marker, label=label, color=color)
+            axs[1].plot(iterations, reduction, marker=marker, label=label, color=color)
+
+        objective_values_total = np.array(objective_values_total)
+        mean_objective_values = np.mean(objective_values_total, axis=0)
+        reduction_total = np.array(reduction_total)
+        mean_reduction = np.mean(reduction_total, axis=0)
+        if highlight_mean_only:
+            axs[0].plot(iterations, mean_objective_values, marker=marker, label="Mean", color="red")
+            axs[1].plot(iterations, mean_reduction, marker=marker, label="Mean", color="red")
 
         axs[0].legend()
         axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
         axs[0].grid(alpha=0.5, linestyle='--', which='both')
 
+        # axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(iteration_histories), fontsize="small", title="Design variables")
         axs[1].legend()
         axs[1].set_ylabel("Reduction [%]")
         axs[1].grid(alpha=0.5, linestyle='--', which='both')
