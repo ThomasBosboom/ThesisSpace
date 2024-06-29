@@ -69,66 +69,66 @@ observation_windows_settings = {
 
 
 observation_windows_settings = {
-    "default1": [
+    "0.05": [
         ([(60390, 60390.05)], 2),
     ],
-    "default2": [
+    "0.1": [
         ([(60390, 60390.1)], 2),
     ],
-#     # "default3": [
-#     #     ([(60390, 60390.15)], 2),
-#     # ],
-#     # "default4": [
-#     #     ([(60390, 60390.20)], 2),
-#     # ],
-#     # "default5": [
-#     #     ([(60390, 60390.25)], 2),
-#     # ],
-#     # "default6": [
-#     #     ([(60390, 60390.30)], 2),
-#     # ],
-#     # "default7": [
-#     #     ([(60390, 60390.35)], 2),
-#     # ],
-#     # "default8": [
-#     #     ([(60390, 60390.40)], 2),
-#     # ],
-#     # "default9": [
-#     #     ([(60390, 60390.45)], 2),
-#     # ],
-#     # "default10": [
-#     #     ([(60390, 60390.50)], 2),
-#     # ],
-#     # "default11": [
-#     #     ([(60390, 60390.55)], 2),
-#     # ],
-#     # "default12": [
-#     #     ([(60390, 60390.60)], 2),
-#     # ],
-#     # "default13": [
-#     #     ([(60390, 60390.65)], 2),
-#     # ],
-#     # "default14": [
-#     #     ([(60390, 60390.70)], 2),
-#     # ],
-#     # "default15": [
-#     #     ([(60390, 60390.75)], 2),
-#     # ],
-#     # "default16": [
-#     #     ([(60390, 60390.80)], 2),
-#     # ],
-#     # "default17": [
-#     #     ([(60390, 60390.85)], 2),
-#     # ],
-#     # "default18": [
-#     #     ([(60390, 60390.90)], 2),
-#     # ],
-#     # "default19": [
-#     #     ([(60390, 60390.95)], 2),
-#     # ],
-#     # "default20": [
-#     #     ([(60390, 60391)], 2),
-#     # ],
+    "0.15": [
+        ([(60390, 60390.15)], 2),
+    ],
+    "0.2": [
+        ([(60390, 60390.20)], 2),
+    ],
+    "0.25": [
+        ([(60390, 60390.25)], 2),
+    ],
+    "0.3": [
+        ([(60390, 60390.30)], 2),
+    ],
+    "0.35": [
+        ([(60390, 60390.35)], 2),
+    ],
+    "0.4": [
+        ([(60390, 60390.40)], 2),
+    ],
+    "0.45": [
+        ([(60390, 60390.45)], 2),
+    ],
+    "0.5": [
+        ([(60390, 60390.50)], 2),
+    ],
+    "0.55": [
+        ([(60390, 60390.55)], 2),
+    ],
+    "0.6": [
+        ([(60390, 60390.60)], 2),
+    ],
+    "0.65": [
+        ([(60390, 60390.65)], 2),
+    ],
+    "0.7": [
+        ([(60390, 60390.70)], 2),
+    ],
+    "0.75": [
+        ([(60390, 60390.75)], 2),
+    ],
+    "0.8": [
+        ([(60390, 60390.80)], 2),
+    ],
+    "0.85": [
+        ([(60390, 60390.85)], 2),
+    ],
+    "0.9": [
+        ([(60390, 60390.90)], 2),
+    ],
+    "0.95": [
+        ([(60390, 60390.95)], 2),
+    ],
+    "1.0": [
+        ([(60390, 60391)], 2),
+    ],
 }
 
 
@@ -139,9 +139,16 @@ observation_windows_settings = {
 ###### Generate the navigation outputs ################
 #######################################################
 
+lpf_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+lumio_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+initial_estimation_error = np.concatenate((lpf_estimation_error, lumio_estimation_error))
+# self.apriori_covariance = np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2)
+apriori_covariance = np.diag(initial_estimation_error**2)
+
 # Run the navigation routine using given settings
 auxilary_settings = {
-    # "apriori_covariance": np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2),
+    # "apriori_covariance": apriori_covariance,
+    # "initial_estimation_error": initial_estimation_error
     # "apriori_covariance": np.diag(np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2),
     # "step_size": 0.01,
     # "observation_interval": 10000
@@ -159,7 +166,7 @@ navigation_outputs = helper_functions.generate_navigation_outputs(observation_wi
 
 print("Plotting results...")
 
-detailed_results = [["default"], [0], [0]]
+detailed_results = [["0.5"], [0], [0]]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
     for case_index, window_case in enumerate(navigation_outputs_cases):
         for run_index, (run, navigation_output) in enumerate(window_case.items()):
@@ -183,11 +190,11 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         process_single_navigation_results.plot_full_state_history()
                         process_single_navigation_results.plot_formal_error_history()
                         process_single_navigation_results.plot_observations()
-                        process_single_navigation_results.plot_dispersion_to_estimation_error_history()
+                        # process_single_navigation_results.plot_dispersion_to_estimation_error_history()
                         process_single_navigation_results.plot_correlation_history()
                         process_single_navigation_results.plot_observability_metrics()
 
-plt.show()
+# plt.show()
 
 process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
     navigation_outputs,
@@ -198,11 +205,11 @@ process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavig
     }
 )
 
-# process_multiple_navigation_results.plot_uncertainty_comparison()
-# process_multiple_navigation_results.plot_maneuvre_costs()
-# process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
+process_multiple_navigation_results.plot_uncertainty_comparison()
+process_multiple_navigation_results.plot_maneuvre_costs()
+process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
 process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None, worst_case=True)
-process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None, worst_case=Tru)
+process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None,  worst_case=True)
 print("Plotting done...")
 
 plt.show()

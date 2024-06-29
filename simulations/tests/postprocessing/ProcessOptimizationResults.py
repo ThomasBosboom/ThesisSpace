@@ -56,6 +56,7 @@ class ProcessOptimizationResults():
 
         objective_values_total = []
         reduction_total = []
+        iterations_total = []
         for index, iteration_history in enumerate(iteration_histories):
             iterations = list(map(str, iteration_history.keys()))
             design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
@@ -64,6 +65,7 @@ class ProcessOptimizationResults():
 
             objective_values_total.append(objective_values)
             reduction_total.append(reduction)
+            iterations_total.append(iterations)
 
             marker = None
             color = plt.rcParams['axes.prop_cycle'].by_key()['color'][int(index%10)]
@@ -74,13 +76,39 @@ class ProcessOptimizationResults():
             axs[0].plot(iterations, objective_values, marker=marker, label=label, color=color)
             axs[1].plot(iterations, reduction, marker=marker, label=label, color=color)
 
-        objective_values_total = np.array(objective_values_total)
-        mean_objective_values = np.mean(objective_values_total, axis=0)
-        reduction_total = np.array(reduction_total)
-        mean_reduction = np.mean(reduction_total, axis=0)
+
+        means, stds = [], []
+        for histories in [iterations_total, objective_values_total, reduction_total]:
+
+            # Determine the maximum length among all sublists
+            max_length = max(len(sublist) for sublist in histories)
+            array_nan = np.full((len(histories), max_length), np.nan)
+            for i, sublist in enumerate(histories):
+                array_nan[i, :len(sublist)] = sublist
+
+            # Calculate column-wise mean ignoring NaNs
+            means.append(np.nanmean(array_nan, axis=0))
+            stds.append(np.nanstd(array_nan, axis=0))
+
+        means = np.array(means)
+        stds = np.array(stds)
+
         if highlight_mean_only:
-            axs[0].plot(iterations, mean_objective_values, marker=marker, label="Mean", color="red")
-            axs[1].plot(iterations, mean_reduction, marker=marker, label="Mean", color="red")
+            axs[0].plot(means[0], means[1], marker=marker, label="Mean", color="red")
+            axs[1].plot(means[0], means[2], marker=marker, label="Mean", color="red")
+
+        # min_length = min(len(sublist) for sublist in iterations_total)
+        # objective_values_total = np.array([sublist[:min_length] for sublist in objective_values_total], dtype=np.float64)
+        # reduction_total = np.array([sublist[:min_length] for sublist in reduction_total], dtype=np.float64)
+        # iterations_total = np.array([sublist[:min_length] for sublist in iterations_total], dtype=np.float64)[0]
+
+
+
+        # mean_objective_values = np.mean(objective_values_total, axis=0)
+        # mean_reduction = np.mean(reduction_total, axis=0)
+        # if highlight_mean_only:
+        #     axs[0].plot(iterations_total, mean_objective_values, marker=marker, label="Mean", color="red")
+        #     axs[1].plot(iterations_total, mean_reduction, marker=marker, label="Mean", color="red")
 
         axs[0].legend()
         axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
@@ -110,7 +138,7 @@ class ProcessOptimizationResults():
             if not compare_time_tags:
                 utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
             if compare_time_tags:
-                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_compared_iteration_history"], custom_sub_folder_name=self.file_name)
+                utils.save_figure_to_folder(figs=[fig], labels=[f"combined_{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
 
 
     def plot_optimization_result_comparison(self, show_observation_window_settings=False):

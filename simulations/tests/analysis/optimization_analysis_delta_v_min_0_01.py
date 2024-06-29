@@ -137,7 +137,7 @@ if __name__ == "__main__":
         run_optimization = True
 
     cases = {
-        "delta_v_min": [0.00],
+        "delta_v_min": [0.01],
     }
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,

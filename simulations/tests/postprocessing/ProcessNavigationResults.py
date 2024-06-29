@@ -1387,24 +1387,57 @@ class PlotMultipleNavigationResults():
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
 
 
+    # fig, ax = plt.subplots(figsize=(10, 4))
+    # rows=1
+    # if not maneuvre_cost_only:
+    #     rows = 3
+    #     fig, ax = plt.subplots(rows, 1, figsize=(10, 3*rows), sharex=False)
+    # if rows==1:
+    #     ax = np.array([ax])
+    # ax = ax.flatten()
+
+    # # Function to find the closest key
+    # def get_closest_key_value(data, specific_value):
+    #     closest_key = min(data.keys(), key=lambda k: abs(k - specific_value))
+    #     return data[closest_key]
+
+    # for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
+    #     batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
+    #     estimation_model_result = navigation_simulator.estimation_arc_results_dict[batch_index]
+    #     estimation_output = estimation_model_result.estimation_output
+    #     best_iteration = estimation_output.best_iteration
+    #     parameter_history = estimation_output.parameter_history
+    #     estimate = parameter_history[:, best_iteration]
+    #     propagated_estimate = get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_start_time)
+    #     estimation_error_start = estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_start_time)
+    #     estimation_error_end = propagated_estimate - get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_end_time)
+
+    #     if batch_index==0:
+    #         if plot_index==1:
+    #             objective_values.append(np.linalg.norm(estimation_error_start[6:9]))
+    #         if plot_index==2:
+    #             objective_values.append(np.linalg.norm(estimation_error_end[6:9]))
 
     def plot_estimation_arc_comparison(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
              legend=True, x_labels=True, label_fontsize=8,
              colors=None, barlabel_offset=1,
-             bar_labeler=lambda k, i, s: str(round(s, 3)), maneuvre_cost_only=True):
+             bar_labeler=lambda k, i, s: str(round(s, 3)), worst_case=True):
 
         self.save_figure = save_figure
 
-        fig, ax = plt.subplots(figsize=(10, 4))
-        rows=1
-        if not maneuvre_cost_only:
-            rows = 3
-            fig, ax = plt.subplots(rows, 1, figsize=(10, 3*rows), sharex=False)
-        if rows==1:
-            ax = np.array([ax])
-        ax = ax.flatten()
+        # Function to find the closest key
+        def get_closest_key_value(data, specific_value):
+            closest_key = min(data.keys(), key=lambda k: abs(k - specific_value))
+            return data[closest_key]
 
-        for plot_index in range(rows):
+        rows = 3
+        fig, ax = plt.subplots(rows, 1, figsize=(10, 5), sharex=True)
+
+        ylabels = [r'||$\Delta V$|| [m/s]', r"||$\mathbf{r}_{est}-\mathbf{r}_{true}$|| [m]", r"||$\mathbf{r}_{true}-\mathbf{r}_{ref}$|| [m]"]
+        # ylabels = [r'||$\Delta V$|| [m/s]', r'Estimation Error [m]', r'Dispersion [m]']
+
+        for row in range(rows):
+
             for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
 
                 data = {}
@@ -1420,51 +1453,63 @@ class PlotMultipleNavigationResults():
                             # Extracting the relevant objects
                             navigation_simulator = navigation_output.navigation_simulator
 
-                            # Extracting the relevant results from objects
-                            delta_v_dict = navigation_simulator.delta_v_dict
-                            delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-                            delta_v_history = np.stack(list(delta_v_dict.values()))
-                            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
-                            # delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
+                            if row == 0:
 
-                            # delta_v_per_skm_list.append(delta_v_per_skm.tolist())
-                            objective_values.append(delta_v)
+                                # Extracting the relevant results from objects
+                                delta_v_dict = navigation_simulator.delta_v_dict
+                                delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+                                delta_v_history = np.stack(list(delta_v_dict.values()))
+                                delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
+                                delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
 
-                            # Extracting orbit determination errors
-                            # full_state_history_truth_history = np.stack(list(navigation_simulator.full_state_history_truth_dict.values()))
-                            # full_state_history_final_dict = np.stack(list(navigation_simulator.full_state_history_final_dict.values()))
-                            # full_state_history_estimated_history = np.stack(list(navigation_simulator.full_state_history_estimated_dict.values()))
+                                delta_v_per_skm_list.append(delta_v_per_skm.tolist())
+                                objective_values.append(delta_v)
 
-                            # Function to find the closest key
-                            def get_closest_key_value(data, specific_value):
-                                closest_key = min(data.keys(), key=lambda k: abs(k - specific_value))
-                                return data[closest_key]
+                            if row == 1:
 
-                            for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
-                                batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
-                                estimation_model_result = navigation_simulator.estimation_arc_results_dict[batch_index]
-                                estimation_output = estimation_model_result.estimation_output
-                                best_iteration = estimation_output.best_iteration
-                                parameter_history = estimation_output.parameter_history
-                                estimate = parameter_history[:, best_iteration]
-                                propagated_estimate = get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_start_time)
-                                estimation_error_start = estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_start_time)
-                                estimation_error_end = propagated_estimate - get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_end_time)
+                                for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
+                                    batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
+                                    estimation_model_result = navigation_simulator.estimation_arc_results_dict[batch_index]
+                                    estimation_output = estimation_model_result.estimation_output
+                                    best_iteration = estimation_output.best_iteration
+                                    parameter_history = estimation_output.parameter_history
+                                    estimate = parameter_history[:, best_iteration]
+                                    propagated_estimate = get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_end_time)
+                                    estimation_error_start = estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_start_time)
+                                    estimation_error_end = propagated_estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_end_time)
+                                    print(batch_index, batch_end_time, np.linalg.norm(estimation_error_end[6:9]), estimation_error_end)
+                                    if batch_index==0:
+                                        if row==1:
+                                            # objective_values.append(np.linalg.norm(estimation_error_start[6:9]))
+                                        # if plot_index==2:
+                                            objective_values.append(np.linalg.norm(estimation_error_end[6:9]))
+                                            # objective_values.append(np.linalg.norm(estimation_error_end[0:3]))
 
-                                if batch_index==0:
-                                    if plot_index==1:
-                                        objective_values.append(np.linalg.norm(estimation_error_start[6:9]))
-                                    if plot_index==2:
-                                        objective_values.append(np.linalg.norm(estimation_error_end[6:9]))
 
+                            if row == 2:
+
+                                for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
+                                    batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
+                                    dispersion = get_closest_key_value(navigation_simulator.full_reference_state_deviation_dict, batch_end_time)
+                                    # print(batch_index, batch_end_time, np.linalg.norm(dispersion[6:9]), dispersion)
+                                    objective_values.append(np.linalg.norm(dispersion[6:9]))
+                                    # objective_values.append(np.linalg.norm(dispersion[0:3]))
+
+
+                        # if row == 0:
+                        #     objective = np.mean(objective_values)
+                        #     if worst_case:
+                        #         objective = np.mean(objective_values) + 3*np.std(objective_values)
+                        #     objective_values = [objective]
+
+                        # if row == 0:
                         objective_value_results_per_window_case.append((len(objective_values),
                                                                     min(objective_values),
                                                                     max(objective_values),
                                                                     np.mean(objective_values),
                                                                     np.std(objective_values),
                                                                     objective_values,
-                                                                    # delta_v_per_skm_list
-                                                                    ))
+                                                                    delta_v_per_skm_list))
 
                     data[window_type] = objective_value_results_per_window_case
 
@@ -1484,11 +1529,11 @@ class PlotMultipleNavigationResults():
                     colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
                             for i, (g_name, values) in enumerate(data.items())}
 
-                ax[plot_index].grid(alpha=0.5)
-                ax[plot_index].set_xticks(group_centers)
-                ax[plot_index].set_xlabel("Tracking window scenario")
-                ax[plot_index].set_ylabel(r'||$\Delta V$|| [m/s]')
-                ax[plot_index].set_title(title)
+                ax[row].grid(alpha=0.5)
+                ax[row].set_xticks(group_centers)
+                ax[-1].set_xlabel("Tracking window scenario")
+                ax[row].set_ylabel(ylabels[row])
+                ax[row].set_title(title)
 
                 for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
                                                                     group_centers)):
@@ -1498,40 +1543,39 @@ class PlotMultipleNavigationResults():
                     for val_i, val in enumerate(vals):
 
                         if threshold_index == 0:
-                            bar = ax[plot_index].bar(group_beg + val_i + bar_offset,
+                            bar = ax[row].bar(group_beg + val_i + bar_offset,
                                         height=val, width=bar_stretch,
                                         color=colors[g_name],
                                         yerr=std_data[g_name][val_i],
                                         capsize=4)[0]
 
                         else:
-                            bar = ax[plot_index].bar(group_beg + val_i + bar_offset,
-                                        height=val, width=0.8,
-                                        color="white", hatch='/', edgecolor='black', alpha=0.6,
-                                        yerr=std_data[g_name][val_i],
-                                        label=f"After {evaluation_threshold} days" if g_i == 0 else None,
-                                        capsize=4)[0]
+                            if row == 0:
+                                bar = ax[row].bar(group_beg + val_i + bar_offset,
+                                            height=val, width=0.8,
+                                            color="white", hatch='/', edgecolor='black', alpha=0.6,
+                                            yerr=std_data[g_name][val_i],
+                                            label=f"After {evaluation_threshold} days" if g_i == 0 else None,
+                                            capsize=4)[0]
 
                         bars[g_name].append(bar)
                         if bar_labeler is not None:
                             x_pos = bar.get_x() + (bar.get_width() / 2.0)
                             y_pos = val + barlabel_offset
                             barlbl = bar_labeler(g_name, val_i, val)
-                            ax[plot_index].text(x_pos, y_pos, barlbl, ha="center", va="bottom",
+                            ax[row].text(x_pos, y_pos, barlbl, ha="center", va="bottom",
                                     fontsize=label_fontsize)
 
             if legend:
-                ax[plot_index].legend(loc='upper right', fontsize="small")
+                ax[row].legend(loc='upper right', fontsize="small")
 
             if x_labels:
-                ax[plot_index].set_xticklabels(sorted_k)
+                ax[row].set_xticklabels(sorted_k)
             else:
-                ax[plot_index].set_xticklabels()
+                ax[row].set_xticklabels()
 
         plt.tight_layout()
 
         if self.save_figure:
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
-
-
 

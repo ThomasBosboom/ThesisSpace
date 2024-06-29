@@ -52,7 +52,8 @@ class OptimizationModel:
             self.use_custom_input = True
 
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            if hasattr(self, key):
+                setattr(self, key, value)
 
         self.options = {'maxiter': self.max_iterations+1, 'disp': False, "adaptive": True}
 
@@ -131,7 +132,7 @@ class OptimizationModel:
             current_time += self.arc_length + self.arc_interval
 
         for arc_set in initial_observation_windows:
-            if arc_set[1]+self.bounds[1] >= self.duration:
+            if arc_set[1]+(1+self.bounds[1])*(arc_set[1]-arc_set[0]) >= self.duration:
                 initial_observation_windows.remove(arc_set)
                 break
 
@@ -147,7 +148,11 @@ class OptimizationModel:
     def generate_initial_simplex(self, initial_design_vector):
 
         n = len(initial_design_vector)
-        perturbations = np.eye(n) * self.initial_simplex_perturbation
+        # perturbations = np.eye(n) * self.initial_simplex_perturbation
+
+        perturbations = np.eye(n)
+        for index, perturbation in enumerate(perturbations):
+            perturbations[index, index] = self.initial_simplex_perturbation*initial_design_vector[index]
 
         initial_simplex = [initial_design_vector]
         for i in range(n):
@@ -256,7 +261,8 @@ class OptimizationModel:
             initial_design_vector = self.best_design_vector
 
         # Define bounds for the design vector entries
-        self.bounds_vector = [(state+self.bounds[0], state+self.bounds[1]) for state in self.generate_initial_design_vector()]
+        # self.bounds_vector = [(state+self.bounds[0], state+self.bounds[1]) for state in self.generate_initial_design_vector()]
+        self.bounds_vector = [(state*(1+self.bounds[0]), state*(1+self.bounds[1])) for state in self.generate_initial_design_vector()]
 
         # Adjust the initial simplex for better convergence
         self.initial_simplex = self.generate_initial_simplex(initial_design_vector)
@@ -289,7 +295,7 @@ class OptimizationModel:
 
         self.final_solution = result.x.tolist()
 
-        print(f"Optimization Result: {result}")
+        # print(f"Optimization Result: {result}")
 
         self.save_to_json()
 
