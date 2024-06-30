@@ -189,62 +189,6 @@ if __name__ == "__main__":
     ##############################################################
 
     auto_mode = False
-
-    custom_time_tag = "0.5day_arc_interval"
-    num_optims = 5
-
-    run_optimization = False
-    from_file = True
-
-    if custom_time_tag is not None:
-        current_time = custom_time_tag
-    if auto_mode:
-        if custom_time_tag is not None:
-            current_time = custom_time_tag
-        from_file = check_file_exists(current_time, num_optims)
-        run_optimization = True
-
-
-    cases = {
-        "delta_v_min": [0.00, 0.01],
-    }
-
-    # optimization_results = collect_optimization_results(cases, substring=custom_time_tag)
-    optimization_results_folders = get_optimization_results_folders(cases, substring=custom_time_tag)
-
-    # process_optimization_results = ProcessOptimizationResults.ProcessOptimizationResults(
-    #     time_tag,
-    #     optimization_model,
-    #     save_settings={
-    #         "save_table": True,
-    #         "save_figure": True,
-    #         "current_time": time_tag,
-    #         "file_name": file_name
-    #     }
-    # )
-
-    # process_optimization_results.plot_iteration_history(
-    #     show_design_variables=True,
-    #     compare_time_tags=[]
-    # )
-    # process_optimization_results.tabulate_optimization_results()
-
-    # print(optimization_results)
-    # # # Plot final iteration history
-    # # final_process_optimization_results = results[-1]
-    # # final_process_optimization_results.plot_iteration_history(
-    # #     show_design_variables=False,
-    # #     compare_time_tags=[result.time_tag for result in results]
-    # # )
-
-    # plt.show()
-
-
-    ##############################################################
-    #### Optimization settings ###################################
-    ##############################################################
-
-    auto_mode = False
     custom_time_tag = "0.5day_arc_interval"
     num_optims = 5
 
@@ -262,6 +206,8 @@ if __name__ == "__main__":
     cases = {
         "delta_v_min": [0.00, 0.01],
     }
+
+    optimization_results_folders = get_optimization_results_folders(cases, substring=custom_time_tag)
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
