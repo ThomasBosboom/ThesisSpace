@@ -60,8 +60,11 @@ observation_windows_settings = {
 
 observation_windows_settings = {
     "default": [
-        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
+        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 2),
     ],
+    # "default": [
+    #     (helper_functions.get_constant_arc_observation_windows(60, arc_interval=3.8, arc_duration=0.2, mission_start_epoch=mission_start_epoch), 1),
+    # ],
     # "optimized": [
     #     (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), 1),
     # ],
@@ -70,38 +73,74 @@ observation_windows_settings = {
 
 
 
-observation_windows_settings = {
-    "0.2": [
-        ([(60390, 60390.2)], num_runs),
-    ],
-    "0.4": [
-        ([(60390, 60390.4)], num_runs),
-    ],
-    "0.6": [
-        ([(60390, 60390.6)], num_runs),
-    ],
-    "0.8": [
-        ([(60390, 60390.8)], num_runs),
-    ],
-    "1.0": [
-        ([(60390, 60391.0)], num_runs),
-    ],
-    "1.2": [
-        ([(60390, 60391.2)], num_runs),
-    ],
-    "1.4": [
-        ([(60390, 60391.4)], num_runs),
-    ],
-    "1.6": [
-        ([(60390, 60391.6)], num_runs),
-    ],
-    "1.8": [
-        ([(60390, 60391.8)], num_runs),
-    ],
-    "2.0": [
-        ([(60390, 60392.0)], num_runs),
-    ],
-}
+# observation_windows_settings = {
+#     "0.2": [
+#         ([(60390, 60390.2)], num_runs),
+#     ],
+#     "0.4": [
+#         ([(60390, 60390.4)], num_runs),
+#     ],
+#     # "0.6": [
+#     #     ([(60390, 60390.6)], num_runs),
+#     # ],
+#     # "0.8": [
+#     #     ([(60390, 60390.8)], num_runs),
+#     # ],
+#     # "1.0": [
+#     #     ([(60390, 60391.0)], num_runs),
+#     # ],
+#     # "1.2": [
+#     #     ([(60390, 60391.2)], num_runs),
+#     # ],
+#     # "1.4": [
+#     #     ([(60390, 60391.4)], num_runs),
+#     # ],
+#     # "1.6": [
+#     #     ([(60390, 60391.6)], num_runs),
+#     # ],
+#     # "1.8": [
+#     #     ([(60390, 60391.8)], num_runs),
+#     # ],
+#     # "2.0": [
+#     #     ([(60390, 60392.0)], num_runs),
+#     # ],
+# }
+
+
+
+#######################################################
+###### Objective value versus #########################
+#######################################################
+
+from src import NavigationSimulator, ObjectiveFunctions
+
+evaluation_threshold = 14
+num_runs_list = [1, 2, 5, 10, 30]
+objective_values = []
+# for num_runs in num_runs_list:
+
+#     navigation_simulator = NavigationSimulator.NavigationSimulator()
+
+#     objective_functions_settings = {"num_runs": num_runs, "evaluation_threshold": evaluation_threshold}
+#     objective_functions = ObjectiveFunctions.ObjectiveFunctions(
+#         navigation_simulator,
+#         **objective_functions_settings
+#     )
+
+#     observation_windows = helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch)
+#     objective_value = objective_functions.worst_case_station_keeping_cost(observation_windows)
+
+#     objective_values.append(objective_value)
+
+#     print(objective_values)
+
+objective_values = [0.024228704064541032, 0.024375438666188874, 0.02458634017463967, 0.02454322733541171, 0.024917275946776524]
+plt.bar(num_runs_list, objective_values)
+plt.xlabel("Number of iterations [-]")
+plt.ylabel("Objective value [m/s]")
+plt.show()
+
+
 
 
 
@@ -111,21 +150,18 @@ observation_windows_settings = {
 ###### Generate the navigation outputs ################
 #######################################################
 
-lpf_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
-lumio_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+lpf_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1
+lumio_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1
 initial_estimation_error = np.concatenate((lpf_estimation_error, lumio_estimation_error))
-# self.apriori_covariance = np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2)
+# apriori_covariance = np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2)
 apriori_covariance = np.diag(initial_estimation_error**2)
+orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
 
 # Run the navigation routine using given settings
 auxilary_settings = {
-    # "apriori_covariance": apriori_covariance,
-    # "initial_estimation_error": initial_estimation_error
-    # "apriori_covariance": np.diag(np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])**2),
-    # "step_size": 0.01,
-    # "observation_interval": 10000
-    # "noise": 102.44,
-    # "run_optimization_version": False
+    "apriori_covariance": apriori_covariance,
+    "initial_estimation_error": initial_estimation_error,
+    "orbit_insertion_error": orbit_insertion_error
 }
 
 
@@ -138,7 +174,7 @@ navigation_outputs = helper_functions.generate_navigation_outputs(observation_wi
 
 print("Plotting results...")
 
-detailed_results = [["0.5"], [0], [0]]
+detailed_results = [["default"], [0], [0]]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
     for case_index, window_case in enumerate(navigation_outputs_cases):
         for run_index, (run, navigation_output) in enumerate(window_case.items()):
@@ -162,7 +198,6 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         process_single_navigation_results.plot_full_state_history()
                         process_single_navigation_results.plot_formal_error_history()
                         process_single_navigation_results.plot_observations()
-                        # process_single_navigation_results.plot_dispersion_to_estimation_error_history()
                         process_single_navigation_results.plot_correlation_history()
                         process_single_navigation_results.plot_observability_metrics()
 

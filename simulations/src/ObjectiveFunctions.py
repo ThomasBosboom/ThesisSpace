@@ -28,54 +28,43 @@ class ObjectiveFunctions():
 
     def test(self, observation_windows):
 
-        costs = []
+        objective_values = []
         for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
             noise = np.random.normal(0, 0.1)
-            cost = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
-            costs.append(cost)
-        mean_cost = np.mean(costs)
-        return mean_cost
+            objective_value = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
+            objective_values.append(objective_value)
+        mean_objective_value = np.mean(objective_values)
+        return mean_objective_value
 
 
-    def mean_station_keeping_cost(self, observation_windows):
+    # def mean_station_keeping_cost(self, observation_windows):
 
-        tracemalloc.start()
-        snapshot1 = tracemalloc.take_snapshot()
+    #     objective_values = []
+    #     for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
 
-        cost_list = []
-        for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
+    #         print(f"Run {run+1} of {self.num_runs}, seed {seed}")
 
+    #         navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=seed)
+    #         navigation_simulator = navigation_output.navigation_simulator
 
-            print(f"Run {run+1} of {self.num_runs}, seed {seed}")
+    #         delta_v_dict = navigation_simulator.delta_v_dict
+    #         delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+    #         delta_v_history = np.stack(list(delta_v_dict.values()))
+    #         delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+self.evaluation_threshold)
 
-            navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=seed)
-            navigation_simulator = navigation_output.navigation_simulator
+    #         objective_values.append(delta_v)
+    #         navigation_simulator.reset_attributes()
 
-            delta_v_dict = navigation_simulator.delta_v_dict
-            delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-            delta_v_history = np.stack(list(delta_v_dict.values()))
-            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+self.evaluation_threshold)
+    #     final_objective_value = np.mean(objective_values)
 
-            cost_list.append(delta_v)
-            navigation_simulator.reset_attributes()
+    #     print("final:", final_objective_value, "Mean: ", np.mean(objective_values), "Std: ", np.std(objective_values))
 
-            # # Take another snapshot after the function call
-            snapshot2 = tracemalloc.take_snapshot()
-            top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-            total_memory = sum(stat.size for stat in top_stats)
-            print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
-
-        total_cost = np.mean(cost_list)
-
-        return total_cost
+    #     return final_objective_value
 
 
     def worst_case_station_keeping_cost(self, observation_windows):
 
-        # tracemalloc.start()
-        # snapshot1 = tracemalloc.take_snapshot()
-
-        cost_list = []
+        objective_values = []
         for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
 
             print(f"Run {run+1} of {self.num_runs}, seed {seed}")
@@ -88,21 +77,14 @@ class ObjectiveFunctions():
             delta_v_history = np.stack(list(delta_v_dict.values()))
             delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+self.evaluation_threshold)
 
-            cost_list.append(delta_v)
+            objective_values.append(delta_v)
             navigation_simulator.reset_attributes()
 
-            # # Take another snapshot after the function call
-            # snapshot2 = tracemalloc.take_snapshot()
-            # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-            # total_memory = sum(stat.size for stat in top_stats)
-            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
+        final_objective_value = np.mean(objective_values)*1+3*np.std(objective_values)
 
-            import psutil
-            print(psutil.virtual_memory())
+        print("Final:", final_objective_value, "Mean: ", np.mean(objective_values), "Std: ", np.std(objective_values))
 
-        total_cost = np.mean(cost_list)*1+3*np.std(cost_list)
-
-        return total_cost
+        return final_objective_value
 
 
     def overall_uncertainty(self, observation_windows):

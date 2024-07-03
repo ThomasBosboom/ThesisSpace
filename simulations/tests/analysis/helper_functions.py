@@ -210,48 +210,48 @@ def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_setti
     return navigation_outputs_sensitivity
 
 
-def generate_objective_value_results(navigation_outputs, evaluation_threshold=14):
+# def generate_objective_value_results(navigation_outputs, evaluation_threshold=14):
 
-    # Get objective value history
-    objective_value_results = {}
-    for window_type in navigation_outputs.keys():
+#     # Get objective value history
+#     objective_value_results = {}
+#     for window_type in navigation_outputs.keys():
 
-        objective_value_results_per_window_case = []
-        for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
+#         objective_value_results_per_window_case = []
+#         for window_case, navigation_output_list in enumerate(navigation_outputs[window_type]):
 
-            objective_values = []
-            delta_v_per_skm_list = []
-            for run, navigation_output in navigation_output_list.items():
+#             objective_values = []
+#             delta_v_per_skm_list = []
+#             for run, navigation_output in navigation_output_list.items():
 
-                print(f"Results for {window_type} window_case {window_case} run {run}:")
+#                 print(f"Results for {window_type} window_case {window_case} run {run}:")
 
-                # Extracting the relevant objects
-                # navigation_results = navigation_output.navigation_results
-                navigation_simulator = navigation_output.navigation_simulator
+#                 # Extracting the relevant objects
+#                 # navigation_results = navigation_output.navigation_results
+#                 navigation_simulator = navigation_output.navigation_simulator
 
-                # Extracting the relevant results from objects
-                delta_v_dict = navigation_simulator.delta_v_dict
-                delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-                delta_v_history = np.stack(list(delta_v_dict.values()))
-                delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
-                delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
+#                 # Extracting the relevant results from objects
+#                 delta_v_dict = navigation_simulator.delta_v_dict
+#                 delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+#                 delta_v_history = np.stack(list(delta_v_dict.values()))
+#                 delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
+#                 delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
 
-                delta_v_per_skm_list.append(delta_v_per_skm.tolist())
-                objective_values.append(delta_v)
+#                 delta_v_per_skm_list.append(delta_v_per_skm.tolist())
+#                 objective_values.append(delta_v)
 
-                print("Objective: ", delta_v_per_skm, delta_v)
+#                 print("Objective: ", delta_v_per_skm, delta_v)
 
-            objective_value_results_per_window_case.append((len(objective_values),
-                                                        min(objective_values),
-                                                        max(objective_values),
-                                                        np.mean(objective_values),
-                                                        np.std(objective_values),
-                                                        objective_values,
-                                                        delta_v_per_skm_list))
+#             objective_value_results_per_window_case.append((len(objective_values),
+#                                                         min(objective_values),
+#                                                         max(objective_values),
+#                                                         np.mean(objective_values),
+#                                                         np.std(objective_values),
+#                                                         objective_values,
+#                                                         delta_v_per_skm_list))
 
-        objective_value_results[window_type] = objective_value_results_per_window_case
+#         objective_value_results[window_type] = objective_value_results_per_window_case
 
-    return objective_value_results
+#     return objective_value_results
 
 
 # #################################################################

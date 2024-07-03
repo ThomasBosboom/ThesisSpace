@@ -853,41 +853,6 @@ class PlotSingleNavigationResults():
         plt.tight_layout()
 
 
-
-    def plot_dispersion_to_estimation_error_history(self):
-
-        fig, axs = plt.subplots(1, 1, figsize=(11, 4), sharex=True)
-
-        full_estimation_error_dict = self.navigation_simulator.full_estimation_error_dict
-        full_reference_state_deviation_dict = self.navigation_simulator.full_reference_state_deviation_dict
-
-        epochs = np.stack(list(full_estimation_error_dict.keys()))
-        full_estimation_error_history = np.stack(list(full_estimation_error_dict.values()))
-        full_reference_state_deviation_history = np.stack(list(full_reference_state_deviation_dict.values()))
-
-        # print(len(full_estimation_error_history), len(full_reference_state_deviation_history))
-
-        relative_epochs = epochs - self.mission_start_epoch
-        od_error = np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1)
-        dispersion = np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1)
-        od_error_dispersion_relation = dispersion/od_error
-
-        axs.plot(relative_epochs, dispersion)
-        axs.plot(relative_epochs, od_error)
-        axs.plot(relative_epochs, od_error_dispersion_relation)
-
-        # axs[1].set_xlabel(r"||$\Delta V$|| [m/s]")
-        # axs[0].set_ylabel(r"||$\hat{\mathbf{r}}-\mathbf{r}$|| [m]")
-        # axs[1].set_ylabel(r"||$\mathbf{r}-\mathbf{r}_{ref}$|| [m]")
-        # axs[0].set_title("Maneuver cost versus OD error")
-        # axs[1].set_title("Maneuver cost versus reference orbit deviation")
-        # axs[0].legend(title="Arc duration", bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
-
-        # fig.suptitle("Relations between SKM cost for run of 28 days")
-        plt.tight_layout()
-        # plt.show()
-
-
     def plot_correlation_history(self):
 
         # Plot the estimation error history
@@ -926,7 +891,6 @@ class PlotSingleNavigationResults():
         fig.suptitle(f"State correlations for estimation, example arc of {np.round(self.navigation_simulator.estimation_arc_durations[0], 1)} days")
         fig.tight_layout()
 
-        # plt.show()
 
 
 class PlotMultipleNavigationResults():
@@ -1038,7 +1002,8 @@ class PlotMultipleNavigationResults():
 
         fig, axs = plt.subplots(figsize=(12, 4), sharex=True)
         axs_twin = axs.twinx()
-        ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
+        # ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
+        ylabels = ["3D RSS OD position \nestimation error [m]", "3D RSS OD velocity \nestimation error [m/s]"]
         # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
         line_style_cycle = ["solid", "dashed", "dashdot"]
         for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
@@ -1052,8 +1017,6 @@ class PlotMultipleNavigationResults():
                 full_propagated_formal_errors_histories = []
                 delta_v_runs_dict = {}
                 for run_index, (run, navigation_output) in enumerate(window_case.items()):
-
-                    # print(f"Results for {window_type} window_case {case_index} run {run}:")
 
                     # Extracting the relevant objects
                     navigation_simulator = navigation_output.navigation_simulator
@@ -1098,7 +1061,7 @@ class PlotMultipleNavigationResults():
                                                 alpha=0.3,
                                                 label="SKM" if i==0 and type_index==0 else None)
 
-                        axs_twin.plot(relative_epochs, 3*np.linalg.norm(full_propagated_formal_errors_history[:, 6:9], axis=1),
+                        axs_twin.plot(relative_epochs, 3*np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
                                         color=color,
                                         ls=line_style,
                                         alpha=0.7)
