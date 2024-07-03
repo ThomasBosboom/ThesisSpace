@@ -31,16 +31,18 @@ class OptimizationModel:
         self.custom_initial_simplex = None
         self.initial_simplex_perturbation = 0.5
         self.iteration = 0
-        self.total_iterations = 0
         self.iteration_history = {}
         self.intermediate_iteration_history = {}
         self.initial_objective_value = None
         self.best_objective_value = None
         self.latest_objective_value = None
+        self.best_simplex = []
+        self.best_simplex_objectives = []
         self.run_counter = 0
+        self.simplex_counter = 0
+        self.total_run_counter = 0
         self.num_runs = 1
         self.evaluation_threshold = 14
-        self.show_evaluations_in_terminal = False
 
         for key, value in json_settings.items():
             setattr(self, key, value)
@@ -56,12 +58,7 @@ class OptimizationModel:
                 setattr(self, key, value)
 
         self.options = {'maxiter': self.max_iterations+1, 'disp': False, "adaptive": True}
-        self.total_iterations += self.max_iterations
-
-        if self.use_custom_input:
-            self.iteration = 0
-            self.run_counter = 0
-            self.options = {'maxiter': self.total_iterations+1, 'disp': False, "adaptive": True}
+        self.simplex_counter = 0
 
 
     def load_from_json(self, time_tag, folder_name="optimization_analysis"):
@@ -170,70 +167,93 @@ class OptimizationModel:
 
     def generate_iteration_history_entry(self, design_vector, objective_value, initial_objective_value):
         return {
-                'design_vector': design_vector,
-                'objective_value': objective_value,
-                'reduction': (objective_value-initial_objective_value)/initial_objective_value*100
+                    'design_vector': design_vector,
+                    'objective_value': objective_value,
+                    'reduction': (objective_value-initial_objective_value)/initial_objective_value*100
                 }
 
 
-    def has_intermediate_iteration_history(self, iteration, run_counter):
+    def get_best_simplex(self, intermediate_iteration_history):
 
-        if str(iteration) in self.intermediate_iteration_history.keys():
-            if str(run_counter) in self.intermediate_iteration_history[str(iteration)].keys():
-                return True
-        return False
+        simplex = []
+        objective_values = [np.inf]
+        for key, values in intermediate_iteration_history.items():
+            sub_objective_values = []
+            for subkey, subvalue in values.items():
+                design_vector = subvalue["design_vector"]
+                objective_value = subvalue["objective_value"]
+                sub_objective_values.append(objective_value)
+                n = len(design_vector)
+                objective_value = max(sub_objective_values)
 
+            if objective_value < objective_values[-1]:
+                objective_values.append(objective_value)
+                simplex.append(design_vector)
+                if len(simplex) > n + 1:
+                    simplex = simplex[1:]
+                    objective_values = objective_values[1:]
 
-    def get_cached_objective_value(self, iteration, run_counter):
-        history = self.intermediate_iteration_history[str(iteration)][str(run_counter)]
-        return history["objective_value"]
+        return simplex, objective_values
 
 
     def optimize(self, objective_function):
 
+        # def constraints(design_vector):
+
+        #     observation_windows = self.generate_observation_windows(design_vector)
+        #     if observation_windows[-1][-1]-observation_windows[0][0] > self.duration:
+        #         return np.inf
+        #     else:
+        #         return 0
+
         def objective(design_vector):
 
+            print("==============")
+
             observation_windows = self.generate_observation_windows(design_vector)
+            # objective_value = objective_function(observation_windows)
 
-            # Retrieve latest simplex information from the cache of previous run
-            if self.has_intermediate_iteration_history(self.iteration, self.run_counter):
-                objective_value = self.get_cached_objective_value(self.iteration, self.run_counter)
-                print(f"Retrieving {self.iteration} {self.run_counter} from cache....")
-
+            # Revive latest simplex information from the previous run
+            if self.use_custom_input:
+                if self.simplex_counter < len(self.best_simplex_objectives):
+                    objective_value = self.best_simplex_objectives[self.simplex_counter]
+                    self.simplex_counter += 1
+                else:
+                    self.simplex_counter = np.inf
+                    objective_value = objective_function(observation_windows)
             else:
                 objective_value = objective_function(observation_windows)
 
-                # Initialize initial objective value
-                if self.initial_objective_value is None:
-                    self.initial_objective_value = objective_value
+            # Initialize initial objective value
+            if self.initial_objective_value is None:
+                self.initial_objective_value = objective_value
 
-                self.latest_objective_value = objective_value
+            self.latest_objective_value = objective_value
 
-                # Save all intermediate function evaluations between iterations
-                if self.iteration not in self.intermediate_iteration_history:
-                    self.intermediate_iteration_history[self.iteration] = {}
+            # Save all intermediate function evaluations between iterations
+            if self.iteration not in self.intermediate_iteration_history:
+                self.intermediate_iteration_history[self.iteration] = {}
 
-                self.intermediate_iteration_history[self.iteration][self.run_counter] = self.generate_iteration_history_entry(design_vector, objective_value, self.initial_objective_value)
+            self.intermediate_iteration_history[self.iteration][self.run_counter] = self.generate_iteration_history_entry(design_vector, objective_value, self.initial_objective_value)
 
-                if self.iteration == 0 and self.run_counter == 0:
-                    self.iteration_history[self.iteration] = self.generate_iteration_history_entry(design_vector, objective_value, self.initial_objective_value)
+            if self.iteration == 0 and self.run_counter == 0:
+                self.iteration_history[self.iteration] = self.generate_iteration_history_entry(design_vector, objective_value, self.initial_objective_value)
 
-                # Update the best objective value and arc lengths for the current iteration
-                if self.best_objective_value is None or objective_value < self.best_objective_value:
-                    self.best_objective_value = objective_value
-                    self.best_design_vector = design_vector
-                    self.best_observation_windows = observation_windows
+            # Update the best objective value and arc lengths for the current iteration
+            if self.best_objective_value is None or objective_value < self.best_objective_value:
+                self.best_objective_value = objective_value
+                self.best_design_vector = design_vector
+                self.best_observation_windows = observation_windows
 
-            if self.show_evaluations_in_terminal:
-                print("==============")
-                print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value} \nObservation windows: \n {observation_windows}")
-                # print(psutil.virtual_memory())
-                print("==============")
+            print(f"Function summary: \nDesign vector: {design_vector} \nObjective: {objective_value} \nObservation windows: \n {observation_windows}")
+            print("==============")
 
             self.run_counter += 1
+            self.best_simplex, self.best_simplex_objectives = self.get_best_simplex(self.intermediate_iteration_history)
 
             self.save_to_json()
 
+            print(psutil.virtual_memory())
 
             return objective_value
 
@@ -241,29 +261,32 @@ class OptimizationModel:
         def callback_function(x):
 
             self.iteration += 1
+            self.total_run_counter += self.run_counter
             self.run_counter = 0
 
+            # print(f"Callback iteration {self.iteration} =================")
+            # print(f"Design vector: \n", self.best_design_vector)
+            # print(f"Objective value: \n", self.best_objective_value)
+            # print(f"Reduction: \n", (self.best_objective_value-self.initial_objective_value)/self.initial_objective_value*100)
+            # print("===========================")
+
             # Only save the final result of each iteration
-            if str(self.iteration) not in self.iteration_history:
-                self.iteration_history[self.iteration] = self.generate_iteration_history_entry(self.best_design_vector, self.best_objective_value, self.initial_objective_value)
-
-            if self.show_evaluations_in_terminal:
-                print(f"Callback iteration {self.iteration} =================")
-                print(f"Design vector: \n", self.best_design_vector)
-                print(f"Objective value: \n", self.best_objective_value)
-                print(f"Reduction: \n", (self.best_objective_value-self.initial_objective_value)/self.initial_objective_value*100)
-                print("===========================")
-
+            self.iteration_history[self.iteration] = self.generate_iteration_history_entry(self.best_design_vector, self.best_objective_value, self.initial_objective_value)
 
         # Initialize the design vector with the maximum number of arcs
         initial_design_vector = self.generate_initial_design_vector()
         self.initial_design_vector = initial_design_vector.copy()
+        if self.use_custom_input:
+            initial_design_vector = self.best_design_vector
 
         # Define bounds for the design vector entries
+        # self.bounds_vector = [(state+self.bounds[0], state+self.bounds[1]) for state in self.generate_initial_design_vector()]
         self.bounds_vector = [(state*(1+self.bounds[0]), state*(1+self.bounds[1])) for state in self.generate_initial_design_vector()]
 
         # Adjust the initial simplex for better convergence
         self.initial_simplex = self.generate_initial_simplex(initial_design_vector)
+        if self.use_custom_input:
+            self.initial_simplex = self.best_simplex
         self.options.update({"initial_simplex": self.initial_simplex})
 
         # Define the initial observation windows
@@ -290,6 +313,8 @@ class OptimizationModel:
         )
 
         self.final_solution = result.x.tolist()
+
+        # print(f"Optimization Result: {result}")
 
         self.save_to_json()
 

@@ -41,22 +41,21 @@ def check_file_exists(substring, num_optims, folder_name):
 
     directory = os.path.join(os.path.join(file_directory, "tests", "postprocessing", "dicts"), folder_name)
 
-    count = 1
+    count = 0
     if os.path.isdir(directory):
         for filename in os.listdir(directory):
             if str(substring) in filename:
                 count += 1
                 if count == num_optims:
                     return True
-
     return False
 
 
 def process_case(case, run, navigation_simulator_settings, objective_functions_settings, optimization_model_settings,
-                 run_optimization, from_file, custom_time_tag, file_name ,test_objective=False):
+                 run_optimization, from_file, custom_tag, file_name ,test_objective=False):
 
 
-    time_tag = generate_case_time_tag(case, custom_time=custom_time_tag, run=run)
+    time_tag = generate_case_time_tag(case, custom_time=custom_tag, run=run)
 
     for settings in [navigation_simulator_settings, objective_functions_settings, optimization_model_settings]:
         for key in case.keys():

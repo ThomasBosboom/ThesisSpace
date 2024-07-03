@@ -14,7 +14,7 @@ fi
 
 # You can continue with your main script logic here
 # List of Python scripts to run
-scripts=("optimization_analysis_delta_v_min.py")
+scripts=("optimization_analysis.py")
 
 # Number of repetitions
 num_repeats=10

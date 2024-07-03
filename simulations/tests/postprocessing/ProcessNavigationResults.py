@@ -1430,10 +1430,14 @@ class PlotMultipleNavigationResults():
             closest_key = min(data.keys(), key=lambda k: abs(k - specific_value))
             return data[closest_key]
 
-        rows = 3
-        fig, ax = plt.subplots(rows, 1, figsize=(10, 5), sharex=True)
+        rows = 5
+        fig, ax = plt.subplots(rows, 1, figsize=(10, 8), sharex=True)
 
-        ylabels = [r'||$\Delta V$|| [m/s]', r"||$\mathbf{r}_{est}-\mathbf{r}_{true}$|| [m]", r"||$\mathbf{r}_{true}-\mathbf{r}_{ref}$|| [m]"]
+        ylabels = [r'||$\Delta V$|| [m/s]', \
+                   r"||$\mathbf{r}_{est}-\mathbf{r}_{true}$|| [m]", \
+                   r"||$\mathbf{r}_{est}-\mathbf{r}_{ref}$|| [m]",
+                   r"||$\mathbf{v}_{est}-\mathbf{v}_{true}$|| [m]", \
+                   r"||$\mathbf{v}_{est}-\mathbf{v}_{ref}$|| [m]"]
         # ylabels = [r'||$\Delta V$|| [m/s]', r'Estimation Error [m]', r'Dispersion [m]']
 
         for row in range(rows):
@@ -1465,35 +1469,35 @@ class PlotMultipleNavigationResults():
                                 delta_v_per_skm_list.append(delta_v_per_skm.tolist())
                                 objective_values.append(delta_v)
 
-                            if row == 1:
 
-                                for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
-                                    batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
-                                    estimation_model_result = navigation_simulator.estimation_arc_results_dict[batch_index]
-                                    estimation_output = estimation_model_result.estimation_output
-                                    best_iteration = estimation_output.best_iteration
-                                    parameter_history = estimation_output.parameter_history
-                                    estimate = parameter_history[:, best_iteration]
-                                    propagated_estimate = get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_end_time)
-                                    estimation_error_start = estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_start_time)
-                                    estimation_error_end = propagated_estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_end_time)
-                                    print(batch_index, batch_end_time, np.linalg.norm(estimation_error_end[6:9]), estimation_error_end)
-                                    if batch_index==0:
-                                        if row==1:
-                                            # objective_values.append(np.linalg.norm(estimation_error_start[6:9]))
-                                        # if plot_index==2:
-                                            objective_values.append(np.linalg.norm(estimation_error_end[6:9]))
-                                            # objective_values.append(np.linalg.norm(estimation_error_end[0:3]))
+                            for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
+                                batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
+                                estimation_model_result = navigation_simulator.estimation_arc_results_dict[batch_index]
+                                estimation_output = estimation_model_result.estimation_output
+                                best_iteration = estimation_output.best_iteration
+                                parameter_history = estimation_output.parameter_history
+                                estimate = parameter_history[:, best_iteration]
+                                propagated_estimate = get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_end_time)
+                                estimation_error_start = estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_start_time)
+                                estimation_error_end = propagated_estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_end_time)
+
+                                if batch_index == 0:
+                                    if row == 1:
+                                        objective_values.append(np.linalg.norm(estimation_error_end[6:9]))
+
+                                    if row == 3:
+                                        objective_values.append(np.linalg.norm(estimation_error_end[9:12]))
 
 
-                            if row == 2:
+                            for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
+                                batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
+                                dispersion = get_closest_key_value(navigation_simulator.full_reference_state_deviation_dict, batch_end_time)
 
-                                for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
-                                    batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
-                                    dispersion = get_closest_key_value(navigation_simulator.full_reference_state_deviation_dict, batch_end_time)
-                                    # print(batch_index, batch_end_time, np.linalg.norm(dispersion[6:9]), dispersion)
+                                if row == 2:
                                     objective_values.append(np.linalg.norm(dispersion[6:9]))
-                                    # objective_values.append(np.linalg.norm(dispersion[0:3]))
+
+                                if row == 4:
+                                    objective_values.append(np.linalg.norm(dispersion[9:12]))
 
 
                         # if row == 0:

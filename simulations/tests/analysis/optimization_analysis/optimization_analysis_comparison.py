@@ -117,10 +117,10 @@ def get_optimization_results_folders(cases, substring=None):
 
 
 def process_case(case, run, navigation_simulator_settings, objective_functions_settings, optimization_model_settings,
-                 run_optimization, from_file, custom_time_tag, folder_name):
+                 run_optimization, from_file, custom_tag, folder_name):
 
 
-    time_tag = generate_case_time_tag(case, custom_time=custom_time_tag, run=run)
+    time_tag = generate_case_time_tag(case, custom_time=custom_tag, run=run)
 
     for settings in [navigation_simulator_settings, objective_functions_settings, optimization_model_settings]:
         for key in case.keys():
@@ -189,17 +189,17 @@ if __name__ == "__main__":
     ##############################################################
 
     auto_mode = False
-    custom_time_tag = "0.5day_arc_interval"
+    custom_tag = "0.5day_arc_interval"
     num_optims = 5
 
     run_optimization = False
     from_file = True
 
-    # if custom_time_tag is not None:
-    #     current_time = custom_time_tag
+    # if custom_tag is not None:
+    #     current_time = custom_tag
     # if auto_mode:
-    #     if custom_time_tag is not None:
-    #         current_time = custom_time_tag
+    #     if custom_tag is not None:
+    #         current_time = custom_tag
     #     from_file = check_file_exists(current_time, num_optims)
     #     run_optimization = True
 
@@ -207,7 +207,7 @@ if __name__ == "__main__":
         "delta_v_min": [0.00, 0.01],
     }
 
-    optimization_results_folders = get_optimization_results_folders(cases, substring=custom_time_tag)
+    optimization_results_folders = get_optimization_results_folders(cases, substring=custom_tag)
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
@@ -241,7 +241,7 @@ if __name__ == "__main__":
         for run in range(num_optims):
             print(case, run)
 
-            optimization_results_folders = get_optimization_results_folders(cases, substring=custom_time_tag)
+            optimization_results_folders = get_optimization_results_folders(cases, substring=custom_tag)
 
             results.append(process_case(
                 case, run,
@@ -250,7 +250,7 @@ if __name__ == "__main__":
                 optimization_model_settings=optimization_model_settings,
                 run_optimization=True,
                 from_file=True,
-                custom_time_tag=current_time,
+                custom_tag=current_time,
                 folder_name=folder_name
             ))
 
@@ -283,7 +283,7 @@ if __name__ == "__main__":
     #         optimization_model_settings=optimization_model_settings,
     #         run_optimization=run_optimization,
     #         from_file=from_file,
-    #         custom_time_tag=current_time)
+    #         custom_tag=current_time)
 
     #     case_runs = [(case, run) for case in combinations for run in range(num_optims)]
     #     results = pool.starmap(partial_process_case, case_runs)

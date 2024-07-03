@@ -36,18 +36,19 @@ if __name__ == "__main__":
         "delta_v_min": [0.00],
     }
 
-    auto_mode = True
-    custom_time_tag = "default"
+    auto_mode = False
+    custom_tag = "default"
     num_optims = 5
+    test_objective = True
 
     run_optimization = False
-    from_file = False
+    from_file = True
 
-    if custom_time_tag is not None:
-        current_time = custom_time_tag
+    if custom_tag is not None:
+        current_time = custom_tag
     if auto_mode:
-        if custom_time_tag is not None:
-            current_time = custom_time_tag
+        if custom_tag is not None:
+            current_time = custom_tag
         from_file = check_file_exists(current_time, num_optims, file_name)
         run_optimization = True
 
@@ -64,7 +65,7 @@ if __name__ == "__main__":
 
     objective_functions_settings = {
         "evaluation_threshold": 14,
-        "num_runs": 5,
+        "num_runs": 15,
         "seed": 0
     }
 
@@ -72,10 +73,11 @@ if __name__ == "__main__":
         "duration": 28,
         "arc_length": 1,
         "arc_interval": 3,
-        "max_iterations": 10,
+        "max_iterations": 5,
         "bounds": (-0.9, 0.9),
         "design_vector_type": "arc_lengths",
-        "initial_simplex_perturbation": -0.5
+        "initial_simplex_perturbation": -0.5,
+        "results_in_terminal": True
     }
 
 
@@ -97,9 +99,9 @@ if __name__ == "__main__":
             optimization_model_settings=optimization_model_settings,
             run_optimization=run_optimization,
             from_file=from_file,
-            custom_time_tag=current_time,
+            custom_tag=current_time,
             file_name=file_name,
-            test_objective=False)
+            test_objective=test_objective)
 
         case_runs = [(case, run) for case in combinations for run in range(num_optims)]
         results = pool.starmap(partial_process_case, case_runs)
