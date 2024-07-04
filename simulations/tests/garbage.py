@@ -732,11 +732,11 @@
 
 # # # # # # # # # # # # import itertools
 
-# # # # # # # # # # # # def generate_case_time_tag(case, custom_time=False, run=0):
+# # # # # # # # # # # # def generate_case_custom_tag(case, custom_tag=False, run=0):
 # # # # # # # # # # # #     params_str = "_".join(f"{run}_{k}_{v:.2f}".replace('.', '_') for k, v in case.items())
 # # # # # # # # # # # #     time = current_time
-# # # # # # # # # # # #     if custom_time is not False:
-# # # # # # # # # # # #         time = custom_time
+# # # # # # # # # # # #     if custom_tag is not False:
+# # # # # # # # # # # #         time = custom_tag
 # # # # # # # # # # # #     return f"{time}_{params_str}"
 
 # # # # # # # # # # # # current_time =100000
@@ -759,9 +759,9 @@
 # # # # # # # # # # # # for case in combinations:
 # # # # # # # # # # # #     for run in range(run_num):
 
-# # # # # # # # # # # #         time_tag = generate_case_time_tag(case, run=run)
+# # # # # # # # # # # #         time_tag = generate_case_custom_tag(case, run=run)
 # # # # # # # # # # # #         if custom_input:
-# # # # # # # # # # # #             time_tag = generate_case_time_tag(case, custom_time=custom_tag, run=run)
+# # # # # # # # # # # #             time_tag = generate_case_custom_tag(case, custom_tag=custom_tag, run=run)
 # # # # # # # # # # # #         time_tags.append(time_tag)
 
 # # # # # # # # # # # # # Output the time tags

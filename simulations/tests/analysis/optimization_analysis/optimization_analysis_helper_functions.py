@@ -1,14 +1,8 @@
 import numpy as np
-import scipy as sp
 import os
 import sys
-import copy
 import json
-import itertools
 from datetime import datetime
-import matplotlib.pyplot as plt
-import multiprocessing
-from functools import partial
 
 # Define path to import src files
 file_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -29,46 +23,50 @@ from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 #### Helper functions ########################################
 ##############################################################
 
-def generate_case_time_tag(case, custom_time=False, run=0):
+def generate_case_custom_tag(case, custom_tag, run=0):
     params_str = "_".join(f"{run}_{k}_{v:.2f}".replace('.', '_') for k, v in case.items())
-    time = current_time
-    if custom_time is not False:
-        time = custom_time
-    return f"{time}_{params_str}"
+    return f"{custom_tag}_{params_str}"
 
 
-def check_file_exists(substring, num_optims, folder_name):
+def check_file_exists(cases, custom_tag, num_optims, folder_name):
 
     directory = os.path.join(os.path.join(file_directory, "tests", "postprocessing", "dicts"), folder_name)
 
     count = 0
     if os.path.isdir(directory):
         for filename in os.listdir(directory):
-            if str(substring) in filename:
-                count += 1
-                if count == num_optims:
-                    return True
+            for key, values in cases.items():
+                for value in values:
+                    for run in range(num_optims):
+                        case = {key: value}
+                        case_custom_tag = generate_case_custom_tag(case, custom_tag, run=run)
+                        if str(case_custom_tag) in filename:
+                            count += 1
+                            if count == num_optims:
+                                return True
     return False
 
 
 def process_case(case, run, navigation_simulator_settings, objective_functions_settings, optimization_model_settings,
-                 run_optimization, from_file, custom_tag, file_name ,test_objective=False):
+                 run_optimization, from_file, custom_tag, file_name, test_objective=False, use_same_seed=False):
 
 
-    time_tag = generate_case_time_tag(case, custom_time=custom_tag, run=run)
+    time_tag = generate_case_custom_tag(case, custom_tag, run=run)
 
-    for settings in [navigation_simulator_settings, objective_functions_settings, optimization_model_settings]:
-        for key in case.keys():
-            if key in settings:
-                settings.update(case)
+    # for settings in [navigation_simulator_settings, objective_functions_settings, optimization_model_settings]:
+    #     for key in case.keys():
+    #         if key in settings:
+    #             settings.update(case)
 
+    navigation_simulator_settings.update(case)
     navigation_simulator = NavigationSimulator.NavigationSimulator(
         **navigation_simulator_settings
     )
 
-    seed = objective_functions_settings.get("seed")
-    num_runs = objective_functions_settings.get("num_runs")
-    objective_functions_settings.update({"seed": seed + run*num_runs})
+    if not use_same_seed:
+        seed = objective_functions_settings.get("seed")
+        num_runs = objective_functions_settings.get("num_runs")
+        objective_functions_settings.update({"seed": seed + run*num_runs})
     objective_functions = ObjectiveFunctions.ObjectiveFunctions(
         navigation_simulator,
         **objective_functions_settings
@@ -114,5 +112,8 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
         compare_time_tags=[]
     )
     process_optimization_results.tabulate_optimization_results()
+
+    if not run_optimization:
+        process_optimization_results.plot_optimization_result_comparisons(case, show_observation_window_settings=True)
 
     return process_optimization_results

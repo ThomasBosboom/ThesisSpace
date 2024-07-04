@@ -40,7 +40,6 @@ class PlotSingleNavigationResults():
         if not step_size:
             step_size = self.navigation_simulator.step_size
 
-
         fig1_3d = plt.figure()
         ax_3d = fig1_3d.add_subplot(111, projection='3d')
         fig1_3d2 = plt.figure()
@@ -1009,11 +1008,9 @@ class PlotMultipleNavigationResults():
         for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
 
             color = self.color_cycle[int(type_index%len(self.color_cycle))]
-
             for case_index, window_case in enumerate(navigation_outputs_cases):
 
                 line_style = line_style_cycle[int(case_index%len(line_style_cycle))]
-
                 full_propagated_formal_errors_histories = []
                 delta_v_runs_dict = {}
                 for run_index, (run, navigation_output) in enumerate(window_case.items()):
@@ -1546,3 +1543,303 @@ class PlotMultipleNavigationResults():
         if self.save_figure:
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
 
+
+    def plot_full_state_history_comparison(self, step_size=None):
+
+        fig1_3d = plt.figure()
+        ax_3d = fig1_3d.add_subplot(111, projection='3d')
+        fig1_3d2 = plt.figure()
+        ax_3d2 = fig1_3d2.add_subplot(111, projection='3d')
+        fig, ax = plt.subplots(2, 3, figsize=(11, 6))
+
+        for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
+
+            color = self.color_cycle[int(type_index%len(self.color_cycle))]
+            for case_index, window_case in enumerate(navigation_outputs_cases):
+
+                # line_style = line_style_cycle[int(case_index%len(line_style_cycle))]
+                full_estimation_error_histories = []
+                for run_index, (run, navigation_output) in enumerate(window_case.items()):
+
+                    navigation_simulator = navigation_output.navigation_simulator
+
+                    if not step_size:
+                        step_size = navigation_simulator.step_size
+
+                    state_history_reference = np.stack(list(navigation_simulator.full_state_history_reference_dict.values()))
+                    state_history_truth = np.stack(list(navigation_simulator.full_state_history_truth_dict.values()))
+                    state_history_estimated = np.stack(list(navigation_simulator.full_state_history_estimated_dict.values()))
+                    epochs = np.stack(list(navigation_simulator.full_dependent_variables_history_estimated.keys()))
+                    dependent_variables_history = np.stack(list(navigation_simulator.full_dependent_variables_history_estimated.values()))
+                    delta_v_dict = navigation_simulator.delta_v_dict
+
+                    full_state_history_truth_dict = navigation_simulator.full_state_history_truth_dict
+                    full_state_history_reference_dict = navigation_simulator.full_state_history_reference_dict
+                    full_state_history_estimated_dict = navigation_simulator.full_state_history_estimated_dict
+                    full_dependent_variables_history_estimated = navigation_simulator.full_dependent_variables_history_estimated
+                    moon_data_dict = {epoch: state[:6] for epoch, state in full_dependent_variables_history_estimated.items()}
+
+                    # Determine the range of keys
+                    all_keys = set(full_state_history_truth_dict.keys()).union(full_state_history_reference_dict.keys()).union(full_state_history_estimated_dict.keys()).union(moon_data_dict.keys())
+                    min_key = min(all_keys)
+                    max_key = max(all_keys)
+
+                    # Generate new keys with the smaller dt
+                    new_keys = np.arange(min_key, max_key + step_size, step_size)
+
+                    def interpolate_dict(original_dict, new_keys):
+                        original_keys = list(original_dict.keys())
+                        original_values = np.array(list(original_dict.values()))
+
+                        num_dims = original_values.shape[1]
+                        new_values = []
+                        for dim in range(num_dims):
+
+                            interpolation_function = interp1d(original_keys, original_values[:, dim], kind='cubic', fill_value='extrapolate')
+                            new_values.append(interpolation_function(new_keys))
+
+                        new_values = np.vstack(new_values).T
+                        return {k: v for k, v in zip(new_keys, new_values)}
+
+                    # Interpolate each dictionary
+                    full_state_history_truth_dict = interpolate_dict(full_state_history_truth_dict, new_keys)
+                    full_state_history_reference_dict = interpolate_dict(full_state_history_reference_dict, new_keys)
+                    full_state_history_estimated_dict = interpolate_dict(full_state_history_estimated_dict, new_keys)
+                    moon_data_dict = interpolate_dict(moon_data_dict, new_keys)
+
+                    G = 6.67430e-11
+                    m1 = 5.972e24
+                    m2 = 7.34767309e22
+                    mu = m2/(m2 + m1)
+
+                    # Create the transformation based on rotation axis of Moon around Earth
+                    transformation_matrix_dict = {}
+                    for epoch, moon_state in moon_data_dict.items():
+
+                        moon_position, moon_velocity = moon_state[:3], moon_state[3:]
+
+                        # Define the complementary axes of the rotating frame
+                        rotation_axis = np.cross(moon_position, moon_velocity)
+                        second_axis = np.cross(moon_position, rotation_axis)
+
+                        # Define the rotation matrix (DCM) using the rotating frame axes
+                        first_axis = moon_position/np.linalg.norm(moon_position)
+                        second_axis = second_axis/np.linalg.norm(second_axis)
+                        third_axis = rotation_axis/np.linalg.norm(rotation_axis)
+                        transformation_matrix = np.array([first_axis, second_axis, third_axis])
+                        rotation_axis = rotation_axis*m2
+                        rotation_rate = rotation_axis/(m2*np.linalg.norm(moon_position)**2)
+
+                        skew_symmetric_matrix = np.array([[0, -rotation_rate[2], rotation_rate[1]],
+                                                        [rotation_rate[2], 0, -rotation_rate[0]],
+                                                        [-rotation_rate[1], rotation_rate[0], 0]])
+
+                        transformation_matrix_derivative =  np.dot(transformation_matrix, skew_symmetric_matrix)
+                        transformation_matrix = np.block([[transformation_matrix, np.zeros((3,3))],
+                                                        [transformation_matrix_derivative, transformation_matrix]])
+
+                        transformation_matrix_dict.update({epoch: transformation_matrix})
+
+
+                    # Generate the synodic states of the satellites
+                    synodic_full_state_history_estimated_dict = {}
+                    synodic_full_state_history_truth_dict = {}
+                    synodic_full_state_history_reference_dict = {}
+                    synodic_dictionaries = [synodic_full_state_history_estimated_dict, synodic_full_state_history_truth_dict, synodic_full_state_history_reference_dict]
+                    inertial_dictionaries = [full_state_history_estimated_dict, full_state_history_truth_dict, full_state_history_reference_dict]
+                    for index, dictionary in enumerate(inertial_dictionaries):
+                        for epoch, state in dictionary.items():
+
+                            transformation_matrix = transformation_matrix_dict[epoch]
+                            synodic_state = np.concatenate((np.dot(transformation_matrix, state[0:6]), np.dot(transformation_matrix, state[6:12])))
+
+                            LU = np.linalg.norm((moon_data_dict[epoch][0:3]))
+                            TU = np.sqrt(LU**3/(G*(m1+m2)))
+                            synodic_state[0:3] = synodic_state[0:3]/LU
+                            synodic_state[6:9] = synodic_state[6:9]/LU
+                            synodic_state[3:6] = synodic_state[3:6]/(LU/TU)
+                            synodic_state[9:12] = synodic_state[9:12]/(LU/TU)
+                            synodic_state = (1-mu)*synodic_state
+
+                            synodic_dictionaries[index].update({epoch: synodic_state})
+
+
+                    inertial_states = np.stack(list(full_state_history_estimated_dict.values()))
+                    inertial_states_truth = np.stack(list(full_state_history_truth_dict.values()))
+                    inertial_states_reference = np.stack(list(full_state_history_reference_dict.values()))
+
+                    synodic_states_estimated = np.stack(list(synodic_full_state_history_estimated_dict.values()))
+                    synodic_states_truth = np.stack(list(synodic_full_state_history_truth_dict.values()))
+                    synodic_states_reference = np.stack(list(synodic_full_state_history_reference_dict.values()))
+
+                    # print("Initial state estimated inertial: \n", inertial_states[0, :])
+                    # print("Initial state truth inertial: \n", inertial_states_truth[0, :])
+                    # print("Initial state estimated synodic: \n", synodic_states_estimated[0, :])
+                    # print("Initial state truth synodic: \n", synodic_states_truth[0, :])
+                    # print("Initial state reference inertial: \n", inertial_states_reference[0, :])
+                    # print("Initial state reference synodic: \n", synodic_states_reference[0, :])
+
+                    # Generate the synodic states of station keeping maneuvre vectors
+                    def closest_key(dictionary, value):
+                        closest_key = None
+                        min_difference = float('inf')
+
+                        for key in dictionary:
+                            difference = abs(key - value)
+                            if difference < min_difference:
+                                min_difference = difference
+                                closest_key = key
+
+                        return closest_key
+
+                    synodic_delta_v_dict = {}
+                    for epoch, delta_v in delta_v_dict.items():
+
+                        epoch = closest_key(transformation_matrix_dict, epoch)
+                        transformation_matrix = transformation_matrix_dict[epoch]
+                        synodic_state = np.dot(transformation_matrix, np.concatenate((np.zeros((3)), delta_v)))
+
+                        LU = np.linalg.norm((moon_data_dict[epoch][0:3]))
+                        TU = np.sqrt(LU**3/(G*(m1+m2)))
+                        synodic_delta_v = synodic_state/(LU/TU)
+                        synodic_delta_v = (1-mu)*synodic_state
+
+                        synodic_delta_v_dict.update({epoch: synodic_state[3:6]})
+
+                    synodic_delta_v_history = np.stack(list(synodic_delta_v_dict.values()))
+
+                    # for start, length, angle in zip(start_positions, arrow_lengths, arrow_angles):
+                    arrow_plot_dict = {}
+                    for index, (epoch, delta_v) in enumerate(synodic_delta_v_dict.items()):
+                        arrow_plot_dict[epoch] = np.concatenate((synodic_full_state_history_estimated_dict[epoch][6:9], delta_v))
+
+                    arrow_plot_data = np.stack(list(arrow_plot_dict.values()))
+                    scale=None
+                    alpha=0.6
+                    zorder=10
+                    for index in range(1):
+                        ax[1][0].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 5],
+                                    angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
+                        ax[1][1].quiver(arrow_plot_data[:, 1], arrow_plot_data[:, 2], arrow_plot_data[:,4], arrow_plot_data[:,5],
+                                    angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
+                        ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
+                                    angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
+                        ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
+                                    alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 else None)
+
+                    # Generate the synodic states of the moon
+                    synodic_full_state_history_moon_dict = {}
+                    for epoch, state in moon_data_dict.items():
+
+                        transformation_matrix = transformation_matrix_dict[epoch]
+                        synodic_state = np.dot(transformation_matrix, state)
+                        LU = np.linalg.norm((moon_data_dict[epoch][0:3]))
+                        TU = np.sqrt(LU**3/(G*(m1+m2)))
+                        synodic_state[0:3] = synodic_state[0:3]/LU
+                        synodic_state[3:6] = synodic_state[3:6]/(LU/TU)
+                        synodic_state = (1-mu)*synodic_state
+                        synodic_full_state_history_moon_dict.update({epoch: synodic_state})
+
+                    synodic_states_estimated = np.stack(list(synodic_full_state_history_estimated_dict.values()))
+                    synodic_moon_states = np.stack(list(synodic_full_state_history_moon_dict.values()))
+
+                    # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+                    for i in range(2):
+                        if i == 0:
+                            color="gray"
+                        else:
+                            color="black"
+
+                        ax[i][0].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 2], s=50, color="darkgray")
+                        ax[i][1].scatter(synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray")
+                        ax[i][2].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], s=50, color="darkgray", label="Moon" if i==0 else None)
+                        ax[i][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
+                        ax[i][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
+                        ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.5, color=color, label="LPF" if i==0 else None)
+                        ax[1][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
+                        ax[1][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
+                        ax[1][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.1, color=color, label="LUMIO" if i==1 else None)
+
+                    ax_3d.scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray", label="Moon")
+                    ax_3d.plot(synodic_states_estimated[:, 0], synodic_states_estimated[:, 1], synodic_states_estimated[:, 2], lw=0.2, color="gray")
+                    ax_3d.plot(synodic_states_estimated[:, 6], synodic_states_estimated[:, 7], synodic_states_estimated[:, 8], lw=0.7, color="black")
+                    # ax_3d.scatter(-mu, 0, 0, label="Earth", color="darkblue", s=50)
+
+                    # ax_3d2.plot(state_history_reference[:,0], state_history_reference[:,1], state_history_reference[:,2], label="LPF ref", color="green")
+                    # ax_3d2.plot(state_history_reference[:,6], state_history_reference[:,7], state_history_reference[:,8], label="LUMIO ref", color="green")
+                    # ax_3d2.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth", color="black", ls="--")
+                    # ax_3d2.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth", color="black", ls="--")
+                    ax_3d2.plot(state_history_estimated[:,0], state_history_estimated[:,1], state_history_estimated[:,2], lw=0.5, label="LPF", color="gray")
+                    ax_3d2.plot(state_history_estimated[:,6], state_history_estimated[:,7], state_history_estimated[:,8], lw=0.5, label="LUMIO", color="black")
+                    ax_3d2.scatter(0, 0, 0, label="Earth", color="darkblue", s=50)
+
+                    for num, (start, end) in enumerate(navigation_simulator.observation_windows):
+
+                        color = self.color_cycle[type_index]
+
+                        synodic_states_window_dict = {key: value for key, value in synodic_full_state_history_estimated_dict.items() if key >= start and key <= end}
+                        synodic_states_window = np.stack(list(synodic_states_window_dict.values()))
+
+                        inertial_states_window_dict = {key: value for key, value in full_state_history_estimated_dict.items() if key >= start and key <= end}
+                        inertial_states_window = np.stack(list(inertial_states_window_dict.values()))
+
+                        for i in range(2):
+                            linewidth=2
+
+                            if num == 0:
+                                ax[i][0].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+2], color=color, s=20, marker="X")
+                                ax[i][1].scatter(synodic_states_window[0, 6*i+1], synodic_states_window[0, 6*i+2], color=color, s=20, marker="X")
+                                ax[i][2].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+1], color=color, s=20, marker="X", label="Start" if i == 0 else None)
+
+                            ax[i][0].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color)
+                            ax[i][1].plot(synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color)
+                            ax[i][2].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], linewidth=linewidth, color=color, label=str(window_type) if i==0 and num==0 else None)
+
+                            ax_3d.plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=0.5 if i ==0 else 2, color=color, label=str(window_type) if i==0 and num==0 else None)
+                            ax_3d2.plot(inertial_states_window[:, 6*i+0], inertial_states_window[:, 6*i+1], inertial_states_window[:, 6*i+2], linewidth=2, color=color, label=str(window_type) if i==0 and num==0 else None)
+
+                        for i in range(len(synodic_states_window[:, 0])):
+                            ax_3d.plot([synodic_states_window[i, 0], synodic_states_window[i, 6]],
+                                        [synodic_states_window[i, 1], synodic_states_window[i, 7]],
+                                        [synodic_states_window[i, 2], synodic_states_window[i, 8]], color=color, lw=0.5, alpha=0.2)
+
+                            ax_3d2.plot([inertial_states_window[i, 0], inertial_states_window[i, 6]],
+                                        [inertial_states_window[i, 1], inertial_states_window[i, 7]],
+                                        [inertial_states_window[i, 2], inertial_states_window[i, 8]], color=color, lw=0.5, alpha=0.2)
+
+        axes_labels = ['X [-]', 'Y [-]', 'Z [-]']
+        for i in range(2):
+            for j in range(3):
+                ax[i][j].grid(alpha=0.3)
+                ax[i][0].set_xlabel(axes_labels[0])
+                ax[i][0].set_ylabel(axes_labels[2])
+                ax[i][1].set_xlabel(axes_labels[1])
+                ax[i][1].set_ylabel(axes_labels[2])
+                ax[i][2].set_xlabel(axes_labels[0])
+                ax[i][2].set_ylabel(axes_labels[1])
+
+        elev = 20
+        azim = -50
+        ax_3d.set_xlabel('X [-]')
+        ax_3d.set_ylabel('Y [-]')
+        ax_3d.set_zlabel('Z [-]')
+        ax_3d.view_init(elev=elev, azim=azim)
+        ax_3d.legend()
+
+        ax_3d2.set_xlabel('X [m]')
+        ax_3d2.set_ylabel('Y [m]')
+        ax_3d2.set_zlabel('Z [m]')
+        ax_3d2.view_init(elev=elev, azim=azim)
+        ax_3d2.legend()
+
+        ax[0][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+        ax[1][2].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        # fig.suptitle(f"Tracking arcs, synodic frame ")
+        # fig1_3d.suptitle(f"Tracking arcs, synodic frame ")
+        # fig1_3d2.suptitle(f"Tracking arcs, inertial frame ")
+        plt.tight_layout()
+        plt.legend()
+
+        if self.save_figure:
+            utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_full_state_history_comparison"], custom_sub_folder_name=self.file_name)

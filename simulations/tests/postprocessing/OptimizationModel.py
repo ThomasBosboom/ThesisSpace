@@ -169,9 +169,11 @@ class OptimizationModel:
 
 
     def generate_iteration_history_entry(self, design_vector, objective_value, initial_objective_value):
+
         return {
                 'design_vector': design_vector,
                 'objective_value': objective_value,
+                'objective_value_annual': objective_value*365/(self.duration-self.evaluation_threshold),
                 'reduction': (objective_value-initial_objective_value)/initial_objective_value*100
                 }
 

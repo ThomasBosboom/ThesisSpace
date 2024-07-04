@@ -141,7 +141,7 @@ class ProcessOptimizationResults():
                 utils.save_figure_to_folder(figs=[fig], labels=[f"combined_{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
 
 
-    def plot_optimization_result_comparison(self, show_observation_window_settings=False):
+    def plot_optimization_result_comparisons(self, case, show_observation_window_settings=False):
 
         observation_windows_settings = {
             "Default": [
@@ -156,7 +156,7 @@ class ProcessOptimizationResults():
             print("Observation window settings \n:", observation_windows_settings)
 
         # Run the navigation routine using given settings
-        auxilary_settings = {}
+        auxilary_settings = case
         navigation_outputs = helper_functions.generate_navigation_outputs(
             observation_windows_settings,
             **auxilary_settings)
@@ -171,6 +171,7 @@ class ProcessOptimizationResults():
         )
 
         evaluation_threshold = self.optimization_results["evaluation_threshold"]
+        process_multiple_navigation_results.plot_full_state_history_comparison()
         process_multiple_navigation_results.plot_uncertainty_comparison()
         process_multiple_navigation_results.plot_maneuvre_costs()
         process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=evaluation_threshold)

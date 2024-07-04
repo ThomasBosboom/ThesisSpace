@@ -152,7 +152,8 @@ def generate_navigation_outputs(observation_windows_settings, **kwargs):
                 print(f"Run {run+1} of {num_runs}, seed {run}")
 
                 navigation_simulator = NavigationSimulator.NavigationSimulator(**kwargs)
-                navigation_output_per_run[run] = navigation_simulator.perform_navigation(observation_windows, seed=run)
+                navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=run)
+                navigation_output_per_run[run] = navigation_output
 
             navigation_output_per_type.append(navigation_output_per_run)
 

@@ -1,9 +1,5 @@
-import numpy as np
-import scipy as sp
 import os
 import sys
-import copy
-import json
 import itertools
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -33,15 +29,17 @@ if __name__ == "__main__":
     ##############################################################
 
     cases = {
-        "delta_v_min": [0.00],
+        "delta_v_min": [0.02],
     }
 
-    auto_mode = False
-    custom_tag = "default"
+    auto_mode = True
+    custom_tag = "asdfasd"
     num_optims = 5
-    test_objective = True
 
-    run_optimization = False
+    test_objective = True
+    use_same_seed = False
+
+    run_optimization = True
     from_file = True
 
     if custom_tag is not None:
@@ -49,7 +47,7 @@ if __name__ == "__main__":
     if auto_mode:
         if custom_tag is not None:
             current_time = custom_tag
-        from_file = check_file_exists(current_time, num_optims, file_name)
+        from_file = check_file_exists(cases, current_time, num_optims, file_name)
         run_optimization = True
 
 
@@ -60,12 +58,12 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "step_size": 0.5
+        "step_size": 0.5,
     }
 
     objective_functions_settings = {
         "evaluation_threshold": 14,
-        "num_runs": 15,
+        "num_runs": 10,
         "seed": 0
     }
 
@@ -73,7 +71,7 @@ if __name__ == "__main__":
         "duration": 28,
         "arc_length": 1,
         "arc_interval": 3,
-        "max_iterations": 5,
+        "max_iterations": 100,
         "bounds": (-0.9, 0.9),
         "design_vector_type": "arc_lengths",
         "initial_simplex_perturbation": -0.5,
@@ -86,11 +84,10 @@ if __name__ == "__main__":
     ##############################################################
 
     keys, values = zip(*cases.items())
-    combinations = [dict(zip(keys, v)) for v in itertools.product(*values)]
+    case_combinations = [dict(zip(keys, v)) for v in itertools.product(*values)]
 
     # Use multiprocessing.Pool to parallelize the loop
     num_workers = multiprocessing.cpu_count()
-    # num_workers = 40
     with multiprocessing.Pool(processes=num_workers) as pool:
         partial_process_case = partial(
             process_case,
@@ -101,13 +98,14 @@ if __name__ == "__main__":
             from_file=from_file,
             custom_tag=current_time,
             file_name=file_name,
-            test_objective=test_objective)
+            test_objective=test_objective,
+            use_same_seed=use_same_seed)
 
-        case_runs = [(case, run) for case in combinations for run in range(num_optims)]
+        case_runs = [(case, run) for case in case_combinations for run in range(num_optims)]
         results = pool.starmap(partial_process_case, case_runs)
 
-    # Plot final iteration history
-    final_process_optimization_results = results[-1]
+    # Select only first case run as example
+    final_process_optimization_results = results[0]
     final_process_optimization_results.plot_iteration_history(
         show_design_variables=False,
         compare_time_tags=[result.time_tag for result in results]

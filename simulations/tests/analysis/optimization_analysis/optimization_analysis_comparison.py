@@ -25,11 +25,11 @@ from src import NavigationSimulator, ObjectiveFunctions
 from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 
 
-def generate_case_time_tag(case, custom_time=False, run=0):
+def generate_case_custom_tag(case, custom_tag=False, run=0):
     params_str = "_".join(f"{run}_{k}_{v:.2f}".replace('.', '_') for k, v in case.items())
     time = current_time
-    if custom_time is not False:
-        time = custom_time
+    if custom_tag is not False:
+        time = custom_tag
     return f"{time}_{params_str}"
 
 
@@ -120,7 +120,7 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
                  run_optimization, from_file, custom_tag, folder_name):
 
 
-    time_tag = generate_case_time_tag(case, custom_time=custom_tag, run=run)
+    time_tag = generate_case_custom_tag(case, custom_tag=custom_tag, run=run)
 
     for settings in [navigation_simulator_settings, objective_functions_settings, optimization_model_settings]:
         for key in case.keys():
