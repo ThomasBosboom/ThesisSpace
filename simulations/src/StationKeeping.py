@@ -20,7 +20,7 @@ class StationKeeping:
 
     def get_corrected_state_vector(self, correction_epoch, target_point_epochs, cut_off_epoch):
 
-        # print("start stationkeeping")
+        # print("start stationkeeping: ", self.dynamic_model.simulation_start_epoch_MJD)
         # Get the reference orbit states
         reference_state_history = list()
         for body in self.dynamic_model.bodies_to_propagate:
@@ -29,6 +29,7 @@ class StationKeeping:
                                                                                             satellite=body,
                                                                                             get_full_history=True))
         reference_state_history = np.concatenate(reference_state_history, axis=1)
+        # print("reference_state_history: ", np.shape(reference_state_history))
 
         # Propagate the results of the dynamic model to generate target points
         epochs, state_history, dependent_variables_history, state_transition_matrix_history = \

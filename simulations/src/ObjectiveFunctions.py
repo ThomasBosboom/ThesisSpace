@@ -30,36 +30,11 @@ class ObjectiveFunctions():
 
         objective_values = []
         for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
-            noise = np.random.normal(0, 0.1)
+            noise = np.random.normal(0, 0.00000000001)
             objective_value = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
             objective_values.append(objective_value)
         mean_objective_value = np.mean(objective_values)
         return mean_objective_value
-
-
-    # def mean_station_keeping_cost(self, observation_windows):
-
-    #     objective_values = []
-    #     for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
-
-    #         print(f"Run {run+1} of {self.num_runs}, seed {seed}")
-
-    #         navigation_output = self.navigation_simulator.perform_navigation(observation_windows, seed=seed)
-    #         navigation_simulator = navigation_output.navigation_simulator
-
-    #         delta_v_dict = navigation_simulator.delta_v_dict
-    #         delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-    #         delta_v_history = np.stack(list(delta_v_dict.values()))
-    #         delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+self.evaluation_threshold)
-
-    #         objective_values.append(delta_v)
-    #         navigation_simulator.reset_attributes()
-
-    #     final_objective_value = np.mean(objective_values)
-
-    #     print("final:", final_objective_value, "Mean: ", np.mean(objective_values), "Std: ", np.std(objective_values))
-
-    #     return final_objective_value
 
 
     def worst_case_station_keeping_cost(self, observation_windows):
@@ -80,9 +55,9 @@ class ObjectiveFunctions():
             objective_values.append(delta_v)
             navigation_simulator.reset_attributes()
 
-        final_objective_value = np.mean(objective_values)*1+3*np.std(objective_values)
+        final_objective_value = 1*np.mean(objective_values)+3*np.std(objective_values)
 
-        print("Final:", final_objective_value, "Mean: ", np.mean(objective_values), "Std: ", np.std(objective_values))
+        print("Final: ", final_objective_value, "Mean: ", np.mean(objective_values), "Std: ", np.std(objective_values))
 
         return final_objective_value
 

@@ -30,6 +30,11 @@ class NavigationSimulator(NavigationSimulatorBase):
                 setattr(self, key, value)
                 self._initial_attrs.update({key: value})
 
+        if self.run_optimization_version:
+            self.step_size = self.step_size_optimization_version
+            self._initial_attrs.update({"step_size": self.step_size})
+            # print(self.run_optimization_version, self.step_size_optimization_version)
+
         self.interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=self.step_size)
         self.reference_data = ReferenceData.ReferenceData(self.interpolator)
 
@@ -69,38 +74,59 @@ class NavigationSimulator(NavigationSimulatorBase):
                 if key not in self._initial_attrs.keys():
                     delattr(self, key)
 
-    # @profile
-    def perform_navigation(self, observation_windows, seed=0):
 
-        # self.reference_data = ReferenceData.ReferenceData(self.interpolator)
+    def get_delta_v_noise(self, seed, delta_v0, magnitude_error, direction_error):
+
+        rng = np.random.default_rng(seed=seed)
+        new_delta_v = delta_v0.copy()
+        direction_vector = delta_v0.copy()
+        old_magnitude = np.linalg.norm(delta_v0)
+
+        # Apply magnitude errors relative to each component
+        for i in range(3):
+            magnitude_errors = rng.normal(loc=0, scale=(magnitude_error) * np.abs(delta_v0[i]))
+            direction_errors = rng.normal(loc=0, scale=(direction_error) * np.abs(delta_v0[i]))
+            new_delta_v[i] += magnitude_errors
+            direction_vector[i] += direction_errors
+
+        new_magnitude = np.linalg.norm(new_delta_v)
+        direction_vector = direction_vector / np.linalg.norm(direction_vector)
+
+        new_delta_v = new_magnitude * direction_vector
+
+        return new_delta_v
+
+
+    def perform_navigation(self, observation_windows, seed=0):
 
         self.seed = seed
         rng = np.random.default_rng(seed=self.seed)
 
         # Adjusting decimals based on the step size used
-        if self.run_optimization_version:
-            self.step_size = self.step_size_optimization_version
+        # if self.run_optimization_version:
+        #     self.step_size = self.step_size_optimization_version
+        #     print(self.run_optimization_version, self.step_size_optimization_version)
         num_str = "{:.15f}".format(self.step_size).rstrip('0')
         decimal_places = len(num_str) - num_str.index('.') - 1
+        decimal_places = 3
 
         # Observation window settings
-        self.mission_start_epoch = observation_windows[0][0]
+        # self.mission_start_epoch = observation_windows[0][0]
         self.observation_windows = observation_windows
         self.observation_windows = [(np.round(tup[0], decimal_places), np.round(tup[1], decimal_places)) for tup in observation_windows]
+        print(self.step_size, decimal_places, self.observation_windows)
         self.initial_station_keeping_epochs = [np.round(observation_window[1], decimal_places) for observation_window in observation_windows]
         self.station_keeping_epochs = []
 
         # Managing the time vector to define all arcs
         self.batch_start_times = np.array([t[0] for t in self.observation_windows])
-        times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
+        # times = list([self.observation_windows[0][0]] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
+        times = list([self.mission_start_epoch] + [item for sublist in self.observation_windows for item in sublist] + [self.observation_windows[0][0]] + self.initial_station_keeping_epochs)
         times = list(set(times))
         times = sorted(times)
 
         self.navigation_arc_durations = np.round(np.diff(times), decimal_places)
         self.estimation_arc_durations = np.round(np.array([tup[1] - tup[0] for tup in self.observation_windows]), decimal_places)
-
-        # print("=========================")
-        # print("Start navigation simulation")
 
         estimation_arc = 0
         navigation_arc = 0
@@ -139,7 +165,6 @@ class NavigationSimulator(NavigationSimulatorBase):
             ##############################################################
             #### PROPAGATIONS OF STATE HISTORIES #########################
             ##############################################################
-            # print("reached state histories")
 
             # Obtain the initial state of the whole simulation once
             state_history_reference = list()
@@ -147,7 +172,6 @@ class NavigationSimulator(NavigationSimulatorBase):
                 state_history_reference.append(self.reference_data.get_reference_state_history(
                     time, navigation_arc_duration, satellite=body, get_full_history=True))
             state_history_reference = np.concatenate(state_history_reference, axis=1)
-            # print("after")
 
             if navigation_arc == 0:
                 self.custom_initial_state_truth = truth_model.initial_state + self.orbit_insertion_error
@@ -178,7 +202,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             ##############################################################
             #### LOOP FOR ESTIMATION ARCS ################################
             ##############################################################
-            # print("reached estimator")
+
             estimation_arc_activated = False
             if time in self.batch_start_times:
 
@@ -218,8 +242,8 @@ class NavigationSimulator(NavigationSimulatorBase):
                     self.estimation_arc_results_dict.update({estimation_arc: estimation_model_result})
 
                 self.maximum_iterations = maximum_iterations
-
                 estimation_arc += 1
+
 
             # Update the values for the next navigation arc
             self.custom_initial_state_truth = state_history_truth[-1,:]
@@ -240,7 +264,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             self.full_propagated_covariance_dict.update(propagated_covariance_estimated)
 
             if not self.run_optimization_version:
-                self.full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_truth-state_history_reference)))
+                self.full_reference_state_deviation_dict.update(dict(zip(epochs, state_history_estimated-state_history_reference)))
                 self.full_estimation_error_dict.update(dict(zip(epochs, state_history_estimated-state_history_truth)))
                 self.full_propagated_formal_errors_dict.update(propagated_formal_errors_estimated)
                 self.full_state_history_reference_dict.update(dict(zip(epochs, state_history_reference)))
@@ -276,14 +300,13 @@ class NavigationSimulator(NavigationSimulatorBase):
                     # Generate random noise to simulate station-keeping errors
                     if self.model_type == "HF":
 
-                        delta_v_noise_sigma = np.abs(self.station_keeping_error*delta_v)
-                        delta_v_noise = rng.normal(loc=0, scale=delta_v_noise_sigma, size=delta_v.shape)
+                        magnitude_delta_v = np.linalg.norm(delta_v)
+                        delta_v_noise_sigma = magnitude_delta_v*np.linalg.norm([self.station_keeping_error, self.station_keeping_error])
+                        delta_v_noise = self.get_delta_v_noise(int(times[navigation_arc+1]), delta_v, self.station_keeping_error, self.station_keeping_error)
 
-                        # od_update = np.linalg.norm(state_history_estimated[0, 6:9]-state_history_truth[0, 6:9])-np.linalg.norm(self.initial_estimation_error[6:9])
-
-                        if np.linalg.norm(delta_v) >= self.delta_v_min:
+                        if magnitude_delta_v >= self.delta_v_min:
                             self.custom_initial_state[9:12] += delta_v
-                            self.custom_initial_state_truth[9:12] += delta_v + delta_v_noise
+                            self.custom_initial_state_truth[9:12] += delta_v_noise
 
                             delta_v_noise_covariance = np.zeros(12)
                             delta_v_noise_covariance[9:12] = delta_v_noise_sigma

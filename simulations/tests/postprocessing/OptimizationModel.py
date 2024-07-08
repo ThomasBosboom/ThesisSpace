@@ -24,12 +24,12 @@ class OptimizationModel:
         self.mission_start_epoch = 60390
         self.optimization_method = "Nelder-Mead"
         self.max_iterations = 50
-        self.bounds = (-0.9, 0.9)
+        self.bounds = (0.1, 2)
         self.design_vector_type = 'arc_lengths'
 
         self.custom_initial_design_vector = None
         self.custom_initial_simplex = None
-        self.initial_simplex_perturbation = 0.5
+        self.initial_simplex_perturbation = -0.5
         self.iteration = 0
         self.total_iterations = 0
         self.iteration_history = {}
@@ -138,7 +138,7 @@ class OptimizationModel:
             current_time += self.arc_length + self.arc_interval
 
         for arc_set in initial_observation_windows:
-            if arc_set[1]+(1+self.bounds[1])*(arc_set[1]-arc_set[0]) >= self.duration:
+            if arc_set[1]+self.bounds[1] >= self.duration:
                 initial_observation_windows.remove(arc_set)
                 break
 
@@ -155,9 +155,10 @@ class OptimizationModel:
 
         n = len(initial_design_vector)
 
-        perturbations = np.eye(n)
-        for index, perturbation in enumerate(perturbations):
-            perturbations[index, index] = self.initial_simplex_perturbation*initial_design_vector[index]
+        perturbations = np.eye(n)*self.initial_simplex_perturbation
+        # perturbations = np.eye(n)
+        # for index, perturbation in enumerate(perturbations):
+        #     perturbations[index, index] = self.initial_simplex_perturbation*initial_design_vector[index]
 
         initial_simplex = [initial_design_vector]
         for i in range(n):
@@ -170,6 +171,7 @@ class OptimizationModel:
 
     def generate_iteration_history_entry(self, design_vector, objective_value, initial_objective_value):
 
+        print("Generate entry: ", design_vector, objective_value, initial_objective_value)
         return {
                 'design_vector': design_vector,
                 'objective_value': objective_value,
@@ -200,7 +202,7 @@ class OptimizationModel:
             # Retrieve latest simplex information from the cache of previous run
             if self.has_intermediate_iteration_history(self.iteration, self.run_counter):
                 objective_value = self.get_cached_objective_value(self.iteration, self.run_counter)
-                print(f"Retrieving {self.iteration} {self.run_counter} from cache....")
+                print(f"Retrieving iteration {self.iteration}, run counter {self.run_counter} from cache....")
 
             else:
                 objective_value = objective_function(observation_windows)
@@ -262,7 +264,8 @@ class OptimizationModel:
         self.initial_design_vector = initial_design_vector.copy()
 
         # Define bounds for the design vector entries
-        self.bounds_vector = [(state*(1+self.bounds[0]), state*(1+self.bounds[1])) for state in self.generate_initial_design_vector()]
+        # self.bounds_vector = [(state*(1+self.bounds[0]), state*(1+self.bounds[1])) for state in self.generate_initial_design_vector()]
+        self.bounds_vector = [self.bounds for state in self.generate_initial_design_vector()]
 
         # Adjust the initial simplex for better convergence
         self.initial_simplex = self.generate_initial_simplex(initial_design_vector)

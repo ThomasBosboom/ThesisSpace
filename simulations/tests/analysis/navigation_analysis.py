@@ -23,25 +23,39 @@ from tests.postprocessing import ProcessNavigationResults
 ###### Define the observation windows ###########################
 #################################################################
 
-num_runs = 10
+num_runs = 1
 duration = 28
 mission_start_epoch = 60390.0
 
 # Collect a series of observation window sets to compare
 observation_windows_settings = {
     "Perilune": [
-        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, mission_start_epoch=mission_start_epoch), num_runs),
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.05, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.06, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
+        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.07, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
+        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.08, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
     ],
-    "Apolune": [
-        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8, apolune=True), num_runs),
-    ],
-    "Random": [
-        (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
-    ],
-    "Constant": [
-        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
-    ]
+    # "Apolune": [
+    #     (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8), num_runs),
+    # ],
+    # "Random": [
+    #     (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
+    # ],
+    # "Constant": [
+    #     (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
+    # ]
 }
+
+# sub_labels = []
+# for window_type, window_cases in observation_windows_settings.items():
+#     sub_labels_type =  []
+#     for window_case in window_cases:
+#         if len(window_case) == 3:
+#             print(window_case[-1])
+#             sub_labels_type.append(window_case[-1])
+#     sub_labels.append(sub_labels_type)
+
+# print(sub_labels)
 
 # observation_windows_settings = {
 #     "0.1 day": [
@@ -58,20 +72,22 @@ observation_windows_settings = {
 #     # ]
 # }
 
-observation_windows_settings = {
-    "default": [
-        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
-    ],
-    # "default": [
-    #     (helper_functions.get_constant_arc_observation_windows(60, arc_interval=3.8, arc_duration=0.2, mission_start_epoch=mission_start_epoch), 1),
-    # ],
-    # "optimized": [
-    #     (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), 1),
-    # ],
-}
+# observation_windows_settings = {
+#     "default": [
+#         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
+#     ],
+#     # "default": [
+#     #     (helper_functions.get_constant_arc_observation_windows(60, arc_interval=3.8, arc_duration=0.2, mission_start_epoch=mission_start_epoch), 1),
+#     # ],
+#     # "optimized": [
+#     #     (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), 1),
+#     # ],
+# }
 
-observation_windows_settings = {'Default': [([(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)], 1)],
-                                'Optimized': [([(60390, 60390.14042208123), (60393.14042208123, 60393.762736291814), (60396.762736291814, 60397.7889041982), (60400.7889041982, 60401.46602915859), (60404.46602915859, 60405.34219283191), (60408.34219283191, 60409.099794879134), (60412.099794879134, 60413.679242665996)], 1)]}
+observation_windows_settings = {
+    'Default': [([(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)], 1)],
+    # 'Optimized': [([(60390, 60390.143), (60393.143, 60393.764), (60396.762, 60397.785)], 1)]
+                                }
 
 
 
@@ -161,11 +177,14 @@ orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1
 
 # Run the navigation routine using given settings
 auxilary_settings = {
-    # "apriori_covariance": apriori_covariance,
-    # "initial_estimation_error": initial_estimation_error,
-    # "orbit_insertion_error": orbit_insertion_error,
-    "delta_v_min": 0.02,
-    "step_size": 0.5
+    "apriori_covariance": apriori_covariance,
+    "initial_estimation_error": initial_estimation_error,
+    "orbit_insertion_error": orbit_insertion_error,
+    "delta_v_min": 0.00,
+    "step_size": 0.01,
+    "station_keeping_error": 0.00,
+    "observation_interval": 300,
+    # "target_point_epochs": [7]
 }
 
 
@@ -178,7 +197,7 @@ navigation_outputs = helper_functions.generate_navigation_outputs(observation_wi
 
 print("Plotting results...")
 
-detailed_results = [["Default", "Optimized"], [0], [0]]
+detailed_results = [["Perilune", "Optimized"], [0], [0]]
 for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
     for case_index, window_case in enumerate(navigation_outputs_cases):
         for run_index, (run, navigation_output) in enumerate(window_case.items()):
@@ -196,14 +215,14 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                             }
                         )
 
-                        process_single_navigation_results.plot_estimation_error_history()
-                        process_single_navigation_results.plot_uncertainty_history()
-                        process_single_navigation_results.plot_dispersion_history()
-                        process_single_navigation_results.plot_full_state_history()
-                        process_single_navigation_results.plot_formal_error_history()
-                        process_single_navigation_results.plot_observations()
-                        process_single_navigation_results.plot_correlation_history()
-                        process_single_navigation_results.plot_observability_metrics()
+                        # process_single_navigation_results.plot_estimation_error_history()
+                        # process_single_navigation_results.plot_uncertainty_history()
+                        # process_single_navigation_results.plot_dispersion_history()
+                        # process_single_navigation_results.plot_full_state_history()
+                        # process_single_navigation_results.plot_formal_error_history()
+                        # process_single_navigation_results.plot_observations()
+                        # process_single_navigation_results.plot_correlation_history()
+                        # process_single_navigation_results.plot_observability_metrics()
 
 # plt.show()
 
@@ -216,11 +235,13 @@ process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavig
     }
 )
 
-process_multiple_navigation_results.plot_uncertainty_comparison()
-process_multiple_navigation_results.plot_maneuvre_costs()
-process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
+
+
+# process_multiple_navigation_results.plot_uncertainty_comparison()
+# process_multiple_navigation_results.plot_maneuvre_costs()
+# process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
 process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None, worst_case=True)
-process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None,  worst_case=True)
+# process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None,  worst_case=True)
 print("Plotting done...")
 
 plt.show()

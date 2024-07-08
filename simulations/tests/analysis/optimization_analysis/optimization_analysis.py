@@ -29,17 +29,20 @@ if __name__ == "__main__":
     ##############################################################
 
     cases = {
-        "delta_v_min": [0.02],
+        "delta_v_min": [0.00],
     }
 
     auto_mode = True
-    custom_tag = "asdfasd"
+    custom_tag = "default"
     num_optims = 5
 
-    test_objective = True
-    use_same_seed = False
+    duration = 28
+    arc_length = 1
+    arc_interval = 3
 
-    run_optimization = True
+    test_objective = False
+    use_same_seed = False
+    run_optimization = False
     from_file = True
 
     if custom_tag is not None:
@@ -58,23 +61,23 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "step_size": 0.5,
+        "step_size_optimization_version": 0.5
     }
 
     objective_functions_settings = {
         "evaluation_threshold": 14,
-        "num_runs": 10,
+        "num_runs": 1,
         "seed": 0
     }
 
     optimization_model_settings = {
-        "duration": 28,
-        "arc_length": 1,
-        "arc_interval": 3,
-        "max_iterations": 100,
-        "bounds": (-0.9, 0.9),
+        "duration": duration,
+        "arc_length": arc_length,
+        "arc_interval": arc_interval,
+        "max_iterations": 10,
+        "bounds": (0.1, 2.0),
         "design_vector_type": "arc_lengths",
-        "initial_simplex_perturbation": -0.5,
+        "initial_simplex_perturbation": -arc_length/2,
         "results_in_terminal": True
     }
 

@@ -114,6 +114,8 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
     process_optimization_results.tabulate_optimization_results()
 
     if not run_optimization:
+        auxilary_settings = {"step_size": 0.01}
+        auxilary_settings.update(case)
         process_optimization_results.plot_optimization_result_comparisons(case, show_observation_window_settings=True)
 
     return process_optimization_results

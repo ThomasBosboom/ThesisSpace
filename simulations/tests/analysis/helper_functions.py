@@ -97,7 +97,7 @@ def get_constant_arc_with_subarcs_observation_windows(duration=28, arc_interval=
 # print(get_constant_arc_with_subarcs_observation_windows(duration=28, arc_interval=3.5, threshold=[1, 0.1], arc_duration=[0.5, 0.1], mission_start_epoch=60390))
 
 
-def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_size=0.01, mission_start_epoch=60390, margin=0.05,  apolune=False, pass_interval=7, threshold=0):
+def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_size=0.01, mission_start_epoch=60390, margin=0.05, apolune=True, pass_interval=7, threshold=0):
 
     ### Constant arc, around perilune
     epochs = np.arange(0, duration, step_size) + mission_start_epoch
@@ -109,9 +109,9 @@ def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_siz
     threshold_index = int(threshold/step_size)
 
     if apolune:
-        indices = np.arange(0+int(period/2), total_indices, period)
-    else:
         indices = np.arange(0, total_indices, period)
+    else:
+        indices = np.arange(0+int(period/2), total_indices, period)
 
     if pass_interval == 0:
         pass_interval = None
@@ -125,6 +125,9 @@ def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_siz
     for start_index, end_index in ranges:
         values = epochs[start_index:end_index+1]
         observation_windows.append((min(values), max(values)))
+
+    print(epochs)
+    print(observation_windows)
 
     return observation_windows
 

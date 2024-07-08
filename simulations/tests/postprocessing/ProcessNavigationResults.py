@@ -75,7 +75,7 @@ class PlotSingleNavigationResults():
             new_values = []
             for dim in range(num_dims):
 
-                interpolation_function = interp1d(original_keys, original_values[:, dim], kind='cubic', fill_value='extrapolate')
+                interpolation_function = interp1d(original_keys, original_values[:, dim], kind='linear', fill_value='extrapolate')
                 new_values.append(interpolation_function(new_keys))
 
             new_values = np.vstack(new_values).T
@@ -425,7 +425,7 @@ class PlotSingleNavigationResults():
 
         colors = ["red", "green", "blue"]
         labels = [[r"$x$", r"$y$", r"$z$"], [r"$v_{x}$", r"$v_{y}$", r"$v_{z}$"]]
-        ylabels = [r"$\mathbf{r}-\mathbf{r}_{ref}$ [m]", r"$\mathbf{v}-\mathbf{v}_{ref}$ [m/s]"]
+        ylabels = [r"$\mathbf{r}_{est}-\mathbf{r}_{ref}$ [m]", r"$\mathbf{v}_{est}-\mathbf{v}_{ref}$ [m/s]"]
 
         for j in range(2):
 
@@ -455,7 +455,7 @@ class PlotSingleNavigationResults():
             ax[j].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
         plt.tight_layout()
-        fig.suptitle(f"Deviation from reference orbit LUMIO ")
+        # fig.suptitle(f"Deviation from reference orbit LUMIO ")
 
 
     def plot_estimation_error_history(self):
@@ -1234,17 +1234,18 @@ class PlotMultipleNavigationResults():
 
     def plot_maneuvre_costs_bar_chart(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
              legend=True, x_labels=True, label_fontsize=8,
-             colors=None, barlabel_offset=1,
+             colors=None, barlabel_offset=1, sub_labels=None,
              bar_labeler=lambda k, i, s: str(round(s, 3)), worst_case=False):
 
         self.save_figure = save_figure
 
         fig, ax = plt.subplots(figsize=(10, 4))
 
+        label = 0
         for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
 
             data = {}
-            for window_type in self.navigation_outputs.keys():
+            for window_index, window_type in enumerate(self.navigation_outputs.keys()):
 
                 objective_value_results_per_window_case = []
                 for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
@@ -1303,6 +1304,9 @@ class PlotMultipleNavigationResults():
             ax.set_ylabel(r'||$\Delta V$|| [m/s]')
             ax.set_title(title)
 
+            minor_xticks = []
+            minor_xtick_labels = []
+
             for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
                                                                 group_centers)):
 
@@ -1310,20 +1314,23 @@ class PlotMultipleNavigationResults():
                 group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
                 for val_i, val in enumerate(vals):
 
+                    x_pos = group_beg + val_i + bar_offset
+
                     if threshold_index == 0:
-                        bar = ax.bar(group_beg + val_i + bar_offset,
+                        bar = ax.bar(x_pos,
                                     height=val, width=bar_stretch,
                                     color=colors[g_name],
                                     yerr=std_data[g_name][val_i],
                                     capsize=4)[0]
 
                     else:
-                        bar = ax.bar(group_beg + val_i + bar_offset,
+                        bar = ax.bar(x_pos,
                                     height=val, width=0.8,
                                     color="white", hatch='/', edgecolor='black', alpha=0.6,
                                     yerr=std_data[g_name][val_i],
-                                    label=f"After {evaluation_threshold} days" if g_i == 0 else None,
+                                    label=f"After {evaluation_threshold} days" if label==0 else None,
                                     capsize=4)[0]
+                        label += 1
 
                     bars[g_name].append(bar)
                     if bar_labeler is not None:
@@ -1333,11 +1340,23 @@ class PlotMultipleNavigationResults():
                         ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
                                 fontsize=label_fontsize)
 
+                    minor_xticks.append(x_pos)
+                    if sub_labels is not None:
+                        minor_xtick_labels.append(sub_labels[window_index][val_i])
+                    # else:
+                    #     minor_xtick_labels.append(f"{g_name}_{val_i + 1}")
+
         if legend:
             ax.legend(loc='upper right', fontsize="small")
 
         if x_labels:
             ax.set_xticklabels(sorted_k)
+            ax.set_xticks(minor_xticks, minor=True)
+            ax.set_xticklabels(minor_xtick_labels, minor=True, fontsize=label_fontsize)
+
+            if sub_labels is not None:
+                for tick in ax.get_xticklabels(minor=False):
+                    tick.set_y(-0.1)
         else:
             ax.set_xticklabels()
 
@@ -1595,7 +1614,7 @@ class PlotMultipleNavigationResults():
                         new_values = []
                         for dim in range(num_dims):
 
-                            interpolation_function = interp1d(original_keys, original_values[:, dim], kind='cubic', fill_value='extrapolate')
+                            interpolation_function = interp1d(original_keys, original_values[:, dim], kind='linear', fill_value='extrapolate')
                             new_values.append(interpolation_function(new_keys))
 
                         new_values = np.vstack(new_values).T
@@ -1725,7 +1744,7 @@ class PlotMultipleNavigationResults():
                         ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
                                     angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
                         ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
-                                    alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 else None)
+                                    alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 and type_index==0 else None)
 
                     # Generate the synodic states of the moon
                     synodic_full_state_history_moon_dict = {}
@@ -1755,10 +1774,10 @@ class PlotMultipleNavigationResults():
                         ax[i][2].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], s=50, color="darkgray", label="Moon" if i==0 else None)
                         ax[i][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
                         ax[i][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
-                        ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.5, color=color, label="LPF" if i==0 else None)
+                        ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.5, color=color, label="LPF" if i==0 and type_index==0 else None)
                         ax[1][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
                         ax[1][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
-                        ax[1][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.1, color=color, label="LUMIO" if i==1 else None)
+                        ax[1][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.1, color=color, label="LUMIO" if i==1 and type_index==0 else None)
 
                     ax_3d.scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray", label="Moon")
                     ax_3d.plot(synodic_states_estimated[:, 0], synodic_states_estimated[:, 1], synodic_states_estimated[:, 2], lw=0.2, color="gray")

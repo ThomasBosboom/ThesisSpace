@@ -137,7 +137,6 @@ class PlotSensitivityResults():
                     for run_index, (run, navigation_output) in enumerate(navigation_outputs_sensitivity_case.items()):
 
                         # Extracting the relevant objects
-                        # navigation_results = navigation_output.navigation_results
                         navigation_simulator = navigation_output.navigation_simulator
 
                         # Extracting the relevant results from objects
@@ -150,7 +149,6 @@ class PlotSensitivityResults():
                                     delta_v_runs_dict[end_epoch] = {}
 
                                 delta_v_runs_dict[end_epoch][run_index] = delta_v
-
 
                             if run_index==0:
 

@@ -14,7 +14,7 @@ class NavigationSimulatorBase():
         self.delta_v_min = 0.00
         self.include_station_keeping = True
         self.station_keeping_error = 0.00
-        self.state_noise_compensation_lpf = 1e-22
+        self.state_noise_compensation_lpf = 1e-21
         self.state_noise_compensation_lumio = 1e-20
         self.propagate_dynamics_linearly = False
 
@@ -41,4 +41,4 @@ class NavigationSimulatorBase():
         self.show_corrections_in_terminal = True
 
         self.run_optimization_version = False
-        self.step_size_optimization_version = 0.01
+        self.step_size_optimization_version = 0.5

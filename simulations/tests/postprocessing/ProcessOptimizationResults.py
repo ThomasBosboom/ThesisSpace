@@ -37,7 +37,7 @@ class ProcessOptimizationResults():
     def plot_iteration_history(self, show_design_variables=True, compare_time_tags=[], highlight_mean_only=True):
 
         if show_design_variables:
-            fig, axs = plt.subplots(3, 1, figsize=(8, 6), sharex=True)
+            fig, axs = plt.subplots(3, 1, figsize=(8, 7.5), sharex=True)
         else:
             fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
 
@@ -141,7 +141,7 @@ class ProcessOptimizationResults():
                 utils.save_figure_to_folder(figs=[fig], labels=[f"combined_{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
 
 
-    def plot_optimization_result_comparisons(self, case, show_observation_window_settings=False):
+    def plot_optimization_result_comparisons(self, auxilary_settings, show_observation_window_settings=False):
 
         observation_windows_settings = {
             "Default": [
@@ -156,14 +156,13 @@ class ProcessOptimizationResults():
             print("Observation window settings \n:", observation_windows_settings)
 
         # Run the navigation routine using given settings
-        auxilary_settings = case
         navigation_outputs = helper_functions.generate_navigation_outputs(
             observation_windows_settings,
             **auxilary_settings)
 
         process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
             navigation_outputs,
-            color_cycle=["grey", "green"],
+            color_cycle=["salmon", "forestgreen"],
             figure_settings={"save_figure": self.save_figure,
                             "current_time": self.current_time,
                             "file_name": self.file_name
