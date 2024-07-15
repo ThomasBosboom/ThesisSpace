@@ -20,228 +20,153 @@ from tests.postprocessing import ProcessNavigationResults
 
 
 #################################################################
-###### Define the observation windows ###########################
+###### Define test setup ########################################
 #################################################################
 
 num_runs = 1
 duration = 28
 mission_start_epoch = 60390.0
 
-# Collect a series of observation window sets to compare
+orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
+auxilary_settings = {"noise": 2.98e-0, "orbit_insertion_error": orbit_insertion_error}
+
+
+#################################################################
+###### Define the observation windows ###########################
+#################################################################
+
 observation_windows_settings = {
     "Perilune": [
-        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.05, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
-        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.06, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
-        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.07, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
-        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.08, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs),
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.05, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs, "0.05"),
+        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.06, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs, "0.06"),
+        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.07, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs, "0.07"),
+        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.08, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs, "0.08"),
+        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.09, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs, "0.09"),
+        # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.10, threshold=0, pass_interval=8, apolune=False, mission_start_epoch=mission_start_epoch), num_runs, "0.10")
     ],
-    # "Apolune": [
-    #     (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.1, threshold=0.2, pass_interval=8), num_runs),
-    # ],
-    # "Random": [
-    #     (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 1], threshold_vars=[1, 0.1], arc_duration_vars=[1, 0.1], seed=0), num_runs),
-    # ],
-    # "Constant": [
-    #     (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs),
-    # ]
+    "Apolune": [
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.05, threshold=0, pass_interval=8, apolune=True, mission_start_epoch=mission_start_epoch), num_runs, None),
+    #     (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.06, threshold=0, pass_interval=8, apolune=True, mission_start_epoch=mission_start_epoch), num_runs, "0.06"),
+    #     # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.07, threshold=0, pass_interval=8, apolune=True, mission_start_epoch=mission_start_epoch), num_runs, "0.07"),
+    #     # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.08, threshold=0, pass_interval=8, apolune=True, mission_start_epoch=mission_start_epoch), num_runs, "0.08"),
+    #     # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.09, threshold=0, pass_interval=8, apolune=True, mission_start_epoch=mission_start_epoch), num_runs, "0.09"),
+    #     # (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=0.10, threshold=0, pass_interval=8, apolune=True, mission_start_epoch=mission_start_epoch), num_runs, "0.10")
+    ],
+    "Random": [
+        (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.000001], threshold_vars=[1, 0.000001], arc_duration_vars=[1, 0.1], seed=0), num_runs, None),
+        # (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0.000001], threshold_vars=[1, 0.000001], arc_duration_vars=[1, 0.2], seed=1), num_runs, "0.2"),
+    ],
+    "Default": [
+        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs, None),
+    ]
 }
 
-# sub_labels = []
-# for window_type, window_cases in observation_windows_settings.items():
-#     sub_labels_type =  []
-#     for window_case in window_cases:
-#         if len(window_case) == 3:
-#             print(window_case[-1])
-#             sub_labels_type.append(window_case[-1])
-#     sub_labels.append(sub_labels_type)
 
-# print(sub_labels)
-
-# observation_windows_settings = {
-#     "0.1 day": [
-#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=0.1, mission_start_epoch=mission_start_epoch), num_runs),
-#     ],
-#     "0.5 day": [
-#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), num_runs),
-#     ],
-#     "1.0 day": [
-#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), num_runs),
-#     ],
-#     # "2.0 day": [
-#     #     (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, arc_duration=2.0, mission_start_epoch=mission_start_epoch), num_runs),
-#     # ]
-# }
-
-# observation_windows_settings = {
-#     "default": [
-#         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch), 1),
-#     ],
-#     # "default": [
-#     #     (helper_functions.get_constant_arc_observation_windows(60, arc_interval=3.8, arc_duration=0.2, mission_start_epoch=mission_start_epoch), 1),
-#     # ],
-#     # "optimized": [
-#     #     (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=0.5, mission_start_epoch=mission_start_epoch), 1),
-#     # ],
-# }
-
+# Varying pass_interval per orbit case
+params = range(1, 9)
+margin = 0.05
+num_runs = 3
 observation_windows_settings = {
-    'Default': [([(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)], 1)],
-    # 'Optimized': [([(60390, 60390.143), (60393.143, 60393.764), (60396.762, 60397.785)], 1)]
-                                }
+    "Perilune": [
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=margin, mission_start_epoch=mission_start_epoch, apolune=False, pass_interval=pass_interval), num_runs, str(pass_interval)) for pass_interval in params
+    ],
+    "Apolune": [
+        (helper_functions.get_orbit_based_arc_observation_windows(duration, margin=margin, mission_start_epoch=mission_start_epoch, apolune=True, pass_interval=pass_interval), num_runs, str(pass_interval)) for pass_interval in params
+    ],
+}
 
-
-
+# Varying seed in random
+# params = range(1, 10)
+# num_runs = 5
 # observation_windows_settings = {
-#     "0.2": [
-#         ([(60390, 60390.2)], num_runs),
+#     "Random (arc length)": [
+#         (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0], threshold_vars=[1, 0], arc_duration_vars=[1, 0.9], seed=seed), num_runs, str(seed)) for seed in params
 #     ],
-#     "0.4": [
-#         ([(60390, 60390.4)], num_runs),
-#     ],
-#     # "0.6": [
-#     #     ([(60390, 60390.6)], num_runs),
-#     # ],
-#     # "0.8": [
-#     #     ([(60390, 60390.8)], num_runs),
-#     # ],
-#     # "1.0": [
-#     #     ([(60390, 60391.0)], num_runs),
-#     # ],
-#     # "1.2": [
-#     #     ([(60390, 60391.2)], num_runs),
-#     # ],
-#     # "1.4": [
-#     #     ([(60390, 60391.4)], num_runs),
-#     # ],
-#     # "1.6": [
-#     #     ([(60390, 60391.6)], num_runs),
-#     # ],
-#     # "1.8": [
-#     #     ([(60390, 60391.8)], num_runs),
-#     # ],
-#     # "2.0": [
-#     #     ([(60390, 60392.0)], num_runs),
-#     # ],
+#     "Random (arc interval)": [
+#         (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 2.5], threshold_vars=[1, 0], arc_duration_vars=[1, 0], seed=seed), num_runs, str(seed)) for seed in params
+#     ]
 # }
 
+params = [0.1, 0.2, 0.5, 1.0, 2.0]
+params2 = [0.1, 0.5, 1.0, 2.0, 3.0, 4.0]
+# params = [0.1, 0.2]
+# params2 = [0.5, 0.7]
+num_runs = 3
+observation_windows_settings = {
+    f"{param2} day": [
+        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=param2, arc_duration=param, mission_start_epoch=mission_start_epoch), num_runs, str(param)) for param in params
+    ]
+    for param2 in params2
+}
 
 
-#######################################################
-###### Objective value versus #########################
-#######################################################
-
-# from src import NavigationSimulator, ObjectiveFunctions
-
-# evaluation_threshold = 14
-# num_runs_list = [1, 2, 5, 10, 30]
-# objective_values = []
-# for num_runs in num_runs_list:
-
-#     navigation_simulator = NavigationSimulator.NavigationSimulator()
-
-#     objective_functions_settings = {"num_runs": num_runs, "evaluation_threshold": evaluation_threshold}
-#     objective_functions = ObjectiveFunctions.ObjectiveFunctions(
-#         navigation_simulator,
-#         **objective_functions_settings
-#     )
-
-#     observation_windows = helper_functions.get_constant_arc_observation_windows(28, arc_interval=3, arc_duration=1, mission_start_epoch=mission_start_epoch)
-#     objective_value = objective_functions.worst_case_station_keeping_cost(observation_windows)
-
-#     objective_values.append(objective_value)
-
-#     print(objective_values)
-
-# objective_values = [0.024228704064541032, 0.024375438666188874, 0.02458634017463967, 0.02454322733541171, 0.024917275946776524]
-# plt.bar(num_runs_list, objective_values)
-# plt.xlabel("Number of iterations [-]")
-# plt.ylabel("Objective value [m/s]")
-# plt.show()
-
-
-
-
-
-
+num_runs = 5
+observation_windows_settings = {
+    "Default": [
+        (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs, None),
+    ],
+}
 
 #######################################################
 ###### Generate the navigation outputs ################
 #######################################################
 
-lpf_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1
-lumio_estimation_error = np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*1
-initial_estimation_error = np.concatenate((lpf_estimation_error, lumio_estimation_error))
-# apriori_covariance = np.diag(np.array([1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])**2)
-apriori_covariance = np.diag(initial_estimation_error**2)
-orbit_insertion_error = np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
+if __name__ == "__main__":
 
-# Run the navigation routine using given settings
-auxilary_settings = {
-    "apriori_covariance": apriori_covariance,
-    "initial_estimation_error": initial_estimation_error,
-    "orbit_insertion_error": orbit_insertion_error,
-    "delta_v_min": 0.00,
-    "step_size": 0.01,
-    "station_keeping_error": 0.00,
-    "observation_interval": 300,
-    # "target_point_epochs": [7]
-}
+    print(observation_windows_settings)
+
+    navigation_outputs = helper_functions.generate_navigation_outputs(observation_windows_settings, **auxilary_settings)
 
 
-navigation_outputs = helper_functions.generate_navigation_outputs(observation_windows_settings, **auxilary_settings)
+    ############################################################
+    ###### Plotting detailed results ###########################
+    ############################################################
 
+    print("Plotting results...")
 
-############################################################
-###### Plotting detailed results ###########################
-############################################################
+    detailed_results = [["Default", "Optimized"], [0], [0]]
+    for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
+        for case_index, window_case in enumerate(navigation_outputs_cases):
+            for run_index, (run, navigation_output) in enumerate(window_case.items()):
 
-print("Plotting results...")
+                # Plotting detailed results for the specified models
+                if window_type in detailed_results[0]:
+                    if case_index in detailed_results[1]:
+                        if run_index in detailed_results[2]:
 
-detailed_results = [["Perilune", "Optimized"], [0], [0]]
-for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_outputs.items()):
-    for case_index, window_case in enumerate(navigation_outputs_cases):
-        for run_index, (run, navigation_output) in enumerate(window_case.items()):
+                            process_single_navigation_results = ProcessNavigationResults.PlotSingleNavigationResults(
+                                navigation_output,
+                                figure_settings={"save_figure": True,
+                                                "current_time": current_time,
+                                                "file_name": file_name
+                                }
+                            )
 
-            # Plotting detailed results for the specified models
-            if window_type in detailed_results[0]:
-                if case_index in detailed_results[1]:
-                    if run_index in detailed_results[2]:
+                            # process_single_navigation_results.plot_estimation_error_history()
+                            # process_single_navigation_results.plot_uncertainty_history()
+                            # process_single_navigation_results.plot_dispersion_history()
+                            # process_single_navigation_results.plot_full_state_history()
+                            # process_single_navigation_results.plot_formal_error_history()
+                            process_single_navigation_results.plot_observations()
+                            # process_single_navigation_results.plot_correlation_history()
+                            # process_single_navigation_results.plot_observability_metrics()
 
-                        process_single_navigation_results = ProcessNavigationResults.PlotSingleNavigationResults(
-                            navigation_output,
-                            figure_settings={"save_figure": True,
-                                            "current_time": current_time,
-                                            "file_name": file_name
-                            }
-                        )
+    # plt.show()
 
-                        # process_single_navigation_results.plot_estimation_error_history()
-                        # process_single_navigation_results.plot_uncertainty_history()
-                        # process_single_navigation_results.plot_dispersion_history()
-                        # process_single_navigation_results.plot_full_state_history()
-                        # process_single_navigation_results.plot_formal_error_history()
-                        # process_single_navigation_results.plot_observations()
-                        # process_single_navigation_results.plot_correlation_history()
-                        # process_single_navigation_results.plot_observability_metrics()
+    process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
+        navigation_outputs,
+        # color_cycle=['gray', "green"],
+        figure_settings={"save_figure": True,
+                        "current_time": current_time,
+                        "file_name": file_name
+        }
+    )
 
-# plt.show()
+    process_multiple_navigation_results.plot_uncertainty_comparison()
+    process_multiple_navigation_results.plot_maneuvre_costs()
+    # process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
+    process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
+    # process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None,  worst_case=False)
+    print("Plotting done...")
 
-process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
-    navigation_outputs,
-    # color_cycle=['gray', "green"],
-    figure_settings={"save_figure": True,
-                     "current_time": current_time,
-                     "file_name": file_name
-    }
-)
-
-
-
-# process_multiple_navigation_results.plot_uncertainty_comparison()
-# process_multiple_navigation_results.plot_maneuvre_costs()
-# process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
-process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, bar_labeler=None, worst_case=True)
-# process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None,  worst_case=True)
-print("Plotting done...")
-
-plt.show()
+    plt.show()

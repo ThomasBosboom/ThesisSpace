@@ -1,5 +1,6 @@
 import os
 import sys
+import numpy as np
 import itertools
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -33,16 +34,17 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default"
+    custom_tag = "default_10timesIO"
     num_optims = 5
 
     duration = 28
     arc_length = 1
     arc_interval = 3
 
-    test_objective = False
+    test_objective = True
     use_same_seed = False
     run_optimization = False
+    plot_full_comparison = False
     from_file = True
 
     if custom_tag is not None:
@@ -61,7 +63,8 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "step_size_optimization_version": 0.5
+        "step_size_optimization_version": 0.5,
+        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*10
     }
 
     objective_functions_settings = {
@@ -74,7 +77,7 @@ if __name__ == "__main__":
         "duration": duration,
         "arc_length": arc_length,
         "arc_interval": arc_interval,
-        "max_iterations": 10,
+        "max_iterations": 50,
         "bounds": (0.1, 2.0),
         "design_vector_type": "arc_lengths",
         "initial_simplex_perturbation": -arc_length/2,
@@ -102,7 +105,8 @@ if __name__ == "__main__":
             custom_tag=current_time,
             file_name=file_name,
             test_objective=test_objective,
-            use_same_seed=use_same_seed)
+            use_same_seed=use_same_seed,
+            plot_full_comparison=plot_full_comparison)
 
         case_runs = [(case, run) for case in case_combinations for run in range(num_optims)]
         results = pool.starmap(partial_process_case, case_runs)
@@ -111,6 +115,10 @@ if __name__ == "__main__":
     final_process_optimization_results = results[0]
     final_process_optimization_results.plot_iteration_history(
         show_design_variables=False,
+        compare_time_tags=[result.time_tag for result in results]
+    )
+
+    final_process_optimization_results.tabulate_optimization_results(
         compare_time_tags=[result.time_tag for result in results]
     )
 

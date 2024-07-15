@@ -70,6 +70,7 @@ class PlotSensitivityResults():
             if include_annual:
                 annual_total_with_threshold = []
                 multiplier = 365/(list(epochs.keys())[-1] - threshold)
+                multiplier = 365/(threshold+14 - threshold)
                 # print(multiplier, list(epochs.keys())[-1], threshold, list(epochs.keys())[-1] - threshold)
                 for run, combined in combined_per_run_with_threshold.items():
                     annual_total_with_threshold.append(np.sum(combined)*multiplier)
@@ -318,7 +319,6 @@ class PlotSensitivityResults():
                     utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_{sensitivity_type}"], custom_sub_folder_name=self.file_name)
                     utils.save_figure_to_folder(figs=[fig1], labels=[f"{self.current_time}"], custom_sub_folder_name=self.file_name)
 
-                print(sensitivity_statistics)
                 if self.save_dict:
                     utils.save_dict_to_folder(dicts=[sensitivity_statistics], labels=[f"{self.current_time}"], custom_sub_folder_name=self.file_name)
 
@@ -333,5 +333,5 @@ class PlotSensitivityResults():
             )
             table_generator.generate_sensitivity_analysis_table(
                 sensitivity_statistics,
-                file_name=f"{self.current_time}.tex"
+                file_name=f"{self.current_time}.tex",
             )

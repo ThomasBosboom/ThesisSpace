@@ -99,13 +99,10 @@ class NavigationSimulator(NavigationSimulatorBase):
 
     def perform_navigation(self, observation_windows, seed=0):
 
-        self.seed = seed
-        rng = np.random.default_rng(seed=self.seed)
+        # self.seed = seed
+        rng = np.random.default_rng(seed=seed)
 
         # Adjusting decimals based on the step size used
-        # if self.run_optimization_version:
-        #     self.step_size = self.step_size_optimization_version
-        #     print(self.run_optimization_version, self.step_size_optimization_version)
         num_str = "{:.15f}".format(self.step_size).rstrip('0')
         decimal_places = len(num_str) - num_str.index('.') - 1
         decimal_places = 3
@@ -114,7 +111,6 @@ class NavigationSimulator(NavigationSimulatorBase):
         # self.mission_start_epoch = observation_windows[0][0]
         self.observation_windows = observation_windows
         self.observation_windows = [(np.round(tup[0], decimal_places), np.round(tup[1], decimal_places)) for tup in observation_windows]
-        print(self.step_size, decimal_places, self.observation_windows)
         self.initial_station_keeping_epochs = [np.round(observation_window[1], decimal_places) for observation_window in observation_windows]
         self.station_keeping_epochs = []
 
@@ -213,7 +209,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                 if estimation_arc == 0:
                     self.maximum_iterations = self.maximum_iterations_first_arc
 
-                estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self))
+                estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self), seed=rng.integers(100))
                 estimation_model_result = estimation_model.get_estimation_results()
                 estimation_output = estimation_model_result.estimation_output
                 parameter_history = estimation_output.parameter_history

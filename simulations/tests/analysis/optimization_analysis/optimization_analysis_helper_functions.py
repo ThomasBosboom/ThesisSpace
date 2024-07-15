@@ -48,15 +48,13 @@ def check_file_exists(cases, custom_tag, num_optims, folder_name):
 
 
 def process_case(case, run, navigation_simulator_settings, objective_functions_settings, optimization_model_settings,
-                 run_optimization, from_file, custom_tag, file_name, test_objective=False, use_same_seed=False):
+                 run_optimization, from_file, custom_tag, file_name, test_objective=False, use_same_seed=False, plot_full_comparison=True):
 
 
     time_tag = generate_case_custom_tag(case, custom_tag, run=run)
 
-    # for settings in [navigation_simulator_settings, objective_functions_settings, optimization_model_settings]:
-    #     for key in case.keys():
-    #         if key in settings:
-    #             settings.update(case)
+    if optimization_model_settings["duration"] <= objective_functions_settings["evaluation_threshold"]:
+        objective_functions_settings["evaluation_threshold"] = optimization_model_settings["duration"]
 
     navigation_simulator_settings.update(case)
     navigation_simulator = NavigationSimulator.NavigationSimulator(
@@ -114,8 +112,9 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
     process_optimization_results.tabulate_optimization_results()
 
     if not run_optimization:
-        auxilary_settings = {"step_size": 0.01}
-        auxilary_settings.update(case)
-        process_optimization_results.plot_optimization_result_comparisons(case, show_observation_window_settings=True)
+        if plot_full_comparison:
+            auxilary_settings = {"step_size": 0.01}
+            auxilary_settings.update(case)
+            process_optimization_results.plot_optimization_result_comparisons(case, show_observation_window_settings=True)
 
     return process_optimization_results

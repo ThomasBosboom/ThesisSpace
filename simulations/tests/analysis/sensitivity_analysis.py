@@ -60,27 +60,6 @@ combined_sensitivity_settings = {
     }
 }
 
-# combined_sensitivity_settings = {
-#     "windows": {
-#         # "arc_duration": [0.1],
-#         "arc_interval": [1.0],
-#         "mission_start_epoch": [60390],
-#     },
-#     "auxiliary": {
-#         # "initial_estimation_error": [
-#         #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
-#         #     ],
-#         # "orbit_insertion_error": [
-#         #     np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
-#         #     ],
-#         # "observation_interval": [100],
-#         # "noise": [0.1],
-#         # "target_point_epochs": [[2]],
-#         "delta_v_min": [0.00],
-#         "station_keeping_error": [0.00],
-#     }
-# }
-
 auxilary_settings = {
     "show_corrections_in_terminal": True,
     "step_size": 0.05

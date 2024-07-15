@@ -34,7 +34,8 @@ class ObjectiveFunctions():
             objective_value = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
             objective_values.append(objective_value)
         mean_objective_value = np.mean(objective_values)
-        return mean_objective_value
+
+        return mean_objective_value, [None]
 
 
     def worst_case_station_keeping_cost(self, observation_windows):
@@ -48,8 +49,6 @@ class ObjectiveFunctions():
             navigation_simulator = navigation_output.navigation_simulator
 
             delta_v_dict = navigation_simulator.delta_v_dict
-            delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-            delta_v_history = np.stack(list(delta_v_dict.values()))
             delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+self.evaluation_threshold)
 
             objective_values.append(delta_v)
@@ -59,7 +58,11 @@ class ObjectiveFunctions():
 
         print("Final: ", final_objective_value, "Mean: ", np.mean(objective_values), "Std: ", np.std(objective_values))
 
-        return final_objective_value
+        delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+        delta_v_history = np.stack(list(delta_v_dict.values()))
+        individual_corrections = np.linalg.norm(delta_v_history, axis=1)
+
+        return final_objective_value, individual_corrections
 
 
     def overall_uncertainty(self, observation_windows):

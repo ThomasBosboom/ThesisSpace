@@ -34,12 +34,9 @@ class ProcessOptimizationResults():
 
 
 
-    def plot_iteration_history(self, show_design_variables=True, compare_time_tags=[], highlight_mean_only=True):
+    def plot_vector_entries(self, compare_time_tags=[]):
 
-        if show_design_variables:
-            fig, axs = plt.subplots(3, 1, figsize=(8, 7.5), sharex=True)
-        else:
-            fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
+        fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
 
         labels = [self.optimization_results["current_time"]]
         iteration_histories = [self.optimization_results["iteration_history"]]
@@ -47,12 +44,23 @@ class ProcessOptimizationResults():
         if compare_time_tags:
             labels = []
             iteration_histories = []
-            initial_design_vector = []
-        for time_tag in compare_time_tags:
-            optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
-            iteration_histories.append(optimization_results["iteration_history"])
-            labels.append(optimization_results["current_time"])
-            initial_design_vector = self.optimization_results["initial_design_vector"]
+            for time_tag in compare_time_tags:
+                optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
+                iteration_histories.append(optimization_results["iteration_history"])
+                labels.append(optimization_results["current_time"])
+
+        individual_corrections_total = []
+        iterations_total = []
+        for index, iteration_history in enumerate(iteration_histories):
+            iterations = list(map(str, iteration_history.keys()))
+            individual_corrections = np.array([iteration_history[key]["individual_corrections"] for key in iterations])
+
+            iterations_total.append(iterations)
+            individual_corrections_total.append(individual_corrections)
+
+
+
+
 
         objective_values_total = []
         reduction_total = []
@@ -61,6 +69,8 @@ class ProcessOptimizationResults():
             iterations = list(map(str, iteration_history.keys()))
             design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
             objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
+            if show_annual:
+                objective_values = np.array([iteration_history[key]["objective_value_annual"] for key in iterations])
             reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
 
             objective_values_total.append(objective_values)
@@ -76,6 +86,55 @@ class ProcessOptimizationResults():
             axs[0].plot(iterations, objective_values, marker=marker, label=label, color=color)
             axs[1].plot(iterations, reduction, marker=marker, label=label, color=color)
 
+
+
+
+
+
+
+    def plot_iteration_history(self, show_design_variables=True, compare_time_tags=[], highlight_mean_only=True, show_annual=False):
+
+        if show_design_variables:
+            fig, axs = plt.subplots(3, 1, figsize=(8, 7.5), sharex=True)
+        else:
+            fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
+
+        labels = [self.optimization_results["current_time"]]
+        iteration_histories = [self.optimization_results["iteration_history"]]
+        initial_design_vector = self.optimization_results["initial_design_vector"]
+        if compare_time_tags:
+            labels = []
+            iteration_histories = []
+            # initial_design_vector = []
+            for time_tag in compare_time_tags:
+                optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
+                iteration_histories.append(optimization_results["iteration_history"])
+                labels.append(optimization_results["current_time"])
+                # initial_design_vector = self.optimization_results["initial_design_vector"]
+
+        objective_values_total = []
+        reduction_total = []
+        iterations_total = []
+        for index, iteration_history in enumerate(iteration_histories):
+            iterations = list(map(str, iteration_history.keys()))
+            design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
+            objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
+            if show_annual:
+                objective_values = np.array([iteration_history[key]["objective_value_annual"] for key in iterations])
+            reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
+
+            objective_values_total.append(objective_values)
+            reduction_total.append(reduction)
+            iterations_total.append(iterations)
+
+            marker = None
+            color = plt.rcParams['axes.prop_cycle'].by_key()['color'][int(index%10)]
+            label=labels[index]
+            if highlight_mean_only:
+                color = "lightgray"
+                label = None
+            axs[0].plot(iterations, objective_values, marker=marker, label=label, color=color)
+            axs[1].plot(iterations, reduction, marker=marker, label=label, color=color)
 
         means, stds = [], []
         for histories in [iterations_total, objective_values_total, reduction_total]:
@@ -97,24 +156,10 @@ class ProcessOptimizationResults():
             axs[0].plot(means[0], means[1], marker=marker, label="Mean", color="red")
             axs[1].plot(means[0], means[2], marker=marker, label="Mean", color="red")
 
-        # min_length = min(len(sublist) for sublist in iterations_total)
-        # objective_values_total = np.array([sublist[:min_length] for sublist in objective_values_total], dtype=np.float64)
-        # reduction_total = np.array([sublist[:min_length] for sublist in reduction_total], dtype=np.float64)
-        # iterations_total = np.array([sublist[:min_length] for sublist in iterations_total], dtype=np.float64)[0]
-
-
-
-        # mean_objective_values = np.mean(objective_values_total, axis=0)
-        # mean_reduction = np.mean(reduction_total, axis=0)
-        # if highlight_mean_only:
-        #     axs[0].plot(iterations_total, mean_objective_values, marker=marker, label="Mean", color="red")
-        #     axs[1].plot(iterations_total, mean_reduction, marker=marker, label="Mean", color="red")
-
         axs[0].legend()
         axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
         axs[0].grid(alpha=0.5, linestyle='--', which='both')
 
-        # axs[1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(iteration_histories), fontsize="small", title="Design variables")
         axs[1].legend()
         axs[1].set_ylabel("Reduction [%]")
         axs[1].grid(alpha=0.5, linestyle='--', which='both')
@@ -145,10 +190,10 @@ class ProcessOptimizationResults():
 
         observation_windows_settings = {
             "Default": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), self.optimization_results["num_runs"]),
+                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), self.optimization_results["num_runs"], None),
             ],
             "Optimized": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), self.optimization_results["num_runs"])
+                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), self.optimization_results["num_runs"], None)
             ],
         }
 
@@ -177,7 +222,7 @@ class ProcessOptimizationResults():
         process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, worst_case=True, bar_labeler=None)
 
 
-    def tabulate_optimization_results(self):
+    def tabulate_optimization_results(self, compare_time_tags=[]):
 
         if self.save_table:
             table_generator = TableGenerator.TableGenerator(
@@ -185,7 +230,20 @@ class ProcessOptimizationResults():
                                 "current_time": self.current_time,
                                 "file_name": self.file_name})
             current_time = self.optimization_results["current_time"]
+
             table_generator.generate_optimization_analysis_table(
                 self.optimization_results,
                 file_name=f"{current_time}.tex"
             )
+
+            if len(compare_time_tags) != 0:
+
+                optimization_results_list = []
+                for time_tag in compare_time_tags:
+                    optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
+                    optimization_results_list.append(optimization_results)
+
+                table_generator.generate_combined_optimization_analysis_table(
+                    optimization_results_list,
+                    file_name=f"{current_time}_combined.tex"
+                )

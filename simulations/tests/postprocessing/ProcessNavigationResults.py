@@ -30,6 +30,7 @@ class PlotSingleNavigationResults():
         self.mission_start_epoch = self.navigation_simulator.mission_start_epoch
         self.observation_windows = self.navigation_simulator.observation_windows
         self.station_keeping_epochs = self.navigation_simulator.station_keeping_epochs
+        self.color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
         for key, value in figure_settings.items():
             setattr(self, key, value)
@@ -515,9 +516,12 @@ class PlotSingleNavigationResults():
         plt.tight_layout()
 
 
-    def plot_observations(self):
+    def plot_observations(self, plot_residual_distributions=True):
 
         fig, ax = plt.subplots(2, 1, figsize=(12, 7), sharex=True)
+        if plot_residual_distributions:
+            fig1, ax1 = plt.subplots(1, 1, figsize=(5, 5), sharex=True)
+
         arc_nums = len(self.navigation_simulator.estimation_arc_results_dict.keys())
 
         # For each arc, plot the observations and its residuals
@@ -530,18 +534,23 @@ class PlotSingleNavigationResults():
                 for j, observation_set in enumerate(information_sets.values()):
                     for k, single_observation_set in enumerate(observation_set):
 
-                        color = "blue"
+                        # color = "blue"
+                        color = self.color_cycle[int(arc_num%len(self.color_cycle))]
                         s = 0.5
 
                         observation_times = utils.convert_epochs_to_MJD(single_observation_set.observation_times)
                         observation_times = observation_times - self.mission_start_epoch
                         ax[0].scatter(observation_times, single_observation_set.concatenated_observations, color=color, s=s)
 
+                        index = int(len(observation_times))
                         residual_history = estimation_output.residual_history
                         best_iteration = estimation_output.best_iteration
+                        best_residual_history = residual_history[i*index:(i+1)*index, best_iteration]
 
-                        index = int(len(observation_times))
-                        ax[1].scatter(observation_times, residual_history[i*index:(i+1)*index, best_iteration], color=color, s=s)
+                        ax[1].scatter(observation_times, best_residual_history, color=color, s=s)
+                        from scipy.stats import shapiro
+                        stat, p_value = shapiro(best_residual_history)
+                        ax1.hist(best_residual_history, bins=20, histtype='step', alpha=0.9, color=color, linewidth=2, label=f"Arc {arc_num+1}, {stat > p_value}")
 
         # Plot the history of observation angle with respect to the large covariance axis
         state_history = np.stack(list(self.navigation_simulator.full_state_history_estimated_dict.values()))
@@ -671,6 +680,11 @@ class PlotSingleNavigationResults():
         # ax[2].set_ylabel(r"$\angle \boldsymbol{a}_{j}, \boldsymbol{\rho}$  [deg]")
         ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
         ax[-1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), ncol=2, fontsize="small")
+
+        ax1.legend(loc='upper right')
+        ax1.grid(alpha=0.5, linestyle='--')
+        ax1.set_xlabel(f"Observation residual [m]")
+        ax1.set_ylabel(f"Frequency [-]")
 
         sigma_rho = r"$\sigma_{\rho}$"
         f_obs = r"$\Delta t_{obs}$"
@@ -992,7 +1006,7 @@ class PlotMultipleNavigationResults():
         plt.tight_layout()
 
         if self.save_figure:
-            utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_uncertianty_comparison"], custom_sub_folder_name=self.file_name)
+            utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_uncertainty_comparison"], custom_sub_folder_name=self.file_name)
 
 
     def plot_maneuvre_costs(self, save_figure=True):
@@ -1232,9 +1246,9 @@ class PlotMultipleNavigationResults():
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_estimation_error_history"], custom_sub_folder_name=self.file_name)
 
 
-    def plot_maneuvre_costs_bar_chart(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
+    def plot_maneuvre_costs_bar_chart(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.2, bar_stretch=0.95,
              legend=True, x_labels=True, label_fontsize=8,
-             colors=None, barlabel_offset=1, sub_labels=None,
+             colors=None, barlabel_offset=1, observation_windows_settings=False,
              bar_labeler=lambda k, i, s: str(round(s, 3)), worst_case=False):
 
         self.save_figure = save_figure
@@ -1267,10 +1281,9 @@ class PlotMultipleNavigationResults():
                         delta_v_per_skm_list.append(delta_v_per_skm.tolist())
                         objective_values.append(delta_v)
 
-                    objective = np.mean(objective_values)
+                    # objective = np.mean(objective_values)
                     if worst_case:
-                        objective = np.mean(objective_values) + 3*np.std(objective_values)
-                    objective_values = [objective]
+                        objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
 
                     objective_value_results_per_window_case.append((len(objective_values),
                                                                 min(objective_values),
@@ -1285,16 +1298,17 @@ class PlotMultipleNavigationResults():
             std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
             data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
 
+            print("data", data)
+            print("std_data", std_data)
+
             sorted_data = list(data.items())
             sorted_k, sorted_v  = zip(*sorted_data)
             max_n_bars = max(len(v) for v in data.values())
-            group_centers = np.cumsum([max_n_bars
-                                    for _ in sorted_data]) - (max_n_bars / 2)
+            group_centers = np.cumsum([max_n_bars + group_stretch for _ in sorted_data]) - ((max_n_bars + group_stretch) / 2)
             bar_offset = (1 - bar_stretch) / 2
             bars = defaultdict(list)
 
             if colors is None:
-                # color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
                 colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
                         for i, (g_name, values) in enumerate(data.items())}
 
@@ -1340,11 +1354,12 @@ class PlotMultipleNavigationResults():
                         ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
                                 fontsize=label_fontsize)
 
-                    minor_xticks.append(x_pos)
-                    if sub_labels is not None:
-                        minor_xtick_labels.append(sub_labels[window_index][val_i])
+                    minor_xticks.append(x_pos+0.001)
+                    if not threshold_index == 0:
+                        if observation_windows_settings:
+                            minor_xtick_labels.append(observation_windows_settings[g_name][val_i][-1])
                     # else:
-                    #     minor_xtick_labels.append(f"{g_name}_{val_i + 1}")
+                        # minor_xtick_labels.append(f"{g_name}_{val_i + 1}")
 
         if legend:
             ax.legend(loc='upper right', fontsize="small")
@@ -1353,10 +1368,11 @@ class PlotMultipleNavigationResults():
             ax.set_xticklabels(sorted_k)
             ax.set_xticks(minor_xticks, minor=True)
             ax.set_xticklabels(minor_xtick_labels, minor=True, fontsize=label_fontsize)
+            ax.tick_params(which="minor", rotation=0)
 
-            if sub_labels is not None:
+            if observation_windows_settings:
                 for tick in ax.get_xticklabels(minor=False):
-                    tick.set_y(-0.1)
+                    tick.set_y(-0.06)
         else:
             ax.set_xticklabels()
 
@@ -1366,36 +1382,157 @@ class PlotMultipleNavigationResults():
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
 
 
-    # fig, ax = plt.subplots(figsize=(10, 4))
-    # rows=1
-    # if not maneuvre_cost_only:
-    #     rows = 3
-    #     fig, ax = plt.subplots(rows, 1, figsize=(10, 3*rows), sharex=False)
-    # if rows==1:
-    #     ax = np.array([ax])
-    # ax = ax.flatten()
 
-    # # Function to find the closest key
-    # def get_closest_key_value(data, specific_value):
-    #     closest_key = min(data.keys(), key=lambda k: abs(k - specific_value))
-    #     return data[closest_key]
+    # def plot_operability_metric_bar_charts(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
+    #          legend=True, x_labels=True, label_fontsize=8,
+    #          colors=None, barlabel_offset=1, observation_windows_settings=False,
+    #          bar_labeler=lambda k, i, s: str(round(s, 3)), worst_case=False, relative_scales=[(1, 1)]):
 
-    # for batch_index, batch_start_time in enumerate(navigation_simulator.batch_start_times):
-    #     batch_end_time = batch_start_time + navigation_simulator.estimation_arc_durations[batch_index]
-    #     estimation_model_result = navigation_simulator.estimation_arc_results_dict[batch_index]
-    #     estimation_output = estimation_model_result.estimation_output
-    #     best_iteration = estimation_output.best_iteration
-    #     parameter_history = estimation_output.parameter_history
-    #     estimate = parameter_history[:, best_iteration]
-    #     propagated_estimate = get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_start_time)
-    #     estimation_error_start = estimate - get_closest_key_value(navigation_simulator.full_state_history_truth_dict, batch_start_time)
-    #     estimation_error_end = propagated_estimate - get_closest_key_value(navigation_simulator.full_state_history_final_dict, batch_end_time)
+    #     self.save_figure = save_figure
 
-    #     if batch_index==0:
-    #         if plot_index==1:
-    #             objective_values.append(np.linalg.norm(estimation_error_start[6:9]))
-    #         if plot_index==2:
-    #             objective_values.append(np.linalg.norm(estimation_error_end[6:9]))
+    #     nrows = len(relative_scales)
+    #     fig, ax = plt.subplots(nrows, 1, figsize=(10, 4*nrows))
+
+    #     for ax_i, ax in enumerate(axs):
+
+    #         label = 0
+    #         for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
+
+    #             data = {}
+    #             for window_index, window_type in enumerate(self.navigation_outputs.keys()):
+
+    #                 objective_value_results_per_window_case = []
+    #                 for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
+
+    #                     objective_values = []
+    #                     delta_v_per_skm_list = []
+    #                     for run, navigation_output in navigation_output_list.items():
+
+    #                         # Extracting the relevant objects
+    #                         navigation_simulator = navigation_output.navigation_simulator
+
+    #                         # Extracting the relevant results from objects
+    #                         delta_v_dict = navigation_simulator.delta_v_dict
+    #                         delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+    #                         delta_v_history = np.stack(list(delta_v_dict.values()))
+    #                         delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
+    #                         delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
+
+
+    #                         if ax_i == 0:
+    #                             delta_v_per_skm_list.append(delta_v_per_skm.tolist())
+    #                             objective_values.append(delta_v)
+
+    #                         else:
+    #                             relative_scale = relative_scales[ax_i]
+
+
+
+
+
+
+    #                     # objective = np.mean(objective_values)
+    #                     if worst_case:
+    #                         objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
+
+    #                     objective_value_results_per_window_case.append((len(objective_values),
+    #                                                                 min(objective_values),
+    #                                                                 max(objective_values),
+    #                                                                 np.mean(objective_values),
+    #                                                                 np.std(objective_values),
+    #                                                                 objective_values,
+    #                                                                 delta_v_per_skm_list))
+
+    #                 data[window_type] = objective_value_results_per_window_case
+
+    #             std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
+    #             data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+
+    #             print("data", data)
+    #             print("std_data", std_data)
+
+    #             sorted_data = list(data.items())
+    #             sorted_k, sorted_v  = zip(*sorted_data)
+    #             max_n_bars = max(len(v) for v in data.values())
+    #             group_centers = np.cumsum([max_n_bars + group_stretch for _ in sorted_data]) - ((max_n_bars + group_stretch) / 2)
+    #             bar_offset = (1 - bar_stretch) / 2
+    #             bars = defaultdict(list)
+
+    #             if colors is None:
+    #                 colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
+    #                         for i, (g_name, values) in enumerate(data.items())}
+
+    #             ax.grid(alpha=0.5)
+    #             ax.set_xticks(group_centers)
+    #             ax.set_xlabel("Tracking window scenario")
+    #             ax.set_ylabel(r'||$\Delta V$|| [m/s]')
+    #             ax.set_title(title)
+
+    #             minor_xticks = []
+    #             minor_xtick_labels = []
+
+    #             for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
+    #                                                                 group_centers)):
+
+    #                 n_bars = len(vals)
+    #                 group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
+    #                 for val_i, val in enumerate(vals):
+
+    #                     x_pos = group_beg + val_i + bar_offset
+
+    #                     if threshold_index == 0:
+    #                         bar = ax.bar(x_pos,
+    #                                     height=val, width=bar_stretch,
+    #                                     color=colors[g_name],
+    #                                     yerr=std_data[g_name][val_i],
+    #                                     capsize=4)[0]
+
+    #                     else:
+    #                         bar = ax.bar(x_pos,
+    #                                     height=val, width=0.8,
+    #                                     color="white", hatch='/', edgecolor='black', alpha=0.6,
+    #                                     yerr=std_data[g_name][val_i],
+    #                                     label=f"After {evaluation_threshold} days" if label==0 else None,
+    #                                     capsize=4)[0]
+    #                         label += 1
+
+    #                     bars[g_name].append(bar)
+    #                     if bar_labeler is not None:
+    #                         x_pos = bar.get_x() + (bar.get_width() / 2.0)
+    #                         y_pos = val + barlabel_offset
+    #                         barlbl = bar_labeler(g_name, val_i, val)
+    #                         ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
+    #                                 fontsize=label_fontsize)
+
+    #                     minor_xticks.append(x_pos+0.001)
+    #                     if not threshold_index == 0:
+    #                         if observation_windows_settings:
+    #                             minor_xtick_labels.append(observation_windows_settings[g_name][val_i][-1])
+    #                     # else:
+    #                         # minor_xtick_labels.append(f"{g_name}_{val_i + 1}")
+
+    #         if legend:
+    #             ax.legend(loc='upper right', fontsize="small")
+
+    #         if x_labels:
+    #             ax.set_xticklabels(sorted_k)
+    #             ax.set_xticks(minor_xticks, minor=True)
+    #             ax.set_xticklabels(minor_xtick_labels, minor=True, fontsize=label_fontsize)
+    #             ax.tick_params(which="minor", rotation=0)
+
+    #             if observation_windows_settings:
+    #                 for tick in ax.get_xticklabels(minor=False):
+    #                     tick.set_y(-0.06)
+    #         else:
+    #             ax.set_xticklabels()
+
+    #     plt.tight_layout()
+
+    #     if self.save_figure:
+    #         utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
+
+
+
 
     def plot_estimation_arc_comparison(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
              legend=True, x_labels=True, label_fontsize=8,
@@ -1560,7 +1697,7 @@ class PlotMultipleNavigationResults():
         plt.tight_layout()
 
         if self.save_figure:
-            utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
+            utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_estimation_arc_comparison"], custom_sub_folder_name=self.file_name)
 
 
     def plot_full_state_history_comparison(self, step_size=None):

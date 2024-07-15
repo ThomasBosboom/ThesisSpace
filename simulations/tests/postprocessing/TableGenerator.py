@@ -26,29 +26,10 @@ class TableGenerator():
         return re.sub(r'[%&_#${}]', lambda match: escape_chars[match.group(0)], string)
 
 
-    # def save_table_to_folder(self, table_str, file_name):
-
-    #     # Define the path to the tables folder
-    #     tables_folder = os.path.join(os.path.dirname(__file__), "tables")
-
-    #     # Create the tables folder if it doesn't exist
-    #     if not os.path.exists(tables_folder):
-    #         os.makedirs(tables_folder)
-
-    #     # Define the file path for the LaTeX table
-    #     file_path = os.path.join(tables_folder, file_name)
-
-    #     print(file_path)
-
-    #     if file_name:
-    #         with open(file_path, 'w') as file:
-    #             file.write(table_str)
-
-
     def generate_sensitivity_analysis_table(self, sensitivity_statistics, caption="Statistical results of Monte Carlo sensitivity analysis", label="tab:SensitivityAnalysis", file_name="sensitivity_analysis.tex", decimals=4, include_worst_case=True):
 
         table_str = ''
-        table_str += r'\begin{table}[h!]' + '\n'
+        table_str += r'\begin{table}[H]' + '\n'
         table_str += r'\centering' + '\n'
         table_str += r'\begin{tabular}{lllllllll}' + '\n'  # Added an extra column
         table_str += r' &  & \cellcolor[HTML]{EFEFEF}\textbf{Total} &  & \cellcolor[HTML]{EFEFEF}\textbf{After 14} & & \cellcolor[HTML]{EFEFEF}\textbf{Annual} & &\\' + '\n'
@@ -93,14 +74,14 @@ class TableGenerator():
     def generate_optimization_analysis_table(self, optimization_results, caption="Results of optimization", label="tab:OptimizationAnalysis", file_name='optimization_analysis.tex', decimals=4):
 
         table_str = ""
-        table_str += r'\begin{table}[h!]' + '\n'
+        table_str += r'\begin{table}[H]' + '\n'
         table_str += r'\centering' + '\n'
         table_str += r'\begin{tabular}{llll}' + '\n'
         table_str += r'\textbf{}      & \cellcolor[HTML]{EFEFEF}\textbf{Vectors} & \textbf{} & \textbf{}         \\' + '\n'
         table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
         table_str += r'\textbf{Entry} & \textbf{Initial} & \textbf{Optimized} & \textbf{Difference} \\' + '\n'
 
-        states = [f"T_{i}" for i in range(len(optimization_results["initial_design_vector"]))]
+        states = [f"T_{i+1}" for i in range(len(optimization_results["initial_design_vector"]))]
         initial_values = optimization_results["initial_design_vector"]
         final_values = optimization_results["best_design_vector"]
 
@@ -129,3 +110,59 @@ class TableGenerator():
 
         if self.save_table:
             utils.save_table_to_folder(tables=[table_str], labels=[f"{self.current_time}_optimization_analysis"], custom_sub_folder_name=self.file_name)
+
+
+    def generate_combined_optimization_analysis_table(self, optimization_results_list, caption="Statistics of optimization results", label="tab:StatisticsOptimizationAnalysis", file_name='optimization_analysis.tex', decimals=4):
+
+        table_str = ""
+        table_str += r'\begin{table}[H]' + '\n'
+        table_str += r'\centering' + '\n'
+        table_str += r'\begin{tabular}{llllllllll}' + '\n'
+        # table_str += r'\textbf{} & & \cellcolor[HTML]{EFEFEF}\textbf{Optimized} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} \\' + '\n'
+        table_str += r'\textbf{} & \textbf{} & \cellcolor[HTML]{EFEFEF}\textbf{Results} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF}\textbf{\% Diff} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} & \cellcolor[HTML]{EFEFEF} \\' + '\n'
+        table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
+        table_str += r'\textbf{Entry} & \textbf{Initial} & \textbf{Min} & \textbf{Max} & \textbf{Mean} & \textbf{Std} & \textbf{Min} & \textbf{Max} & \textbf{Mean} & \textbf{Std} \\' + '\n'
+
+        num_entries = len(optimization_results_list[0]["initial_design_vector"])
+
+        for i in range(num_entries):
+            state = f"$T_{i+1}$"
+            initial_value = optimization_results_list[0]["initial_design_vector"][i]
+            optimized_values = [results["best_design_vector"][i] for results in optimization_results_list]
+            mean_value = np.mean(optimized_values)
+            std_value = np.std(optimized_values)
+            min_value = min(optimized_values)
+            max_value = max(optimized_values)
+            differences = [(final - initial_value) / initial_value * 100 if initial_value != 0 else 0 for final in optimized_values]
+            mean_diff = np.mean(differences)
+            std_diff = np.std(differences)
+            min_diff = min(differences)
+            max_diff = max(differences)
+
+            table_str += f"{state} & {initial_value:.{decimals}f} & {min_value:.{decimals}f} & {max_value:.{decimals}f} & {mean_value:.{decimals}f} & {std_value:.{decimals}f} & "
+            table_str += f"{min_diff:.{decimals}f} & {max_diff:.{decimals}f} & {mean_diff:.{decimals}f} & {std_diff:.{decimals}f}" + r' \\ ' + '\n'
+
+        initial_cost = optimization_results_list[0]["initial_objective_value"]
+        final_costs = [results["best_objective_value"] for results in optimization_results_list]
+        cost_differences = [(final - initial_cost) / initial_cost * 100 if initial_cost != 0 else 0 for final in final_costs]
+        mean_cost_diff = np.mean(cost_differences)
+        std_cost_diff = np.std(cost_differences)
+        min_cost_diff = min(cost_differences)
+        max_cost_diff = max(cost_differences)
+
+        mean_cost = np.mean(final_costs)
+        std_cost = np.std(final_costs)
+        min_cost = min(final_costs)
+        max_cost = max(final_costs)
+
+        table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
+        table_str += r'\textbf{Objective} & ' + f"{initial_cost:.{decimals}f} & {min_cost:.{decimals}f} & {max_cost:.{decimals}f} & {mean_cost:.{decimals}f} & {std_cost:.{decimals}f} & "
+        table_str += f"{min_cost_diff:.{decimals}f} & {max_cost_diff:.{decimals}f} & {mean_cost_diff:.{decimals}f} & {std_cost_diff:.{decimals}f}" + r' \\ ' + '\n'
+
+        table_str += r'\end{tabular}' + '\n'
+        table_str += r'\caption{' + caption + '}' + '\n'
+        table_str += r'\label{' + label + '}' + '\n'
+        table_str += r'\end{table}'
+
+        if self.save_table:
+            utils.save_table_to_folder(tables=[table_str], labels=[f"{self.current_time}_statistics_optimization_analysis"], custom_sub_folder_name=self.file_name)
