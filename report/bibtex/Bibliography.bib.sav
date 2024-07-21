@@ -2424,3 +2424,87 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   doi      = {10.4236/aast.2019.44005},
   file     = {Full Text PDF:https\://www.researchgate.net/profile/Rui-Botelho-2/publication/336872208_A_Unified_Satellite_Taxonomy_Proposal_Based_on_Mass_and_Size/links/5db82ca8299bf1a47bfbd78c/A-Unified-Satellite-Taxonomy-Proposal-Based-on-Mass-and-Size.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/336872208_A_Unified_Satellite_Taxonomy_Proposal_Based_on_Mass_and_Size:},
 }
+
+ 
+@InProceedings{DeiTos2015,
+  author   = {Dei Tos, Diogene Alessandro and Topputo, Francesco},
+  title    = {On the {Advantages} of {Using} a {Strict} {Hierarchy} to {Model} {Astrodynamical} {Problems}},
+  year     = {2015},
+  month    = oct,
+  abstract = {In this paper an algorithm is developed that combines the capabilities and advantages of several different astrodynamical models of increasing complexity. Splitting these models in a strict hierarchical order yields a clearer grasp on what is available. With the effort of developing a comprehensive model overhead, the equations for the spacecraft motion in simpler models can be readily obtained as particular cases. The proposed algorithm embeds the circular and elliptic restricted three-body problems, the four-body bicircular and concentric models, an averaged n-body model, and, at the top hierarchic ladder, the full ephemeris spice-based restricted n-body problem. The equations of motion are reduced to the assignment of 13 time-varying coefficients, which multiply the states and the gravitational potential to reproduce the proper vector field. This approach is powerful because it allows, for instance, an efficient and quick way to check solutions for different dynamics and parameters. It is shown how a gradual increase of the dynamics complexity greatly improves accuracy, the chances of success and the convergence rate of a continuation algorithm, applied to low-energy transfers.},
+  file     = {Full Text PDF:https\://www.researchgate.net/profile/Diogene-Alessandro-Dei-Tos/publication/313279432_On_the_Advantages_of_Using_a_Strict_Hierarchy_to_Model_Astrodynamical_Problems/links/5894b15392851c8bb672c386/On-the-Advantages-of-Using-a-Strict-Hierarchy-to-Model-Astrodynamical-Problems.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/313279432_On_the_Advantages_of_Using_a_Strict_Hierarchy_to_Model_Astrodynamical_Problems:},
+}
+
+ 
+@Article{Gao2022,
+  author    = {Gao, Zhao-Yang and Hou, Xi-Yun},
+  journal   = {NAVIGATION: Journal of the Institute of Navigation},
+  title     = {Comparison of {Autonomous} {Orbit} {Determination} for {Satellite} {Pairs} in {Lunar} {Halo} and {Distant} {Retrograde} {Orbits}},
+  year      = {2022},
+  issn      = {0028-1522, 2161-4296},
+  month     = jun,
+  number    = {2},
+  volume    = {69},
+  abstract  = {A comprehensive study on the autonomous orbit determination (AOD) performance of satellite pairs in halo orbits and distant retrograde orbits (DROs) is carried out. A factor called dynamic and geometric dilution of precision (DAGDOP) is proposed to simultaneously incorporate influences from the dynamics and geometry of satellite pairs. Based on the DAGDOP, the effect of different observation arcs on the AOD accuracy is investigated. Next, the AOD accuracy of three different types of satellite pairs—halo+halo, DRO+DRO, and halo+DRO—is systematically analyzed. The hybrid halo+DRO type shows the best overall accuracy. Finally, the AOD performance of the hybrid type is verified in a realistic model. Our studies find that the average AOD accuracy of the halo orbit is about 170 meters, and that of the DRO is about 190 meters. The relative time synchronization error of two satellites is less than 30 nanoseconds.},
+  chapter   = {Original Article},
+  copyright = {© 2022 Institute of Navigation. This is an open access article under the terms of the Creative Commons Attribution License, which permits use, distribution and reproduction in any medium, provided the original work is properly cited.},
+  doi       = {10.33012/navi.522},
+  file      = {:Gao2022 - Comparison of Autonomous Orbit Determination for Satellite Pairs in Lunar Halo and Distant Retrograde Orbits.pdf:PDF},
+  keywords  = {autonomous orbit determination, distant retrograde orbits, halo orbits, LiAISON, navigation},
+  language  = {en},
+  publisher = {Institute of Navigation},
+  url       = {https://navi.ion.org/content/69/2/navi.522},
+  urldate   = {2024-06-27},
+}
+
+ 
+@InProceedings{Smith2020,
+  author     = {Smith, Marshall and Craig, Douglas and Herrmann, Nicole and Mahoney, Erin and Krezel, Jonathan and McIntyre, Nate and Goodliff, Kandyce},
+  booktitle  = {2020 {IEEE} {Aerospace} {Conference}},
+  title      = {The {Artemis} {Program}: {An} {Overview} of {NASA}'s {Activities} to {Return} {Humans} to the {Moon}},
+  year       = {2020},
+  month      = mar,
+  note       = {ISSN: 1095-323X},
+  pages      = {1--10},
+  abstract   = {NASA is developing a two-phased approach to quickly return humans to the Moon and establish a sustainable presence in orbit and on the surface. The two phases run in parallel, and both have already begun, with selection of the first Gateway element, the Power and Propulsion Element, solicitation activities focused on an American-built, industry-provided Human Landing System, and discussions with industry and international partners about potential opportunities for collaboration. Phase 1 is driven exclusively by the administration's priority to land the first woman and the next man on the lunar South Pole by 2024. In this phase, NASA and its partners will develop and deploy two Gateway components: the Power and Propulsion Element (PPE) that will launch in 2022, and the Habitation and Logistics Outpost (HALO), a minimal habitation capability) that will launch in 2023. Both will launch on commercial rockets, as will Gateway logistics deliveries to outfit the ship and provide supplies for surface expeditions. This initial Gateway configuration represents the beginning of its capability buildup, and the primary components required to support the first human expedition to the lunar South Pole. NASA's baseline reference approach for human expeditions on the surface is for Human Landing Systems to aggregate and dock to the Gateway, then deploy to the lunar South Pole with two astronauts aboard. Phase 2 is focused on advancing the technologies that will foster a sustainable presence on and around the Moon - a lasting and productive presence enabled by reusable systems, access for a diverse body of contributing partners, and repeatable trips to multiple destinations across the lunar surface. In this Phase, we will advance sustainable systems to make surface expeditions more repeatable and affordable. While the Gateway is the first of its kind to be funded, the concept has been proposed for decades as a necessary and foundational capability for a sustainable return to the Moon, and a port for vehicles embarking to farther destinations. It supports every tenet of Space Policy Directive-1 and the infrastructure it provides is critical to an accelerated return to the Moon, and access to more parts of the Moon than ever before. The Gateway also provides a unique platform to conduct cross-discipline science. Science instruments, both internal and external to the Gateway, have the potential to reveal new findings in space science, Earth science, and biological research data from deep space. Additionally, the broad science community will be able to utilize the communications and data relay capabilities of the Gateway, beginning with the PPE in Phase 1. This paper will outline the cross-discipline activities NASA is currently conducting, and those the agency anticipates conducting in the future to successfully implement Phases 1 and 2 in the lunar vicinity, all while preparing for humanity's next giant leap: Mars.},
+  doi        = {10.1109/AERO47225.2020.9172323},
+  issn       = {1095-323X},
+  shorttitle = {The {Artemis} {Program}},
+  url        = {https://ieeexplore.ieee.org/document/9172323},
+  urldate    = {2024-06-27},
+}
+
+ 
+@Conference{Duncan2012,
+  author       = {Duncan, Courtney and Aguirre, Fernando and Archer, Eric and Bize, Maxime},
+  title        = {Low {Mass} {Radio} {Science} {Transponder} - {Satellite} {TRL} {Raising} {Mission} for {LMRST} {Solar} {System} {Navigation} and {Radio} {Science}},
+  year         = {2012},
+  address      = {Pasadena, California},
+  month        = aug,
+  note         = {NTRS Author Affiliations: Jet Propulsion Lab., California Inst. of Tech. NTRS Document ID: 20150004591 NTRS Research Center: Jet Propulsion Laboratory (JPL)},
+  organization = {Jet Propulsion Laboratory, California Institute of Technology},
+  collaborator = {Duncan, Courtney and Aguirre, Fernando and Archer, Eric and Bize, Maxime},
+  keywords     = {Space Communications, Spacecraft Communications, Command And Tracking},
+  url          = {https://ntrs.nasa.gov/citations/20150004591},
+  urldate      = {2024-07-02},
+}
+
+ 
+@Article{Han2006,
+  author    = {Han, Lixing and Neumann, Michael},
+  journal   = {Optimization Methods and Software},
+  title     = {Effect of dimensionality on the {Nelder}–{Mead} simplex method},
+  year      = {2006},
+  issn      = {1055-6788},
+  month     = feb,
+  number    = {1},
+  pages     = {1--16},
+  volume    = {21},
+  abstract  = {The effect of dimensionality on the widely used Nelder–Mead simplex method for unconstrained optimization is investigated. It is shown that by using the quadratic function f(x)=x T x, the Nelder–Mead simplex method deteriorates as the dimension increases.},
+  doi       = {10.1080/10556780512331318290},
+  file      = {Full Text PDF:https\://www.tandfonline.com/doi/pdf/10.1080/10556780512331318290:application/pdf},
+  keywords  = {Nelder–Mead method, Simplex, Effect of dimensionality, Convergence, Optimization},
+  publisher = {Taylor \& Francis},
+  url       = {https://doi.org/10.1080/10556780512331318290},
+  urldate   = {2024-07-13},
+}

@@ -1,33 +1,31 @@
 #!/bin/bash
 
-# Set variables for screen session
-SCREEN_SESSION_NAME="optimization_analysis"
-# LOG_FILE="run_jobs.log"
+# Array of script names
+scripts=("optimization_analysis_nelder_mead.py" "optimization_analysis_particle_swarm.py")
 
-# Start a new screen session if it doesn't exist, or attach to existing one
-if ! screen -ls | grep -q "$SCREEN_SESSION_NAME"; then
-    screen -dmS $SCREEN_SESSION_NAME /bin/bash -c "exec bash -c './$SCREEN_SESSION_NAME.sh'"
-    echo "Started new screen session: $SCREEN_SESSION_NAME"
-else
-    echo "Attaching to existing screen session: $SCREEN_SESSION_NAME"
-fi
+# Number of times to run each script
+runs=20
 
-# You can continue with your main script logic here
-# List of Python scripts to run
-scripts=("optimization_analysis.py")
-
-# Number of repetitions
-num_repeats=10
-
-# Loop through scripts and run them
-for script in "${scripts[@]}"; do
-    for ((i=1; i<=num_repeats; i++)); do
-        echo "Running $script iteration $i"
-        python "$script"
-        if [ $? -ne 0 ]; then
-            echo "$script iteration $i encountered an error, exiting"
+# Function to run a script a specified number of times with error handling
+run_script() {
+    script=$1
+    for ((i=1; i<=runs; i++)); do
+        echo "Running $script, iteration $i"
+        if python "$script"; then
+            echo "$script iteration $i completed successfully."
+        else
+            echo "Error running $script iteration $i. Exiting."
             exit 1
         fi
-        echo "$script iteration $i finished successfully"
     done
+}
+
+# Run each script in parallel
+for script in "${scripts[@]}"; do
+    run_script "$script" &
 done
+
+# Wait for all background jobs to finish
+wait
+
+echo "All scripts have completed."

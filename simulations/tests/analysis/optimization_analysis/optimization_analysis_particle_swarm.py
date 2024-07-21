@@ -34,17 +34,21 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default_10timesIO"
+    custom_tag = "default28dur1len3int"
     num_optims = 5
 
     duration = 28
     arc_length = 1
     arc_interval = 3
 
-    test_objective = True
+    bounds = (0.1, 2.0)
+    max_iterations = 2
+    num_particles = 20
+    test_objective = False
+
     use_same_seed = False
     run_optimization = False
-    plot_full_comparison = False
+    plot_full_comparison_cases = [0, 2]
     from_file = True
 
     if custom_tag is not None:
@@ -64,7 +68,7 @@ if __name__ == "__main__":
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
         "step_size_optimization_version": 0.5,
-        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*10
+        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
     }
 
     objective_functions_settings = {
@@ -77,11 +81,11 @@ if __name__ == "__main__":
         "duration": duration,
         "arc_length": arc_length,
         "arc_interval": arc_interval,
-        "max_iterations": 50,
-        "bounds": (0.1, 2.0),
-        "design_vector_type": "arc_lengths",
-        "initial_simplex_perturbation": -arc_length/2,
-        "results_in_terminal": True
+        "bounds": bounds,
+        "show_evaluations_in_terminal": True,
+        "optimization_method": "Particle-Swarm",
+        "max_iterations": max_iterations,
+        "num_particles": num_particles,
     }
 
 
@@ -94,6 +98,7 @@ if __name__ == "__main__":
 
     # Use multiprocessing.Pool to parallelize the loop
     num_workers = multiprocessing.cpu_count()
+    # num_workers = num_optims
     with multiprocessing.Pool(processes=num_workers) as pool:
         partial_process_case = partial(
             process_case,
@@ -106,7 +111,7 @@ if __name__ == "__main__":
             file_name=file_name,
             test_objective=test_objective,
             use_same_seed=use_same_seed,
-            plot_full_comparison=plot_full_comparison)
+            plot_full_comparison_cases=plot_full_comparison_cases)
 
         case_runs = [(case, run) for case in case_combinations for run in range(num_optims)]
         results = pool.starmap(partial_process_case, case_runs)
@@ -115,7 +120,7 @@ if __name__ == "__main__":
     final_process_optimization_results = results[0]
     final_process_optimization_results.plot_iteration_history(
         show_design_variables=False,
-        compare_time_tags=[result.time_tag for result in results]
+        compare_time_tags={"Particle Swarm": [result.time_tag for result in results]}
     )
 
     final_process_optimization_results.tabulate_optimization_results(

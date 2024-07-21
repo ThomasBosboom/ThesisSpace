@@ -75,17 +75,6 @@ observation_windows_settings = {
     ],
 }
 
-# Varying seed in random
-# params = range(1, 10)
-# num_runs = 5
-# observation_windows_settings = {
-#     "Random (arc length)": [
-#         (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 0], threshold_vars=[1, 0], arc_duration_vars=[1, 0.9], seed=seed), num_runs, str(seed)) for seed in params
-#     ],
-#     "Random (arc interval)": [
-#         (helper_functions.get_random_arc_observation_windows(duration, arc_interval_vars=[3, 2.5], threshold_vars=[1, 0], arc_duration_vars=[1, 0], seed=seed), num_runs, str(seed)) for seed in params
-#     ]
-# }
 
 params = [0.1, 0.2, 0.5, 1.0, 2.0]
 params2 = [0.1, 0.5, 1.0, 2.0, 3.0, 4.0]
@@ -106,6 +95,9 @@ observation_windows_settings = {
         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=3, threshold=1, arc_duration=1), num_runs, None),
     ],
 }
+
+
+
 
 #######################################################
 ###### Generate the navigation outputs ################

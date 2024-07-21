@@ -1298,9 +1298,6 @@ class PlotMultipleNavigationResults():
             std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
             data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
 
-            print("data", data)
-            print("std_data", std_data)
-
             sorted_data = list(data.items())
             sorted_k, sorted_v  = zip(*sorted_data)
             max_n_bars = max(len(v) for v in data.values())
@@ -1380,158 +1377,6 @@ class PlotMultipleNavigationResults():
 
         if self.save_figure:
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
-
-
-
-    # def plot_operability_metric_bar_charts(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
-    #          legend=True, x_labels=True, label_fontsize=8,
-    #          colors=None, barlabel_offset=1, observation_windows_settings=False,
-    #          bar_labeler=lambda k, i, s: str(round(s, 3)), worst_case=False, relative_scales=[(1, 1)]):
-
-    #     self.save_figure = save_figure
-
-    #     nrows = len(relative_scales)
-    #     fig, ax = plt.subplots(nrows, 1, figsize=(10, 4*nrows))
-
-    #     for ax_i, ax in enumerate(axs):
-
-    #         label = 0
-    #         for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
-
-    #             data = {}
-    #             for window_index, window_type in enumerate(self.navigation_outputs.keys()):
-
-    #                 objective_value_results_per_window_case = []
-    #                 for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
-
-    #                     objective_values = []
-    #                     delta_v_per_skm_list = []
-    #                     for run, navigation_output in navigation_output_list.items():
-
-    #                         # Extracting the relevant objects
-    #                         navigation_simulator = navigation_output.navigation_simulator
-
-    #                         # Extracting the relevant results from objects
-    #                         delta_v_dict = navigation_simulator.delta_v_dict
-    #                         delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-    #                         delta_v_history = np.stack(list(delta_v_dict.values()))
-    #                         delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
-    #                         delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
-
-
-    #                         if ax_i == 0:
-    #                             delta_v_per_skm_list.append(delta_v_per_skm.tolist())
-    #                             objective_values.append(delta_v)
-
-    #                         else:
-    #                             relative_scale = relative_scales[ax_i]
-
-
-
-
-
-
-    #                     # objective = np.mean(objective_values)
-    #                     if worst_case:
-    #                         objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
-
-    #                     objective_value_results_per_window_case.append((len(objective_values),
-    #                                                                 min(objective_values),
-    #                                                                 max(objective_values),
-    #                                                                 np.mean(objective_values),
-    #                                                                 np.std(objective_values),
-    #                                                                 objective_values,
-    #                                                                 delta_v_per_skm_list))
-
-    #                 data[window_type] = objective_value_results_per_window_case
-
-    #             std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
-    #             data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
-
-    #             print("data", data)
-    #             print("std_data", std_data)
-
-    #             sorted_data = list(data.items())
-    #             sorted_k, sorted_v  = zip(*sorted_data)
-    #             max_n_bars = max(len(v) for v in data.values())
-    #             group_centers = np.cumsum([max_n_bars + group_stretch for _ in sorted_data]) - ((max_n_bars + group_stretch) / 2)
-    #             bar_offset = (1 - bar_stretch) / 2
-    #             bars = defaultdict(list)
-
-    #             if colors is None:
-    #                 colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
-    #                         for i, (g_name, values) in enumerate(data.items())}
-
-    #             ax.grid(alpha=0.5)
-    #             ax.set_xticks(group_centers)
-    #             ax.set_xlabel("Tracking window scenario")
-    #             ax.set_ylabel(r'||$\Delta V$|| [m/s]')
-    #             ax.set_title(title)
-
-    #             minor_xticks = []
-    #             minor_xtick_labels = []
-
-    #             for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
-    #                                                                 group_centers)):
-
-    #                 n_bars = len(vals)
-    #                 group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
-    #                 for val_i, val in enumerate(vals):
-
-    #                     x_pos = group_beg + val_i + bar_offset
-
-    #                     if threshold_index == 0:
-    #                         bar = ax.bar(x_pos,
-    #                                     height=val, width=bar_stretch,
-    #                                     color=colors[g_name],
-    #                                     yerr=std_data[g_name][val_i],
-    #                                     capsize=4)[0]
-
-    #                     else:
-    #                         bar = ax.bar(x_pos,
-    #                                     height=val, width=0.8,
-    #                                     color="white", hatch='/', edgecolor='black', alpha=0.6,
-    #                                     yerr=std_data[g_name][val_i],
-    #                                     label=f"After {evaluation_threshold} days" if label==0 else None,
-    #                                     capsize=4)[0]
-    #                         label += 1
-
-    #                     bars[g_name].append(bar)
-    #                     if bar_labeler is not None:
-    #                         x_pos = bar.get_x() + (bar.get_width() / 2.0)
-    #                         y_pos = val + barlabel_offset
-    #                         barlbl = bar_labeler(g_name, val_i, val)
-    #                         ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
-    #                                 fontsize=label_fontsize)
-
-    #                     minor_xticks.append(x_pos+0.001)
-    #                     if not threshold_index == 0:
-    #                         if observation_windows_settings:
-    #                             minor_xtick_labels.append(observation_windows_settings[g_name][val_i][-1])
-    #                     # else:
-    #                         # minor_xtick_labels.append(f"{g_name}_{val_i + 1}")
-
-    #         if legend:
-    #             ax.legend(loc='upper right', fontsize="small")
-
-    #         if x_labels:
-    #             ax.set_xticklabels(sorted_k)
-    #             ax.set_xticks(minor_xticks, minor=True)
-    #             ax.set_xticklabels(minor_xtick_labels, minor=True, fontsize=label_fontsize)
-    #             ax.tick_params(which="minor", rotation=0)
-
-    #             if observation_windows_settings:
-    #                 for tick in ax.get_xticklabels(minor=False):
-    #                     tick.set_y(-0.06)
-    #         else:
-    #             ax.set_xticklabels()
-
-    #     plt.tight_layout()
-
-    #     if self.save_figure:
-    #         utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
-
-
 
 
     def plot_estimation_arc_comparison(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.8, bar_stretch=0.95,
@@ -1879,7 +1724,7 @@ class PlotMultipleNavigationResults():
                         ax[1][1].quiver(arrow_plot_data[:, 1], arrow_plot_data[:, 2], arrow_plot_data[:,4], arrow_plot_data[:,5],
                                     angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
                         ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
-                                    angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
+                                    angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha) # label="SKM" if index==0 else None
                         ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
                                     alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 and type_index==0 else None)
 

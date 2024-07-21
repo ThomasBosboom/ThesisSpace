@@ -31,130 +31,98 @@ class ProcessOptimizationResults():
         self.time_tag = str(time_tag)
         self.optimization_model = optimization_model
         self.optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
+        self.color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
 
+    def plot_iteration_history(self, show_design_variables=True, compare_time_tags={}, highlight_mean_only=True, show_annual=False):
 
-    def plot_vector_entries(self, compare_time_tags=[]):
-
-        fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
-
-        labels = [self.optimization_results["current_time"]]
-        iteration_histories = [self.optimization_results["iteration_history"]]
-        initial_design_vector = self.optimization_results["initial_design_vector"]
-        if compare_time_tags:
-            labels = []
-            iteration_histories = []
-            for time_tag in compare_time_tags:
-                optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
-                iteration_histories.append(optimization_results["iteration_history"])
-                labels.append(optimization_results["current_time"])
-
-        individual_corrections_total = []
-        iterations_total = []
-        for index, iteration_history in enumerate(iteration_histories):
-            iterations = list(map(str, iteration_history.keys()))
-            individual_corrections = np.array([iteration_history[key]["individual_corrections"] for key in iterations])
-
-            iterations_total.append(iterations)
-            individual_corrections_total.append(individual_corrections)
-
-
-
-
-
-        objective_values_total = []
-        reduction_total = []
-        iterations_total = []
-        for index, iteration_history in enumerate(iteration_histories):
-            iterations = list(map(str, iteration_history.keys()))
-            design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
-            objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
-            if show_annual:
-                objective_values = np.array([iteration_history[key]["objective_value_annual"] for key in iterations])
-            reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
-
-            objective_values_total.append(objective_values)
-            reduction_total.append(reduction)
-            iterations_total.append(iterations)
-
-            marker = None
-            color = plt.rcParams['axes.prop_cycle'].by_key()['color'][int(index%10)]
-            label=labels[index]
-            if highlight_mean_only:
-                color = "lightgray"
-                label = None
-            axs[0].plot(iterations, objective_values, marker=marker, label=label, color=color)
-            axs[1].plot(iterations, reduction, marker=marker, label=label, color=color)
-
-
-
-
-
-
-
-    def plot_iteration_history(self, show_design_variables=True, compare_time_tags=[], highlight_mean_only=True, show_annual=False):
-
+        # Initialize the plots
         if show_design_variables:
             fig, axs = plt.subplots(3, 1, figsize=(8, 7.5), sharex=True)
         else:
             fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
 
-        labels = [self.optimization_results["current_time"]]
-        iteration_histories = [self.optimization_results["iteration_history"]]
+        optimization_keys = self.optimization_results["optimization_method"]
+        time_tags = {optimization_keys: [self.optimization_results["current_time"]]}
         initial_design_vector = self.optimization_results["initial_design_vector"]
+
         if compare_time_tags:
-            labels = []
-            iteration_histories = []
-            # initial_design_vector = []
-            for time_tag in compare_time_tags:
-                optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
-                iteration_histories.append(optimization_results["iteration_history"])
-                labels.append(optimization_results["current_time"])
-                # initial_design_vector = self.optimization_results["initial_design_vector"]
+            time_tags = compare_time_tags
 
-        objective_values_total = []
-        reduction_total = []
-        iterations_total = []
-        for index, iteration_history in enumerate(iteration_histories):
-            iterations = list(map(str, iteration_history.keys()))
-            design_vectors = np.array([iteration_history[key]["design_vector"] for key in iterations])
-            objective_values = np.array([iteration_history[key]["objective_value"] for key in iterations])
-            if show_annual:
-                objective_values = np.array([iteration_history[key]["objective_value_annual"] for key in iterations])
-            reduction = np.array([iteration_history[key]["reduction"] for key in iterations])
+        # Collect optimization results
+        optimization_results_dict = {}
+        for label, time_tags_list in time_tags.items():
+            optimization_results_dict[label] = {}
+            for time_tag in time_tags_list:
+                file_name = self.file_name
+                if "nelder_mead" in label or "Nelder-Mead" in label or "Nelder Mead" in label:
+                    file_name = "optimization_analysis_nelder_mead"
+                elif "particle_swarm" in label or "Particle-Swarm" or "Particle Swarm" in label:
+                    file_name = "optimization_analysis_particle_swarm"
+                optimization_results_dict[label][time_tag] = self.optimization_model.load_from_json(time_tag, folder_name=file_name)
 
-            objective_values_total.append(objective_values)
-            reduction_total.append(reduction)
-            iterations_total.append(iterations)
+        # Generate statistics of iteration histories
+        for index, (label, optimization_results) in enumerate(optimization_results_dict.items()):
 
+            # Plotting settings
             marker = None
-            color = plt.rcParams['axes.prop_cycle'].by_key()['color'][int(index%10)]
-            label=labels[index]
+            alpha = 1
+            color = self.color_cycle[int(index % 10)]
             if highlight_mean_only:
-                color = "lightgray"
-                label = None
-            axs[0].plot(iterations, objective_values, marker=marker, label=label, color=color)
-            axs[1].plot(iterations, reduction, marker=marker, label=label, color=color)
+                # color = "lightgray"
+                alpha = 0.2
+                # label = None
 
-        means, stds = [], []
-        for histories in [iterations_total, objective_values_total, reduction_total]:
+            iterations = {}
+            design_vectors = {}
+            objective_values = {}
+            reduction = {}
+            for time_tag, optimization_result in optimization_results.items():
 
-            # Determine the maximum length among all sublists
-            max_length = max(len(sublist) for sublist in histories)
-            array_nan = np.full((len(histories), max_length), np.nan)
-            for i, sublist in enumerate(histories):
-                array_nan[i, :len(sublist)] = sublist
+                # Extract from iteration histories
+                iterations[time_tag] = []
+                design_vectors[time_tag] = []
+                objective_values[time_tag] = []
+                reduction[time_tag] = []
+                for iteration, iteration_data in optimization_result["iteration_history"].items():
 
-            # Calculate column-wise mean ignoring NaNs
-            means.append(np.nanmean(array_nan, axis=0))
-            stds.append(np.nanstd(array_nan, axis=0))
+                    iterations[time_tag].append(iteration)
+                    design_vectors[time_tag].append(iteration_data["design_vector"])
+                    objective_values[time_tag].append(iteration_data["objective_value"])
+                    reduction[time_tag].append(iteration_data["reduction"])
 
-        means = np.array(means)
-        stds = np.array(stds)
+                # Plot the individual runs
 
-        if highlight_mean_only:
-            axs[0].plot(means[0], means[1], marker=marker, label="Mean", color="red")
-            axs[1].plot(means[0], means[2], marker=marker, label="Mean", color="red")
+                axs[0].plot(iterations[time_tag], objective_values[time_tag], marker=marker, label=None, alpha=alpha, color=color)
+                axs[1].plot(iterations[time_tag], reduction[time_tag], marker=marker, label=None, alpha=alpha, color=color)
+
+
+            iterations = list(iterations.values())
+            design_vectors = list(design_vectors.values())
+            objective_values = list(objective_values.values())
+            reduction = list(reduction.values())
+
+            # Calculate statistics over time tags per label
+            means, stds = [], []
+            for data in [objective_values, reduction]:
+
+                # Determine the number of columns
+                max_length = max(len(row) for row in data)
+
+                # Create an empty array filled with np.nan
+                array = np.full((len(data), max_length), np.nan)
+
+                # Populate the array with the data
+                for i, row in enumerate(data):
+                    array[i, :len(row)] = row
+
+                # Calculate the mean along the columns, ignoring nan values
+                means.append(np.nanmean(array, axis=0))
+                stds.append(np.nanstd(array, axis=0))
+
+            axs[0].plot(range(0, max_length), means[0], marker=marker, label=label, alpha=1, color=color)
+            axs[1].plot(range(0, max_length), means[1], marker=marker, label=label, alpha=1, color=color)
+
 
         axs[0].legend()
         axs[0].set_ylabel(r"||$\Delta V$|| [m/s]")
@@ -165,14 +133,15 @@ class ProcessOptimizationResults():
         axs[1].grid(alpha=0.5, linestyle='--', which='both')
 
         if show_design_variables:
+            design_vectors = np.array(design_vectors)[0, :, :]
             for i in range(design_vectors.shape[1]):
-                axs[2].plot(iterations, design_vectors[:, i], marker=marker, label=f'$T_{i+1}$')
+                axs[2].plot(max(iterations, key=len), design_vectors[:, i], marker=marker, label=f'$T_{i+1}$')
             axs[2].set_xlabel('Iteration')
             axs[2].set_ylabel("Design variables [days]")
             axs[2].grid(alpha=0.5, linestyle='--', which='both')
             axs[2].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
             axs[2].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(initial_design_vector), fontsize="small", title="Design variables")
-
+            # axs[2].legend(loc='best')
         else:
             axs[1].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
             axs[1].set_xlabel('Iteration')
@@ -183,7 +152,8 @@ class ProcessOptimizationResults():
             if not compare_time_tags:
                 utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
             if compare_time_tags:
-                utils.save_figure_to_folder(figs=[fig], labels=[f"combined_{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
+                utils.save_figure_to_folder(figs=[fig], labels=[f"combined_iteration_history"], custom_sub_folder_name=self.file_name)
+
 
 
     def plot_optimization_result_comparisons(self, auxilary_settings, show_observation_window_settings=False):
@@ -199,6 +169,8 @@ class ProcessOptimizationResults():
 
         if show_observation_window_settings:
             print("Observation window settings \n:", observation_windows_settings)
+
+        print("auxiliary_settings", auxilary_settings)
 
         # Run the navigation routine using given settings
         navigation_outputs = helper_functions.generate_navigation_outputs(

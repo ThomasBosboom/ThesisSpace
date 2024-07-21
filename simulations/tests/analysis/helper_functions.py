@@ -161,8 +161,31 @@ def get_navigation_output(observation_windows, seed=0, **kwargs):
     return navigation_output
 
 
+# def generate_navigation_outputs(observation_windows_settings, **kwargs):
+
+#     # Run the navigation routine using given settings
+#     navigation_outputs = {}
+#     for window_type in observation_windows_settings.keys():
+
+#         navigation_output_per_type = []
+#         for (observation_windows, num_runs, label) in observation_windows_settings[window_type]:
+
+#             navigation_output_per_run = {}
+#             for run in range(num_runs):
+
+#                 print(f"Run {run+1} of {num_runs}, seed {run}")
+#                 navigation_output_per_run[run] = get_navigation_output(observation_windows, seed=run, **kwargs)
+
+#             navigation_output_per_type.append(navigation_output_per_run)
+
+#         navigation_outputs[window_type] = navigation_output_per_type
+
+#     return navigation_outputs
+
+
 def generate_navigation_outputs(observation_windows_settings, **kwargs):
 
+    kwargs_copy = kwargs.copy()
     # Run the navigation routine using given settings
     navigation_outputs = {}
     for window_type in observation_windows_settings.keys():
@@ -171,16 +194,27 @@ def generate_navigation_outputs(observation_windows_settings, **kwargs):
         for (observation_windows, num_runs, label) in observation_windows_settings[window_type]:
 
             navigation_output_per_run = {}
-            for run in range(num_runs):
 
-                print(f"Run {run+1} of {num_runs}, seed {run}")
-                navigation_output_per_run[run] = get_navigation_output(observation_windows, seed=run, **kwargs)
+            seed = 0
+            seed_copy = 0
+            if "seed" in kwargs.keys():
+                seed = kwargs["seed"]
+                seed_copy = seed
+                kwargs.pop("seed")
+
+            for run, seed in enumerate(range(seed, seed+num_runs)):
+
+                print(f"Run {run+1} of {num_runs}, seed {seed}")
+                navigation_output_per_run[run] = get_navigation_output(observation_windows, seed=seed, **kwargs)
+
+            kwargs.update({"seed": seed_copy})
 
             navigation_output_per_type.append(navigation_output_per_run)
 
         navigation_outputs[window_type] = navigation_output_per_type
 
     return navigation_outputs
+
 
 
 def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, **kwargs):

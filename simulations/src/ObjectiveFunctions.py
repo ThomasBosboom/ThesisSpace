@@ -30,7 +30,7 @@ class ObjectiveFunctions():
 
         objective_values = []
         for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
-            noise = np.random.normal(0, 0.00000000001)
+            noise = np.random.normal(0, 0.0000000001)
             objective_value = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
             objective_values.append(objective_value)
         mean_objective_value = np.mean(objective_values)

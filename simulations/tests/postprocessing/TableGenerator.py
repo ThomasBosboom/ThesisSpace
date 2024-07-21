@@ -125,6 +125,8 @@ class TableGenerator():
 
         num_entries = len(optimization_results_list[0]["initial_design_vector"])
 
+        caption = caption + f". n={len(optimization_results_list)}"
+
         for i in range(num_entries):
             state = f"$T_{i+1}$"
             initial_value = optimization_results_list[0]["initial_design_vector"][i]
