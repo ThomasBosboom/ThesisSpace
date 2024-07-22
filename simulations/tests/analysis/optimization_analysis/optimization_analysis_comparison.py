@@ -26,7 +26,7 @@ from optimization_analysis_helper_functions import \
 if __name__ == "__main__":
 
     optimization_methods = ["particle_swarm", "nelder_mead"]
-    custom_tags = ["default"]
+    custom_tags = ["default56dur1len3int"]
 
     comparison_labels = ["Particle-Swarm", "Nelder-Mead"]
 

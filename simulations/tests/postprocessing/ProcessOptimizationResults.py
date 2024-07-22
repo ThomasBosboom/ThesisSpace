@@ -134,13 +134,19 @@ class ProcessOptimizationResults():
 
         if show_design_variables:
             design_vectors = np.array(design_vectors)[0, :, :]
+            ncol = min(len(initial_design_vector), 7)
             for i in range(design_vectors.shape[1]):
-                axs[2].plot(max(iterations, key=len), design_vectors[:, i], marker=marker, label=f'$T_{i+1}$')
+                ls = "-"
+                label = f'$T_{{{i + 1}}}$'
+                if i >= ncol:
+                    ls = "--"
+                axs[2].plot(max(iterations, key=len), design_vectors[:, i], marker=marker, ls=ls, label=label)
             axs[2].set_xlabel('Iteration')
             axs[2].set_ylabel("Design variables [days]")
             axs[2].grid(alpha=0.5, linestyle='--', which='both')
             axs[2].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))
-            axs[2].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=len(initial_design_vector), fontsize="small", title="Design variables")
+
+            axs[2].legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), ncol=ncol, fontsize="small", title="Design variables")
             # axs[2].legend(loc='best')
         else:
             axs[1].xaxis.set_major_locator(ticker.MaxNLocator(nbins=10))

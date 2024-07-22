@@ -1,7 +1,11 @@
 #!/bin/bash
 
 # Array of script names
-scripts=("optimization_analysis_nelder_mead.py" "optimization_analysis_particle_swarm.py")
+# scripts=("optimization_analysis_nelder_mead.py" "optimization_analysis_particle_swarm.py")
+
+# scripts=("optimization_analysis_nelder_mead.py" "optimization_analysis_particle_swarm.py" "optimization_analysis_nelder_mead2.py" "optimization_analysis_particle_swarm2.py")
+
+scripts=("optimization_analysis_nelder_mead.py" "optimization_analysis_particle_swarm.py" "optimization_analysis_nelder_mead2.py" "optimization_analysis_particle_swarm2.py" "optimization_analysis_nelder_mead3.py" "optimization_analysis_particle_swarm3.py")
 
 # Number of times to run each script
 runs=20

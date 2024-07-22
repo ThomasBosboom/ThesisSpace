@@ -34,10 +34,10 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default56dur1len3int"
+    custom_tag = "default28dur1len3intSHSRP01"
     num_optims = 5
 
-    duration = 56
+    duration = 28
     arc_length = 1
     arc_interval = 3
 
@@ -68,7 +68,9 @@ if __name__ == "__main__":
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
         "step_size_optimization_version": 0.5,
-        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
+        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
+        "model_name": "SHSRP",
+        "model_name_truth": "SHSRP"
     }
 
     objective_functions_settings = {

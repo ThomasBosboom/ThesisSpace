@@ -34,11 +34,11 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default56dur1len3int"
+    custom_tag = "default28dur05len3int"
     num_optims = 5
 
-    duration = 56
-    arc_length = 1
+    duration = 28
+    arc_length = 0.5
     arc_interval = 3
 
     bounds = (0.1, 2.0)

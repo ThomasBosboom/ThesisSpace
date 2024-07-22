@@ -34,19 +34,18 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default56dur1len3int"
+    custom_tag = "default28dur05len3int"
     num_optims = 5
 
-    duration = 56
-    arc_length = 1
+    duration = 28
+    arc_length = 0.5
     arc_interval = 3
 
     bounds = (0.1, 2.0)
     max_iterations = 2
-    num_particles = 20
     test_objective = False
 
-    use_same_seed = False
+    use_same_seed = True
     run_optimization = False
     plot_full_comparison_cases = [0, 2]
     from_file = True
@@ -82,10 +81,11 @@ if __name__ == "__main__":
         "arc_length": arc_length,
         "arc_interval": arc_interval,
         "bounds": bounds,
-        "show_evaluations_in_terminal": True,
-        "optimization_method": "Particle-Swarm",
         "max_iterations": max_iterations,
-        "num_particles": num_particles,
+        "show_evaluations_in_terminal": True,
+        "optimization_method": "Nelder-Mead",
+        "design_vector_type": "arc_lengths",
+        "initial_simplex_perturbation": -arc_length/2,
     }
 
 
@@ -97,8 +97,8 @@ if __name__ == "__main__":
     case_combinations = [dict(zip(keys, v)) for v in itertools.product(*values)]
 
     # Use multiprocessing.Pool to parallelize the loop
-    num_workers = multiprocessing.cpu_count()
-    # num_workers = num_optims
+    # num_workers = multiprocessing.cpu_count()
+    num_workers = num_optims
     with multiprocessing.Pool(processes=num_workers) as pool:
         partial_process_case = partial(
             process_case,
@@ -120,7 +120,7 @@ if __name__ == "__main__":
     final_process_optimization_results = results[0]
     final_process_optimization_results.plot_iteration_history(
         show_design_variables=False,
-        compare_time_tags={"Particle Swarm": [result.time_tag for result in results]}
+        compare_time_tags={"Nelder-Mead": [result.time_tag for result in results]}
     )
 
     final_process_optimization_results.tabulate_optimization_results(

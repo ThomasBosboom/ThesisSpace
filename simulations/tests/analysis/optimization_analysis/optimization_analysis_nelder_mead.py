@@ -34,10 +34,10 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default28dur1len3int"
+    custom_tag = "default56dur1len3int"
     num_optims = 5
 
-    duration = 28
+    duration = 56
     arc_length = 1
     arc_interval = 3
 
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     max_iterations = 2
     test_objective = False
 
-    use_same_seed = False
+    use_same_seed = True
     run_optimization = False
     plot_full_comparison_cases = [0, 2]
     from_file = True

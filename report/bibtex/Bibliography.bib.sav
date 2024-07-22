@@ -2508,3 +2508,16 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url       = {https://doi.org/10.1080/10556780512331318290},
   urldate   = {2024-07-13},
 }
+
+ 
+@Article{Das2016,
+  author  = {Das, Keya},
+  journal = {American Journal of Theoretical and Applied Statistics},
+  title   = {A {Brief} {Review} of {Tests} for {Normality}},
+  year    = {2016},
+  month   = jan,
+  pages   = {5},
+  volume  = {5},
+  doi     = {10.11648/j.ajtas.20160501.12},
+  file    = {Full Text PDF:https\://www.researchgate.net/profile/Keya-Das/publication/304339245_A_Brief_Review_of_Tests_for_Normality/links/58d4c524aca2727e5e9af6e9/A-Brief-Review-of-Tests-for-Normality.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/304339245_A_Brief_Review_of_Tests_for_Normality:},
+}
