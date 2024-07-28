@@ -42,7 +42,7 @@ class ProcessOptimizationResults():
         else:
             fig, axs = plt.subplots(2, 1, figsize=(8, 4), sharex=True)
 
-        optimization_keys = self.optimization_results["optimization_method"]
+        optimization_keys = self.optimization_results["file_name"]
         time_tags = {optimization_keys: [self.optimization_results["current_time"]]}
         initial_design_vector = self.optimization_results["initial_design_vector"]
 
@@ -55,10 +55,12 @@ class ProcessOptimizationResults():
             optimization_results_dict[label] = {}
             for time_tag in time_tags_list:
                 file_name = self.file_name
-                if "nelder_mead" in label or "Nelder-Mead" in label or "Nelder Mead" in label:
-                    file_name = "optimization_analysis_nelder_mead"
-                elif "particle_swarm" in label or "Particle-Swarm" or "Particle Swarm" in label:
-                    file_name = "optimization_analysis_particle_swarm"
+                if label != self.optimization_results["file_name"]:
+                    if "nelder_mead" in label or "Nelder-Mead" in label or "Nelder Mead" in label:
+                        file_name = "optimization_analysis_nelder_mead"
+                    elif "particle_swarm" in label or "Particle-Swarm" in label or "Particle Swarm" in label:
+                        file_name = "optimization_analysis_particle_swarm"
+
                 optimization_results_dict[label][time_tag] = self.optimization_model.load_from_json(time_tag, folder_name=file_name)
 
         # Generate statistics of iteration histories
@@ -76,6 +78,7 @@ class ProcessOptimizationResults():
             iterations = {}
             design_vectors = {}
             objective_values = {}
+            objective_values_annual = {}
             reduction = {}
             for time_tag, optimization_result in optimization_results.items():
 
@@ -83,28 +86,34 @@ class ProcessOptimizationResults():
                 iterations[time_tag] = []
                 design_vectors[time_tag] = []
                 objective_values[time_tag] = []
+                objective_values_annual[time_tag] = []
                 reduction[time_tag] = []
                 for iteration, iteration_data in optimization_result["iteration_history"].items():
 
                     iterations[time_tag].append(iteration)
                     design_vectors[time_tag].append(iteration_data["design_vector"])
                     objective_values[time_tag].append(iteration_data["objective_value"])
+                    objective_values_annual[time_tag].append(iteration_data["objective_value_annual"])
                     reduction[time_tag].append(iteration_data["reduction"])
 
                 # Plot the individual runs
 
-                axs[0].plot(iterations[time_tag], objective_values[time_tag], marker=marker, label=None, alpha=alpha, color=color)
+                if show_annual:
+                    axs[0].plot(iterations[time_tag], objective_values_annual[time_tag], marker=marker, label=None, alpha=alpha, color=color)
+                else:
+                    axs[0].plot(iterations[time_tag], objective_values[time_tag], marker=marker, label=None, alpha=alpha, color=color)
                 axs[1].plot(iterations[time_tag], reduction[time_tag], marker=marker, label=None, alpha=alpha, color=color)
 
 
             iterations = list(iterations.values())
             design_vectors = list(design_vectors.values())
             objective_values = list(objective_values.values())
+            objective_values_annual = list(objective_values_annual.values())
             reduction = list(reduction.values())
 
             # Calculate statistics over time tags per label
             means, stds = [], []
-            for data in [objective_values, reduction]:
+            for data in [objective_values, objective_values_annual, reduction]:
 
                 # Determine the number of columns
                 max_length = max(len(row) for row in data)
@@ -120,8 +129,11 @@ class ProcessOptimizationResults():
                 means.append(np.nanmean(array, axis=0))
                 stds.append(np.nanstd(array, axis=0))
 
-            axs[0].plot(range(0, max_length), means[0], marker=marker, label=label, alpha=1, color=color)
-            axs[1].plot(range(0, max_length), means[1], marker=marker, label=label, alpha=1, color=color)
+            if show_annual:
+                axs[0].plot(range(0, max_length), means[1], marker=marker, label=label, alpha=1, color=color)
+            else:
+                axs[0].plot(range(0, max_length), means[0], marker=marker, label=label, alpha=1, color=color)
+            axs[1].plot(range(0, max_length), means[2], marker=marker, label=label, alpha=1, color=color)
 
 
         axs[0].legend()
@@ -158,25 +170,31 @@ class ProcessOptimizationResults():
             if not compare_time_tags:
                 utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_iteration_history"], custom_sub_folder_name=self.file_name)
             if compare_time_tags:
-                utils.save_figure_to_folder(figs=[fig], labels=[f"combined_iteration_history"], custom_sub_folder_name=self.file_name)
+                if len(compare_time_tags) >= 2:
+                    utils.save_figure_to_folder(figs=[fig], labels=[f"comparison_iteration_history"], custom_sub_folder_name=self.file_name)
+                else:
+                    utils.save_figure_to_folder(figs=[fig], labels=[f"combined_iteration_history"], custom_sub_folder_name=self.file_name)
 
 
+    def plot_optimization_result_comparisons(self, auxilary_settings, show_observation_window_settings=False, custom_num_runs=None):
 
-    def plot_optimization_result_comparisons(self, auxilary_settings, show_observation_window_settings=False):
+        num_runs = self.optimization_results["num_runs"]
+        if custom_num_runs is not None:
+            num_runs = custom_num_runs
 
         observation_windows_settings = {
             "Default": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), self.optimization_results["num_runs"], None),
+                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs, None),
             ],
             "Optimized": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), self.optimization_results["num_runs"], None)
+                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), num_runs, None)
             ],
         }
 
         if show_observation_window_settings:
             print("Observation window settings \n:", observation_windows_settings)
 
-        print("auxiliary_settings", auxilary_settings)
+        print("auxiliary_settings: ", auxilary_settings)
 
         # Run the navigation routine using given settings
         navigation_outputs = helper_functions.generate_navigation_outputs(
@@ -195,9 +213,10 @@ class ProcessOptimizationResults():
         evaluation_threshold = self.optimization_results["evaluation_threshold"]
         process_multiple_navigation_results.plot_full_state_history_comparison()
         process_multiple_navigation_results.plot_uncertainty_comparison()
-        process_multiple_navigation_results.plot_maneuvre_costs()
+        process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=True)
+        process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=False)
         process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=evaluation_threshold)
-        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, worst_case=True, bar_labeler=None)
+        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, worst_case=False, bar_labeler=None)
 
 
     def tabulate_optimization_results(self, compare_time_tags=[]):

@@ -65,6 +65,8 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
         seed = objective_functions_settings.get("seed")
         num_runs = objective_functions_settings.get("num_runs")
         objective_functions_settings.update({"seed": seed + run*num_runs})
+
+        # print(objective_functions_settings)
     objective_functions = ObjectiveFunctions.ObjectiveFunctions(
         navigation_simulator,
         **objective_functions_settings
@@ -111,10 +113,14 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
     process_optimization_results.tabulate_optimization_results()
 
     if not run_optimization:
-        if run in plot_full_comparison_cases:
-            auxilary_settings = {"step_size": 0.01, "seed": objective_functions_settings["seed"]}
+        runs, custom_num_runs = plot_full_comparison_cases[0], plot_full_comparison_cases[1]
+        if run in runs:
+            auxilary_settings = {
+                                 "seed": objective_functions_settings["seed"],
+                                 "run_optimization_version": False
+                                 }
             auxilary_settings.update(case)
-            process_optimization_results.plot_optimization_result_comparisons(auxilary_settings, show_observation_window_settings=True)
+            process_optimization_results.plot_optimization_result_comparisons(auxilary_settings, show_observation_window_settings=True, custom_num_runs=custom_num_runs)
 
     return process_optimization_results
 
@@ -229,7 +235,6 @@ def find_first_object(d):
         if isinstance(value, dict):
             return find_first_object(value)
         elif isinstance(value, list):
-            # Assuming the first numeric key is always 0 and returning the first object
             return value[0][0]
         else:
             return value

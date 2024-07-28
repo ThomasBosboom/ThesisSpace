@@ -34,21 +34,26 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default56dur1len3int"
+    custom_tag = "default28dur1len3intSHSRP"
     num_optims = 5
 
-    duration = 56
+    duration = 28
     arc_length = 1
     arc_interval = 3
 
     bounds = (0.1, 2.0)
-    max_iterations = 2
+    max_iterations = 1
     test_objective = False
 
-    use_same_seed = True
+    use_same_seed = False
     run_optimization = False
-    plot_full_comparison_cases = [0, 2]
+    plot_full_comparison_cases = [[0], 3]
     from_file = True
+
+
+    ##############################################################
+    #### Processing logic ########################################
+    ##############################################################
 
     if custom_tag is not None:
         current_time = custom_tag
@@ -66,8 +71,8 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "step_size_optimization_version": 0.5,
-        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
+        "model_name": "SHSRP",
+        "model_name_truth": "SHSRP"
     }
 
     objective_functions_settings = {
@@ -86,6 +91,7 @@ if __name__ == "__main__":
         "optimization_method": "Nelder-Mead",
         "design_vector_type": "arc_lengths",
         "initial_simplex_perturbation": -arc_length/2,
+        "use_random_initial_design_vector": False
     }
 
 

@@ -25,10 +25,13 @@ from optimization_analysis_helper_functions import \
 
 if __name__ == "__main__":
 
-    optimization_methods = ["particle_swarm", "nelder_mead"]
-    custom_tags = ["default56dur1len3int"]
+    # optimization_methods = ["particle_swarm", "nelder_mead"]
+    optimization_methods = ["particle_swarm"]
+    custom_tags = ["default28dur1len3int", "default28dur1len3intSHSRP"]
 
-    comparison_labels = ["Particle-Swarm", "Nelder-Mead"]
+    # comparison_labels = ["Particle-Swarm", "Nelder-Mead"]
+    # comparison_labels = ["28", "56"]
+    comparison_labels = ["PMSRP", "SHSRP"]
 
     cases = {
         "delta_v_min": [0.00],
@@ -39,20 +42,22 @@ if __name__ == "__main__":
         custom_tags=custom_tags
         )
 
-    # Transforming the initial_dict
-    results = transform_dict(optimization_results, get_process_optimization_results)
+    # print(optimization_results)
 
-    print(results)
+    # Transforming the initial_dict
+    process_optimization_results = transform_dict(optimization_results, get_process_optimization_results)
+    # print(process_optimization_results)
 
     # Select only first case run as example
-    final_process_optimization_results = find_first_object(results)
+    process_optimization_result = find_first_object(process_optimization_results)
+    # print("process_optimization_result", process_optimization_result.file_name)
 
-    # Compare cases
-    compare_time_tags = get_compare_time_tags(results, comparison_labels)
-    print("compare_time_tags: ", compare_time_tags)
+    # Get the time tags associated with the optimization results
+    compare_time_tags = get_compare_time_tags(process_optimization_results, comparison_labels)
 
-    final_process_optimization_results.plot_iteration_history(
+    process_optimization_result.plot_iteration_history(
         show_design_variables=False,
+        show_annual=True,
         compare_time_tags=compare_time_tags
     )
 

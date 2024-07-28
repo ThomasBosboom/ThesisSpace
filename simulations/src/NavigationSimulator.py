@@ -209,7 +209,9 @@ class NavigationSimulator(NavigationSimulatorBase):
                 if estimation_arc == 0:
                     self.maximum_iterations = self.maximum_iterations_first_arc
 
-                estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self), seed=rng.integers(100))
+                estimation_seed = rng.integers(0, 1000)
+                # print(estimation_seed, self.run_optimization_version)
+                estimation_model = EstimationModel.EstimationModel(dynamic_model, truth_model, **vars(self), seed=estimation_seed)
                 estimation_model_result = estimation_model.get_estimation_results()
                 estimation_output = estimation_model_result.estimation_output
                 parameter_history = estimation_output.parameter_history
@@ -346,20 +348,45 @@ class NavigationOutput():
 
 if __name__ == "__main__":
 
-    import psutil
-    from pympler import asizeof
-
-    @profile
     def simulate_runs():
 
-        # tracemalloc.start()
-        # snapshot1 = tracemalloc.take_snapshot()
-        navigation_simulator = NavigationSimulator(run_optimization_version=False, step_size=0.5)
+        navigation_simulator = NavigationSimulator(run_optimization_version=True, step_size=0.5)
         observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0), (60402.0, 60403.0), (60406.0, 60407.0), (60410.0, 60411.0), (60414.0, 60415.0)]
-        # observation_windows = [(60390, 60391.0), (60394.0, 60395.0), (60398.0, 60399.0)]
+        observation_windows = [
+        [
+            60390,
+            60390.76217095995
+        ],
+        [
+            60393.76217095995,
+            60394.92989843622
+        ],
+        [
+            60397.92989843622,
+            60398.78205703818
+        ],
+        [
+            60401.78205703818,
+            60402.82977960193
+        ],
+        [
+            60405.82977960193,
+            60407.68702720861
+        ],
+        [
+            60410.68702720861,
+            60410.78702720861
+        ],
+        [
+            60413.78702720861,
+            60413.887027208606
+        ]
+    ]
 
         cost_list = []
-        for i in range(3):
+        for i in range(1):
+
+            print(i)
 
             navigation_output = navigation_simulator.perform_navigation(observation_windows, seed=i)
             navigation_simulator = navigation_output.navigation_simulator
@@ -367,30 +394,15 @@ if __name__ == "__main__":
             delta_v_dict = navigation_simulator.delta_v_dict
             delta_v_epochs = np.stack(list(delta_v_dict.keys()))
             delta_v_history = np.stack(list(delta_v_dict.values()))
-            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+0)
+            delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+14)
 
             cost_list.append(delta_v)
             print(cost_list)
 
             print("===========")
-            print(navigation_simulator.get_total_size())
             navigation_simulator.reset_attributes()
-            print(navigation_simulator.get_total_size())
 
-            # print(psutil.virtual_memory())
-            # print(navigation_simulator.get_total_size())
-
-
-            # Take another snapshot after the function call
-            # snapshot2 = tracemalloc.take_snapshot()
-            # top_stats = snapshot2.compare_to(snapshot1, 'lineno')
-
-            # print("[ Top 5 differences ]")
-            # for stat in top_stats[:10]:
-            #     print(stat)
-            # total_memory = sum(stat.size for stat in top_stats)
-            # print(f"Total memory used after iteration: {total_memory / (1024 ** 2):.2f} MB")
-
-
-    for _ in range(2):
+    for _ in range(1):
         simulate_runs()
+
+

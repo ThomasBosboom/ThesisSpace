@@ -18,7 +18,7 @@ class ObjectiveFunctions():
 
         self.navigation_simulator = navigation_simulator
         self.evaluation_threshold = 14
-        self.num_runs = 2
+        self.num_runs = 1
         self.seed = 0
 
         for key, value in kwargs.items():
@@ -29,13 +29,18 @@ class ObjectiveFunctions():
     def test(self, observation_windows):
 
         objective_values = []
+        noises = []
         for run, seed in enumerate(range(self.seed, self.seed+self.num_runs)):
-            noise = np.random.normal(0, 0.0000000001)
+            rng = np.random.default_rng(seed=seed)
+            noise = rng.normal(0, 0.1)
+            noises.append(noise)
             objective_value = np.sum([tup[-1]-tup[0] for tup in observation_windows]) + noise
             objective_values.append(objective_value)
-        mean_objective_value = np.mean(objective_values)
+        # import time
+        # time.sleep(1)
+        mean_objective_value = np.mean(objective_values) + 3*np.std(objective_values)
 
-        return mean_objective_value, [None]
+        return mean_objective_value, noises
 
 
     def worst_case_station_keeping_cost(self, observation_windows):
@@ -84,3 +89,26 @@ class ObjectiveFunctions():
         navigation_simulator.reset_attributes()
 
         return beta_aves[0]
+
+
+if __name__ == "__main__":
+
+    from src import NavigationSimulator
+
+    navigation_simulator_settings = {
+        "show_corrections_in_terminal": True,
+        "run_optimization_version": True
+    }
+    navigation_simulator = NavigationSimulator.NavigationSimulator(**navigation_simulator_settings)
+
+    objective_functions = ObjectiveFunctions(navigation_simulator, num_runs=1, seed=0)
+
+    observation_windows = [(60390, 60391), (60394, 60395)]
+
+    final_objective_value, individual_corrections = objective_functions.worst_case_station_keeping_cost(observation_windows)
+
+
+    print(final_objective_value, individual_corrections)
+
+
+

@@ -33,23 +33,29 @@ if __name__ == "__main__":
         "delta_v_min": [0.00],
     }
 
-    auto_mode = True
-    custom_tag = "default56dur1len3int"
+    auto_mode = False
+    custom_tag = "default28dur1len3int"
     num_optims = 5
 
-    duration = 56
+    duration = 28
     arc_length = 1
     arc_interval = 3
 
     bounds = (0.1, 2.0)
-    max_iterations = 2
+    max_iterations = 1
     num_particles = 20
     test_objective = False
 
     use_same_seed = False
     run_optimization = False
-    plot_full_comparison_cases = [0, 2]
+    plot_full_comparison_cases = [[0], 3]
+    custom_runs = None
     from_file = True
+
+
+    ##############################################################
+    #### Processing logic ########################################
+    ##############################################################
 
     if custom_tag is not None:
         current_time = custom_tag
@@ -67,8 +73,8 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "step_size_optimization_version": 0.5,
-        "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0
+        "model_name": "SHSRP",
+        "model_name_truth": "SHSRP"
     }
 
     objective_functions_settings = {
@@ -86,6 +92,11 @@ if __name__ == "__main__":
         "optimization_method": "Particle-Swarm",
         "max_iterations": max_iterations,
         "num_particles": num_particles,
+        "include_constraints": False,
+        # "w": 0.9,
+        # "c1": 2,
+        # "c2": 2,
+        # "use_random_initial_design_vector": False
     }
 
 

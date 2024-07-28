@@ -105,6 +105,7 @@ class EstimationModel:
         rng = np.random.default_rng(seed=self.seed)
         def range_noise_function(time):
             noise = rng.normal(loc=0, scale=self.noise, size=1)
+            # print("seed, noise: ", self.seed, noise)
             return noise
 
         observation.add_noise_function_to_observable(

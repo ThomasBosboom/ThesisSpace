@@ -201,6 +201,7 @@ def generate_navigation_outputs(observation_windows_settings, **kwargs):
                 seed = kwargs["seed"]
                 seed_copy = seed
                 kwargs.pop("seed")
+                print(seed)
 
             for run, seed in enumerate(range(seed, seed+num_runs)):
 
