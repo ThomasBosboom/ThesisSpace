@@ -34,7 +34,7 @@ if __name__ == "__main__":
     }
 
     auto_mode = False
-    custom_tag = "default28dur1len3int"
+    custom_tag = "default28dur1len3intSHSRP"
     num_optims = 5
 
     duration = 28
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     use_same_seed = False
     run_optimization = False
-    plot_full_comparison_cases = [[0], 3]
+    plot_full_comparison_cases = [[0, 1, 2, 3, 4], 3]
     custom_runs = None
     from_file = True
 

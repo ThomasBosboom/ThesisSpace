@@ -119,6 +119,8 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
                                  "seed": objective_functions_settings["seed"],
                                  "run_optimization_version": False
                                  }
+            auxilary_settings = kwargs
+            auxilary_settings["run_optimization_version"] = False
             auxilary_settings.update(case)
             process_optimization_results.plot_optimization_result_comparisons(auxilary_settings, show_observation_window_settings=True, custom_num_runs=custom_num_runs)
 
