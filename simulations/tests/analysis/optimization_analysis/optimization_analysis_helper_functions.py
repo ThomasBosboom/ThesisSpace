@@ -115,10 +115,10 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
     if not run_optimization:
         runs, custom_num_runs = plot_full_comparison_cases[0], plot_full_comparison_cases[1]
         if run in runs:
-            auxilary_settings = {
-                                 "seed": objective_functions_settings["seed"],
-                                 "run_optimization_version": False
-                                 }
+            # auxilary_settings = {
+            #                      "seed": objective_functions_settings["seed"],
+            #                      "run_optimization_version": False
+            #                      }
             auxilary_settings = kwargs
             auxilary_settings["run_optimization_version"] = False
             auxilary_settings.update(case)

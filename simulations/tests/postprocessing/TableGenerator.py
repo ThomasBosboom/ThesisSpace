@@ -112,7 +112,7 @@ class TableGenerator():
             utils.save_table_to_folder(tables=[table_str], labels=[f"{self.current_time}_optimization_analysis"], custom_sub_folder_name=self.file_name)
 
 
-    def generate_combined_optimization_analysis_table(self, optimization_results_list, caption="Statistics of optimization results", label="tab:StatisticsOptimizationAnalysis", file_name='optimization_analysis.tex', decimals=4):
+    def generate_statistics_table(self, optimization_results_list, caption="Statistics of optimization results", label="tab:StatisticsOptimizationAnalysis", file_name='optimization_analysis.tex', decimals=4):
 
         table_str = ""
         table_str += r'\begin{table}[H]' + '\n'
@@ -167,4 +167,57 @@ class TableGenerator():
         table_str += r'\end{table}'
 
         if self.save_table:
-            utils.save_table_to_folder(tables=[table_str], labels=[f"{self.current_time}_statistics_optimization_analysis"], custom_sub_folder_name=self.file_name)
+            utils.save_table_to_folder(tables=[table_str], labels=[file_name], custom_sub_folder_name=self.file_name)
+
+
+    def generate_design_vector_table(self, optimization_results_list, caption="Design vector entries", label="tab:DesignVectorEntries", file_name='design_vector_entries.tex', decimals=4):
+        table_str = ""
+        table_str += r'\begin{table}[H]' + '\n'
+        table_str += r'\centering' + '\n'
+
+        # Determine the number of runs
+        num_runs = len(optimization_results_list)
+
+        # Header row for Vectors
+        header_row1 = r'\textbf{} & \cellcolor[HTML]{EFEFEF}\textbf{Vectors}'
+        header_row1 += r' & \textbf{}' * (num_runs - 1) + r' & \textbf{} \\' + '\n'
+
+        # Header row for Entries
+        header_row2 = r'\rowcolor[HTML]{EFEFEF} ' + r'\cellcolor[HTML]{EFEFEF}\textbf{Entry} & \cellcolor[HTML]{EFEFEF}\textbf{Initial}'
+        for i in range(1, num_runs + 1):
+            header_row2 += r' & \cellcolor[HTML]{EFEFEF}\textbf{Run ' + f'{i}' + r'}'
+        header_row2 += r' \\' + '\n'
+
+        # Combine header rows
+        table_str += r'\begin{tabular}{l' + 'l' * (num_runs + 1) + '}' + '\n'
+        table_str += header_row1 + header_row2
+
+        num_entries = len(optimization_results_list[0]["initial_design_vector"])
+
+        for i in range(num_entries):
+            state = f"$T_{i+1}$"
+            initial_value = optimization_results_list[0]["initial_design_vector"][i]
+            run_values = [optimization_results_list[j]["best_design_vector"][i] for j in range(num_runs)]
+
+            # Add row for each entry in design vector
+            table_str += f"{state} & {initial_value:.{decimals}f} & " + " & ".join([f"{value:.{decimals}f}" for value in run_values]) + r' \\' + '\n'
+
+        initial_cost = optimization_results_list[0]["initial_objective_value"]
+        final_costs = [results["best_objective_value"] for results in optimization_results_list]
+        cost_differences = [(final - initial_cost) / initial_cost * 100 if initial_cost != 0 else 0 for final in final_costs]
+
+        # Add cost row
+        table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
+        table_str += r'\cellcolor[HTML]{EFEFEF}\textbf{Cost} & \cellcolor[HTML]{EFEFEF}' + f"{initial_cost:.{decimals}f} & " + " & ".join([f"{cost:.{decimals}f}" for cost in final_costs]) + r' \\' + '\n'
+
+        # Add percentage difference row
+        table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
+        table_str += r'\cellcolor[HTML]{EFEFEF}\textbf{\%Diff} & \cellcolor[HTML]{EFEFEF} 00.00\% &' + " & ".join([f"{diff:.2f}\\%" for diff in cost_differences]) + r' \\' + '\n'
+
+        table_str += r'\end{tabular}' + '\n'
+        table_str += r'\caption{' + caption + '}' + '\n'
+        table_str += r'\label{' + label + '}' + '\n'
+        table_str += r'\end{table}'
+
+        if self.save_table:
+            utils.save_table_to_folder(tables=[table_str], labels=[file_name], custom_sub_folder_name=self.file_name)

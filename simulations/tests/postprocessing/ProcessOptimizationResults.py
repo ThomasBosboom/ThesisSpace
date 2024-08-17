@@ -182,19 +182,28 @@ class ProcessOptimizationResults():
         if custom_num_runs is not None:
             num_runs = custom_num_runs
 
+        # observation_windows_settings = {
+        #     "Default": [
+        #         (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs, None),
+        #     ],
+        #     "Optimized": [
+        #         (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), num_runs, None)
+        #     ],
+        # }
+
         observation_windows_settings = {
             "Default": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs, None),
+                (self.optimization_results["initial_observation_windows"], num_runs, None),
             ],
             "Optimized": [
-                (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), num_runs, None)
+                (self.optimization_results["best_observation_windows"], num_runs, None)
             ],
         }
 
         if show_observation_window_settings:
             print("Observation window settings \n:", observation_windows_settings)
 
-        print("auxiliary_settings: ", auxilary_settings)
+        # print("auxiliary_settings: ", auxilary_settings)
 
         # Run the navigation routine using given settings
         navigation_outputs = helper_functions.generate_navigation_outputs(
@@ -219,6 +228,89 @@ class ProcessOptimizationResults():
         process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, worst_case=False, bar_labeler=None)
 
 
+    def plot_comparison_optimization_maneuvre_costs(self, auxilary_settings, process_optimization_results, compare_time_tags={}, show_observation_window_settings=False, custom_num_runs=None):
+
+        optimization_keys = self.optimization_results["file_name"]
+        time_tags = {optimization_keys: [self.optimization_results["current_time"]]}
+        initial_design_vector = self.optimization_results["initial_design_vector"]
+
+        if compare_time_tags:
+            time_tags = compare_time_tags
+
+        # Collect optimization results
+        optimization_results_dict = {}
+        for label, time_tags_list in time_tags.items():
+            optimization_results_dict[label] = {}
+            for time_tag in time_tags_list:
+                file_name = self.file_name
+                if label != self.optimization_results["file_name"]:
+                    if "nelder_mead" in label or "Nelder-Mead" in label or "Nelder Mead" in label:
+                        file_name = "optimization_analysis_nelder_mead"
+                    elif "particle_swarm" in label or "Particle-Swarm" in label or "Particle Swarm" in label:
+                        file_name = "optimization_analysis_particle_swarm"
+
+                optimization_results_dict[label][time_tag] = self.optimization_model.load_from_json(time_tag, folder_name=file_name)
+
+
+        num_runs = self.optimization_results["num_runs"]
+        if custom_num_runs is not None:
+            num_runs = custom_num_runs
+
+        # observation_windows_settings = {
+        #     "Default": [
+        #         (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs, None),
+        #     ]
+        # }
+
+        observation_windows_settings = {
+            "Default": [
+                (self.optimization_results["initial_observation_windows"], num_runs, None),
+            ]
+        }
+
+        # for key in optimization_results_dict.keys():
+        #     observation_windows_settings.update({f"Optimized {key}": [
+        #         (self.optimization_model.generate_observation_windows(optimization_results_dict[key][time_tag]["best_design_vector"]), num_runs, None)
+        #             for time_tag in time_tags[key]
+        #         ]
+        #     }
+        # )
+
+        for key in optimization_results_dict.keys():
+            observation_windows_settings.update({f"Optimized, {key}": [
+                (optimization_results_dict[key][time_tag]["best_observation_windows"], num_runs, str(run))
+                    for run, time_tag in enumerate(time_tags[key])
+                ]
+            }
+        )
+
+        if show_observation_window_settings:
+            print("Observation window settings \n:", observation_windows_settings)
+
+        # Run the navigation routine using given settings
+        navigation_outputs = helper_functions.generate_navigation_outputs(
+            observation_windows_settings,
+            **auxilary_settings)
+
+        process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
+            navigation_outputs,
+            color_cycle=["salmon", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "forestgreen"],
+            figure_settings={"save_figure": self.save_figure,
+                            "current_time": self.current_time,
+                            "file_name": self.file_name
+            }
+        )
+
+        evaluation_threshold = self.optimization_results["evaluation_threshold"]
+        # process_multiple_navigation_results.plot_full_state_history_comparison()
+        # process_multiple_navigation_results.plot_uncertainty_comparison()
+        # process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=True)
+        # process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=False)
+        # process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=evaluation_threshold)
+        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(show_annual=True, evaluation_threshold=evaluation_threshold, worst_case=False, bar_labeler=None)
+
+
+
     def tabulate_optimization_results(self, compare_time_tags=[]):
 
         if self.save_table:
@@ -240,7 +332,12 @@ class ProcessOptimizationResults():
                     optimization_results = self.optimization_model.load_from_json(time_tag, folder_name=self.file_name)
                     optimization_results_list.append(optimization_results)
 
-                table_generator.generate_combined_optimization_analysis_table(
+                table_generator.generate_statistics_table(
                     optimization_results_list,
-                    file_name=f"{current_time}_combined.tex"
+                    file_name=f"{current_time}_statistics_table.tex"
+                )
+
+                table_generator.generate_design_vector_table(
+                    optimization_results_list,
+                    file_name=f"{current_time}_design_vector_table.tex"
                 )

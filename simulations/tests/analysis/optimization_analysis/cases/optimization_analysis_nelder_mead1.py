@@ -117,13 +117,13 @@ if __name__ == "__main__":
         results = pool.starmap(partial_process_case, case_runs)
 
     # Select only first case run as example
-    final_process_optimization_results = results[0]
-    final_process_optimization_results.plot_iteration_history(
+    process_optimization_result = results[0]
+    process_optimization_result.plot_iteration_history(
         show_design_variables=False,
         compare_time_tags={"Nelder-Mead": [result.time_tag for result in results]}
     )
 
-    final_process_optimization_results.tabulate_optimization_results(
+    process_optimization_result.tabulate_optimization_results(
         compare_time_tags=[result.time_tag for result in results]
     )
 

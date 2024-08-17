@@ -33,8 +33,8 @@ if __name__ == "__main__":
         "delta_v_min": [0.00],
     }
 
-    auto_mode = True
-    custom_tag = "default28dur1len3intSHSRP"
+    auto_mode = False
+    custom_tag = "default28dur1len3int"
     num_optims = 5
 
     duration = 28
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     use_same_seed = False
     run_optimization = False
-    plot_full_comparison_cases = [[0], 3]
+    plot_full_comparison_cases = [[], 3]
     from_file = True
 
 
@@ -71,8 +71,8 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "model_name": "SHSRP",
-        "model_name_truth": "SHSRP"
+        "model_name": "PMSRP",
+        "model_name_truth": "PMSRP"
     }
 
     objective_functions_settings = {
@@ -123,13 +123,13 @@ if __name__ == "__main__":
         results = pool.starmap(partial_process_case, case_runs)
 
     # Select only first case run as example
-    final_process_optimization_results = results[0]
-    final_process_optimization_results.plot_iteration_history(
+    process_optimization_result = results[0]
+    process_optimization_result.plot_iteration_history(
         show_design_variables=False,
         compare_time_tags={"Nelder-Mead": [result.time_tag for result in results]}
     )
 
-    final_process_optimization_results.tabulate_optimization_results(
+    process_optimization_result.tabulate_optimization_results(
         compare_time_tags=[result.time_tag for result in results]
     )
 
