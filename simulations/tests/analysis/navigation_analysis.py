@@ -85,15 +85,15 @@ observation_windows_settings = {
     for param2 in params2
 }
 
-# params = [3.0]
-# params2 = [0.1, 0.5, 1.0, 2.0]
-# num_runs = 3
-# observation_windows_settings = {
-#     f"{param2} day": [
-#         (helper_functions.get_constant_arc_observation_windows(duration, arc_interval=param, arc_duration=param2, mission_start_epoch=mission_start_epoch), num_runs, None) for param in params
-#     ]
-#     for param2 in params2
-# }
+params = [3.0]
+params2 = [1.0]
+num_runs = 1
+observation_windows_settings = {
+    f"{param2} day": [
+        (helper_functions.get_constant_arc_observation_windows(30, arc_interval=param, arc_duration=param2, mission_start_epoch=mission_start_epoch), num_runs, None) for param in params
+    ]
+    for param2 in params2
+}
 
 
 #######################################################
@@ -134,7 +134,8 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         # process_single_navigation_results.plot_estimation_error_history()
                         # process_single_navigation_results.plot_uncertainty_history()
                         # process_single_navigation_results.plot_dispersion_history()
-                        # process_single_navigation_results.plot_full_state_history()
+                        process_single_navigation_results.plot_full_state_history(show_trajectories_only=False)
+                        process_single_navigation_results.plot_full_state_history(show_trajectories_only=True)
                         # process_single_navigation_results.plot_formal_error_history()
                         # process_single_navigation_results.plot_observations()
                         # process_single_navigation_results.plot_correlation_history()

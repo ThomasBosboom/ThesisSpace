@@ -90,7 +90,7 @@ class PlotSensitivityResults():
 
 
 
-    def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True):
+    def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True, show_annual=False):
 
         self.save_figure = save_figure
         self.save_table = save_table
@@ -241,34 +241,61 @@ class PlotSensitivityResults():
                                 capsize=4,
                                 label=f"{window_type}" if navigation_outputs_sensitivity_case==0 and delta_v_runs_dict_index==0 else None)
 
-                    axs[3].barh(sensitivity_case, delta_v_statistics["total_stats"]["mean"],
-                        color=color_cycle[case_index],
-                        xerr=delta_v_statistics["total_stats"]["std"],
-                        capsize=4,
-                        label=f"{sensitivity_settings[sensitivity_type][case_index]}"
-                        )
+                    if not show_annual:
+                        axs[3].barh(sensitivity_case, delta_v_statistics["total_stats"]["mean"],
+                            color=color_cycle[case_index],
+                            xerr=delta_v_statistics["total_stats"]["std"],
+                            capsize=4,
+                            label=f"{sensitivity_settings[sensitivity_type][case_index]}"
+                            )
 
-                    axs[3].barh(sensitivity_case, delta_v_statistics["total_stats_with_threshold"]["mean"],
-                        color="white", hatch='/', edgecolor='black', alpha=0.6, height=0.6,
-                        xerr=delta_v_statistics["total_stats_with_threshold"]["std"],
-                        capsize=4,
-                        label=f"After {evaluation_threshold} days" if sensitivity_case==list(sensitivity_case_delta_v_stats.keys())[-1] else None,
-                        )
+                        axs[3].barh(sensitivity_case, delta_v_statistics["total_stats_with_threshold"]["mean"],
+                            color="white", hatch='/', edgecolor='black', alpha=0.6, height=0.6,
+                            xerr=delta_v_statistics["total_stats_with_threshold"]["std"],
+                            capsize=4,
+                            label=f"After {evaluation_threshold} days" if sensitivity_case==list(sensitivity_case_delta_v_stats.keys())[-1] else None,
+                            )
 
-                    axs1[sensitivity_type_index].barh(sensitivity_case, delta_v_statistics["total_stats"]["mean"],
-                        color=color_cycle[case_index],
-                        xerr=delta_v_statistics["total_stats"]["std"],
-                        capsize=4,
-                        # label=f"{sensitivity_settings[sensitivity_type][case_index]}"
-                        )
+                        axs1[sensitivity_type_index].barh(sensitivity_case, delta_v_statistics["total_stats"]["mean"],
+                            color=color_cycle[case_index],
+                            xerr=delta_v_statistics["total_stats"]["std"],
+                            capsize=4,
+                            # label=f"{sensitivity_settings[sensitivity_type][case_index]}"
+                            )
 
-                    axs1[sensitivity_type_index].barh(sensitivity_case, delta_v_statistics["total_stats_with_threshold"]["mean"],
-                        color="white", hatch='/', edgecolor='black', alpha=0.6, height=0.6,
-                        xerr=delta_v_statistics["total_stats_with_threshold"]["std"],
-                        capsize=4,
-                        # label=f"After {evaluation_threshold} days" if sensitivity_type==list(sensitivity_settings.keys())[-1] else None,
-                        label=f"After {evaluation_threshold} days" if case_index==0 else None,
-                        )
+                        axs1[sensitivity_type_index].barh(sensitivity_case, delta_v_statistics["total_stats_with_threshold"]["mean"],
+                            color="white", hatch='/', edgecolor='black', alpha=0.6, height=0.6,
+                            xerr=delta_v_statistics["total_stats_with_threshold"]["std"],
+                            capsize=4,
+                            # label=f"After {evaluation_threshold} days" if sensitivity_type==list(sensitivity_settings.keys())[-1] else None,
+                            label=f"After {evaluation_threshold} days" if case_index==0 else None,
+                            )
+
+                        # axs[3].barh(sensitivity_case, delta_v_statistics["total_stats"]["mean"],
+                        #     color=color_cycle[case_index],
+                        #     xerr=delta_v_statistics["total_stats"]["std"],
+                        #     capsize=4,
+                        #     label=f"{sensitivity_settings[sensitivity_type][case_index]}"
+                        #     )
+
+
+                    else:
+
+                        axs[3].barh(sensitivity_case, delta_v_statistics["total_annual_stats_with_threshold"]["mean"],
+                            color=color_cycle[case_index], hatch='/', edgecolor='black', alpha=0.6, height=1.0,
+                            xerr=delta_v_statistics["total_annual_stats_with_threshold"]["std"],
+                            capsize=4,
+                            # label=f"Annual approx." if sensitivity_case==list(sensitivity_case_delta_v_stats.keys())[-1] else None,
+                            )
+
+                        axs1[sensitivity_type_index].barh(sensitivity_case, delta_v_statistics["total_annual_stats_with_threshold"]["mean"],
+                            color=color_cycle[case_index], hatch='/', edgecolor='black', alpha=0.6, height=1.0,
+                            xerr=delta_v_statistics["total_annual_stats_with_threshold"]["std"],
+                            capsize=4,
+                            # label=f"After {evaluation_threshold} days" if sensitivity_type==list(sensitivity_settings.keys())[-1] else None,
+                            # label=f"Annual approx." if case_index==0 else None,
+                            )
+
 
                     ylabel = self.convert_key(sensitivity_type)
                     if sensitivity_type == "initial_estimation_error":
@@ -316,8 +343,12 @@ class PlotSensitivityResults():
                 plt.tight_layout()
 
                 if self.save_figure:
-                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_{sensitivity_type}"], custom_sub_folder_name=self.file_name)
-                    utils.save_figure_to_folder(figs=[fig1], labels=[f"{self.current_time}"], custom_sub_folder_name=self.file_name)
+                    if show_annual:
+                        utils.save_figure_to_folder(figs=[fig], labels=[f"annual_{self.current_time}_{sensitivity_type}"], custom_sub_folder_name=self.file_name)
+                        utils.save_figure_to_folder(figs=[fig1], labels=[f"annual_{self.current_time}"], custom_sub_folder_name=self.file_name)
+                    else:
+                        utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_{sensitivity_type}"], custom_sub_folder_name=self.file_name)
+                        utils.save_figure_to_folder(figs=[fig1], labels=[f"{self.current_time}"], custom_sub_folder_name=self.file_name)
 
                 if self.save_dict:
                     utils.save_dict_to_folder(dicts=[sensitivity_statistics], labels=[f"{self.current_time}"], custom_sub_folder_name=self.file_name)

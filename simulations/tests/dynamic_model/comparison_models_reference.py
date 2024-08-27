@@ -127,7 +127,7 @@ def comparison_models_reference(simulation_start_epoch_MJD, propagation_time, st
 # comparison_models_reference(60390, 5, step_size=0.001)
 
 
-# import FrameConverter2
+# import FrameConverter
 
 # def continuities_reference(simulation_start_epoch_MJD, propagation_time, step_size=0.001):
 
@@ -176,12 +176,12 @@ def comparison_models_reference(simulation_start_epoch_MJD, propagation_time, st
 #                                                                                         solve_variational_equations=False)
 
 
-#                 frame_converter = FrameConverter2.FrameConverter(state_history, dependent_variables_history[:, :6], epochs)
+#                 frame_converter = FrameConverter.FrameConverter(state_history, dependent_variables_history[:, :6], epochs)
 #                 synodic_state_history, synodic_state_history_moon = frame_converter.InertialToSynodicHistoryConverter()
 
 
 
-#     frame_converter = FrameConverter2.FrameConverter(reference_state_history, reference_state_history_moon, epochs)
+#     frame_converter = FrameConverter.FrameConverter(reference_state_history, reference_state_history_moon, epochs)
 #     synodic_state_history_ref, synodic_state_history_ref_moon = frame_converter.InertialToSynodicHistoryConverter()
 
 #     # Get difference between epochs

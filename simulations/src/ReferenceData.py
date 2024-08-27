@@ -124,7 +124,6 @@ class ReferenceData():
 
         self.state_history_reference_lumio = np.stack([state_fixed_LUMIO_Earth_centered, state_fixed_Moon_Earth_centered, state_fixed_Sun_Earth_centered])
 
-
         folder_path = reference_folder_path / "DataLPF" / "TextFiles"
         file_paths = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if file.endswith('.txt')]
 
@@ -170,7 +169,8 @@ class ReferenceData():
 
         else:
             if get_full_history == True:
-                return data_dict
+                # return data_dict
+                return {epoch: vector for epoch, vector in zip(epochs, interpolated_states) if epoch >=user_start_epoch and epoch <= user_end_epoch}
             return {user_start_epoch: interpolated_states[0]}
 
 

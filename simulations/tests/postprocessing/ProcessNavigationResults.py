@@ -36,7 +36,7 @@ class PlotSingleNavigationResults():
             setattr(self, key, value)
 
 
-    def plot_full_state_history(self, step_size=None):
+    def plot_full_state_history(self, step_size=None, show_trajectories_only=False):
 
         if not step_size:
             step_size = self.navigation_simulator.step_size
@@ -153,13 +153,6 @@ class PlotSingleNavigationResults():
         synodic_states_truth = np.stack(list(synodic_full_state_history_truth_dict.values()))
         synodic_states_reference = np.stack(list(synodic_full_state_history_reference_dict.values()))
 
-        # print("Initial state estimated inertial: \n", inertial_states[0, :])
-        # print("Initial state truth inertial: \n", inertial_states_truth[0, :])
-        # print("Initial state estimated synodic: \n", synodic_states_estimated[0, :])
-        # print("Initial state truth synodic: \n", synodic_states_truth[0, :])
-        # print("Initial state reference inertial: \n", inertial_states_reference[0, :])
-        # print("Initial state reference synodic: \n", synodic_states_reference[0, :])
-
         # Generate the synodic states of station keeping maneuvre vectors
         def closest_key(dictionary, value):
             closest_key = None
@@ -198,15 +191,16 @@ class PlotSingleNavigationResults():
         scale=None
         alpha=0.6
         zorder=10
-        for index in range(1):
-            ax[1][0].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 5],
-                        angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
-            ax[1][1].quiver(arrow_plot_data[:, 1], arrow_plot_data[:, 2], arrow_plot_data[:,4], arrow_plot_data[:,5],
-                        angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
-            ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
-                        angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
-            ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
-                        alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 else None)
+        if not show_trajectories_only:
+            for index in range(1):
+                ax[1][0].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 5],
+                            angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
+                ax[1][1].quiver(arrow_plot_data[:, 1], arrow_plot_data[:, 2], arrow_plot_data[:,4], arrow_plot_data[:,5],
+                            angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
+                ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
+                            angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
+                ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
+                            alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 else None)
 
         # Generate the synodic states of the moon
         synodic_full_state_history_moon_dict = {}
@@ -228,62 +222,84 @@ class PlotSingleNavigationResults():
         for i in range(2):
             if i == 0:
                 color="gray"
+                label="LPF"
+                if show_trajectories_only:
+                    color="red"
             else:
                 color="black"
+                label="LUMIO"
+                if show_trajectories_only:
+                    color="blue"
 
             ax[i][0].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 2], s=50, color="darkgray")
             ax[i][1].scatter(synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray")
             ax[i][2].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], s=50, color="darkgray", label="Moon" if i==0 else None)
             ax[i][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
             ax[i][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
-            ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.5, color=color, label="LPF" if i==0 else None)
-            ax[1][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
-            ax[1][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
-            ax[1][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.1, color=color, label="LUMIO" if i==1 else None)
+            ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.5, color=color, label=label)
+
+            if i == 0:
+                ax[1][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
+                ax[1][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
+                ax[1][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.1, color=color)
+
+                # ax[1][0].plot(synodic_states_reference[:, 6], synodic_states_reference[:, 8], lw=3, color="green")
+                # ax[1][1].plot(synodic_states_reference[:, 7], synodic_states_reference[:, 8], lw=2, color="green")
+                # ax[1][2].plot(synodic_states_reference[:, 6], synodic_states_reference[:, 7], lw=3, color="green")
+
+            # Plotting the 3D plots
+            ax_3d.plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.2, label=label, color=color)
+            # ax_3d.plot(synodic_states_estimated[:, 6], synodic_states_estimated[:, 7], synodic_states_estimated[:, 8], lw=0.7, color=color)
+            ax_3d2.plot(state_history_estimated[:,6*i+0], state_history_estimated[:,6*i+1], state_history_estimated[:,6*i+2], lw=0.5, label=label, color=color)
+            # ax_3d2.plot(state_history_estimated[:,6], state_history_estimated[:,7], state_history_estimated[:,8], lw=0.5, label="LUMIO", color=color)
+
+            if show_trajectories_only:
+                label = "Start"
+                ax[i][0].scatter(synodic_states_estimated[0, 6*i+0], synodic_states_estimated[0, 6*i+2], s=30, marker="X", color=color)
+                ax[i][1].scatter(synodic_states_estimated[0, 6*i+1], synodic_states_estimated[0, 6*i+2], s=30, marker="X", color=color)
+                ax[i][2].scatter(synodic_states_estimated[0, 6*i+0], synodic_states_estimated[0, 6*i+1], s=30, marker="X", color=color, label=label)
+
+                ax_3d.scatter(synodic_states_estimated[0, 6*i+0], synodic_states_estimated[0, 6*i+1], synodic_states_estimated[0, 6*i+2], s=30, marker="X", color=color, label=label)
+                ax_3d2.scatter(state_history_estimated[0, 6*i+0], state_history_estimated[0, 6*i+1], state_history_estimated[0, 6*i+2], s=30, marker="X", color=color, label=label)
+
 
         ax_3d.scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray", label="Moon")
-        ax_3d.plot(synodic_states_estimated[:, 0], synodic_states_estimated[:, 1], synodic_states_estimated[:, 2], lw=0.2, color="gray")
-        ax_3d.plot(synodic_states_estimated[:, 6], synodic_states_estimated[:, 7], synodic_states_estimated[:, 8], lw=0.7, color="black")
-        # ax_3d.scatter(-mu, 0, 0, label="Earth", color="darkblue", s=50)
-
-        # ax_3d2.plot(state_history_reference[:,0], state_history_reference[:,1], state_history_reference[:,2], label="LPF ref", color="green")
-        # ax_3d2.plot(state_history_reference[:,6], state_history_reference[:,7], state_history_reference[:,8], label="LUMIO ref", color="green")
-        # ax_3d2.plot(state_history_truth[:,0], state_history_truth[:,1], state_history_truth[:,2], label="LPF truth", color="black", ls="--")
-        # ax_3d2.plot(state_history_truth[:,6], state_history_truth[:,7], state_history_truth[:,8], label="LUMIO truth", color="black", ls="--")
-        ax_3d2.plot(state_history_estimated[:,0], state_history_estimated[:,1], state_history_estimated[:,2], lw=0.5, label="LPF", color="gray")
-        ax_3d2.plot(state_history_estimated[:,6], state_history_estimated[:,7], state_history_estimated[:,8], lw=0.5, label="LUMIO", color="black")
         ax_3d2.scatter(0, 0, 0, color="darkblue", s=50, label="Earth")
 
-        for num, (start, end) in enumerate(self.navigation_simulator.observation_windows):
-            synodic_states_window_dict = {key: value for key, value in synodic_full_state_history_estimated_dict.items() if key >= start and key <= end}
-            synodic_states_window = np.stack(list(synodic_states_window_dict.values()))
+        if not show_trajectories_only:
+            for num, (start, end) in enumerate(self.navigation_simulator.observation_windows):
+                synodic_states_window_dict = {key: value for key, value in synodic_full_state_history_estimated_dict.items() if key >= start and key <= end}
+                synodic_states_window = np.stack(list(synodic_states_window_dict.values()))
 
-            inertial_states_window_dict = {key: value for key, value in full_state_history_estimated_dict.items() if key >= start and key <= end}
-            inertial_states_window = np.stack(list(inertial_states_window_dict.values()))
+                inertial_states_window_dict = {key: value for key, value in full_state_history_estimated_dict.items() if key >= start and key <= end}
+                inertial_states_window = np.stack(list(inertial_states_window_dict.values()))
 
-            for i in range(2):
-                linewidth=2
+                for i in range(2):
+                    linewidth=2
 
-                if num == 0:
-                    ax[i][0].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+2], color=color_cycle[num%10], s=20, marker="X")
-                    ax[i][1].scatter(synodic_states_window[0, 6*i+1], synodic_states_window[0, 6*i+2], color=color_cycle[num%10], s=20, marker="X")
-                    ax[i][2].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+1], color=color_cycle[num%10], s=20, marker="X", label="Start" if i == 0 else None)
+                    if num == 0:
+                        ax[i][0].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+2], color=color_cycle[num%10], s=20, marker="X")
+                        ax[i][1].scatter(synodic_states_window[0, 6*i+1], synodic_states_window[0, 6*i+2], color=color_cycle[num%10], s=20, marker="X")
+                        ax[i][2].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+1], color=color_cycle[num%10], s=20, marker="X", label="Start" if i == 0 else None)
 
-                ax[i][0].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color_cycle[num%10])
-                ax[i][1].plot(synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color_cycle[num%10])
-                ax[i][2].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], linewidth=linewidth, color=color_cycle[num%10], label=f"Arc {num+1}" if i==0 else None)
+                    ax[i][0].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color_cycle[num%10])
+                    ax[i][1].plot(synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=linewidth, color=color_cycle[num%10])
+                    ax[i][2].plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], linewidth=linewidth, color=color_cycle[num%10], label=f"Arc {num+1}" if i==0 else None)
 
-                ax_3d.plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=0.5 if i ==0 else 2, color=color_cycle[num%10], label=f"Arc {num+1}" if i==1 else None)
-                ax_3d2.plot(inertial_states_window[:, 6*i+0], inertial_states_window[:, 6*i+1], inertial_states_window[:, 6*i+2], linewidth=2, color=color_cycle[num%10], label=f"Arc {num+1}" if i==0 else None)
+                    ax_3d.plot(synodic_states_window[:, 6*i+0], synodic_states_window[:, 6*i+1], synodic_states_window[:, 6*i+2], linewidth=0.5 if i ==0 else 2, color=color_cycle[num%10], label=f"Arc {num+1}" if i==1 else None)
+                    ax_3d2.plot(inertial_states_window[:, 6*i+0], inertial_states_window[:, 6*i+1], inertial_states_window[:, 6*i+2], linewidth=2, color=color_cycle[num%10], label=f"Arc {num+1}" if i==0 else None)
 
-            for i in range(len(synodic_states_window[:, 0])):
-                ax_3d.plot([synodic_states_window[i, 0], synodic_states_window[i, 6]],
-                            [synodic_states_window[i, 1], synodic_states_window[i, 7]],
-                            [synodic_states_window[i, 2], synodic_states_window[i, 8]], color=color_cycle[num%10], lw=0.5, alpha=0.2)
+                len_links = len(synodic_states_window[:, 0])
+                max_links = 20
+                indices = np.linspace(0, len_links - 1, max_links, dtype=int)
+                for i in indices:
+                    ax_3d.plot([synodic_states_window[i, 0], synodic_states_window[i, 6]],
+                                [synodic_states_window[i, 1], synodic_states_window[i, 7]],
+                                [synodic_states_window[i, 2], synodic_states_window[i, 8]], color=color_cycle[num%10], lw=0.5, alpha=0.2)
 
-                ax_3d2.plot([inertial_states_window[i, 0], inertial_states_window[i, 6]],
-                            [inertial_states_window[i, 1], inertial_states_window[i, 7]],
-                            [inertial_states_window[i, 2], inertial_states_window[i, 8]], color=color_cycle[num%10], lw=0.5, alpha=0.2)
+                    ax_3d2.plot([inertial_states_window[i, 0], inertial_states_window[i, 6]],
+                                [inertial_states_window[i, 1], inertial_states_window[i, 7]],
+                                [inertial_states_window[i, 2], inertial_states_window[i, 8]], color=color_cycle[num%10], lw=0.5, alpha=0.2)
 
         axes_labels = ['X [-]', 'Y [-]', 'Z [-]']
         for i in range(2):
@@ -317,7 +333,7 @@ class PlotSingleNavigationResults():
         # fig1_3d.suptitle(f"Tracking arcs, synodic frame ")
         # fig1_3d2.suptitle(f"Tracking arcs, inertial frame ")
         plt.tight_layout()
-        plt.legend()
+        # plt.legend()
 
 
     def plot_formal_error_history(self):

@@ -26,7 +26,7 @@ from tests.postprocessing import ProcessNavigationResults, ProcessSensitivityRes
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 10
+num_runs = 5
 default_window_inputs = {
     "duration": 28,
     "arc_interval": 3,
@@ -88,6 +88,12 @@ for sensitivity_name, sensitivity_settings in combined_sensitivity_settings.item
     process_sensitivity_results.plot_sensitivity_analysis_results(
         sensitivity_settings,
         evaluation_threshold=14
+    )
+
+    process_sensitivity_results.plot_sensitivity_analysis_results(
+        sensitivity_settings,
+        evaluation_threshold=14,
+        show_annual=True
     )
     print("Plotting done...")
 
