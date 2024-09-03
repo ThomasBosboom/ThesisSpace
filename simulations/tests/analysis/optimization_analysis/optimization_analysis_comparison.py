@@ -25,13 +25,14 @@ from optimization_analysis_helper_functions import \
 
 if __name__ == "__main__":
 
-    # optimization_methods = ["particle_swarm", "nelder_mead"]
     optimization_methods = ["particle_swarm"]
     custom_tags = ["default28dur1len3int", "default56dur1len3int", "default28dur1len3intSHSRP"]
+    comparison_labels = ["PSO, 28, PMSRP", "PSO, 56, PMSRP", "PSO, 56, SHSRP"]
 
-    # comparison_labels = ["Particle-Swarm", "Nelder-Mead"]
-    comparison_labels = ["28", "56", "SHSRP"]
-    # comparison_labels = ["PMSRP", "SHSRP"]
+
+    # optimization_methods = ["particle_swarm", "nelder_mead"]
+    # custom_tags = ["default28dur1len3int"]
+    # comparison_labels = ["PSO, 28, PMSRP", "Nelder-Mead, 28, PMSRP"]
 
     cases = {
         "delta_v_min": [0.00],
@@ -68,6 +69,6 @@ if __name__ == "__main__":
     process_optimization_result.plot_comparison_optimization_maneuvre_costs(auxilary_settings, process_optimization_results,
                                     compare_time_tags=compare_time_tags,
                                     show_observation_window_settings=True,
-                                    custom_num_runs=5)
+                                    custom_num_runs=3)
 
     plt.show()

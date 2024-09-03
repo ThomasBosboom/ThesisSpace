@@ -246,7 +246,7 @@ class ProcessOptimizationResults():
                 if label != self.optimization_results["file_name"]:
                     if "nelder_mead" in label or "Nelder-Mead" in label or "Nelder Mead" in label:
                         file_name = "optimization_analysis_nelder_mead"
-                    elif "particle_swarm" in label or "Particle-Swarm" in label or "Particle Swarm" in label:
+                    elif "particle_swarm" in label or "Particle-Swarm" in label or "Particle Swarm" in label or "PSO" in label:
                         file_name = "optimization_analysis_particle_swarm"
 
                 optimization_results_dict[label][time_tag] = self.optimization_model.load_from_json(time_tag, folder_name=file_name)
@@ -277,7 +277,7 @@ class ProcessOptimizationResults():
         # )
 
         for key in optimization_results_dict.keys():
-            observation_windows_settings.update({f"Optimized, {key}": [
+            observation_windows_settings.update({f"Optimized,\n {key}": [
                 (optimization_results_dict[key][time_tag]["best_observation_windows"], num_runs, str(run))
                     for run, time_tag in enumerate(time_tags[key])
                 ]
@@ -307,6 +307,7 @@ class ProcessOptimizationResults():
         # process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=True)
         # process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=False)
         # process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=evaluation_threshold)
+        process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(show_annual=False, evaluation_threshold=evaluation_threshold, worst_case=False, bar_labeler=None)
         process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(show_annual=True, evaluation_threshold=evaluation_threshold, worst_case=False, bar_labeler=None)
 
 

@@ -1685,6 +1685,8 @@ class PlotMultipleNavigationResults():
             std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
             data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
 
+            # print("MEAN DATA: ", data)
+            # print("STD DATA: ", std_data)
             sorted_data = list(data.items())
             sorted_k, sorted_v  = zip(*sorted_data)
             max_n_bars = max(len(v) for v in data.values())

@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     use_same_seed = False
     run_optimization = False
-    plot_full_comparison_cases = [[], 3]
+    plot_full_comparison_cases = [[0], 3]
     from_file = True
 
 
