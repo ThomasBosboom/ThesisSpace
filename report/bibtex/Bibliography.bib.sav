@@ -2623,3 +2623,24 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url       = {https://www.mdpi.com/2226-4310/11/6/497},
   urldate   = {2024-08-25},
 }
+
+ 
+@Book{Lal2017,
+  author = {Lal, Bhavya and Blanco, Elena and Behrens, Jonathan and Corbin, Benjamin and Green, Ellen and Picard, Alyssa and Balakrishnan, Asha},
+  title  = {Global {Trends} in {Small} {Satellites}},
+  year   = {2017},
+  month  = jul,
+  file   = {Full Text PDF:https\://www.researchgate.net/profile/Jonathan-Behrens/publication/335429689_Global_Trends_in_Small_Satellites/links/5d65321e299bf1f70b103008/Global-Trends-in-Small-Satellites.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/335429689_Global_Trends_in_Small_Satellites:},
+}
+
+ 
+@Book{Querejazu2017,
+  author     = {Querejazu, Daniel and Randazzese, Lucien and Hunter, Andrew and Johnson, Kaitlyn},
+  title      = {Small {Satellites}, {Big} {Missions}: {The} {Implications} of the {Growing} {Small} {Satellite} {Market} for {Launch} and {Key} {Applications}},
+  year       = {2017},
+  month      = nov,
+  abstract   = {On June 21, 2017, the Center for Strategic and International Studies (CSIS) hosted a two-panel event on opportunities emerging from new space technologies, particularly small-scale satellites. Panelists discussed the implications of new small satellite technology and small satellite market dynamics, not only for the government space sector, but also for private-sector users of satellite technology and the growing cohort of commercial space systems suppliers. That small satellites will continue to grow—in use, market share, capability, and overall importance—is now widely accepted. Appreciation for the direction, pace, and implications of this growth, however, remains limited. The June CSIS event and the report that follows represent an effort to understand and describe the shape and consequences of the growth ahead. For a complete record of the session, please access the full video file at https://www.csis.org/events/small-satellites-big-missions.},
+  doi        = {10.13140/RG.2.2.18595.55846},
+  file       = {Full Text PDF:https\://www.researchgate.net/profile/Kaitlyn-Johnson-9/publication/320911449_Small_Satellites_Big_Missions_The_Implications_of_the_Growing_Small_Satellite_Market_for_Launch_and_Key_Applications/links/5a020d9eaca2720df3c7b9a5/Small-Satellites-Big-Missions-The-Implications-of-the-Growing-Small-Satellite-Market-for-Launch-and-Key-Applications.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/320911449_Small_Satellites_Big_Missions_The_Implications_of_the_Growing_Small_Satellite_Market_for_Launch_and_Key_Applications:},
+  shorttitle = {Small {Satellites}, {Big} {Missions}},
+}
