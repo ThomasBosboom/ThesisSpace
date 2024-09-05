@@ -218,13 +218,16 @@ def generate_navigation_outputs(observation_windows_settings, **kwargs):
 
 
 
-def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, **kwargs):
+def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, custom_observation_windows_settings=None, **kwargs):
 
     observation_windows_settings = {
         "Constant": [
             (get_constant_arc_observation_windows(**default_window_inputs), num_runs, None),
         ]
     }
+
+    if custom_observation_windows_settings:
+        observation_windows_settings = custom_observation_windows_settings
 
     navigation_outputs_sensitivity = {}
 

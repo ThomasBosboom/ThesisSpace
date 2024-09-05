@@ -26,7 +26,7 @@ from tests.postprocessing import ProcessNavigationResults, ProcessSensitivityRes
 ###### Sensitivity analysis #####################################
 #################################################################
 
-num_runs = 5
+num_runs = 2
 default_window_inputs = {
     "duration": 28,
     "arc_interval": 3,
@@ -35,28 +35,28 @@ default_window_inputs = {
 }
 
 combined_sensitivity_settings = {
-    "sensitivity_settings_windows": {
-        "arc_duration": [0.1, 0.5, 1.0, 2.0],
-        "arc_interval": [1.0, 2.0, 3.0, 4.0],
-        "mission_start_epoch": [60390, 60395, 60400, 60405],
-    },
+    # "sensitivity_settings_windows": {
+    #     "arc_duration": [0.1, 0.5, 1.0, 2.0],
+    #     "arc_interval": [1.0, 2.0, 3.0, 4.0],
+    #     "mission_start_epoch": [60390, 60395, 60400, 60405],
+    # },
     "sensitivity_settings_auxiliary": {
-        "initial_estimation_error": [
-            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/100,
-            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/10,
-            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
-            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
-            ],
-        "orbit_insertion_error": [np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-                                  np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0.5,
-                                  np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1,
-                                  np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
-            ],
-        "observation_interval": [100, 500, 1000, 5000],
-        "noise": [0.1, 1, 10, 100],
-        "target_point_epochs": [[2], [3], [4], [5]],
-        "delta_v_min": [0.00, 0.01, 0.02, 0.03],
-        "station_keeping_error": [0.00, 0.01, 0.05, 0.1],
+        # "initial_estimation_error": [
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/100,
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/10,
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
+        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+        #     ],
+        # "orbit_insertion_error": [np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
+        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0.5,
+        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1,
+        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
+        #     ],
+        # "observation_interval": [100, 500, 1000, 5000],
+        # "noise": [0.1, 1, 10, 100],
+        # "target_point_epochs": [[2], [3], [4], [5]],
+        "delta_v_min": [0.00, 0.003, 0.01, 0.02, 0.03],
+        # "station_keeping_error": [0.00, 0.01, 0.05, 0.1],
     }
 }
 
@@ -65,10 +65,51 @@ auxilary_settings = {
     "step_size": 0.05
 }
 
+custom_observation_windows_settings = {
+    "Optimized": [
+        ([
+        [
+            60390,
+            60390.76217095995
+        ],
+        [
+            60393.76217095995,
+            60394.92989843622
+        ],
+        [
+            60397.92989843622,
+            60398.78205703818
+        ],
+        [
+            60401.78205703818,
+            60402.82977960193
+        ],
+        [
+            60405.82977960193,
+            60407.68702720861
+        ],
+        [
+            60410.68702720861,
+            60410.78702720861
+        ],
+        [
+            60413.78702720861,
+            60413.887027208606
+        ]
+    ], num_runs, None),
+    ]
+}
+
 for sensitivity_name, sensitivity_settings in combined_sensitivity_settings.items():
 
     print("Sensitivity settings \n", sensitivity_settings)
-    navigation_outputs_sensitivity = helper_functions.generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_settings, default_window_inputs, **auxilary_settings)
+    navigation_outputs_sensitivity = helper_functions.generate_navigation_outputs_sensitivity_analysis(
+        num_runs,
+        sensitivity_settings,
+        default_window_inputs,
+        custom_observation_windows_settings=custom_observation_windows_settings,
+        **auxilary_settings
+    )
 
     #################################################################
     ###### Plot results of sensitivity analysis #####################
@@ -93,7 +134,8 @@ for sensitivity_name, sensitivity_settings in combined_sensitivity_settings.item
     process_sensitivity_results.plot_sensitivity_analysis_results(
         sensitivity_settings,
         evaluation_threshold=14,
-        show_annual=True
+        show_annual=True,
+        custom_color_cycle=["gray", "red", "gray", "gray", "gray"]
     )
     print("Plotting done...")
 

@@ -90,7 +90,7 @@ class PlotSensitivityResults():
 
 
 
-    def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True, show_annual=False):
+    def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True, show_annual=False, custom_color_cycle=None):
 
         self.save_figure = save_figure
         self.save_table = save_table
@@ -108,13 +108,15 @@ class PlotSensitivityResults():
         }
 
         nrows = len(list(sensitivity_settings.items()))
-        fig1, axs1 = plt.subplots(nrows, 1, figsize=(7, min(3*nrows, 10)), sharex=True)
+        fig1, axs1 = plt.subplots(nrows, 1, figsize=(7, min(4*nrows, 10)), sharex=True)
 
         if not isinstance(axs1, np.ndarray):
             axs1 = np.array([axs1])
         axs1 = axs1.flatten()
 
         color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        if custom_color_cycle:
+            color_cycle = custom_color_cycle
         sensitivity_statistics = {}
         for type_index, (window_type, navigation_outputs_sensitivity_types) in enumerate(self.navigation_outputs_sensitivity.items()):
 
@@ -282,14 +284,14 @@ class PlotSensitivityResults():
                     else:
 
                         axs[3].barh(sensitivity_case, delta_v_statistics["total_annual_stats_with_threshold"]["mean"],
-                            color=color_cycle[case_index], hatch='/', edgecolor='black', alpha=0.6, height=1.0,
+                            color=color_cycle[case_index], hatch='/', edgecolor='black', alpha=0.6,
                             xerr=delta_v_statistics["total_annual_stats_with_threshold"]["std"],
                             capsize=4,
                             # label=f"Annual approx." if sensitivity_case==list(sensitivity_case_delta_v_stats.keys())[-1] else None,
                             )
 
                         axs1[sensitivity_type_index].barh(sensitivity_case, delta_v_statistics["total_annual_stats_with_threshold"]["mean"],
-                            color=color_cycle[case_index], hatch='/', edgecolor='black', alpha=0.6, height=1.0,
+                            color=color_cycle[case_index], hatch='/', edgecolor='black', alpha=0.6,
                             xerr=delta_v_statistics["total_annual_stats_with_threshold"]["std"],
                             capsize=4,
                             # label=f"After {evaluation_threshold} days" if sensitivity_type==list(sensitivity_settings.keys())[-1] else None,
