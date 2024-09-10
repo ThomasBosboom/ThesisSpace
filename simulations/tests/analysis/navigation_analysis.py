@@ -27,7 +27,11 @@ num_runs = 5
 duration = 28
 mission_start_epoch = 60390.0
 
-auxilary_settings = {"step_size": 0.001}
+auxilary_settings = {
+    "step_size": 0.001,
+    # "apriori_covariance": np.diag(np.array([5e2, 5e2, 5e2, 1e-2, 1e-2, 1e-2, 5e2, 5e2, 5e2, 1e-2, 1e-2, 1e-2])**2)
+    "include_station_keeping": False
+}
 
 
 #################################################################
@@ -98,49 +102,37 @@ observation_windows_settings = {
 # }
 
 
-# arc_lengths = [0.5, 1.0, 2.0]
-# arc_intervals = [3.0]
-# num_runs = 1
-# observation_windows_settings = {
-#     f"{arc_length} day": [
-#         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=arc_interval, arc_duration=arc_length, mission_start_epoch=mission_start_epoch), num_runs, None) for arc_interval in arc_intervals
-#     ]
-#     for arc_length in arc_lengths
-# }
+arc_lengths = [1.0]
+arc_intervals = [3.0]
+num_runs = 1
+observation_windows_settings = {
+    f"{arc_length} day": [
+        (helper_functions.get_constant_arc_observation_windows(56, arc_interval=arc_interval, arc_duration=arc_length, mission_start_epoch=mission_start_epoch), num_runs, None) for arc_interval in arc_intervals
+    ]
+    for arc_length in arc_lengths
+}
 
 
 
 observation_windows_settings = {"optimized": [([
+        # [
+        #     60390,
+        #     60390.2
+        # ],
+        # [
+        #     60445.8,
+        #     60446
+        # ]
+
         [
             60390,
-            60390.76217095995
+            60390.2
         ],
         [
-            60393.76217095995,
-            60394.92989843622
-        ],
-        [
-            60397.92989843622,
-            60398.78205703818
-        ],
-        [
-            60401.78205703818,
-            60402.82977960193
-        ],
-        [
-            60405.82977960193,
-            60407.68702720861
-        ],
-        [
-            60410.68702720861,
-            60410.78702720861
-        ],
-        [
-            60413.78702720861,
-            60413.887027208606
+            60423,
+            60425
         ]
-    ], 5, None)]
-
+    ], 1, None)]
 }
 
 
@@ -180,10 +172,10 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         )
 
                         process_single_navigation_results.plot_estimation_error_history()
-                        # process_single_navigation_results.plot_uncertainty_history()
+                        process_single_navigation_results.plot_uncertainty_history()
                         # process_single_navigation_results.plot_dispersion_history()
-                        process_single_navigation_results.plot_full_state_history(show_trajectories_only=False)
-                        # process_single_navigation_results.plot_full_state_history(show_trajectories_only=True)
+                        # process_single_navigation_results.plot_full_state_history(show_trajectories_only=False)
+                        process_single_navigation_results.plot_full_state_history(show_trajectories_only=True)
                         # process_single_navigation_results.plot_formal_error_history()
                         process_single_navigation_results.plot_observations()
                         process_single_navigation_results.plot_correlation_history()
@@ -203,10 +195,10 @@ process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavig
 # process_multiple_navigation_results.plot_uncertainty_comparison()
 # process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=False)
 # process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=True)
-process_multiple_navigation_results.plot_full_state_history_comparison(step_size=None)
+# process_multiple_navigation_results.plot_full_state_history_comparison(step_size=None)
 # process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
 # process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, show_annual=False, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
-process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, show_annual=True, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
+# process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, show_annual=True, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
 # process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None,  worst_case=False)
 print("Plotting done...")
 

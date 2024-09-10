@@ -58,6 +58,8 @@ class TableGenerator():
                             f"{annual_stats.get('std', 0):.{decimals}f} & " + \
                             f"{annual_stats.get('mean', 0)+3*annual_stats.get('std', 0):.{decimals}f}" + r' \\ ' + '\n'
 
+                print(f"{annual_stats.get('mean', 0):.{decimals}f} & ", f"{annual_stats.get('std', 0):.{decimals}f} & ")
+
         table_str += r'\end{tabular}' + '\n'
         table_str += r'\caption{' + caption + '}' + '\n'
         table_str += r'\label{' + label + '}' + '\n'
@@ -66,7 +68,7 @@ class TableGenerator():
         if self.save_table:
             utils.save_table_to_folder(tables=[table_str], labels=[f"{self.current_time}_sensitivity_analysis"], custom_sub_folder_name=self.file_name)
 
-        print(table_str, sensitivity_statistics)
+        # print(table_str, sensitivity_statistics)
 
         print(f"LaTeX table code has been written")
 

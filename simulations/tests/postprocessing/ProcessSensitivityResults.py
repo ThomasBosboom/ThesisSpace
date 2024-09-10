@@ -235,6 +235,7 @@ class PlotSensitivityResults():
                         relative_epoch = epoch-navigation_simulator.mission_start_epoch
                         if sensitivity_type == "mission_start_epoch":
                             relative_epoch = epoch-float(sensitivity_case)
+
                         axs[2].bar(relative_epoch, statistics["mean"],
                                 color=color_cycle[case_index],
                                 alpha=0.6,
@@ -273,14 +274,6 @@ class PlotSensitivityResults():
                             label=f"After {evaluation_threshold} days" if case_index==0 else None,
                             )
 
-                        # axs[3].barh(sensitivity_case, delta_v_statistics["total_stats"]["mean"],
-                        #     color=color_cycle[case_index],
-                        #     xerr=delta_v_statistics["total_stats"]["std"],
-                        #     capsize=4,
-                        #     label=f"{sensitivity_settings[sensitivity_type][case_index]}"
-                        #     )
-
-
                     else:
 
                         axs[3].barh(sensitivity_case, delta_v_statistics["total_annual_stats_with_threshold"]["mean"],
@@ -297,7 +290,6 @@ class PlotSensitivityResults():
                             # label=f"After {evaluation_threshold} days" if sensitivity_type==list(sensitivity_settings.keys())[-1] else None,
                             # label=f"Annual approx." if case_index==0 else None,
                             )
-
 
                     ylabel = self.convert_key(sensitivity_type)
                     if sensitivity_type == "initial_estimation_error":
@@ -316,7 +308,6 @@ class PlotSensitivityResults():
                     axs1[sensitivity_type_index].grid(alpha=0.5, linestyle='--', zorder=0)
                     axs1[sensitivity_type_index].set_ylabel(f"{ylabel} \n{units[sensitivity_type]}")
                     axs1[-1].set_xlabel(r"Total $||\Delta V||$ [m/s]", fontsize="small")
-                    # axs1[-1].legend(loc='upper center', bbox_to_anchor=(0.5, -0.3), fontsize="small")
 
                 sensitivity_statistics[sensitivity_type] = sensitivity_case_delta_v_stats
 

@@ -166,41 +166,42 @@ class PlotSingleNavigationResults():
 
             return closest_key
 
-        synodic_delta_v_dict = {}
-        for epoch, delta_v in delta_v_dict.items():
+        if self.navigation_simulator.include_station_keeping:
+            synodic_delta_v_dict = {}
+            for epoch, delta_v in delta_v_dict.items():
 
-            epoch = closest_key(transformation_matrix_dict, epoch)
-            transformation_matrix = transformation_matrix_dict[epoch]
-            synodic_state = np.dot(transformation_matrix, np.concatenate((np.zeros((3)), delta_v)))
+                epoch = closest_key(transformation_matrix_dict, epoch)
+                transformation_matrix = transformation_matrix_dict[epoch]
+                synodic_state = np.dot(transformation_matrix, np.concatenate((np.zeros((3)), delta_v)))
 
-            LU = np.linalg.norm((moon_data_dict[epoch][0:3]))
-            TU = np.sqrt(LU**3/(G*(m1+m2)))
-            synodic_delta_v = synodic_state/(LU/TU)
-            synodic_delta_v = (1-mu)*synodic_state
+                LU = np.linalg.norm((moon_data_dict[epoch][0:3]))
+                TU = np.sqrt(LU**3/(G*(m1+m2)))
+                synodic_delta_v = synodic_state/(LU/TU)
+                synodic_delta_v = (1-mu)*synodic_state
 
-            synodic_delta_v_dict.update({epoch: synodic_state[3:6]})
+                synodic_delta_v_dict.update({epoch: synodic_state[3:6]})
 
-        synodic_delta_v_history = np.stack(list(synodic_delta_v_dict.values()))
+            synodic_delta_v_history = np.stack(list(synodic_delta_v_dict.values()))
 
-        # for start, length, angle in zip(start_positions, arrow_lengths, arrow_angles):
-        arrow_plot_dict = {}
-        for index, (epoch, delta_v) in enumerate(synodic_delta_v_dict.items()):
-            arrow_plot_dict[epoch] = np.concatenate((synodic_full_state_history_estimated_dict[epoch][6:9], delta_v))
+            # for start, length, angle in zip(start_positions, arrow_lengths, arrow_angles):
+            arrow_plot_dict = {}
+            for index, (epoch, delta_v) in enumerate(synodic_delta_v_dict.items()):
+                arrow_plot_dict[epoch] = np.concatenate((synodic_full_state_history_estimated_dict[epoch][6:9], delta_v))
 
-        arrow_plot_data = np.stack(list(arrow_plot_dict.values()))
-        scale=None
-        alpha=0.6
-        zorder=10
-        if not show_trajectories_only:
-            for index in range(1):
-                ax[1][0].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 5],
-                            angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
-                ax[1][1].quiver(arrow_plot_data[:, 1], arrow_plot_data[:, 2], arrow_plot_data[:,4], arrow_plot_data[:,5],
-                            angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
-                ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
-                            angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
-                ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
-                            alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 else None)
+            arrow_plot_data = np.stack(list(arrow_plot_dict.values()))
+            scale=None
+            alpha=0.6
+            zorder=10
+            if not show_trajectories_only:
+                for index in range(1):
+                    ax[1][0].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 5],
+                                angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
+                    ax[1][1].quiver(arrow_plot_data[:, 1], arrow_plot_data[:, 2], arrow_plot_data[:,4], arrow_plot_data[:,5],
+                                angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha)
+                    ax[1][2].quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1], arrow_plot_data[:,3], arrow_plot_data[:,4],
+                                angles='xy', scale_units='xy', scale=scale, zorder=zorder, alpha=alpha, label="SKM" if index==0 else None)
+                    ax_3d.quiver(arrow_plot_data[:, 0], arrow_plot_data[:, 1],  arrow_plot_data[:, 2], arrow_plot_data[:, 3], arrow_plot_data[:, 4], arrow_plot_data[:, 5],
+                                alpha=alpha, color="gray", length=2, normalize=False, label="SKM" if index==0 else None)
 
         # Generate the synodic states of the moon
         synodic_full_state_history_moon_dict = {}
