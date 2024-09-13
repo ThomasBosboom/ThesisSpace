@@ -182,15 +182,6 @@ class ProcessOptimizationResults():
         if custom_num_runs is not None:
             num_runs = custom_num_runs
 
-        # observation_windows_settings = {
-        #     "Default": [
-        #         (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs, None),
-        #     ],
-        #     "Optimized": [
-        #         (self.optimization_model.generate_observation_windows(self.optimization_results["best_design_vector"]), num_runs, None)
-        #     ],
-        # }
-
         observation_windows_settings = {
             "Default": [
                 (self.optimization_results["initial_observation_windows"], num_runs, None),
@@ -202,8 +193,6 @@ class ProcessOptimizationResults():
 
         if show_observation_window_settings:
             print("Observation window settings \n:", observation_windows_settings)
-
-        # print("auxiliary_settings: ", auxilary_settings)
 
         # Run the navigation routine using given settings
         navigation_outputs = helper_functions.generate_navigation_outputs(
@@ -228,7 +217,7 @@ class ProcessOptimizationResults():
         process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=evaluation_threshold, worst_case=False, bar_labeler=None)
 
 
-    def plot_comparison_optimization_maneuvre_costs(self, auxilary_settings, process_optimization_results, compare_time_tags={}, show_observation_window_settings=False, custom_num_runs=None):
+    def plot_comparison_optimization_maneuvre_costs(self, process_optimization_results, compare_time_tags={}, show_observation_window_settings=False, custom_num_runs=None, custom_auxiliary_settings={}):
 
         optimization_keys = self.optimization_results["file_name"]
         time_tags = {optimization_keys: [self.optimization_results["current_time"]]}
@@ -236,6 +225,10 @@ class ProcessOptimizationResults():
 
         if compare_time_tags:
             time_tags = compare_time_tags
+        if custom_auxiliary_settings is None:
+            auxilary_settings = {}
+        else:
+            auxilary_settings = custom_auxiliary_settings
 
         # Collect optimization results
         optimization_results_dict = {}
@@ -256,25 +249,11 @@ class ProcessOptimizationResults():
         if custom_num_runs is not None:
             num_runs = custom_num_runs
 
-        # observation_windows_settings = {
-        #     "Default": [
-        #         (self.optimization_model.generate_observation_windows(self.optimization_results["initial_design_vector"]), num_runs, None),
-        #     ]
-        # }
-
         observation_windows_settings = {
             "Default": [
                 (self.optimization_results["initial_observation_windows"], num_runs, None),
             ]
         }
-
-        # for key in optimization_results_dict.keys():
-        #     observation_windows_settings.update({f"Optimized {key}": [
-        #         (self.optimization_model.generate_observation_windows(optimization_results_dict[key][time_tag]["best_design_vector"]), num_runs, None)
-        #             for time_tag in time_tags[key]
-        #         ]
-        #     }
-        # )
 
         for key in optimization_results_dict.keys():
             observation_windows_settings.update({f"Optimized,\n {key}": [
@@ -288,9 +267,27 @@ class ProcessOptimizationResults():
             print("Observation window settings \n:", observation_windows_settings)
 
         # Run the navigation routine using given settings
-        navigation_outputs = helper_functions.generate_navigation_outputs(
-            observation_windows_settings,
-            **auxilary_settings)
+        navigation_outputs = {}
+        for index, key in enumerate(observation_windows_settings.keys()):
+
+            if key != "Default":
+                sub_key = list(optimization_results_dict.keys())[int(index-1)]
+                for run, time_tag in enumerate(time_tags[sub_key]):
+                    auxilary_settings = optimization_results_dict[sub_key][time_tag]["kwargs"]
+                    auxilary_settings.pop("seed")
+
+                    auxilary_settings.update(custom_auxiliary_settings)
+
+            print("auxiliary_settings", auxilary_settings)
+
+            sub_navigation_outputs = helper_functions.generate_navigation_outputs(
+                {key: observation_windows_settings[key]},
+                **auxilary_settings
+            )
+
+            navigation_outputs.update(sub_navigation_outputs)
+
+        print(navigation_outputs)
 
         process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
             navigation_outputs,

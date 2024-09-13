@@ -34,7 +34,7 @@ if __name__ == "__main__":
     }
 
     auto_mode = True
-    custom_tag = "default28dur1len3intPM"
+    custom_tag = "default28dur1len3intPropulsionSHSRP"
     num_optims = 5
 
     duration = 28
@@ -74,8 +74,9 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "model_name": "PM",
-        "model_name_truth": "PM"
+        "model_name": "SHSRP",
+        "model_name_truth": "SHSRP",
+        "delta_v_min": 0.003
     }
 
     objective_functions_settings = {

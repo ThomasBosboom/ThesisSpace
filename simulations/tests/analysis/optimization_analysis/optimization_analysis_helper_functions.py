@@ -56,7 +56,7 @@ def process_case(case, run, navigation_simulator_settings, objective_functions_s
     if optimization_model_settings["duration"] <= objective_functions_settings["evaluation_threshold"]:
         objective_functions_settings["evaluation_threshold"] = optimization_model_settings["duration"]
 
-    navigation_simulator_settings.update(case)
+    # navigation_simulator_settings.update(case)
     navigation_simulator = NavigationSimulator.NavigationSimulator(
         **navigation_simulator_settings
     )
