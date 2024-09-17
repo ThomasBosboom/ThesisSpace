@@ -2644,3 +2644,40 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   file       = {Full Text PDF:https\://www.researchgate.net/profile/Kaitlyn-Johnson-9/publication/320911449_Small_Satellites_Big_Missions_The_Implications_of_the_Growing_Small_Satellite_Market_for_Launch_and_Key_Applications/links/5a020d9eaca2720df3c7b9a5/Small-Satellites-Big-Missions-The-Implications-of-the-Growing-Small-Satellite-Market-for-Launch-and-Key-Applications.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/320911449_Small_Satellites_Big_Missions_The_Implications_of_the_Growing_Small_Satellite_Market_for_Launch_and_Key_Applications:},
   shorttitle = {Small {Satellites}, {Big} {Missions}},
 }
+
+ 
+@Article{Pereira2022,
+  author    = {Pereira, Filipe and Patrick M. Reed and Selva, Daniel},
+  journal   = {NAVIGATION: Journal of the Institute of Navigation},
+  title     = {Multi-{Objective} {Design} of a {Lunar} {GNSS}},
+  year      = {2022},
+  issn      = {0028-1522, 2161-4296},
+  month     = mar,
+  number    = {1},
+  volume    = {69},
+  abstract  = {The success of future lunar missions depends on quality positioning, navigation, and timing (PNT) information. Earthbound GNSS signals can be received at lunar distances but suffer from poor geometric dilution of precision (GDOP) and provide no coverage of the lunar far side. This article explores the design space of a dedicated GNSS system in lunar orbit by using a multi-objective evolutionary algorithm framework to optimize GDOP, availability, space segment cost, station-keeping ΔV, and robustness to single-satellite failure. Results show that Pareto approximate solutions that achieve a global GDOP availability (GDOP ≤ 6.0) greater than 98\% contain a minimum of 24 satellites in near-circular polar orbits at an altitude of {\textasciitilde}2 lunar radii. The impact of single-satellite failure on GDOP outage is analyzed and a no-maneuver scenario is considered. Design rules characterizing optimal solutions are identified and trade-offs between station-keeping maneuver frequency, performance, and design lifetime are discussed.},
+  chapter   = {Regular Papers},
+  copyright = {© 2022 Institute of Navigation. This is an open access article under the terms of the Creative Commons Attribution License, which permits use, distribution and reproduction in any medium, provided the original work is properly cited.},
+  doi       = {10.33012/navi.504},
+  file      = {:Pereira2022 - Multi Objective Design of a Lunar GNSS.pdf:PDF},
+  keywords  = {design optimization, GDOP, lunar GNSS, multi-objective evolutionary algorithm (MOEA), sensitivity analysis},
+  language  = {en},
+  publisher = {Institute of Navigation},
+  url       = {https://navi.ion.org/content/69/1/navi.504},
+  urldate   = {2024-09-08},
+}
+
+ 
+@InCollection{Abraham2018,
+  author    = {Abraham, Douglas S. and MacNeal, Bruce and Heckman, David and Chen, Yijiang and Wu, Janet and Tran, Kristy and Kwok, Andrew and Lee, Carlyn-Ann},
+  publisher = {American Institute of Aeronautics and Astronautics},
+  title     = {Recommendations {Emerging} from an {Analysis} of {NASA}’s {Deep} {Space} {Communications} {Capacity}},
+  year      = {2018},
+  month     = may,
+  series    = {{SpaceOps} {Conferences}},
+  doi       = {10.2514/6.2018-2528},
+  file      = {Full Text PDF:https\://arc.aiaa.org/doi/pdf/10.2514/6.2018-2528:application/pdf},
+  keywords  = {Space Communication, Deep Space Network, Spacecraft Mission, Planets, Optical Communication, Ground Station, CubeSat, Telecommunication, InterPlanetary Network, Receiving Antennas},
+  url       = {https://arc.aiaa.org/doi/10.2514/6.2018-2528},
+  urldate   = {2024-09-08},
+}
