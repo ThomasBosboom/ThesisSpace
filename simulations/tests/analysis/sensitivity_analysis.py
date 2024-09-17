@@ -35,28 +35,28 @@ default_window_inputs = {
 }
 
 combined_sensitivity_settings = {
-    # "sensitivity_settings_windows": {
-    #     # "arc_duration": [0.1, 0.5, 1.0, 2.0],
-    #     "arc_interval": [1.0, 2.0, 3.0, 4.0],
-    #     # "mission_start_epoch": [60390, 60395, 60400, 60405],
-    # },
+    "sensitivity_settings_windows": {
+        "arc_duration": [0.1, 0.5, 1.0, 2.0],
+        "arc_interval": [1.0, 2.0, 3.0, 4.0],
+        "mission_start_epoch": [60390, 60395, 60400, 60405],
+    },
     "sensitivity_settings_auxiliary": {
-        # "initial_estimation_error": [
-        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/100,
-        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/10,
-        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
-        #     np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
-        #     ],
-        # "orbit_insertion_error": [np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
-        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0.5,
-        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1,
-        #                           np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
-        #     ],
-        # "observation_interval": [100, 500, 1000, 5000],
-        # "noise": [0.1, 1, 10, 100],
-        # "target_point_epochs": [[2], [3], [4], [5]],
-        "delta_v_min": [0.00, 0.003, 0.01, 0.02, 0.03],
-        # "station_keeping_error": [0.00, 0.01, 0.05, 0.1],
+        "initial_estimation_error": [
+            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/100,
+            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])/10,
+            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3]),
+            np.array([5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3, 5e2, 5e2, 5e2, 1e-3, 1e-3, 1e-3])*10
+            ],
+        "orbit_insertion_error": [np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0,
+                                  np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*0.5,
+                                  np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1,
+                                  np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*2
+            ],
+        "observation_interval": [100, 500, 1000, 5000],
+        "noise": [0.1, 1, 10, 100],
+        "target_point_epochs": [[2], [3], [4], [5]],
+        "delta_v_min": [0.00, 0.01, 0.02, 0.03],
+        "station_keeping_error": [0.00, 0.01, 0.05, 0.1],
     }
 }
 
@@ -104,7 +104,7 @@ for sensitivity_name, sensitivity_settings in combined_sensitivity_settings.item
         sensitivity_settings,
         evaluation_threshold=14,
         show_annual=True,
-        custom_color_cycle=["gray", "red", "gray", "gray", "gray"]
+        # custom_color_cycle=["gray", "red", "gray", "gray", "gray"]
     )
     print("Plotting done...")
 

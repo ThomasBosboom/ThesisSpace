@@ -225,10 +225,10 @@ class ProcessOptimizationResults():
 
         if compare_time_tags:
             time_tags = compare_time_tags
-        if custom_auxiliary_settings is None:
-            auxilary_settings = {}
-        else:
+        if custom_auxiliary_settings:
             auxilary_settings = custom_auxiliary_settings
+        else:
+            auxilary_settings = {}
 
         # Collect optimization results
         optimization_results_dict = {}

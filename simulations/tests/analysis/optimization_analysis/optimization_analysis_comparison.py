@@ -87,15 +87,13 @@ if __name__ == "__main__":
     #     custom_auxiliary_settings=None
     # )
 
-    custom_auxiliary_settings = {"delta_v_min": 0.003}
+    custom_auxiliary_settings = {}
     plot_optimization_analysis_comparison(
         num_runs,
         ["particle_swarm"],
         ["default28dur1len3int", "default28dur1len3intPropulsion", "default56dur1len3intPropulsion"],
         ["0.000 m/s, 28, PMSRP", "0.003 m/s, 28, PMSRP", "0.003 m/s, 56, PMSRP"],
-        custom_auxiliary_settings=None
+        custom_auxiliary_settings=custom_auxiliary_settings
     )
 
     plt.show()
-
-
