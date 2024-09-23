@@ -69,7 +69,7 @@ def get_random_arc_observation_windows(duration=28, arc_interval_vars=[3.5, 0.1]
     return observation_windows
 
 
-def get_constant_arc_observation_windows(duration=28, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=60390):
+def get_constant_arc_observation_windows(duration=28, arc_interval=3, threshold=1, arc_duration=1, mission_start_epoch=60390, gabs=None):
 
     threshold=arc_duration
     # Generate a vector with OD durations
@@ -146,7 +146,31 @@ def get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_siz
 
     return observation_windows
 
-# print(get_orbit_based_arc_observation_windows(duration=28, period=0.4597, step_size=0.01, mission_start_epoch=60390, margin=0.05,  apolune=False, pass_interval=7, threshold=0))
+
+def get_lumio_like_observation_windows(duration, pattern=[7, 7, 7, 14], arc_duration=0.3, mission_start_epoch=60390):
+
+    observation_windows = []
+    current_value = 0
+    offset = pattern[0]-arc_duration
+    count = 0
+    initial_length = len(pattern)
+
+    while True:
+        for step in pattern:
+
+            count += 1
+            if count == initial_length:
+                pattern = pattern[1:]
+
+            current_value += step
+
+            if current_value + mission_start_epoch > mission_start_epoch + duration:
+                observation_windows = [(tup[0]-offset, tup[1]-offset) for i, tup in enumerate(observation_windows)]
+                return observation_windows
+
+            b = current_value + mission_start_epoch
+            a = b - arc_duration
+            observation_windows.append((a, b))
 
 
 #################################################################
@@ -272,3 +296,17 @@ def generate_navigation_outputs_sensitivity_analysis(num_runs, sensitivity_setti
 
 def generate_total_observation_time(observation_windows):
     return np.sum([window[1]-window[0] for window in observation_windows])
+
+
+
+if __name__ == "__main__":
+
+    arc_lengths = [0.3]
+    observation_windows_settings = {
+        f"{arc_length} day": [
+            (get_lumio_like_observation_windows(365, pattern=[7, 7, 7, 14], arc_duration=arc_length, mission_start_epoch=60390), 1, None)
+        ]
+        for arc_length in arc_lengths
+    }
+
+    print(observation_windows_settings)

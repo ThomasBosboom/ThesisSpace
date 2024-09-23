@@ -1652,24 +1652,27 @@ class PlotMultipleNavigationResults():
                         delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
                         delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
 
+                        print(delta_v_dict)
+
                         if show_annual:
                             observation_windows = navigation_simulator.observation_windows
                             mission_start_epoch = navigation_simulator.mission_start_epoch
 
-                            choices = [28, 56]
+                            # choices = [28, 56]
+                            choices = np.linspace(0, 500, 10000)
                             duration = observation_windows[-1][-1]-mission_start_epoch
                             duration = min(choices, key=lambda x: abs(x - duration))
-                            # print("duration: ", duration)
-                            # print("observation_windows: ", observation_windows)
-                            # print("mission_start_epoch: ", mission_start_epoch)
-                            # print("delta_v: ", delta_v)
 
                             delta_v = delta_v*365/(duration-evaluation_threshold)
+
+                            print("duration: ", duration)
+                            print("delta_v: ", delta_v)
 
                         delta_v_per_skm_list.append(delta_v_per_skm.tolist())
                         objective_values.append(delta_v)
 
-                    # objective = np.mean(objective_values)
+                    print(objective_values)
+
                     if worst_case:
                         objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
 
@@ -1686,8 +1689,8 @@ class PlotMultipleNavigationResults():
             std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
             data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
 
-            # print("MEAN DATA: ", data)
-            # print("STD DATA: ", std_data)
+            print("MEAN DATA: ", data)
+            print("STD DATA: ", std_data)
             sorted_data = list(data.items())
             sorted_k, sorted_v  = zip(*sorted_data)
             max_n_bars = max(len(v) for v in data.values())

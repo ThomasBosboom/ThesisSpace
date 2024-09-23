@@ -2701,3 +2701,20 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   url        = {https://www.sciencedirect.com/science/article/pii/S027311772400841X},
   urldate    = {2024-09-17},
 }
+
+ 
+@Book{Re2020,
+  author = {Ré, Nathan and Kayser, Ethan and Udupa, Shreya and Parker, Jeffrey and Cheetham, Bradley and Davis, Diane},
+  title  = {Near {Rectilinear} {Halo} {Orbit} {Determination} with {Simulated} {DSN} {Observations}},
+  year   = {2020},
+  month  = jan,
+  doi    = {10.2514/6.2020-1700},
+  file   = {Full Text PDF:https\://www.researchgate.net/profile/Nathan-Re/publication/338398041_Near_Rectilinear_Halo_Orbit_Determination_with_Simulated_DSN_Observations/links/603563bd299bf1cc26e7d906/Near-Rectilinear-Halo-Orbit-Determination-with-Simulated-DSN-Observations.pdf:application/pdf;ResearchGate Link:https\://www.researchgate.net/publication/338398041_Near_Rectilinear_Halo_Orbit_Determination_with_Simulated_DSN_Observations:},
+}
+
+@InProceedings{Geipel2019,
+  author = {Geipel, Ethan},
+  title  = {HALO Orbit Determination, Integration, and Station Keeping},
+  year   = {2019},
+  month  = apr,
+}

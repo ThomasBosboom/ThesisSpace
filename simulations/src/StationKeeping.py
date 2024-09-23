@@ -58,11 +58,12 @@ class StationKeeping:
 
         final_sum = np.zeros((3,))
         total_sum = np.zeros((3,3))
+
+        cut_off_epoch = epochs[0] + cut_off_epoch
+        correction_epoch = epochs[0] + correction_epoch
         for target_point_epoch in target_point_epochs:
 
             # Define the indexes
-            cut_off_epoch = epochs[0] + cut_off_epoch
-            correction_epoch = epochs[0] + correction_epoch
             target_point_epoch = epochs[0] + target_point_epoch
             i_tc = self.interpolator.get_closest_index(epochs[0], epochs[-1], cut_off_epoch)
             i_tv = self.interpolator.get_closest_index(epochs[0], epochs[-1], correction_epoch)
@@ -92,40 +93,35 @@ class StationKeeping:
         A = -np.linalg.inv(np.add((Q.T+Q), total_sum))
 
         delta_v = A @ final_sum
+        dispersion = np.concatenate((dr_tc, dv_tc))
 
-        # print("A", A, "final_sum", final_sum)
-
-        # delta_v = -np.linalg.inv(Phi_tcti_rv) @ Phi_tcti_rr @ dr_tc - dv_tc
-        return delta_v, np.concatenate((dr_tc, dv_tc))
+        return delta_v, dispersion
 
 
+if __name__ == "__main__":
 
-# dynamic_models = utils.get_dynamic_model_objects(60390,
-#                                                         4,
-#                                                         custom_model_dict=None,
-#                                                         get_only_first=False,
-#                                                         custom_initial_state=None)
+    import time
+    import Interpolator, ReferenceData
+    from tests import utils
 
-# dynamic_model = dynamic_models["HF"]["PMSRP"][0]
-# # dynamic_model = dynamic_models["LF"]["CRTBP"][0]
+    dynamic_models = utils.get_dynamic_model_objects(60390,
+                                                    4,
+                                                    custom_model_dict=None,
+                                                    get_only_first=False,
+                                                    custom_initial_state=None)
 
-# # custom_initial_state = np.array([-3.34034638e+08,  1.91822560e+08,  1.11600187e+08, -1.22100520e+02,
-# #                                  -7.02130739e+02, -9.74257591e+02, -3.83004013e+08,  1.80617292e+08,
-# #                                   1.22243914e+08, -6.84094596e+02, -8.16779163e+02, -6.68497305e+02])
+    dynamic_model = dynamic_models["HF"]["PMSRP"][0]
 
-# import time
+    interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=0.001)
+    reference_data = ReferenceData.ReferenceData(interpolator)
 
-# # lists = [[7, [21]], [7, [21, 28]]]
-# lists = [[1, [4]]]
-# cost_list = []
-# for _ in range(2):
-#     for i, list1 in enumerate(lists):
-#         station_keeping = StationKeeping(dynamic_model, step_size=0.01)
-#         delta_v, dispersion = station_keeping.get_corrected_state_vector(cut_off_epoch=list1[0], correction_epoch=list1[0], target_point_epochs=list1[1])
-#         # print("delta_v:", delta_v)
-#         cost_list.extend([np.linalg.norm(delta_v), dispersion])
-# print(cost_list)
 
+    station_keeping = StationKeeping(dynamic_model, reference_data, interpolator)
+    delta_v, dispersion = station_keeping.get_corrected_state_vector(0.5, [35], 0.5)
+    print("delta_v:", np.linalg.norm(delta_v), np.linalg.norm(dispersion[:3]))
+
+    delta_v, dispersion = station_keeping.get_corrected_state_vector(0.5, [35, 42], 0.5)
+    print("delta_v:", np.linalg.norm(delta_v), np.linalg.norm(dispersion[:3]))
 
 
 

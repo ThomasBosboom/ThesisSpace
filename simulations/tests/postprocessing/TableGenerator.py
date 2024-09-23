@@ -180,6 +180,8 @@ class TableGenerator():
         # Determine the number of runs
         num_runs = len(optimization_results_list)
 
+        print(optimization_results_list)
+
         # Header row for Vectors
         header_row1 = r'\textbf{} & \cellcolor[HTML]{EFEFEF}\textbf{Vectors}'
         header_row1 += r' & \textbf{}' * (num_runs - 1) + r' & \textbf{} \\' + '\n'
@@ -210,7 +212,7 @@ class TableGenerator():
 
         # Add cost row
         table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'
-        table_str += r'\cellcolor[HTML]{EFEFEF}\textbf{Cost} & \cellcolor[HTML]{EFEFEF}' + f"{initial_cost:.{decimals}f} & " + " & ".join([f"{cost:.{decimals}f}" for cost in final_costs]) + r' \\' + '\n'
+        table_str += r'\cellcolor[HTML]{EFEFEF}\textbf{Objective} & \cellcolor[HTML]{EFEFEF}' + f"{initial_cost:.{decimals}f} & " + " & ".join([f"{cost:.{decimals}f}" for cost in final_costs]) + r' \\' + '\n'
 
         # Add percentage difference row
         table_str += r'\rowcolor[HTML]{EFEFEF} ' + '\n'

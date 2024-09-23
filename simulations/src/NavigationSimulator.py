@@ -126,6 +126,7 @@ class NavigationSimulator(NavigationSimulatorBase):
 
         estimation_arc = 0
         navigation_arc = 0
+        total_magnitude_delta_v = 0
         self.full_estimation_error_dict = dict()
         self.full_reference_state_deviation_dict = dict()
         self.full_propagated_covariance_dict = dict()
@@ -299,6 +300,7 @@ class NavigationSimulator(NavigationSimulatorBase):
                     if self.model_type == "HF":
 
                         magnitude_delta_v = np.linalg.norm(delta_v)
+                        total_magnitude_delta_v += magnitude_delta_v
                         delta_v_noise_sigma = magnitude_delta_v*np.linalg.norm([self.station_keeping_error, self.station_keeping_error])
                         delta_v_noise = self.get_delta_v_noise(int(times[navigation_arc+1]), delta_v, self.station_keeping_error, self.station_keeping_error)
 
@@ -326,6 +328,7 @@ class NavigationSimulator(NavigationSimulatorBase):
             if navigation_arc < len(times)-2:
                 navigation_arc += 1
             else:
+                print("Total: ", total_magnitude_delta_v)
                 break
 
         return NavigationOutput(self)
