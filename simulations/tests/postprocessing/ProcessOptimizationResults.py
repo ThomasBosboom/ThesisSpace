@@ -332,10 +332,10 @@ class ProcessOptimizationResults():
 
                 table_generator.generate_statistics_table(
                     optimization_results_list,
-                    file_name=f"{current_time}_statistics_table.tex"
+                    file_name=f"{current_time}_statistics_table"
                 )
 
                 table_generator.generate_design_vector_table(
                     optimization_results_list,
-                    file_name=f"{current_time}_design_vector_table.tex"
+                    file_name=f"{current_time}_design_vector_table"
                 )

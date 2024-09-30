@@ -1,0 +1,24 @@
+{
+     "arc_duration": {
+          "2.0": {
+               "epoch_stats": {
+                    "60392.0": {
+                         "mean": 0.0036640243309895818,
+                         "std": 0.00029377855703683644
+                    }
+               },
+               "total_stats": {
+                    "mean": 0.0036640243309895818,
+                    "std": 0.00029377855703683644
+               },
+               "total_stats_with_threshold": {
+                    "mean": 0.0,
+                    "std": 0.0
+               },
+               "total_annual_stats_with_threshold": {
+                    "mean": 0.0,
+                    "std": 0.0
+               }
+          }
+     }
+}

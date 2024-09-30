@@ -30,7 +30,7 @@ class PlotSensitivityResults():
         return ' '.join(words)
 
 
-    def calculate_sensitivity_statistics(self, data, mission_start_epoch, custom_mission_start_epoch=False, evaluation_threshold=14, include_annual=True):
+    def calculate_sensitivity_statistics(self, data, mission_start_epoch, custom_mission_start_epoch=False, evaluation_threshold=14, include_annual=True, duration=28):
 
         result_dict = {}
 
@@ -69,9 +69,8 @@ class PlotSensitivityResults():
 
             if include_annual:
                 annual_total_with_threshold = []
-                multiplier = 365/(list(epochs.keys())[-1] - threshold)
-                multiplier = 365/(threshold+14 - threshold)
-                # print(multiplier, list(epochs.keys())[-1], threshold, list(epochs.keys())[-1] - threshold)
+                multiplier = 365/(duration+mission_start_epoch - threshold)
+
                 for run, combined in combined_per_run_with_threshold.items():
                     annual_total_with_threshold.append(np.sum(combined)*multiplier)
 
@@ -90,7 +89,7 @@ class PlotSensitivityResults():
 
 
 
-    def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True, show_annual=False, custom_color_cycle=None):
+    def plot_sensitivity_analysis_results(self, sensitivity_settings, evaluation_threshold=14, save_figure=True, save_table=True, show_annual=False, custom_color_cycle=None, duration=28):
 
         self.save_figure = save_figure
         self.save_table = save_table
@@ -228,7 +227,8 @@ class PlotSensitivityResults():
                                                             delta_v_runs_dict_sensitivity_case,
                                                             mission_start_epoch=navigation_simulator.mission_start_epoch,
                                                             evaluation_threshold=evaluation_threshold,
-                                                            custom_mission_start_epoch=custom_mission_start_epoch)
+                                                            custom_mission_start_epoch=custom_mission_start_epoch,
+                                                            duration=duration)
                 for case_index, (sensitivity_case, delta_v_statistics) in enumerate(sensitivity_case_delta_v_stats.items()):
 
                     for epoch, statistics in delta_v_statistics["epoch_stats"].items():

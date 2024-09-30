@@ -104,6 +104,7 @@ for sensitivity_name, sensitivity_settings in combined_sensitivity_settings.item
         sensitivity_settings,
         evaluation_threshold=14,
         show_annual=True,
+        duration=default_window_inputs["duration"]
         # custom_color_cycle=["gray", "red", "gray", "gray", "gray"]
     )
     print("Plotting done...")

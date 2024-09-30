@@ -23,7 +23,7 @@ from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 from optimization_analysis_helper_functions import check_file_exists, process_case
 
 
-if __name__ == "__main__":
+def run_comparison_analysis(custom_tag):
 
     ##############################################################
     #### Optimization settings ###################################
@@ -34,7 +34,7 @@ if __name__ == "__main__":
     }
 
     auto_mode = False
-    custom_tag = "default28dur1len3int"
+    # custom_tag = "default28dur1len3int"
     num_optims = 5
 
     duration = 28
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     use_same_seed = False
     run_optimization = False
-    plot_full_comparison_cases = [[0], 3]
+    plot_full_comparison_cases = [[], 3]
     from_file = True
 
 
@@ -132,5 +132,14 @@ if __name__ == "__main__":
     process_optimization_result.tabulate_optimization_results(
         compare_time_tags=[result.time_tag for result in results]
     )
+
+    # plt.show()
+
+
+if __name__ == "__main__":
+
+    custom_tags = ["default28dur1len3int"]
+    for custom_tag in custom_tags:
+        run_comparison_analysis(custom_tag)
 
     plt.show()

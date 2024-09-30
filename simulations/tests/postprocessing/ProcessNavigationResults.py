@@ -433,7 +433,7 @@ class PlotSingleNavigationResults():
         plt.tight_layout()
 
 
-    def plot_dispersion_history(self):
+    def plot_dispersion_history(self, plot3d=False):
 
         # Plot how the deviation from the reference orbit
         fig, ax = plt.subplots(2, 1, figsize=(11, 5), sharex=True)
@@ -447,8 +447,13 @@ class PlotSingleNavigationResults():
 
         for j in range(2):
 
-            for i in range(3):
-                ax[j].plot(relative_epochs, full_reference_state_deviation_history[:,6+3*j+i], label=labels[j][i], color=colors[i])
+            if plot3d:
+                ax[j].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:,6+3*j:6+3*j+3], axis=1), label="3D RSS" if j==0 else None)
+                ax[j].set_yscale("log")
+
+            else:
+                for i in range(3):
+                    ax[j].plot(relative_epochs, full_reference_state_deviation_history[:,6+3*j+i], label=labels[j][i], color=colors[i])
 
             for i, gap in enumerate(self.observation_windows):
                 ax[j].axvspan(
@@ -456,19 +461,24 @@ class PlotSingleNavigationResults():
                     xmax=gap[1]-self.mission_start_epoch,
                     color="gray",
                     alpha=0.1,
-                    label="Tracking arc" if i == 0 else None)
+                    label="Tracking arc" if i == 0 and j == 0 else None)
 
             for i, epoch in enumerate(self.station_keeping_epochs):
                 station_keeping_epoch = epoch - self.mission_start_epoch
-                ax[j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.7, label="SKM" if i==0 else None)
+                ax[j].axvline(
+                    x=station_keeping_epoch,
+                    color='black',
+                    linestyle='--',
+                    alpha=0.7,
+                    label="SKM" if i == 0 and j == 0 else None)
 
             ax[j].set_ylabel(ylabels[j])
             ax[j].grid(alpha=0.5, linestyle='--')
             # ax[0].set_title("LUMIO")
 
             # Set y-axis tick label format to scientific notation with one decimal place
-            ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-            ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+            # ax[j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+            # ax[j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
             ax[-1].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
             ax[j].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
 
@@ -476,7 +486,7 @@ class PlotSingleNavigationResults():
         # fig.suptitle(f"Deviation from reference orbit LUMIO ")
 
 
-    def plot_estimation_error_history(self):
+    def plot_estimation_error_history(self, plot3d=False):
 
         fig, ax = plt.subplots(2, 2, figsize=(11, 4), sharex=True)
 
@@ -491,45 +501,62 @@ class PlotSingleNavigationResults():
                 colors = ["red", "green", "blue"]
                 symbols = [[r"x", r"y", r"z"], [r"v_{x}", r"v_{y}", r"v_{z}"]]
                 ylabels = [r"$\mathbf{r}-\hat{\mathbf{r}}$ [m]", r"$\mathbf{v}-\hat{\mathbf{v}}$ [m/s]"]
-                for i in range(3):
-                    sigma = self.sigma_number*full_propagated_formal_errors_history[:, 3*k+6*j+i]
+                if plot3d:
+                    sigma = self.sigma_number*np.linalg.norm(full_propagated_formal_errors_history[:, 3*k+6*j:3*k+6*j+3], axis=1)
+                    ax[k][j].plot(relative_epochs, sigma, ls="--", label=f"$3\sigma$" if k==0 else None, color=self.color_cycle[0], alpha=0.3)
+                    ax[k][j].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:,3*k+6*j:3*k+6*j+3], axis=1), label="3D RSS" if k==0 else None, color=self.color_cycle[0])
+                    ax[k][j].set_yscale("log")
 
-                    ax[k][j].plot(relative_epochs, sigma, color=colors[i], ls="--", label=f"$3\sigma_{{{symbols[k][i]}}}$", alpha=0.3)
-                    ax[k][j].plot(relative_epochs, -sigma, color=colors[i], ls="-.", alpha=0.3)
-                    ax[k][j].plot(relative_epochs, full_estimation_error_history[:,3*k+6*j+i], color=colors[i], label=f"${symbols[k][i]}-\hat{{{symbols[k][i]}}}$")
+                else:
+                    for i in range(3):
+                        sigma = self.sigma_number*full_propagated_formal_errors_history[:, 3*k+6*j+i]
 
-                    # ax[k][j].plot(relative_epochs, np.abs(sigma), color=colors[i], ls="--", label=f"$3\sigma_{{{symbols[k][i]}}}$", alpha=0.3)
-                    # # ax[k][j].plot(relative_epochs, -sigma, color=colors[i], ls="-.", alpha=0.3)
-                    # ax[k][j].plot(relative_epochs, np.abs(full_estimation_error_history[:,3*k+6*j+i]), color=colors[i], label=f"${symbols[k][i]}-\hat{{{symbols[k][i]}}}$")
-                    # ax[k][j].set_yscale("log")
+                        ax[k][j].plot(relative_epochs, sigma, color=colors[i], ls="--", label=f"$3\sigma_{{{symbols[k][i]}}}$", alpha=0.3)
+                        ax[k][j].plot(relative_epochs, -sigma, color=colors[i], ls="-.", alpha=0.3)
+                        ax[k][j].plot(relative_epochs, full_estimation_error_history[:,3*k+6*j+i], color=colors[i], label=f"${symbols[k][i]}-\hat{{{symbols[k][i]}}}$")
 
-            ax[k][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+                        ax[0][0].set_ylim(-100, 100)
+                        ax[1][0].set_ylim(-0.03, 0.03)
 
         for k in range(2):
             for j in range(2):
+
                 for i, gap in enumerate(self.observation_windows):
                     ax[k][j].axvspan(
                         xmin=gap[0]-self.mission_start_epoch,
                         xmax=gap[1]-self.mission_start_epoch,
                         color="gray",
                         alpha=0.1,
-                        label="Tracking arc" if i == 0 else None)
+                        label="Tracking arc" if i == 0 else None
+                    )
+
                 for i, epoch in enumerate(self.station_keeping_epochs):
                     station_keeping_epoch = epoch - self.mission_start_epoch
-                    ax[k][j].axvline(x=station_keeping_epoch, color='black', linestyle='--', alpha=0.2, label="SKM" if i==0 else None)
+                    ax[k][j].axvline(
+                        x=station_keeping_epoch,
+                        color='black',
+                        linestyle='--',
+                        alpha=0.2,
+                        label="SKM" if i == 0 else None
+                    )
+
                 ax[k][0].set_ylabel(ylabels[k])
                 ax[k][j].grid(alpha=0.5, linestyle='--')
-                ax[0][0].set_ylim(-100, 100)
-                ax[1][0].set_ylim(-0.03, 0.03)
                 ax[k][0].set_title("LPF")
                 ax[k][1].set_title("LUMIO")
 
                 # Set y-axis tick label format to scientific notation with one decimal place
-                ax[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
-                ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
+                # ax[k][j].yaxis.set_major_formatter(ScalarFormatter(useMathText=True))
+                # ax[k][j].ticklabel_format(axis='y', style='sci', scilimits=(0, 0))
                 ax[-1][j].set_xlabel(f"Time since MJD {self.mission_start_epoch} [days]")
 
-        fig.suptitle(f"Estimaton error history")
+                if not plot3d:
+                    ax[k][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        if plot3d:
+            ax[0][1].legend(bbox_to_anchor=(1, 1.04), loc='upper left', fontsize="small")
+
+        # fig.suptitle(f"Estimation error history")
         plt.tight_layout()
 
 
@@ -1124,7 +1151,7 @@ class PlotMultipleNavigationResults():
     #         utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs"], custom_sub_folder_name=self.file_name)
 
 
-    def plot_maneuvre_costs(self, save_figure=True, separate_plots=False):
+    def plot_maneuvre_costs(self, save_figure=True, separate_plots=False, include_velocity=False):
 
         self.save_figure = save_figure
 
@@ -1219,12 +1246,15 @@ class PlotMultipleNavigationResults():
 
         else:
 
-            fig, axs = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
+            if include_velocity:
+                fig, axs = plt.subplots(5, 1, figsize=(12, 10), sharex=True)
+            else:
+                fig, axs = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
             # ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
             ylabels = ["3D RSS OD position \nestimation error [m]", "3D RSS OD velocity \nestimation error [m/s]"]
 
             # ylabels = [r'||$\Delta V$|| [m/s]', r"||$\mathbf{r}_{est}-\mathbf{r}_{true}$|| [m]", r"||$\mathbf{r}_{est}-\mathbf{r}_{ref}$|| [m]"]
-            ylabels =[r'||$\Delta V$|| [m/s]', "3D RSS OD position \nestimation error [m]", "3D RSS OD position \ndispersion [m]"]
+            ylabels =[r'||$\Delta V$|| [m/s]', "3D RSS OD position \nestimation error [m]", "3D RSS OD position \ndispersion [m]", "3D RSS OD velocity \nestimation error [m]", "3D RSS OD velocity \ndispersion [m]"]
             line_style_cycle = ["solid", "dashed", "dashdot"]
             for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
 
@@ -1289,12 +1319,24 @@ class PlotMultipleNavigationResults():
                                                         alpha=0.3,
                                                         label="SKM" if ax_i ==0 and i==0 and type_index==0 else None)
 
-                            axs[1].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
+                        axs[1].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
+                                        color=color,
+                                        ls=line_style,
+                                        alpha=0.05)
+
+                        axs[2].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1),
+                                        color=color,
+                                        ls=line_style,
+                                        alpha=0.05)
+
+                        if include_velocity:
+
+                            axs[3].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 9:12], axis=1),
                                             color=color,
                                             ls=line_style,
                                             alpha=0.05)
 
-                            axs[2].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1),
+                            axs[4].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 9:12], axis=1),
                                             color=color,
                                             ls=line_style,
                                             alpha=0.05)
@@ -1311,6 +1353,17 @@ class PlotMultipleNavigationResults():
                                     color=color,
                                     alpha=1
                                     )
+
+                    if include_velocity:
+                        axs[3].plot(relative_epochs, np.linalg.norm(mean_full_estimation_error_histories[:, 9:12], axis=1),
+                                        color=color,
+                                        alpha=1
+                                        )
+
+                        axs[4].plot(relative_epochs, np.linalg.norm(mean_full_reference_state_deviation_histories[:, 9:12], axis=1),
+                                        color=color,
+                                        alpha=1
+                                        )
 
                     # Plot the station keeping costs standard deviations
                     for delta_v_runs_dict_index, (end_epoch, delta_v_runs) in enumerate(delta_v_runs_dict.items()):
@@ -1337,7 +1390,12 @@ class PlotMultipleNavigationResults():
             plt.tight_layout()
 
             if self.save_figure:
-                utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_full"], custom_sub_folder_name=self.file_name)
+
+                if include_velocity:
+                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_full_with_velocity"], custom_sub_folder_name=self.file_name)
+
+                else:
+                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_full"], custom_sub_folder_name=self.file_name)
 
 
     def plot_monte_carlo_estimation_error_history(self, save_figure=True, evaluation_threshold=14):
@@ -1479,140 +1537,295 @@ class PlotMultipleNavigationResults():
             utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_estimation_error_history"], custom_sub_folder_name=self.file_name)
 
 
-    # def plot_maneuvre_costs_bar_chart(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.2, bar_stretch=0.95,
-    #          legend=True, x_labels=True, label_fontsize=8,
-    #          colors=None, barlabel_offset=1, observation_windows_settings=False,
-    #          bar_labeler=lambda k, i, s: str(round(s, 3)), worst_case=False, show_annual=False, duration=28):
 
-    #     self.save_figure = save_figure
 
-    #     fig, ax = plt.subplots(figsize=(10, 4))
 
-    #     label = 0
-    #     for threshold_index, evaluation_threshold in enumerate([0, evaluation_threshold]):
+    def plot_average_power_bar_chart(self, save_figure=True, evaluation_threshold=14, title="", group_stretch=0.2, bar_stretch=0.95,
+             legend=True, x_labels=True, label_fontsize=8,
+             colors=None, barlabel_offset=1, observation_windows_settings=False,
+             bar_labeler=lambda k, i, s: str(round(s, 3)), worst_case=False, show_annual=False, duration=28):
 
-    #         data = {}
-    #         for window_index, window_type in enumerate(self.navigation_outputs.keys()):
 
-    #             objective_value_results_per_window_case = []
-    #             for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
+        # Calculate the average power consumption for thruster and transponder
+        def calculate_energy_power(x_days, powers, fractions):
 
-    #                 objective_values = []
-    #                 delta_v_per_skm_list = []
-    #                 for run, navigation_output in navigation_output_list.items():
+            # Total time in seconds per day and total tracking time
+            seconds_per_day = 86400  # seconds in one day
+            total_time_seconds = x_days * seconds_per_day
 
-    #                     # Extracting the relevant objects
-    #                     navigation_simulator = navigation_output.navigation_simulator
+            # Energy consumed in one 300-second cycle
+            energies = []
+            for i, power in enumerate(powers):
+                energies.append(power*fractions[i]*total_time_seconds)
 
-    #                     # Extracting the relevant results from objects
-    #                     delta_v_dict = navigation_simulator.delta_v_dict
-    #                     delta_v_epochs = np.stack(list(delta_v_dict.keys()))
-    #                     delta_v_history = np.stack(list(delta_v_dict.values()))
-    #                     delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
-    #                     delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
+            # Average power consumption over total tracking time
+            total_energy = sum(energies)
+            average_power = total_energy/total_time_seconds
 
-    #                     # if show_annual:
-    #                     #     delta_v = delta_v*365/(duration-evaluation_threshold)
+            return total_energy, average_power
 
-    #                     delta_v_per_skm_list.append(delta_v_per_skm.tolist())
-    #                     objective_values.append(delta_v)
 
-    #                 # objective = np.mean(objective_values)
-    #                 if worst_case:
-    #                     objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
+        self.save_figure = save_figure
 
-    #                 objective_value_results_per_window_case.append((len(objective_values),
-    #                                                             min(objective_values),
-    #                                                             max(objective_values),
-    #                                                             np.mean(objective_values),
-    #                                                             np.std(objective_values),
-    #                                                             objective_values,
-    #                                                             delta_v_per_skm_list))
+        fig, ax = plt.subplots(figsize=(10, 4))
 
-    #             data[window_type] = objective_value_results_per_window_case
+        label = 0
+        thresholds = [0, evaluation_threshold]
+        if show_annual:
+            thresholds = [evaluation_threshold]
 
-    #         std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
-    #         data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+        for threshold_index, evaluation_threshold in enumerate(thresholds):
 
-    #         sorted_data = list(data.items())
-    #         sorted_k, sorted_v  = zip(*sorted_data)
-    #         max_n_bars = max(len(v) for v in data.values())
-    #         group_centers = np.cumsum([max_n_bars + group_stretch for _ in sorted_data]) - ((max_n_bars + group_stretch) / 2)
-    #         bar_offset = (1 - bar_stretch) / 2
-    #         bars = defaultdict(list)
+            data = {}
+            data1 = {}
+            data2 = {}
+            for window_index, window_type in enumerate(self.navigation_outputs.keys()):
 
-    #         if colors is None:
-    #             colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
-    #                     for i, (g_name, values) in enumerate(data.items())}
+                objective_value_results_per_window_case = []
+                objective_value_results_per_window_case1 = []
+                objective_value_results_per_window_case2 = []
+                for window_case, navigation_output_list in enumerate(self.navigation_outputs[window_type]):
 
-    #         ax.grid(alpha=0.5)
-    #         ax.set_xticks(group_centers)
-    #         ax.set_xlabel("Tracking window scenario")
-    #         ax.set_ylabel(r'||$\Delta V$|| [m/s]')
-    #         ax.set_title(title)
+                    objective_values = []
+                    objective_values1 = []
+                    objective_values2 = []
+                    delta_v_per_skm_list = []
+                    for run, navigation_output in navigation_output_list.items():
 
-    #         minor_xticks = []
-    #         minor_xtick_labels = []
+                        # Extracting the relevant objects
+                        navigation_simulator = navigation_output.navigation_simulator
 
-    #         for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
-    #                                                             group_centers)):
+                        # Extracting the relevant results from objects
+                        delta_v_dict = navigation_simulator.delta_v_dict
+                        delta_v_epochs = np.stack(list(delta_v_dict.keys()))
+                        delta_v_history = np.stack(list(delta_v_dict.values()))
+                        delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
+                        delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
 
-    #             n_bars = len(vals)
-    #             group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
-    #             for val_i, val in enumerate(vals):
+                        print(delta_v_dict)
 
-    #                 x_pos = group_beg + val_i + bar_offset
+                        # if show_annual:
+                        observation_windows = navigation_simulator.observation_windows
+                        mission_start_epoch = navigation_simulator.mission_start_epoch
 
-    #                 if threshold_index == 0:
-    #                     bar = ax.bar(x_pos,
-    #                                 height=val, width=bar_stretch,
-    #                                 color=colors[g_name],
-    #                                 yerr=std_data[g_name][val_i],
-    #                                 capsize=4)[0]
+                        choices = [28, 56, 180, 365]
+                        # choices = np.linspace(0, 500, 10000)
+                        duration = observation_windows[-1][-1]-mission_start_epoch
+                        duration = min(choices, key=lambda x: abs(x - duration))
 
-    #                 else:
-    #                     bar = ax.bar(x_pos,
-    #                                 height=val, width=0.8,
-    #                                 color="white", hatch='/', edgecolor='black', alpha=0.6,
-    #                                 yerr=std_data[g_name][val_i],
-    #                                 label=f"After {evaluation_threshold} days" if label==0 else None,
-    #                                 capsize=4)[0]
-    #                     label += 1
+                        delta_v = delta_v*365/(duration-evaluation_threshold)
 
-    #                 bars[g_name].append(bar)
-    #                 if bar_labeler is not None:
-    #                     x_pos = bar.get_x() + (bar.get_width() / 2.0)
-    #                     y_pos = val + barlabel_offset
-    #                     barlbl = bar_labeler(g_name, val_i, val)
-    #                     ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
-    #                             fontsize=label_fontsize)
+                        print("duration: ", duration)
+                        print("delta_v: ", delta_v)
 
-    #                 minor_xticks.append(x_pos+0.001)
-    #                 if not threshold_index == 0:
-    #                     if observation_windows_settings:
-    #                         minor_xtick_labels.append(observation_windows_settings[g_name][val_i][-1])
-    #                 # else:
-    #                     # minor_xtick_labels.append(f"{g_name}_{val_i + 1}")
+                        # duration = results["duration"]
+                        # initial_tracking_time = sum([tup[1] - tup[0] for tup in results["initial_observation_windows"]])
+                        tracking_time = sum([tup[1] - tup[0] for tup in observation_windows])
+                        total_heatups = len(observation_windows)
 
-    #     if legend:
-    #         ax.legend(loc='upper right', fontsize="small")
+                        # Settings
+                        signal_time = 6
+                        signal_interval = 300
+                        seconds_per_day = 86400
+                        heatup_time = 2*60*60
 
-    #     if x_labels:
-    #         ax.set_xticklabels(sorted_k)
-    #         ax.set_xticks(minor_xticks, minor=True)
-    #         ax.set_xticklabels(minor_xtick_labels, minor=True, fontsize=label_fontsize)
-    #         ax.tick_params(which="minor", rotation=0)
+                        # Initial results
+                        # initial_total_signals = initial_tracking_time/(signal_interval/seconds_per_day)
+                        # initial_total_signal_time = initial_total_signals*signal_time/seconds_per_day
+                        # fraction_off = 1-initial_tracking_time/duration
+                        # fraction_tracking = initial_tracking_time/duration
+                        # fraction_signals = initial_total_signal_time/duration
+                        total_heatup_time = total_heatups*heatup_time/seconds_per_day
 
-    #         if observation_windows_settings:
-    #             for tick in ax.get_xticklabels(minor=False):
-    #                 tick.set_y(-0.06)
-    #     else:
-    #         ax.set_xticklabels()
+                        # initial_total_energy_transponder, initial_average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
+                        # initial_total_energy_thruster, initial_average_power_thruster = calculate_energy_power(duration, [0, 10], [1-total_heatup_time/duration, total_heatup_time/duration])
+                        # initial_total_energy_obc, initial_average_power_obc = calculate_energy_power(duration, [0, 1.3], [0, 1])
+                        # initial_total_average_power = initial_average_power_transponder+initial_average_power_thruster+initial_average_power_obc
 
-    #     plt.tight_layout()
+                        # Updated version
+                        total_signals = tracking_time/(signal_interval/seconds_per_day)
+                        total_signal_time = total_signals*signal_time/seconds_per_day
+                        fraction_off = 1-tracking_time/duration
+                        fraction_tracking = tracking_time/duration
+                        fraction_signals = total_signal_time/duration
 
-    #     if self.save_figure:
-    #         utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_bar_chart"], custom_sub_folder_name=self.file_name)
+                        print(total_signals, total_signal_time, fraction_off, fraction_tracking, fraction_signals)
+
+                        total_energy_transponder, average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
+                        total_energy_thruster, average_power_thruster = calculate_energy_power(duration, [0, 10], [1-total_heatup_time/duration, total_heatup_time/duration])
+                        average_energy_obc, average_power_obc = calculate_energy_power(duration, [0, 1.3], [0, 1])
+                        total_average_power = average_power_transponder+average_power_thruster+average_power_obc
+
+                        # Store percentage differences
+                        # power_difference = (total_average_power - initial_total_average_power) / initial_total_average_power * 100
+
+
+                        print(average_power_transponder, average_power_thruster, average_power_obc)
+
+
+                        delta_v_per_skm_list.append(delta_v_per_skm.tolist())
+                        objective_values.append(average_power_transponder)
+                        objective_values1.append(average_power_thruster)
+                        objective_values2.append(average_power_obc)
+
+                        print(objective_values)
+
+                    if worst_case:
+                        objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
+
+                    objective_value_results_per_window_case.append((len(objective_values),
+                                                                min(objective_values),
+                                                                max(objective_values),
+                                                                np.mean(objective_values),
+                                                                np.std(objective_values),
+                                                                objective_values,
+                                                                delta_v_per_skm_list))
+
+                    objective_value_results_per_window_case1.append((len(objective_values1),
+                                                                min(objective_values1),
+                                                                max(objective_values1),
+                                                                np.mean(objective_values1),
+                                                                np.std(objective_values1),
+                                                                objective_values1,
+                                                                delta_v_per_skm_list))
+
+                    objective_value_results_per_window_case2.append((len(objective_values2),
+                                                                min(objective_values2),
+                                                                max(objective_values2),
+                                                                np.mean(objective_values2),
+                                                                np.std(objective_values2),
+                                                                objective_values2,
+                                                                delta_v_per_skm_list))
+
+                data[window_type] = objective_value_results_per_window_case
+                data1[window_type] = objective_value_results_per_window_case1
+                data2[window_type] = objective_value_results_per_window_case2
+
+            std_data = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data.items()}
+            data = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data.items()}
+
+            std_data1 = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data1.items()}
+            data1 = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data1.items()}
+
+            std_data2 = {window_type: [case_result[4] for case_result in case_results] for window_type, case_results in data2.items()}
+            data2 = {window_type: [case_result[3] for case_result in case_results] for window_type, case_results in data2.items()}
+
+            print("MEAN DATA: ", data)
+            print("STD DATA: ", std_data)
+            sorted_data = list(data.items())
+            sorted_k, sorted_v  = zip(*sorted_data)
+            max_n_bars = max(len(v) for v in data.values())
+            group_centers = np.cumsum([max_n_bars + group_stretch for _ in sorted_data]) - ((max_n_bars + group_stretch) / 2)
+            bar_offset = (1 - bar_stretch) / 2
+            bars = defaultdict(list)
+
+            if colors is None:
+                colors = {g_name: self.color_cycle[int(i%len(self.color_cycle))]
+                        for i, (g_name, values) in enumerate(data.items())}
+
+            ax.grid(alpha=0.5)
+            ax.set_xticks(group_centers)
+            ax.set_xlabel("Tracking window scenario")
+            ax.set_ylabel("Average power [W]")
+            ax.set_title(title)
+
+            minor_xticks = []
+            minor_xtick_labels = []
+
+            for g_i, ((g_name, vals), g_center) in enumerate(zip(sorted_data,
+                                                                group_centers)):
+
+                n_bars = len(vals)
+                group_beg = g_center - (n_bars / 2) + (bar_stretch / 2)
+                for val_i, val in enumerate(vals):
+
+                    x_pos = group_beg + val_i + bar_offset
+
+                    if evaluation_threshold == 0:
+                        bar = ax.bar(x_pos,
+                                    height=val, width=bar_stretch,
+                                    color=colors[g_name],
+                                    yerr=std_data[g_name][val_i],
+                                    capsize=4)[0]
+
+                    else:
+                        if not show_annual:
+                            bar = ax.bar(x_pos,
+                                        height=val, width=0.8,
+                                        color="white", hatch='/', edgecolor='black', alpha=0.6,
+                                        yerr=std_data[g_name][val_i],
+                                        label=f"After {evaluation_threshold} days" if label==0 else None,
+                                        capsize=4)[0]
+                        else:
+                            bar = ax.bar(x_pos,
+                                        height=val, width=bar_stretch,
+                                        # color=colors[g_name], hatch='/', edgecolor='black'
+                                        color=colors[g_name],
+                                        # yerr=std_data[g_name][val_i],
+                                        label=f"Transponder" if label==0 else None,
+                                        capsize=4)[0]
+
+                            ax.bar(x_pos,
+                                        height=data1[g_name][val_i], width=bar_stretch, alpha=0.7,
+                                        # color=colors[g_name], hatch='/', edgecolor='black',
+                                        color=colors[g_name],
+                                        # yerr=std_data1[g_name][val_i],
+                                        label=f"Thruster" if label==0 else None,
+                                        capsize=4,
+                                        bottom=val)[0]
+
+                            ax.bar(x_pos,
+                                        height=data2[g_name][val_i], width=bar_stretch, alpha=0.4,
+                                        # color=colors[g_name], hatch='/', edgecolor='black',
+                                        color=colors[g_name],
+                                        # yerr=std_data2[g_name][val_i],
+                                        label=f"OBC" if label==0 else None,
+                                        capsize=4,
+                                        bottom=val+data1[g_name][val_i])[0]
+                        label += 1
+
+                    bars[g_name].append(bar)
+                    if bar_labeler is not None:
+                        x_pos = bar.get_x() + (bar.get_width() / 2.0)
+                        y_pos = val + barlabel_offset
+                        barlbl = bar_labeler(g_name, val_i, val)
+                        ax.text(x_pos, y_pos, barlbl, ha="center", va="bottom",
+                                fontsize=label_fontsize)
+
+                    minor_xticks.append(x_pos+0.001)
+                    if not evaluation_threshold == 0:
+                        if observation_windows_settings:
+                            minor_xtick_labels.append(observation_windows_settings[g_name][val_i][-1])
+
+        if legend:
+            ax.legend(loc='upper right', fontsize="small")
+
+        if x_labels:
+            ax.set_xticklabels(sorted_k)
+            ax.set_xticks(minor_xticks, minor=True)
+            ax.set_xticklabels(minor_xtick_labels, minor=True, fontsize=label_fontsize)
+            ax.tick_params(which="minor", rotation=0)
+
+            if observation_windows_settings:
+                for tick in ax.get_xticklabels(minor=False):
+                    tick.set_y(-0.06)
+        else:
+            ax.set_xticklabels()
+
+        # if show_annual:
+            # ax.set_title("Annual SKM costs")
+
+        plt.tight_layout()
+
+        if self.save_figure:
+            label=f"{self.current_time}_average_power_bar_chart"
+            if show_annual:
+                label=f"{self.current_time}_annual_maneuvre_costs_bar_chart"
+            utils.save_figure_to_folder(figs=[fig], labels=[label], custom_sub_folder_name=self.file_name)
+
+
+
+
 
 
 
@@ -1658,8 +1871,8 @@ class PlotMultipleNavigationResults():
                             observation_windows = navigation_simulator.observation_windows
                             mission_start_epoch = navigation_simulator.mission_start_epoch
 
-                            # choices = [28, 56]
-                            choices = np.linspace(0, 500, 10000)
+                            choices = [28, 56, 180, 365]
+                            # choices = np.linspace(0, 500, 10000)
                             duration = observation_windows[-1][-1]-mission_start_epoch
                             duration = min(choices, key=lambda x: abs(x - duration))
 

@@ -23,7 +23,7 @@ from tests.postprocessing import ProcessOptimizationResults, OptimizationModel
 from optimization_analysis_helper_functions import check_file_exists, process_case
 
 
-if __name__ == "__main__":
+def run_comparison_analysis(custom_tag):
 
     ##############################################################
     #### Optimization settings ###################################
@@ -33,11 +33,11 @@ if __name__ == "__main__":
         "delta_v_min": [0.00],
     }
 
-    auto_mode = True
-    custom_tag = "default28dur1len3intPropulsionSHSRP"
+    auto_mode = False
+    # custom_tag = "default56dur1len3intPropulsion"
     num_optims = 5
 
-    duration = 28
+    duration = 56
     arc_length = 1
     arc_interval = 3
 
@@ -74,8 +74,8 @@ if __name__ == "__main__":
     navigation_simulator_settings = {
         "show_corrections_in_terminal": True,
         "run_optimization_version": True,
-        "model_name": "SHSRP",
-        "model_name_truth": "SHSRP",
+        "model_name": "PMSRP",
+        "model_name_truth": "PMSRP",
         "delta_v_min": 0.003
     }
 
@@ -139,5 +139,15 @@ if __name__ == "__main__":
     process_optimization_result.tabulate_optimization_results(
         compare_time_tags=[result.time_tag for result in results]
     )
+
+    # plt.show()
+
+
+if __name__ == "__main__":
+
+    custom_tags = ["default28dur1len3int", "default28dur1len3intPropulsion", "default28dur1len3intSHSRP",\
+                   "default56dur1len3int", "default56dur1len3intPropulsion"]
+    for custom_tag in custom_tags:
+        run_comparison_analysis(custom_tag)
 
     plt.show()
