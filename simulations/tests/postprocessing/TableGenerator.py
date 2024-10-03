@@ -295,6 +295,18 @@ class TableGenerator():
             total_heatups = len(results["best_observation_windows"])
 
             # Settings
+            standby_power = 7.4
+            transmission_input_power = 94.4
+            output_power = 15
+            transmission_power = 10**(3/10)
+
+            efficiency_transponder = output_power/(transmission_input_power-standby_power)
+            transmission_input_power = transmission_power/efficiency_transponder
+            transmission_power = transmission_input_power + standby_power
+
+            # print("transmission power: ", transmission_power)
+            # print("standby power: ", standby_power)
+
             signal_time = 6
             signal_interval = 300
             seconds_per_day = 86400
@@ -307,7 +319,10 @@ class TableGenerator():
             fraction_tracking = initial_tracking_time/duration
             fraction_signals = initial_total_signal_time/duration
 
-            initial_total_energy_transponder, initial_average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
+            # initial_total_energy_transponder, initial_average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
+            # initial_average_power_transponder_list.append(initial_average_power_transponder)
+
+            initial_total_energy_transponder, initial_average_power_transponder = calculate_energy_power(duration, [standby_power, transmission_power], [fraction_off, fraction_tracking])
             initial_average_power_transponder_list.append(initial_average_power_transponder)
 
             total_heatup_time = total_heatups*heatup_time/seconds_per_day
@@ -327,7 +342,7 @@ class TableGenerator():
             fraction_tracking = tracking_time/duration
             fraction_signals = total_signal_time/duration
 
-            total_energy_transponder, average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
+            total_energy_transponder, average_power_transponder = calculate_energy_power(duration, [standby_power, transmission_power], [fraction_off, fraction_tracking])
             average_power_transponder_list.append(average_power_transponder)
 
             total_energy_thruster, average_power_thruster = calculate_energy_power(duration, [0, 10], [1-total_heatup_time/duration, total_heatup_time/duration])
@@ -335,10 +350,6 @@ class TableGenerator():
 
             average_energy_obc, average_power_obc = calculate_energy_power(duration, [0, 1.3], [0, 1])
             average_power_obc_list.append(average_power_obc)
-
-            # print(fraction_off, fraction_tracking, fraction_signals)
-            # print(total_energy_transponder, average_power_transponder)
-            # print(total_energy_thruster, average_power_thruster)
 
             total_average_power = average_power_transponder+average_power_thruster+average_power_obc
             total_average_power_list.append(total_average_power)

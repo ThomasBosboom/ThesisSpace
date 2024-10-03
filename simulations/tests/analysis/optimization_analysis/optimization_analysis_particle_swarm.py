@@ -145,7 +145,7 @@ def run_comparison_analysis(custom_tag):
 
 if __name__ == "__main__":
 
-    custom_tags = ["default28dur1len3int", "default28dur1len3intPropulsion", "default28dur1len3intSHSRP",\
+    custom_tags = ["default28dur1len3int", "default28dur1len3intPropulsion", "default28dur1len3intSHSRP", "default28dur1len3intPropulsionSHSRP",\
                    "default56dur1len3int", "default56dur1len3intPropulsion"]
     for custom_tag in custom_tags:
         run_comparison_analysis(custom_tag)

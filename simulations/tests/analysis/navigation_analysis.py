@@ -140,6 +140,7 @@ observation_windows_settings = {
 # }
 
 mission_start_epoch = 60390
+num_runs = 5
 observation_windows_settings = {
     f"Baseline": [
         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3.0, arc_duration=1.0), num_runs, None),

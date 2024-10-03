@@ -33,7 +33,7 @@ auxilary_settings = {
     # "orbit_insertion_error": np.array([0, 0, 0, 0, 0, 0, 1e3, 1e3, 1e3, 1e-2, 1e-2, 1e-2])*1,
     "include_station_keeping": True,
     # "target_point_epochs": [35, 42],
-    "target_point_epochs": [21, 28],
+    # "target_point_epochs": [21, 28],
     # "delta_v_min": 0.02
 }
 
@@ -140,7 +140,7 @@ observation_windows_settings = {
 # }
 
 # mission_start_epoch = 60390
-num_runs = 5
+num_runs = 1
 observation_windows_settings = {
     f"Baseline": [
         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3.0, arc_duration=1.0), num_runs, None),
@@ -239,6 +239,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
 process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
     navigation_outputs,
     color_cycle=["salmon", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "forestgreen"],
+    # color_cycle=["red", "green", "green", "green", "green", "green", "green"],
     figure_settings={"save_figure": True,
                     "current_time": current_time,
                     "file_name": file_name

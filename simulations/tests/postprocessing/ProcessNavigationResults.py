@@ -1624,23 +1624,24 @@ class PlotMultipleNavigationResults():
                         total_heatups = len(observation_windows)
 
                         # Settings
+                        standby_power = 7.4
+                        transmission_input_power = 94.4
+                        output_power = 15
+                        transmission_power = 10**(3/10)
+
+                        efficiency_transponder = output_power/(transmission_input_power-standby_power)
+                        transmission_input_power = transmission_power/efficiency_transponder
+                        transmission_power = transmission_input_power + standby_power
+
+                        # print("transmission power: ", transmission_power)
+                        # print("standby power: ", standby_power)
+
                         signal_time = 6
                         signal_interval = 300
                         seconds_per_day = 86400
                         heatup_time = 2*60*60
 
-                        # Initial results
-                        # initial_total_signals = initial_tracking_time/(signal_interval/seconds_per_day)
-                        # initial_total_signal_time = initial_total_signals*signal_time/seconds_per_day
-                        # fraction_off = 1-initial_tracking_time/duration
-                        # fraction_tracking = initial_tracking_time/duration
-                        # fraction_signals = initial_total_signal_time/duration
                         total_heatup_time = total_heatups*heatup_time/seconds_per_day
-
-                        # initial_total_energy_transponder, initial_average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
-                        # initial_total_energy_thruster, initial_average_power_thruster = calculate_energy_power(duration, [0, 10], [1-total_heatup_time/duration, total_heatup_time/duration])
-                        # initial_total_energy_obc, initial_average_power_obc = calculate_energy_power(duration, [0, 1.3], [0, 1])
-                        # initial_total_average_power = initial_average_power_transponder+initial_average_power_thruster+initial_average_power_obc
 
                         # Updated version
                         total_signals = tracking_time/(signal_interval/seconds_per_day)
@@ -1649,26 +1650,18 @@ class PlotMultipleNavigationResults():
                         fraction_tracking = tracking_time/duration
                         fraction_signals = total_signal_time/duration
 
-                        print(total_signals, total_signal_time, fraction_off, fraction_tracking, fraction_signals)
-
-                        total_energy_transponder, average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
+                        # total_energy_transponder, average_power_transponder = calculate_energy_power(duration, [0, 7.4, 94.4], [fraction_off, fraction_tracking, fraction_signals])
+                        total_energy_transponder, average_power_transponder = calculate_energy_power(duration, [standby_power, transmission_power], [fraction_off, fraction_tracking])
                         total_energy_thruster, average_power_thruster = calculate_energy_power(duration, [0, 10], [1-total_heatup_time/duration, total_heatup_time/duration])
                         average_energy_obc, average_power_obc = calculate_energy_power(duration, [0, 1.3], [0, 1])
                         total_average_power = average_power_transponder+average_power_thruster+average_power_obc
-
-                        # Store percentage differences
-                        # power_difference = (total_average_power - initial_total_average_power) / initial_total_average_power * 100
-
-
-                        print(average_power_transponder, average_power_thruster, average_power_obc)
-
 
                         delta_v_per_skm_list.append(delta_v_per_skm.tolist())
                         objective_values.append(average_power_transponder)
                         objective_values1.append(average_power_thruster)
                         objective_values2.append(average_power_obc)
 
-                        print(objective_values)
+                        print("Total average power: ", total_average_power, "sep: ", average_power_transponder, average_power_thruster, average_power_obc)
 
                     if worst_case:
                         objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
@@ -1820,12 +1813,8 @@ class PlotMultipleNavigationResults():
         if self.save_figure:
             label=f"{self.current_time}_average_power_bar_chart"
             if show_annual:
-                label=f"{self.current_time}_annual_maneuvre_costs_bar_chart"
+                label=f"{self.current_time}_annual_average_power_bar_chart"
             utils.save_figure_to_folder(figs=[fig], labels=[label], custom_sub_folder_name=self.file_name)
-
-
-
-
 
 
 
