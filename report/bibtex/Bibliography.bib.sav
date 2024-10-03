@@ -2718,3 +2718,23 @@ the smaller and larger primaries. Consequently, a halo orbiting the Earth–Moon
   year   = {2019},
   month  = apr,
 }
+
+ 
+@Misc{ClydeSpace2024,
+  author   = {ClydeSpace},
+  title    = {{SMALLSAT} {SIRIUS}-{OBC}-{LEON3FT} - {Satellite} {Command} \& {Data} {Handling} {\textbar} {AAC} {Clyde} {Space}},
+  abstract = {The SMALLSAT SIRIUS-OBC-LEON3FT is our leading SmallSat Mass Memory and Comms Protocol Unit for dependable data handling. Designed for advanced satellite constellations in LEO and deep space exploration missions the readily available SmallSat Sirius-OBC-LEON3FT delivers ‘always on’ reliable operations that work every time on time with precision performance..},
+  language = {en-GB},
+  url      = {https://www.aac-clyde.space/what-we-do/space-products-components/command-data-handling/smallsat-sirius-obc},
+  urldate  = {2024-09-23},
+}
+
+ 
+@Misc{IMT2024,
+  author   = {IMT},
+  title    = {X-Band Transponder},
+  abstract = {This subsystem can be used for the Deep Space Exploration and Earth Observation missions. It is a revolutionary equipment for CubeSat spacecrafts. IMT uses COTS components to make this subsystem, in fact, we want to reduce costs to be more competitive on the market.},
+  language = {en-gb},
+  url      = {https://www.imtsrl.it/},
+  urldate  = {2024-09-23},
+}
