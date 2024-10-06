@@ -15,7 +15,7 @@ for _ in range(4):
 
 # Own
 from tests import utils
-import reference_data, Interpolator, FrameConverter
+import ReferenceData, Interpolator, FrameConverter
 from src.dynamic_models.LF.CRTBP import *
 from src.dynamic_models.HF.PM import *
 from src.dynamic_models.HF.PMSRP import *
@@ -107,6 +107,9 @@ def run_deviations():
     n = 2
     run_cases = np.linspace(start_epoch, end_epoch, n)
     step_size = 0.1
+
+    interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size)
+    reference_data = ReferenceData.ReferenceData(interpolator)
 
     # Initialize dictionaries to store accumulated values
     dynamic_model_objects = utils.get_dynamic_model_objects(start_epoch, propagation_time, custom_model_dict=custom_model_dict, get_only_first=get_only_first)

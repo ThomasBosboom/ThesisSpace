@@ -1369,9 +1369,13 @@ class PlotMultipleNavigationResults():
                     for delta_v_runs_dict_index, (end_epoch, delta_v_runs) in enumerate(delta_v_runs_dict.items()):
                         mean_delta_v = np.mean(delta_v_runs)
                         std_delta_v = np.std(delta_v_runs)
+
+                        width = 0.2
+                        if navigation_simulator.observation_windows[-1][-1]-navigation_simulator.mission_start_epoch>180:
+                            width=0.8
                         axs[0].bar(end_epoch-navigation_simulator.mission_start_epoch, mean_delta_v,
                                 color=color,
-                                width=0.2,
+                                width=width,
                                 yerr=std_delta_v,
                                 capsize=4,
                                 label=f"{window_type}" if case_index==0 and delta_v_runs_dict_index==0 else None)

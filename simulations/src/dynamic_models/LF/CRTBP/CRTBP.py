@@ -16,6 +16,7 @@ sys.path.append(os.path.dirname(parent_dir))
 
 # Own
 from DynamicModelBase import DynamicModelBase
+from src import Interpolator, ReferenceData
 
 
 class LowFidelityDynamicModel(DynamicModelBase):
@@ -100,6 +101,9 @@ class LowFidelityDynamicModel(DynamicModelBase):
     def get_closest_initial_state(self, step_size=0.05):
 
         self.set_initial_cartesian_moon_state()
+
+        interpolator = Interpolator.Interpolator(epoch_in_MJD=True, step_size=step_size)
+        reference_data = ReferenceData.ReferenceData(interpolator)
 
         _, state_history_synodic = reference_data.get_synodic_state_history(constants.GRAVITATIONAL_CONSTANT,
                                                                             self.bodies.get("Earth").mass,
