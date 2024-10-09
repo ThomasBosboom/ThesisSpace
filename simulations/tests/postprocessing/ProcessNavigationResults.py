@@ -235,9 +235,17 @@ class PlotSingleNavigationResults():
             ax[i][0].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 2], s=50, color="darkgray")
             ax[i][1].scatter(synodic_moon_states[:, 1], synodic_moon_states[:, 2], s=50, color="darkgray")
             ax[i][2].scatter(synodic_moon_states[:, 0], synodic_moon_states[:, 1], s=50, color="darkgray", label="Moon" if i==0 else None)
-            ax[i][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
-            ax[i][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=0.5, color=color)
-            ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=0.5, color=color, label=label)
+
+            linewidth=0.5
+            if i == 1:
+                linewidth=0.5
+            else:
+                if self.navigation_simulator.observation_windows[-1][-1]-self.navigation_simulator.mission_start_epoch>180:
+                    linewidth=0.1
+
+            ax[i][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=linewidth, color=color)
+            ax[i][1].plot(synodic_states_estimated[:, 6*i+1], synodic_states_estimated[:, 6*i+2], lw=linewidth, color=color)
+            ax[i][2].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+1], lw=linewidth, color=color, label=label)
 
             if i == 0:
                 ax[1][0].plot(synodic_states_estimated[:, 6*i+0], synodic_states_estimated[:, 6*i+2], lw=0.1, color=color)
@@ -276,6 +284,7 @@ class PlotSingleNavigationResults():
                 inertial_states_window = np.stack(list(inertial_states_window_dict.values()))
 
                 for i in range(2):
+
                     linewidth=2
 
                     if num == 0:
@@ -1151,7 +1160,7 @@ class PlotMultipleNavigationResults():
     #         utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs"], custom_sub_folder_name=self.file_name)
 
 
-    def plot_maneuvre_costs(self, save_figure=True, separate_plots=False, include_velocity=False):
+    def plot_maneuvre_costs(self, save_figure=True, separate_plots=False, include_velocity=False, plot_individual_states=False):
 
         self.save_figure = save_figure
 
@@ -1247,15 +1256,17 @@ class PlotMultipleNavigationResults():
         else:
 
             if include_velocity:
-                fig, axs = plt.subplots(5, 1, figsize=(12, 10), sharex=True)
+                fig, axs = plt.subplots(5, 1, figsize=(8, 10), sharex=True)
             else:
-                fig, axs = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
-            # ylabels = ["3D RSS OD \n position uncertainty [m]", "3D RSS OD \n velocity uncertainty [m/s]"]
-            ylabels = ["3D RSS OD position \nestimation error [m]", "3D RSS OD velocity \nestimation error [m/s]"]
+                fig, axs = plt.subplots(3, 1, figsize=(8, 10), sharex=True)
 
-            # ylabels = [r'||$\Delta V$|| [m/s]', r"||$\mathbf{r}_{est}-\mathbf{r}_{true}$|| [m]", r"||$\mathbf{r}_{est}-\mathbf{r}_{ref}$|| [m]"]
+            ylabels = ["3D RSS OD position \nestimation error [m]", "3D RSS OD velocity \nestimation error [m/s]"]
             ylabels =[r'||$\Delta V$|| [m/s]', "3D RSS OD position \nestimation error [m]", "3D RSS OD position \ndispersion [m]", "3D RSS OD velocity \nestimation error [m]", "3D RSS OD velocity \ndispersion [m]"]
             line_style_cycle = ["solid", "dashed", "dashdot"]
+            colors = ["red", "green", "blue"]
+            # symbols = [[r"x", r"y", r"z"], [r"x", r"y", r"z"]]
+            symbols = [r"x", r"y", r"z"]
+
             for type_index, (window_type, navigation_outputs_cases) in enumerate(self.navigation_outputs.items()):
 
                 color = self.color_cycle[int(type_index%len(self.color_cycle))]
@@ -1319,51 +1330,110 @@ class PlotMultipleNavigationResults():
                                                         alpha=0.3,
                                                         label="SKM" if ax_i ==0 and i==0 and type_index==0 else None)
 
-                        axs[1].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
-                                        color=color,
-                                        ls=line_style,
-                                        alpha=0.05)
+                        if plot_individual_states:
 
-                        axs[2].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1),
-                                        color=color,
-                                        ls=line_style,
-                                        alpha=0.05)
+                            for i in range(3):
+                                axs[1].plot(relative_epochs, np.absolute(full_estimation_error_history[:, 6+i]),
+                                                color=colors[i],
+                                                ls=line_style,
+                                                alpha=0.05)
+
+                                axs[2].plot(relative_epochs, np.absolute(full_reference_state_deviation_history[:, 6+i]),
+                                                color=colors[i],
+                                                ls=line_style,
+                                                alpha=0.05)
+
+                        else:
+
+                            axs[1].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 6:9], axis=1),
+                                            color=color,
+                                            ls=line_style,
+                                            alpha=0.05)
+
+                            axs[2].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 6:9], axis=1),
+                                            color=color,
+                                            ls=line_style,
+                                            alpha=0.05)
 
                         if include_velocity:
 
-                            axs[3].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 9:12], axis=1),
-                                            color=color,
-                                            ls=line_style,
-                                            alpha=0.05)
+                            if plot_individual_states:
+                                for i in range(3):
 
-                            axs[4].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 9:12], axis=1),
-                                            color=color,
-                                            ls=line_style,
-                                            alpha=0.05)
+                                    axs[3].plot(relative_epochs, np.absolute(full_estimation_error_history[:, 9+i]),
+                                                    color=colors[i],
+                                                    ls=line_style,
+                                                    alpha=0.05)
+
+                                    axs[4].plot(relative_epochs, np.absolute(full_reference_state_deviation_history[:, 9+i]),
+                                                    color=colors[i],
+                                                    ls=line_style,
+                                                    alpha=0.05)
+
+                            else:
+
+                                axs[3].plot(relative_epochs, np.linalg.norm(full_estimation_error_history[:, 9:12], axis=1),
+                                                color=color,
+                                                ls=line_style,
+                                                alpha=0.05)
+
+                                axs[4].plot(relative_epochs, np.linalg.norm(full_reference_state_deviation_history[:, 9:12], axis=1),
+                                                color=color,
+                                                ls=line_style,
+                                                alpha=0.05)
 
                     # Plot mean value of runs
                     mean_full_estimation_error_histories = np.mean(np.array(full_estimation_error_histories), axis=0)
-                    axs[1].plot(relative_epochs, np.linalg.norm(mean_full_estimation_error_histories[:, 6:9], axis=1),
-                                    color=color,
-                                    alpha=1
-                                    )
-
                     mean_full_reference_state_deviation_histories = np.mean(np.array(full_reference_state_deviation_histories), axis=0)
-                    axs[2].plot(relative_epochs, np.linalg.norm(mean_full_reference_state_deviation_histories[:, 6:9], axis=1),
-                                    color=color,
-                                    alpha=1
-                                    )
 
-                    if include_velocity:
-                        axs[3].plot(relative_epochs, np.linalg.norm(mean_full_estimation_error_histories[:, 9:12], axis=1),
+                    if plot_individual_states:
+                        for i in range(3):
+
+                            axs[1].plot(relative_epochs, np.absolute(mean_full_estimation_error_histories[:, 6+i]),
+                                            color=colors[i],
+                                            alpha=1,
+                                            label=symbols[i]
+                                            )
+
+
+                            axs[2].plot(relative_epochs, np.absolute(mean_full_reference_state_deviation_histories[:, 6+i]),
+                                            color=colors[i],
+                                            alpha=1
+                                            )
+
+                            if include_velocity:
+                                axs[3].plot(relative_epochs, np.absolute(mean_full_estimation_error_histories[:, 9+i]),
+                                                color=colors[i],
+                                                alpha=1
+                                                )
+
+                                axs[4].plot(relative_epochs, np.absolute(mean_full_reference_state_deviation_histories[:, 9+i]),
+                                                color=colors[i],
+                                                alpha=1
+                                                )
+
+                    else:
+
+                        axs[1].plot(relative_epochs, np.linalg.norm(mean_full_estimation_error_histories[:, 6:9], axis=1),
                                         color=color,
                                         alpha=1
                                         )
 
-                        axs[4].plot(relative_epochs, np.linalg.norm(mean_full_reference_state_deviation_histories[:, 9:12], axis=1),
+                        axs[2].plot(relative_epochs, np.linalg.norm(mean_full_reference_state_deviation_histories[:, 6:9], axis=1),
                                         color=color,
                                         alpha=1
                                         )
+
+                        if include_velocity:
+                            axs[3].plot(relative_epochs, np.linalg.norm(mean_full_estimation_error_histories[:, 9:12], axis=1),
+                                            color=color,
+                                            alpha=1
+                                            )
+
+                            axs[4].plot(relative_epochs, np.linalg.norm(mean_full_reference_state_deviation_histories[:, 9:12], axis=1),
+                                            color=color,
+                                            alpha=1
+                                            )
 
                     # Plot the station keeping costs standard deviations
                     for delta_v_runs_dict_index, (end_epoch, delta_v_runs) in enumerate(delta_v_runs_dict.items()):
@@ -1395,11 +1465,14 @@ class PlotMultipleNavigationResults():
 
             if self.save_figure:
 
+                tag=""
+                if plot_individual_states:
+                    tag="_states"
                 if include_velocity:
-                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_full_with_velocity"], custom_sub_folder_name=self.file_name)
+                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_full_with_velocity"+tag], custom_sub_folder_name=self.file_name)
 
                 else:
-                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_full"], custom_sub_folder_name=self.file_name)
+                    utils.save_figure_to_folder(figs=[fig], labels=[f"{self.current_time}_maneuvre_costs_full"+tag], custom_sub_folder_name=self.file_name)
 
 
     def plot_monte_carlo_estimation_error_history(self, save_figure=True, evaluation_threshold=14):
@@ -2399,7 +2472,13 @@ class PlotMultipleNavigationResults():
                                 inertial_states_window = np.stack(list(inertial_states_window_dict.values()))
 
                                 for i in range(2):
+
                                     linewidth=2
+                                    if i == 1:
+                                        linewidth=2
+                                    else:
+                                        if navigation_simulator.observation_windows[-1][-1]-navigation_simulator.mission_start_epoch>180:
+                                            linewidth=0.5
 
                                     if num == 0:
                                         ax[i][0].scatter(synodic_states_window[0, 6*i+0], synodic_states_window[0, 6*i+2], color=color, s=20, marker="X")
