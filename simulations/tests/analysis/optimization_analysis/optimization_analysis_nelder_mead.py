@@ -47,7 +47,7 @@ def run_comparison_analysis(custom_tag):
 
     use_same_seed = False
     run_optimization = False
-    plot_full_comparison_cases = [[], 3]
+    plot_full_comparison_cases = [[0, 1, 2, 3, 4], 5]
     from_file = True
 
 

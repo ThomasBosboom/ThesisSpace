@@ -35,6 +35,7 @@ auxilary_settings = {
     # "target_point_epochs": [35, 42],
     # "target_point_epochs": [21, 28],
     # "delta_v_min": 0.02
+    "seed": 5
 }
 
 
@@ -140,55 +141,55 @@ observation_windows_settings = {
 #     for arc_interval in arc_intervals
 # }
 
-# mission_start_epoch = 60390
-# num_runs = 1
-# observation_windows_settings = {
-#     f"Baseline": [
-#         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3.0, arc_duration=1.0), num_runs, None),
-#     ],
-#     f"Best, constant": [
-#         (helper_functions.get_constant_arc_observation_windows(28, arc_interval=1.0, arc_duration=0.5), num_runs, None),
-#     ],
-#     f"Best, orbit-based": [
-#         (helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.075, threshold=0.1, pass_interval=6, apolune=False), num_runs, "Perilune"),
-#         (helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.075, threshold=0.1, pass_interval=4, apolune=True), num_runs, "Apolune"),
-#     ],
-#     # f"Best, apolune": [
-#     #     (helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.075, threshold=0.1, pass_interval=4, apolune=True), num_runs, "Apolune"),
-#     # ],
-#     f"Best, variable": [
-#         ([
-#         [
-#             60390,
-#             60391.618612525024
-#         ],
-#         [
-#             60394.618612525024,
-#             60395.756028792246
-#         ],
-#         [
-#             60398.756028792246,
-#             60399.922544256435
-#         ],
-#         [
-#             60402.922544256435,
-#             60403.02254425643
-#         ],
-#         [
-#             60406.02254425643,
-#             60406.24953812655
-#         ],
-#         [
-#             60409.24953812655,
-#             60409.349538126546
-#         ],
-#         [
-#             60412.349538126546,
-#             60412.449538126544
-#         ]
-#     ], num_runs, None),
-#     ],
-# }
+mission_start_epoch = 60390
+num_runs = 5
+observation_windows_settings = {
+    f"Baseline": [
+        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=3.0, arc_duration=1.0), num_runs, None),
+    ],
+    f"Best, constant": [
+        (helper_functions.get_constant_arc_observation_windows(28, arc_interval=0.5, arc_duration=0.5), num_runs, None),
+    ],
+    f"Best, orbit-based": [
+        (helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.075, threshold=0.1, pass_interval=6, apolune=False), num_runs, "Perilune"),
+        (helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.075, threshold=0.1, pass_interval=4, apolune=True), num_runs, "Apolune"),
+    ],
+    # f"Best, apolune": [
+    #     (helper_functions.get_orbit_based_arc_observation_windows(28, margin=0.075, threshold=0.1, pass_interval=4, apolune=True), num_runs, "Apolune"),
+    # ],
+    f"Best, variable": [
+        ([
+        [
+            60390,
+            60391.618612525024
+        ],
+        [
+            60394.618612525024,
+            60395.756028792246
+        ],
+        [
+            60398.756028792246,
+            60399.922544256435
+        ],
+        [
+            60402.922544256435,
+            60403.02254425643
+        ],
+        [
+            60406.02254425643,
+            60406.24953812655
+        ],
+        [
+            60409.24953812655,
+            60409.349538126546
+        ],
+        [
+            60412.349538126546,
+            60412.449538126544
+        ]
+    ], num_runs, None),
+    ],
+}
 
 
 # duration = 365
@@ -239,8 +240,8 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
                         # process_single_navigation_results.plot_uncertainty_history()
                         # process_single_navigation_results.plot_dispersion_history(plot3d=True)
                         # process_single_navigation_results.plot_dispersion_history(plot3d=False)
-                        process_single_navigation_results.plot_full_state_history(show_trajectories_only=False)
-                        process_single_navigation_results.plot_full_state_history(show_trajectories_only=True)
+                        # process_single_navigation_results.plot_full_state_history(show_trajectories_only=False)
+                        # process_single_navigation_results.plot_full_state_history(show_trajectories_only=True)
                         # process_single_navigation_results.plot_formal_error_history()
                         # process_single_navigation_results.plot_observations()
                         # process_single_navigation_results.plot_correlation_history()
@@ -250,7 +251,7 @@ for type_index, (window_type, navigation_outputs_cases) in enumerate(navigation_
 
 process_multiple_navigation_results = ProcessNavigationResults.PlotMultipleNavigationResults(
     navigation_outputs,
-    # color_cycle=["salmon", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "forestgreen"],
+    color_cycle=["salmon", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "forestgreen", "forestgreen"],
     # color_cycle=["red", "green", "green", "green", "green", "green", "green"],
     # color_cycle=["gray", "gray"],
     figure_settings={"save_figure": True,
@@ -267,9 +268,9 @@ process_multiple_navigation_results.plot_maneuvre_costs(separate_plots=True, inc
 process_multiple_navigation_results.plot_full_state_history_comparison(step_size=0.001)
 # process_multiple_navigation_results.plot_monte_carlo_estimation_error_history(evaluation_threshold=14)
 # process_multiple_navigation_results.plot_estimation_arc_comparison(evaluation_threshold=14, bar_labeler=None,  worst_case=False)
-# process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, show_annual=False, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
-# process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, show_annual=True, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
-# process_multiple_navigation_results.plot_average_power_bar_chart(evaluation_threshold=14, show_annual=True, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
+process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, show_annual=False, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
+process_multiple_navigation_results.plot_maneuvre_costs_bar_chart(evaluation_threshold=14, show_annual=True, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
+process_multiple_navigation_results.plot_average_power_bar_chart(evaluation_threshold=14, show_annual=True, bar_labeler=None, worst_case=False, observation_windows_settings=observation_windows_settings)
 
 print("Plotting done...")
 

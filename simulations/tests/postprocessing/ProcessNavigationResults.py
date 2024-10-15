@@ -1256,9 +1256,9 @@ class PlotMultipleNavigationResults():
         else:
 
             if include_velocity:
-                fig, axs = plt.subplots(5, 1, figsize=(8, 10), sharex=True)
+                fig, axs = plt.subplots(5, 1, figsize=(12, 10), sharex=True)
             else:
-                fig, axs = plt.subplots(3, 1, figsize=(8, 10), sharex=True)
+                fig, axs = plt.subplots(3, 1, figsize=(12, 10), sharex=True)
 
             ylabels = ["3D RSS OD position \nestimation error [m]", "3D RSS OD velocity \nestimation error [m/s]"]
             ylabels =[r'||$\Delta V$|| [m/s]', "3D RSS OD position \nestimation error [m]", "3D RSS OD position \ndispersion [m]", "3D RSS OD velocity \nestimation error [m]", "3D RSS OD velocity \ndispersion [m]"]
@@ -1931,7 +1931,7 @@ class PlotMultipleNavigationResults():
                         delta_v = sum(np.linalg.norm(value) for key, value in delta_v_dict.items() if key > navigation_simulator.mission_start_epoch+evaluation_threshold)
                         delta_v_per_skm = np.linalg.norm(delta_v_history, axis=1)
 
-                        print(delta_v_dict)
+                        # print(delta_v_dict)
 
                         if show_annual:
                             observation_windows = navigation_simulator.observation_windows
@@ -1950,7 +1950,7 @@ class PlotMultipleNavigationResults():
                         delta_v_per_skm_list.append(delta_v_per_skm.tolist())
                         objective_values.append(delta_v)
 
-                    print(objective_values)
+                    # print(objective_values)
 
                     if worst_case:
                         objective_values = [np.mean(objective_values) + 3*np.std(objective_values)]
