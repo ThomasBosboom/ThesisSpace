@@ -6,6 +6,7 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+from scipy.stats import shapiro
 from matplotlib.ticker import ScalarFormatter
 from collections import defaultdict
 
@@ -601,7 +602,7 @@ class PlotSingleNavigationResults():
                         best_residual_history = residual_history[i*index:(i+1)*index, best_iteration]
 
                         ax[1].scatter(observation_times, best_residual_history, color=color, s=s)
-                        from scipy.stats import shapiro
+
                         stat, p_value = shapiro(best_residual_history)
                         ax1.hist(best_residual_history, bins=20, histtype='step', alpha=0.9, color=color, linewidth=2, label=f"Arc {arc_num+1}, {stat > p_value}")
 
